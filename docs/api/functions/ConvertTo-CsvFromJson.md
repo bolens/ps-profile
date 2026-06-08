@@ -23,7 +23,11 @@ The path to the JSON file to convert.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-CsvFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

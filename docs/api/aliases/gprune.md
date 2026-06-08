@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Remove-GitMergedBranches`
+Git prune merged - remove merged branches
 
 ## Description
 
-This is an alias that points to the `Remove-GitMergedBranches` command.
+Git prune merged - remove merged branches
 
 ## Alias Information
 

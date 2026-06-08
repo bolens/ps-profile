@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Expand-Snappy`
+Decompresses a Snappy compressed file.
 
 ## Description
 
-This is an alias that points to the `Expand-Snappy` command.
+Decompresses a file that was compressed using Snappy compression.
 
 ## Alias Information
 

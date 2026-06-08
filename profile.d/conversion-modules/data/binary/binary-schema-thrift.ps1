@@ -140,6 +140,9 @@ try {
     The path for the output Thrift file. If not specified, uses input path with .thrift extension.
 .PARAMETER SchemaPath
     The path to the compiled Thrift schema. Required.
+.EXAMPLE
+    ConvertTo-ThriftFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-ThriftFromJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
@@ -161,6 +164,9 @@ Set-AgentModeAlias -Name 'json-to-thrift' -Target 'ConvertTo-ThriftFromJson'
     The path for the output JSON file. If not specified, uses input path with .json extension.
 .PARAMETER SchemaPath
     The path to the compiled Thrift schema. Required.
+.EXAMPLE
+    ConvertFrom-ThriftToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-ThriftToJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)

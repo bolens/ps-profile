@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-SquareMetersToArea`
+Convert from Square meters
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-SquareMetersToArea` command.
+Convert from Square meters
 
 ## Alias Information
 

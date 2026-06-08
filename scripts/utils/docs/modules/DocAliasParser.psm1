@@ -11,7 +11,7 @@ scripts/utils/docs/modules/DocAliasParser.psm1
 # Import regex patterns
 $regexModulePath = Join-Path $PSScriptRoot 'DocParserRegex.psm1'
 if (Test-Path $regexModulePath) {
-    Import-Module $regexModulePath -DisableNameChecking -ErrorAction SilentlyContinue
+    Import-Module $regexModulePath -DisableNameChecking -Force -ErrorAction SilentlyContinue
 }
 
 # Try to import Collections and FileContent modules from scripts/lib (optional)
@@ -30,7 +30,7 @@ if (Test-Path $fileContentModulePath) {
     Parses aliases from a PowerShell file.
 
 .DESCRIPTION
-    Detects Set-Alias and Set-AgentModeAlias calls and extracts their documentation.
+    Detects Set-Alias, Set-AgentModeAlias, and Register-LazyFunction -Alias registrations.
 
 .PARAMETER File
     Path to the PowerShell file to parse.
@@ -38,8 +38,17 @@ if (Test-Path $fileContentModulePath) {
 .PARAMETER Functions
     List of already-parsed functions (used to find target function descriptions).
 
+.PARAMETER Content
+    Optional pre-read file content.
+
+.PARAMETER Ast
+    Optional pre-parsed script AST for the file.
+
 .OUTPUTS
     List of PSCustomObject with alias information.
+.EXAMPLE
+    Get-CommandParameterValue
+
 #>
 function Get-CommandParameterValue {
     param(
@@ -101,7 +110,11 @@ function Parse-AliasesFromFile {
 
         [Parameter(Mandatory)]
         [AllowEmptyCollection()]
-        [System.Collections.Generic.List[PSCustomObject]]$Functions
+        [System.Collections.Generic.List[PSCustomObject]]$Functions,
+
+        [string]$Content,
+
+        [System.Management.Automation.Language.Ast]$Ast
     )
 
     if (Get-Command New-ObjectList -ErrorAction SilentlyContinue) {
@@ -116,42 +129,60 @@ function Parse-AliasesFromFile {
         $aliases = [System.Collections.Generic.List[PSCustomObject]]::new()
     }
 
-    # Use FileContent module if available, otherwise fallback
-    if (Get-Command Read-FileContent -ErrorAction SilentlyContinue) {
-        $allLines = Read-FileContent -Path $File
+    if (-not $Content) {
+        if (Get-Command Read-FileContent -ErrorAction SilentlyContinue) {
+            $Content = Read-FileContent -Path $File
+        }
+        else {
+            $Content = Get-Content $File -Raw -ErrorAction SilentlyContinue
+        }
     }
-    else {
-        $allLines = Get-Content $File -Raw -ErrorAction SilentlyContinue
-    }
-    if (-not $allLines) {
+
+    if ([string]::IsNullOrWhiteSpace($Content)) {
         return $aliases
     }
 
-    $lines = $allLines -split "`r?`n"
+    $lines = $Content -split "`r?`n"
 
-    $parseErrors = $null
-    $tokens = $null
-    $ast = [System.Management.Automation.Language.Parser]::ParseFile($File, [ref]$tokens, [ref]$parseErrors)
-    if (-not $ast) {
-        return $aliases
+    if (-not $Ast) {
+        $parseErrors = $null
+        $tokens = $null
+        $Ast = [System.Management.Automation.Language.Parser]::ParseFile($File, [ref]$tokens, [ref]$parseErrors)
+        if (-not $Ast) {
+            return $aliases
+        }
     }
+
+    $ast = $Ast
 
     $aliasCommands = $ast.FindAll({
             param($node)
             if ($node -isnot [System.Management.Automation.Language.CommandAst]) { return $false }
             $cmdName = $node.GetCommandName()
-            return $cmdName -and ($cmdName -ieq 'Set-Alias' -or $cmdName -ieq 'Set-AgentModeAlias')
+            return $cmdName -and (
+                $cmdName -ieq 'Set-Alias' -or
+                $cmdName -ieq 'Set-AgentModeAlias' -or
+                $cmdName -ieq 'Register-LazyFunction'
+            )
         }, $true)
 
     if ($env:PS_PROFILE_DEBUG -eq '1') {
         Write-Host "[AliasParser] $File -> $($aliasCommands.Count) alias command(s)" -ForegroundColor DarkCyan
     }
 
+    $seenAliasNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+
     foreach ($commandAst in $aliasCommands) {
         $commandName = $commandAst.GetCommandName()
-        $aliasName = Get-CommandParameterValue -CommandAst $commandAst -ParameterName 'Name'
-        $targetParam = if ($commandName -ieq 'Set-AgentModeAlias') { 'Target' } else { 'Value' }
-        $targetCommand = Get-CommandParameterValue -CommandAst $commandAst -ParameterName $targetParam
+        if ($commandName -ieq 'Register-LazyFunction') {
+            $aliasName = Get-CommandParameterValue -CommandAst $commandAst -ParameterName 'Alias'
+            $targetCommand = Get-CommandParameterValue -CommandAst $commandAst -ParameterName 'Name'
+        }
+        else {
+            $aliasName = Get-CommandParameterValue -CommandAst $commandAst -ParameterName 'Name'
+            $targetParam = if ($commandName -ieq 'Set-AgentModeAlias') { 'Target' } else { 'Value' }
+            $targetCommand = Get-CommandParameterValue -CommandAst $commandAst -ParameterName $targetParam
+        }
 
         # Convert to string and trim quotes if present
         if ($aliasName) {
@@ -165,6 +196,10 @@ function Parse-AliasesFromFile {
             if ($env:PS_PROFILE_DEBUG -eq '1') {
                 Write-Host "[AliasParser] Skipping alias - Name: '$aliasName', Target: '$targetCommand'" -ForegroundColor DarkYellow
             }
+            continue
+        }
+
+        if (-not $seenAliasNames.Add($aliasName)) {
             continue
         }
 
@@ -189,7 +224,20 @@ function Parse-AliasesFromFile {
                     $commentMatches = $script:regexCommentBlock.Matches($beforeText)
                 }
                 else {
-                    $commentMatches = [regex]::Matches($beforeText, '<#[\s\S]*?#>')
+                    $commentMatches = [regex]::Matches($beforeText, '<#
+[\s\S]*?
+.PARAMETER File
+    Source file path.
+.PARAMETER Functions
+    Already discovered function documentation objects.
+.PARAMETER Content
+    File or help content as text.
+.PARAMETER Ast
+    Pre-parsed PowerShell AST for the file.
+.EXAMPLE
+    Parse-AliasesFromFile
+
+#>')
                 }
 
                 if ($commentMatches -and $commentMatches.Count -gt 0) {
@@ -281,5 +329,5 @@ function Parse-AliasesFromFile {
     return $aliases
 }
 
-Export-ModuleMember -Function Parse-AliasesFromFile
+Export-ModuleMember -Function Parse-AliasesFromFile, Get-CommandParameterValue
 

@@ -16,11 +16,20 @@ Invoke-Pip
 
 ## Parameters
 
-No parameters.
+### -Arguments
+
+Arguments forwarded to uv pip.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-Pip install requests
+.PARAMETER Arguments
+    Arguments forwarded to uv pip.
+``
 
 ## Aliases
 

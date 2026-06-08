@@ -27,7 +27,11 @@ The path for the output CSV file. If not specified, uses input path with .csv ex
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-OrcToCsv -InputPath ./input.file
+``
 
 ## Aliases
 

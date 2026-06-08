@@ -69,6 +69,9 @@ if ($moduleImportPath -and (Test-Path -LiteralPath $moduleImportPath)) {
 
 .PARAMETER EmailOnlyOnUpdates
     Whether to only send email when updates are available.
+.EXAMPLE
+    Register-UpdateSchedule
+
 #>
 function Register-UpdateSchedule {
     [CmdletBinding()]
@@ -217,7 +220,13 @@ function Register-UpdateSchedule {
     Removes the scheduled task for module updates.
 
 .PARAMETER ScheduledTaskName
+.DESCRIPTION
+    Removes the scheduled task for module updates.
+    .PARAMETER ScheduledTaskName
     Name of the scheduled task to remove.
+.EXAMPLE
+    Remove-UpdateSchedule
+
 #>
 function Remove-UpdateSchedule {
     [CmdletBinding()]

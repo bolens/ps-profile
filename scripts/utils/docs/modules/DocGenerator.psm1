@@ -21,6 +21,9 @@ scripts/utils/docs/modules/DocGenerator.psm1
 
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Test-DocsDebugEnabled
+
 #>
 function Test-DocsDebugEnabled {
     param(
@@ -52,6 +55,9 @@ function Test-DocsDebugEnabled {
     Optional console color for the message.
 .PARAMETER CallerCmdlet
     Originating PSCmdlet for debug preference detection.
+.EXAMPLE
+    Write-DocsDebugMessage
+
 #>
 function Write-DocsDebugMessage {
     param(
@@ -91,6 +97,9 @@ function Write-DocsDebugMessage {
 
 .OUTPUTS
     System.String. Relative path from From to To.
+.EXAMPLE
+    Get-RelativePath
+
 #>
 function Get-RelativePath {
     [CmdletBinding()]
@@ -136,8 +145,14 @@ function Get-RelativePath {
 .PARAMETER DocumentedCommandNames
     List to track which commands are being documented (for cleanup).
 
+.PARAMETER OnlyNames
+    When set, only writes markdown files for these command names (incremental generation).
+
 .OUTPUTS
     None. Files are written directly to disk.
+.EXAMPLE
+    Write-FunctionDocumentation
+
 #>
 function Write-FunctionDocumentation {
     [CmdletBinding()]
@@ -154,7 +169,9 @@ function Write-FunctionDocumentation {
 
         [Parameter(Mandatory)]
         [AllowEmptyCollection()]
-        [System.Collections.Generic.List[string]]$DocumentedCommandNames
+        [System.Collections.Generic.List[string]]$DocumentedCommandNames,
+
+        [System.Collections.Generic.HashSet[string]]$OnlyNames
     )
 
     Write-DocsDebugMessage -Message "Write-FunctionDocumentation ENTERED" -CallerCmdlet $PSCmdlet
@@ -195,6 +212,10 @@ function Write-FunctionDocumentation {
             Write-DocsDebugMessage -Message "Target file: $mdFile" -ForegroundColor Cyan -CallerCmdlet $PSCmdlet
         }
         $DocumentedCommandNames.Add($function.Name)
+
+        if ($null -ne $OnlyNames -and -not $OnlyNames.Contains($function.Name)) {
+            continue
+        }
 
         $content = "# $($function.Name)`n`n"
         $content += "## Synopsis`n`n"
@@ -346,8 +367,14 @@ function Write-FunctionDocumentation {
 .PARAMETER DocumentedCommandNames
     List to track which commands are being documented (for cleanup).
 
+.PARAMETER OnlyNames
+    When set, only writes markdown files for these command names (incremental generation).
+
 .OUTPUTS
     None. Files are written directly to disk.
+.EXAMPLE
+    Write-AliasDocumentation
+
 #>
 function Write-AliasDocumentation {
     [CmdletBinding()]
@@ -361,7 +388,9 @@ function Write-AliasDocumentation {
 
         [Parameter(Mandatory)]
         [AllowEmptyCollection()]
-        [System.Collections.Generic.List[string]]$DocumentedCommandNames
+        [System.Collections.Generic.List[string]]$DocumentedCommandNames,
+
+        [System.Collections.Generic.HashSet[string]]$OnlyNames
     )
 
     if (-not $Aliases -or $Aliases.Count -eq 0) {
@@ -383,6 +412,10 @@ function Write-AliasDocumentation {
 
         $mdFile = Join-Path $DocsPath "$($alias.Name).md"
         $DocumentedCommandNames.Add($alias.Name)
+
+        if ($null -ne $OnlyNames -and -not $OnlyNames.Contains($alias.Name)) {
+            continue
+        }
         
         $content = "# $($alias.Name)`n`n"
         

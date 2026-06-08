@@ -16,11 +16,18 @@ Start-ContainerCompose
 
 ## Parameters
 
-No parameters.
+### -args
+
+Additional arguments forwarded to compose up -d.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Start-ContainerCompose
+``
 
 ## Aliases
 

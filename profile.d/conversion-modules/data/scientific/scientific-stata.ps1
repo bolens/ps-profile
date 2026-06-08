@@ -332,6 +332,9 @@ except Exception as e:
     The path to the Stata file (.dta extension).
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-StataToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-StataToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -351,6 +354,9 @@ Set-AgentModeAlias -Name 'dta-to-json' -Target 'ConvertFrom-StataToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output Stata file. If not specified, uses input path with .dta extension.
+.EXAMPLE
+    ConvertTo-StataFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-StataFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -370,6 +376,9 @@ Set-AgentModeAlias -Name 'json-to-dta' -Target 'ConvertTo-StataFromJson'
     The path to the Stata file (.dta extension).
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-StataToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-StataToCsv {
     param([string]$InputPath, [string]$OutputPath)

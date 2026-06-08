@@ -31,7 +31,11 @@ The path to the compiled FlatBuffers schema. Required.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-FlatBuffersFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

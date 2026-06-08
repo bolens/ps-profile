@@ -4,11 +4,10 @@
 
 Sets up all Git utility functions when any of them is called for the first time.
         This lazy loading approach improves profile startup performance.
-        Loads Git modules from the git-modules subdirectory.
 
 ## Description
 
-No description available.
+Sets up all Git utility functions when any of them is called for the first time. This lazy loading approach improves profile startup performance. Loads Git modules from the git-modules subdirectory.
 
 ## Signature
 

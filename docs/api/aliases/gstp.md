@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Restore-GitStash`
+Git stash pop - apply stashed changes
 
 ## Description
 
-This is an alias that points to the `Restore-GitStash` command.
+Git stash pop - apply stashed changes
 
 ## Alias Information
 

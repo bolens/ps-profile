@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Views a GitHub pull request in the browser.
+GitHub PR view - view pull request in browser
 
 ## Description
 
-Opens a pull request in the default browser using the GitHub CLI (gh). Forwards all arguments to gh pr view --web.
+GitHub PR view - view pull request in browser
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/git-modules/integrations/git-github.ps1
+Defined in: ../profile.d/git-modules/core/git-advanced.ps1

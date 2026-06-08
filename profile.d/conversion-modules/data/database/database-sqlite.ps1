@@ -316,6 +316,9 @@ function Initialize-FileConversion-DatabaseSqlite {
     The path for the output JSON file. If not specified, uses input path with .json extension.
 .PARAMETER TableName
     Optional. Name of the table to export. If not specified, exports all tables.
+.EXAMPLE
+    ConvertFrom-SqliteToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-SqliteToJson {
     param([string]$InputPath, [string]$OutputPath, [string]$TableName)
@@ -338,6 +341,9 @@ Set-AgentModeAlias -Name 'db-to-json' -Target 'ConvertFrom-SqliteToJson'
     The path for the output SQLite database file. If not specified, uses input path with .db extension.
 .PARAMETER TableName
     Optional. Name of the table to create. Defaults to 'data'. Ignored if JSON contains multiple tables.
+.EXAMPLE
+    ConvertTo-SqliteFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-SqliteFromJson {
     param([string]$InputPath, [string]$OutputPath, [string]$TableName = 'data')
@@ -360,6 +366,9 @@ Set-AgentModeAlias -Name 'json-to-db' -Target 'ConvertTo-SqliteFromJson'
     The path for the output CSV file. If not specified, uses input path with .csv extension.
 .PARAMETER TableName
     Optional. Name of the table to export. If not specified, exports the first table.
+.EXAMPLE
+    ConvertFrom-SqliteToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-SqliteToCsv {
     param([string]$InputPath, [string]$OutputPath, [string]$TableName)
@@ -380,6 +389,9 @@ Set-AgentModeAlias -Name 'db-to-csv' -Target 'ConvertFrom-SqliteToCsv'
     The path to the SQLite database file (.db, .sqlite, or .sqlite3 extension).
 .PARAMETER OutputPath
     The path for the output SQL file. If not specified, uses input path with .sql extension.
+.EXAMPLE
+    ConvertFrom-SqliteToSql -InputPath ./input.file
+
 #>
 function ConvertFrom-SqliteToSql {
     param([string]$InputPath, [string]$OutputPath)

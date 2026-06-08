@@ -106,6 +106,9 @@ if (-not (Test-Path Function:vsc)) {
     Opens the specified file in the best available editor.
 .PARAMETER p
     The path to the file to open.
+.EXAMPLE
+    Open-Editor
+
 #>
 if (-not (Test-Path Function:Open-Editor)) {
     function Open-Editor {

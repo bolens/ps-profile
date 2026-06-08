@@ -50,6 +50,9 @@ if ($testCacheDbModule -and (Test-Path -LiteralPath $testCacheDbModule)) {
 
 .OUTPUTS
     Cache status information
+.EXAMPLE
+    Get-TestCacheStatus
+
 #>
 function Get-TestCacheStatus {
     param(
@@ -158,6 +161,9 @@ function Get-TestCacheStatus {
 
 .OUTPUTS
     None
+.EXAMPLE
+    Save-TestCache
+
 #>
 function Save-TestCache {
     param(

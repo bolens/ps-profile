@@ -6,7 +6,7 @@ Imports ISBN values from a text file and optionally looks them up.
 
 ## Description
 
-This is an alias that points to the `Import-IsbnListFile` command.
+Imports ISBN values from a text file and optionally looks them up.
 
 ## Alias Information
 

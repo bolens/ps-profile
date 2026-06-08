@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-IonToJson`
+Converts Ion file to JSON format.
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-IonToJson` command.
+Converts an Ion file (text or binary) to JSON format. Ion is a richly-typed, self-describing, hierarchical data serialization format. Requires Python and the ion-python package to be installed.
 
 ## Alias Information
 

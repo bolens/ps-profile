@@ -284,6 +284,19 @@ function global:Test-CachedCommand {
 <#
 .SYNOPSIS
     Returns command names to probe for an external tool (includes distro-specific aliases).
+
+.DESCRIPTION
+    Expands well-known aliases before command-cache probing. For example, yq lookups
+    try go-yq before yq to prefer mikefarah/yq on Arch Linux.
+
+.PARAMETER Name
+    Canonical command name requested by profile helpers.
+
+.OUTPUTS
+    System.String[]
+
+.EXAMPLE
+    Get-ExternalCommandLookupNames -Name 'yq'
 #>
 function global:Get-ExternalCommandLookupNames {
     [CmdletBinding()]
@@ -305,6 +318,19 @@ function global:Get-ExternalCommandLookupNames {
 <#
 .SYNOPSIS
     Returns whether an executable is mikefarah/yq v4+ (not python-yq).
+
+.DESCRIPTION
+    Inspects --version and eval --help output to distinguish mikefarah/yq from
+    python-yq and other incompatible implementations.
+
+.PARAMETER Executable
+    Executable name or path to test.
+
+.OUTPUTS
+    System.Boolean
+
+.EXAMPLE
+    Test-IsMikefarahYqExecutable -Executable 'go-yq'
 #>
 function global:Test-IsMikefarahYqExecutable {
     [CmdletBinding()]
@@ -373,6 +399,12 @@ function global:Invoke-CachedYqCommand {
     an external executable discovered via the command cache.
 .OUTPUTS
     System.Management.Automation.CommandInfo
+
+.EXAMPLE
+    $yq = Get-CachedExternalCommand -Name 'yq'
+.PARAMETER Name
+    External command name to resolve through the profile command cache.
+
 #>
 function global:Get-CachedExternalCommand {
     [CmdletBinding()]
@@ -459,6 +491,9 @@ function global:Clear-TestCachedCommandCache {
     The command name whose cached result should be removed.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Remove-TestCachedCommandCacheEntry
+
 #>
 function global:Remove-TestCachedCommandCacheEntry {
     [CmdletBinding()]
@@ -489,6 +524,9 @@ function global:Remove-TestCachedCommandCacheEntry {
     Cache duration in minutes. Defaults to 5 minutes.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Test-HasCommand
+
 #>
 function global:Test-HasCommand {
     [CmdletBinding()]

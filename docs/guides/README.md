@@ -56,7 +56,8 @@ See also [ARCHITECTURE.md](../../ARCHITECTURE.md) for loader design and implemen
 
 | Task | When |
 | ---- | ---- |
-| `task generate-docs` | After changing comment-based help on profile functions |
+| `task generate-docs` | After changing comment-based help on profile functions (full regen) |
+| `task generate-docs-incremental` | Day-to-day help edits (parses/writes only changed sources) |
 | `task generate-fragment-readmes` | After changing fragment behavior or exports |
 | `task drift-link` | After editing guides or the source files they document |
 | `task drift-check` | Before commits (`quality-check` runs this automatically) |

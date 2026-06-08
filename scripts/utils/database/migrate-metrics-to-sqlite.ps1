@@ -37,7 +37,7 @@ param(
 )
 
 # Import shared utilities
-$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'ModuleImport.psm1'
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Parse debug level once at script start
@@ -52,7 +52,7 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChe
 Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Import Performance Metrics Database
-$perfMetricsModule = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'database' 'PerformanceMetricsDatabase.psm1'
+$perfMetricsModule = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'database' 'PerformanceMetricsDatabase.psm1'
 if (-not (Test-Path -LiteralPath $perfMetricsModule)) {
     $errorMsg = "Performance Metrics Database module not found: $perfMetricsModule"
     if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {

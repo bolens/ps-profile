@@ -45,7 +45,7 @@ BeforeAll {
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
 
     # Load module under test
-    $modulePath = Join-Path $script:ProfileDir '00-bootstrap' 'ModuleLoading.ps1'
+    $modulePath = Join-Path $script:ProfileDir 'bootstrap' 'ModuleLoading.ps1'
     if (Test-Path $modulePath) {
         . $modulePath
     }
@@ -88,7 +88,7 @@ BeforeAll {
 
     # Get test paths (creates if doesn't exist)
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:BootstrapDir = Get-TestPath -RelativePath 'profile.d\00-bootstrap' -StartPath $PSScriptRoot -EnsureExists
+    $script:BootstrapDir = Get-TestPath -RelativePath 'profile.d\bootstrap' -StartPath $PSScriptRoot -EnsureExists
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
 }
 ```
@@ -127,7 +127,7 @@ See [Testing Guide — Naming Conventions](../guides/TESTING.md#naming-conventio
 
 BeforeAll {
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:BootstrapDir = Get-TestPath -RelativePath 'profile.d\00-bootstrap' -StartPath $PSScriptRoot -EnsureExists
+    $script:BootstrapDir = Get-TestPath -RelativePath 'profile.d\bootstrap' -StartPath $PSScriptRoot -EnsureExists
 
     # Load module under test
     $modulePath = Join-Path $script:BootstrapDir 'ModuleLoading.ps1'
@@ -166,7 +166,7 @@ BeforeAll {
     $testRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
 
     # Load bootstrap to get module loading functions
-    $bootstrapPath = Join-Path $testRepoRoot 'profile.d' '00-bootstrap.ps1'
+    $bootstrapPath = Join-Path $testRepoRoot 'profile.d' 'bootstrap.ps1'
     if (-not (Test-Path -LiteralPath $bootstrapPath)) {
         throw "Bootstrap file not found at: $bootstrapPath"
     }

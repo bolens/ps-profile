@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Expand-Lzma`
+Decompresses an LZMA compressed file.
 
 ## Description
 
-This is an alias that points to the `Expand-Lzma` command.
+Decompresses a file that was compressed using LZMA compression.
 
 ## Alias Information
 

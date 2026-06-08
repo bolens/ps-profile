@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Save-GitCommit`
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Description
 
-This is an alias that points to the `Save-GitCommit` command.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Alias Information
 

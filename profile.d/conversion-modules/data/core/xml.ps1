@@ -78,6 +78,9 @@ function Initialize-FileConversion-CoreBasicXml {
     Parses an XML file and converts it to JSON representation.
 .PARAMETER Path
     The path to the XML file to convert.
+.EXAMPLE
+    ConvertFrom-XmlToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-XmlToJson {
     param([string]$Path)

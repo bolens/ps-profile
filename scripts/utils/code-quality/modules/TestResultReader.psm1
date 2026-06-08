@@ -30,6 +30,9 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 
 .OUTPUTS
     Hashtable with FailedTests (array of test names) and TestFiles (array of test file paths)
+.EXAMPLE
+    Get-FailedTestsFromLastRun
+
 #>
 function Get-FailedTestsFromLastRun {
     [CmdletBinding()]
@@ -173,6 +176,9 @@ function Get-FailedTestsFromLastRun {
 
 .OUTPUTS
     System.String[] - Array of test file paths
+.EXAMPLE
+    Get-TestFilesFromFailedTestNames
+
 #>
 function Get-TestFilesFromFailedTestNames {
     [CmdletBinding()]

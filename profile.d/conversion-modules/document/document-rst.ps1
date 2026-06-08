@@ -200,6 +200,9 @@ function Initialize-FileConversion-DocumentRst {
     The path to the RST file.
 .PARAMETER OutputPath
     The path for the output Markdown file. If not specified, uses input path with .md extension.
+.EXAMPLE
+    ConvertFrom-RstToMarkdown -InputPath ./input.file
+
 #>
 function ConvertFrom-RstToMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -227,6 +230,9 @@ Set-AgentModeAlias -Name 'rst-to-markdown' -Target 'ConvertFrom-RstToMarkdown'
     The path to the RST file.
 .PARAMETER OutputPath
     The path for the output HTML file. If not specified, uses input path with .html extension.
+.EXAMPLE
+    ConvertTo-HtmlFromRst -InputPath ./input.file
+
 #>
 function ConvertTo-HtmlFromRst {
     param([string]$InputPath, [string]$OutputPath)
@@ -254,6 +260,9 @@ Set-AgentModeAlias -Name 'rst-to-html' -Target 'ConvertTo-HtmlFromRst'
     The path to the RST file.
 .PARAMETER OutputPath
     The path for the output PDF file. If not specified, uses input path with .pdf extension.
+.EXAMPLE
+    ConvertTo-PdfFromRst -InputPath ./input.file
+
 #>
 function ConvertTo-PdfFromRst {
     param([string]$InputPath, [string]$OutputPath)
@@ -281,6 +290,9 @@ Set-AgentModeAlias -Name 'rst-to-pdf' -Target 'ConvertTo-PdfFromRst'
     The path to the RST file.
 .PARAMETER OutputPath
     The path for the output DOCX file. If not specified, uses input path with .docx extension.
+.EXAMPLE
+    ConvertTo-DocxFromRst -InputPath ./input.file
+
 #>
 function ConvertTo-DocxFromRst {
     param([string]$InputPath, [string]$OutputPath)
@@ -308,6 +320,9 @@ Set-AgentModeAlias -Name 'rst-to-docx' -Target 'ConvertTo-DocxFromRst'
     The path to the RST file.
 .PARAMETER OutputPath
     The path for the output LaTeX file. If not specified, uses input path with .tex extension.
+.EXAMPLE
+    ConvertTo-LaTeXFromRst -InputPath ./input.file
+
 #>
 function ConvertTo-LaTeXFromRst {
     param([string]$InputPath, [string]$OutputPath)

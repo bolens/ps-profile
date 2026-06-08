@@ -27,6 +27,12 @@ validate: ## Validate profile (lint + idempotency)
 check-comment-help: ## Check comment-based help
 	pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
 
+check-doc-coverage: ## Report API documentation coverage gaps
+	pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 $(ARGS)
+
+check-doc-freshness: ## Verify docs/api matches incremental generator output
+	pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 $(ARGS)
+
 test: ## Run Pester tests with coverage
 	pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel $(ARGS)
 
@@ -71,6 +77,9 @@ create-release: ## Create release (dry run)
 
 generate-docs: ## Generate API documentation
 	pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 $(ARGS)
+
+generate-docs-incremental: ## Generate API docs incrementally (changed profile sources only)
+	pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 -Incremental $(ARGS)
 
 spellcheck: ## Run spellcheck
 	pwsh -NoProfile -File scripts/utils/code-quality/spellcheck.ps1

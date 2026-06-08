@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Angle`
+Convert Angle
 
 ## Description
 
-This is an alias that points to the `Convert-Angle` command.
+Convert Angle
 
 ## Alias Information
 

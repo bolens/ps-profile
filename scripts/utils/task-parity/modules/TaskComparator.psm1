@@ -22,7 +22,7 @@ if (Test-Path -LiteralPath $utilitiesModulePath) {
 
 function Compare-Tasks {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Compares tasks across multiple task runner files.
     
     .DESCRIPTION
@@ -37,7 +37,10 @@ function Compare-Tasks {
         - AllTasks: Array of all unique task names
         - MissingTasks: Hashtable mapping file types to arrays of missing task names
         - CommandDifferences: Hashtable mapping task names to command differences
-    #>
+.EXAMPLE
+    Compare-Tasks -TaskSets $taskSets
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -99,12 +102,17 @@ function Compare-Tasks {
 
 function Normalize-Command {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Normalizes a command string for comparison.
     
     .DESCRIPTION
         Removes whitespace differences and normalizes variable/argument placeholders.
-    #>
+.PARAMETER Command
+    Shell command text.
+.EXAMPLE
+    Normalize-Command -Command 'pwsh -NoProfile -File scripts/test.ps1'
+
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(

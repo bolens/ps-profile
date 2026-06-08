@@ -12,6 +12,7 @@
 
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/verify-file-change-parsing.ps1
+
 #>
 
 [CmdletBinding()]

@@ -6,6 +6,27 @@
     Binds each guide markdown file to the profile modules, fragments, and scripts it
     documents so `drift check` can detect stale documentation. Uses an explicit
     anchor map per guide plus path references discovered in guide content.
+.PARAMETER GuideFile
+    GuideSource file path.
+.PARAMETER RepoRoot
+    Repository root used to resolve relative paths.
+.EXAMPLE
+    Get-SourcePathsForGuide
+
+#>ARAMETER Content
+    File or help content as text.
+.PARAMETER RepoRoot
+    Repository root used to resolve relative paths.
+.EXAMPLE
+    Get-SourcePathsFromGuideContent
+
+#>ARAMETER Candidate
+    Candidate link target to validate.
+.PARAMETER RepoRoot
+    Repository root used to resolve relative paths.
+.EXAMPLE
+    Resolve-GuideSourcePath
+
 #>
 
 param(

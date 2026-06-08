@@ -433,6 +433,9 @@ function Initialize-FileConversion-Edn {
     The path to the EDN file (.edn extension).
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-EdnToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-EdnToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -451,6 +454,9 @@ Set-AgentModeAlias -Name 'edn-to-json' -Target 'ConvertFrom-EdnToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output EDN file. If not specified, uses input path with .edn extension.
+.EXAMPLE
+    ConvertTo-EdnFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-EdnFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -469,6 +475,9 @@ Set-AgentModeAlias -Name 'json-to-edn' -Target 'ConvertTo-EdnFromJson'
     The path to the EDN file (.edn extension).
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-EdnToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-EdnToYaml {
     param([string]$InputPath, [string]$OutputPath)

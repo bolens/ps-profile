@@ -19,6 +19,9 @@
     The indentation level for nested structures (internal use).
 .OUTPUTS
     String representing the TOON format.
+.EXAMPLE
+    Convert-JsonToToon
+
 #>
 function Convert-JsonToToon {
     param(
@@ -112,6 +115,9 @@ function Convert-JsonToToon {
     The TOON format string to parse.
 .OUTPUTS
     PowerShell object representing the parsed TOON data.
+.EXAMPLE
+    Convert-ToonToJson
+
 #>
 function Convert-ToonToJson {
     param(
@@ -139,6 +145,9 @@ function Convert-ToonToJson {
     Base indentation level for the current parsing context.
 .OUTPUTS
     Hashtable with 'Object' (the parsed object) and 'Index' (the next index to process).
+.EXAMPLE
+    Parse-ToonLines
+
 #>
 function Parse-ToonLines {
     param(
@@ -247,6 +256,9 @@ function Parse-ToonLines {
     The TOON value string to parse.
 .OUTPUTS
     The parsed value as a PowerShell object (string, int, double, bool, or null).
+.EXAMPLE
+    Parse-ToonValue
+
 #>
 function Parse-ToonValue {
     param([string]$Value)

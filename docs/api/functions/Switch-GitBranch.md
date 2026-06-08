@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Switches branches or restores working tree files.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Description
 
-Changes the active branch or restores files from a specific commit or branch. Forwards all arguments to git checkout.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Signature
 
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gco` - Switches branches or restores working tree files.
+- `gco` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git.ps1

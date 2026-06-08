@@ -31,7 +31,11 @@ Optional. Name of the table to export. If not specified, exports all tables.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-SqliteToJson -InputPath ./input.file
+``
 
 ## Aliases
 

@@ -28,6 +28,7 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 # Use the original hook script path for ModuleImport resolution
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $hookScriptPath -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Logging' -ScriptPath $hookScriptPath -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $hookScriptPath -DisableNameChecking -Global
 
 $validate = Join-Path $repoRoot 'scripts' 'checks' 'validate-profile.ps1'
 

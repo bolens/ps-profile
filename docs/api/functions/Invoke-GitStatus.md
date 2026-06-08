@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Shows Git repository status.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Description
 
-Displays the working tree status, showing which files have changes, are staged, or are untracked. Forwards all arguments to git status.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Signature
 
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gs` - Shows Git repository status.
+- `gs` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git.ps1

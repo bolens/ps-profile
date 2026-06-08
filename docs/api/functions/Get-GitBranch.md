@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Lists, creates, or deletes branches.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Description
 
-Manages Git branches. Lists branches when called without arguments, or creates/deletes branches with arguments. Forwards all arguments to git branch.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Signature
 
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gb` - Lists, creates, or deletes branches.
+- `gb` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git.ps1

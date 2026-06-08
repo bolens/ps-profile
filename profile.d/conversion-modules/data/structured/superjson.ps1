@@ -409,6 +409,9 @@ try {
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output SuperJSON file. If not specified, uses input path with .superjson extension.
+.EXAMPLE
+    ConvertTo-SuperJsonFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-SuperJsonFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -427,6 +430,9 @@ Set-AgentModeAlias -Name 'json-to-superjson' -Target 'ConvertTo-SuperJsonFromJso
     The path to the SuperJSON file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-SuperJsonToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-SuperJsonToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -445,6 +451,9 @@ Set-AgentModeAlias -Name 'superjson-to-json' -Target 'ConvertFrom-SuperJsonToJso
     The path to the SuperJSON file.
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-SuperJsonToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-SuperJsonToYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -463,6 +472,9 @@ Set-AgentModeAlias -Name 'superjson-to-yaml' -Target 'ConvertFrom-SuperJsonToYam
     The path to the YAML file.
 .PARAMETER OutputPath
     The path for the output SuperJSON file. If not specified, uses input path with .superjson extension.
+.EXAMPLE
+    ConvertTo-SuperJsonFromYaml -InputPath ./input.file
+
 #>
 function ConvertTo-SuperJsonFromYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -481,6 +493,9 @@ Set-AgentModeAlias -Name 'yaml-to-superjson' -Target 'ConvertTo-SuperJsonFromYam
     The path to the SuperJSON file.
 .PARAMETER OutputPath
     The path for the output TOON file. If not specified, uses input path with .toon extension.
+.EXAMPLE
+    ConvertFrom-SuperJsonToToon -InputPath ./input.file
+
 #>
 function ConvertFrom-SuperJsonToToon {
     param([string]$InputPath, [string]$OutputPath)
@@ -499,6 +514,9 @@ Set-AgentModeAlias -Name 'superjson-to-toon' -Target 'ConvertFrom-SuperJsonToToo
     The path to the TOON file.
 .PARAMETER OutputPath
     The path for the output SuperJSON file. If not specified, uses input path with .superjson extension.
+.EXAMPLE
+    ConvertTo-SuperJsonFromToon -InputPath ./input.file
+
 #>
 function ConvertTo-SuperJsonFromToon {
     param([string]$InputPath, [string]$OutputPath)
@@ -517,6 +535,9 @@ Set-AgentModeAlias -Name 'toon-to-superjson' -Target 'ConvertTo-SuperJsonFromToo
     The path to the SuperJSON file.
 .PARAMETER OutputPath
     The path for the output TOML file. If not specified, uses input path with .toml extension.
+.EXAMPLE
+    ConvertFrom-SuperJsonToToml -InputPath ./input.file
+
 #>
 function ConvertFrom-SuperJsonToToml {
     param([string]$InputPath, [string]$OutputPath)
@@ -535,6 +556,9 @@ Set-AgentModeAlias -Name 'superjson-to-toml' -Target 'ConvertFrom-SuperJsonToTom
     The path to the TOML file.
 .PARAMETER OutputPath
     The path for the output SuperJSON file. If not specified, uses input path with .superjson extension.
+.EXAMPLE
+    ConvertTo-SuperJsonFromToml -InputPath ./input.file
+
 #>
 function ConvertTo-SuperJsonFromToml {
     param([string]$InputPath, [string]$OutputPath)
@@ -553,6 +577,9 @@ Set-AgentModeAlias -Name 'toml-to-superjson' -Target 'ConvertTo-SuperJsonFromTom
     The path to the SuperJSON file.
 .PARAMETER OutputPath
     The path for the output XML file. If not specified, uses input path with .xml extension.
+.EXAMPLE
+    ConvertFrom-SuperJsonToXml -InputPath ./input.file
+
 #>
 function ConvertFrom-SuperJsonToXml {
     param([string]$InputPath, [string]$OutputPath)
@@ -571,6 +598,9 @@ Set-AgentModeAlias -Name 'superjson-to-xml' -Target 'ConvertFrom-SuperJsonToXml'
     The path to the XML file.
 .PARAMETER OutputPath
     The path for the output SuperJSON file. If not specified, uses input path with .superjson extension.
+.EXAMPLE
+    ConvertTo-SuperJsonFromXml -InputPath ./input.file
+
 #>
 function ConvertTo-SuperJsonFromXml {
     param([string]$InputPath, [string]$OutputPath)
@@ -589,6 +619,9 @@ Set-AgentModeAlias -Name 'xml-to-superjson' -Target 'ConvertTo-SuperJsonFromXml'
     The path to the SuperJSON file.
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-SuperJsonToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-SuperJsonToCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -607,6 +640,9 @@ Set-AgentModeAlias -Name 'superjson-to-csv' -Target 'ConvertFrom-SuperJsonToCsv'
     The path to the CSV file.
 .PARAMETER OutputPath
     The path for the output SuperJSON file. If not specified, uses input path with .superjson extension.
+.EXAMPLE
+    ConvertTo-SuperJsonFromCsv -InputPath ./input.file
+
 #>
 function ConvertTo-SuperJsonFromCsv {
     param([string]$InputPath, [string]$OutputPath)

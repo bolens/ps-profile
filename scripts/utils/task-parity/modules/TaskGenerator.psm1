@@ -19,7 +19,7 @@ if (Test-Path -LiteralPath $utilitiesModulePath) {
 
 function Add-MissingTasks {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Adds missing tasks to a task runner file.
     
     .DESCRIPTION
@@ -36,7 +36,9 @@ function Add-MissingTasks {
     
     .PARAMETER ReferenceTasks
         Hashtable of reference tasks (from another file) to use for command/description.
-    #>
+.EXAMPLE
+    Add-MissingTasks -FilePath ./Taskfile.yml -FileType taskfile -MissingTaskNames test -ReferenceTasks $ref
+#>
     [CmdletBinding(SupportsShouldProcess)]
     param(
         [Parameter(Mandatory)]
@@ -143,6 +145,16 @@ function Format-TaskfileTask {
     <#
     .SYNOPSIS
         Formats a task for Taskfile.yml.
+    .DESCRIPTION
+        Returns YAML text for a single Taskfile task definition.
+    .PARAMETER TaskName
+        Task name to emit in the output file.
+    .PARAMETER Command
+        Shell command lines to include under cmds.
+    .PARAMETER Description
+        Optional task description shown in desc.
+    .EXAMPLE
+        Format-TaskfileTask -TaskName 'test' -Command 'task test' -Description 'Run tests'
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -180,6 +192,16 @@ function Format-MakefileTask {
     <#
     .SYNOPSIS
         Formats a task for Makefile.
+    .DESCRIPTION
+        Returns Makefile target text with optional ## description comments.
+    .PARAMETER TaskName
+        Target name to emit in the Makefile.
+    .PARAMETER Command
+        Recipe command lines for the target.
+    .PARAMETER Description
+        Optional description appended after ## on the target line.
+    .EXAMPLE
+        Format-MakefileTask -TaskName 'test' -Command 'pwsh -File ./scripts/test.ps1'
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -217,7 +239,15 @@ function Format-MakefileTask {
 function Format-PackageJsonTask {
     <#
     .SYNOPSIS
-        Formats a task for package.json (returns just the command).
+        Formats a task for package.json scripts.
+    .DESCRIPTION
+        Normalizes a reference command into a package.json scripts value.
+    .PARAMETER TaskName
+        Script name used only for normalization context.
+    .PARAMETER Command
+        Command text to store under scripts in package.json.
+    .EXAMPLE
+        Format-PackageJsonTask -TaskName 'test' -Command 'pwsh -File ./scripts/test.ps1'
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -243,6 +273,16 @@ function Format-JustfileTask {
     <#
     .SYNOPSIS
         Formats a task for justfile.
+    .DESCRIPTION
+        Returns justfile recipe text with optional leading description comment.
+    .PARAMETER TaskName
+        Recipe name to emit in the justfile.
+    .PARAMETER Command
+        Recipe command lines to execute.
+    .PARAMETER Description
+        Optional comment placed above the recipe.
+    .EXAMPLE
+        Format-JustfileTask -TaskName 'test' -Command 'pwsh -File ./scripts/test.ps1'
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -280,7 +320,17 @@ function Format-JustfileTask {
 function Update-PackageJsonTasks {
     <#
     .SYNOPSIS
-        Updates package.json with new tasks (requires JSON manipulation).
+        Updates package.json with missing script tasks.
+    .DESCRIPTION
+        Adds scripts entries derived from reference task commands.
+    .PARAMETER FilePath
+        Path to package.json.
+    .PARAMETER NewTasks
+        Script names to add.
+    .PARAMETER ReferenceTasks
+        Hashtable of reference tasks keyed by script name.
+    .EXAMPLE
+        Update-PackageJsonTasks -FilePath ./package.json -NewTasks test -ReferenceTasks $ref
     #>
     [CmdletBinding()]
     param(
@@ -322,6 +372,12 @@ function Format-JsonString {
     <#
     .SYNOPSIS
         Formats a JSON string with consistent indentation.
+    .DESCRIPTION
+        Parses and re-serializes JSON to produce stable indented output.
+    .PARAMETER JsonString
+        JSON text to format.
+    .EXAMPLE
+        Format-JsonString -JsonString '{"name":"demo"}'
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -344,7 +400,17 @@ function Format-JsonString {
 function Update-TasksJsonTasks {
     <#
     .SYNOPSIS
-        Updates tasks.json with new tasks (requires JSON manipulation).
+        Updates VS Code tasks.json with missing task definitions.
+    .DESCRIPTION
+        Appends shell task entries derived from reference task metadata.
+    .PARAMETER FilePath
+        Path to tasks.json.
+    .PARAMETER NewTasks
+        Task labels to add.
+    .PARAMETER ReferenceTasks
+        Hashtable of reference tasks keyed by label.
+    .EXAMPLE
+        Update-TasksJsonTasks -FilePath ./.vscode/tasks.json -NewTasks test -ReferenceTasks $ref
     #>
     [CmdletBinding()]
     param(

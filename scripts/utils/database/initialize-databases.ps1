@@ -28,9 +28,11 @@ Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameC
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PlatformPaths' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
-# Import SQLite utilities
+# Import SQLite utilities when the optional module is present
 $sqliteModule = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'utilities' 'SqliteDatabase.psm1'
-Import-Module $sqliteModule -DisableNameChecking -ErrorAction Stop
+if (Test-Path -LiteralPath $sqliteModule) {
+    Import-Module $sqliteModule -DisableNameChecking -ErrorAction Stop
+}
 
 # Import database modules
 $databaseModulesPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'database'
@@ -52,7 +54,15 @@ Write-Host "=============================" -ForegroundColor Cyan
 Write-Host ""
 
 # Check SQLite availability
-if (-not (Test-SqliteAvailable)) {
+$sqliteAvailable = $false
+if (Get-Command Test-SqliteAvailable -ErrorAction SilentlyContinue) {
+    $sqliteAvailable = Test-SqliteAvailable
+}
+elseif (Get-Command sqlite3 -ErrorAction SilentlyContinue) {
+    $sqliteAvailable = $true
+}
+
+if (-not $sqliteAvailable) {
     Write-Host "✗ SQLite is not available" -ForegroundColor Red
     Write-Host "  Install sqlite3: choco install sqlite -y (Windows) or brew install sqlite (macOS)" -ForegroundColor Yellow
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR

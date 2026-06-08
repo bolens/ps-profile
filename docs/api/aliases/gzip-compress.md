@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Compress-Gzip`
+Compresses a file using Gzip compression.
 
 ## Description
 
-This is an alias that points to the `Compress-Gzip` command.
+Compresses a file using Gzip compression algorithm.
 
 ## Alias Information
 

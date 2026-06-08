@@ -6,7 +6,7 @@ Compares two ISBN values and reports whether they refer to the same book.
 
 ## Description
 
-No description available.
+Compares two ISBN values and reports whether they refer to the same book.
 
 ## Signature
 
@@ -16,7 +16,19 @@ Compare-Isbn
 
 ## Parameters
 
-No parameters.
+### -First
+
+First ISBN to compare.
+
+### -Second
+
+Second ISBN to compare.
+
+
+## Outputs
+
+PSCustomObject
+
 
 ## Examples
 

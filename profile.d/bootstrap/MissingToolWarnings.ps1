@@ -56,6 +56,9 @@ function global:Get-PlatformSpecificTools {
     Name of the tool to check.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Test-ToolAvailableOnPlatform
+
 #>
 function global:Test-ToolAvailableOnPlatform {
     [CmdletBinding()]
@@ -114,6 +117,9 @@ function global:Test-ToolAvailableOnPlatform {
     Full warning message to emit instead of the default format.
 .PARAMETER Force
     When specified, emits the warning even when it has already been shown.
+.EXAMPLE
+    Write-MissingToolWarning
+
 #>
 function global:Write-MissingToolWarning {
     [CmdletBinding()]
@@ -202,6 +208,9 @@ function global:Write-MissingToolWarning {
     Optional set of tool names whose warning entries should be cleared.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Clear-MissingToolWarnings
+
 #>
 function global:Clear-MissingToolWarnings {
     [CmdletBinding()]

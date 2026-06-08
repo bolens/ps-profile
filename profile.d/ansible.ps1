@@ -17,6 +17,9 @@
 .NOTES
     Module: PowerShell.Profile.Ansible
     Author: PowerShell Profile
+.EXAMPLE
+    Invoke-Ansible -Arguments @('all', '-m', 'ping')
+
 #>
 
 # Determine invocation strategy once at load time
@@ -32,6 +35,22 @@ if (-not $script:_ansibleIsLinux -and -not $script:_ansibleHasWsl) {
 }
 
 # Private helper: invoke an ansible binary with the right strategy
+<#
+.SYNOPSIS
+    Invokes an Ansible binary with the correct platform strategy.
+
+.DESCRIPTION
+    Invokes an Ansible binary with the correct platform strategy.
+
+.PARAMETER Bin
+    Ansible executable name (for example ansible or ansible-playbook).
+
+.PARAMETER Arguments
+    Arguments to pass to the binary.
+
+.EXAMPLE
+    script:Invoke-AnsibleBin -Bin 'ansible' -Arguments @('all', '-m', 'ping')
+#>
 function script:Invoke-AnsibleBin {
     param([string]$Bin, [string[]]$Arguments)
     if ($script:_ansibleIsLinux) {
@@ -45,13 +64,13 @@ function script:Invoke-AnsibleBin {
 
 <#
 .SYNOPSIS
-    Runs ansible with the correct invocation strategy for the current platform.
+        Runs ansible with the correct invocation strategy for the current platform.
+
+.DESCRIPTION
+        Runs ansible with the correct invocation strategy for the current platform.
 
 .PARAMETER Arguments
-    Arguments to pass to ansible.
-
-.EXAMPLE
-    Invoke-Ansible all -m ping
+        Arguments to pass to ansible.
 #>
 function Invoke-Ansible {
     [CmdletBinding()]
@@ -61,13 +80,13 @@ function Invoke-Ansible {
 
 <#
 .SYNOPSIS
-    Runs ansible-playbook with the correct invocation strategy for the current platform.
+        Runs ansible-playbook with the correct invocation strategy for the current platform.
+
+.DESCRIPTION
+        Runs ansible-playbook with the correct invocation strategy for the current platform.
 
 .PARAMETER Arguments
-    Arguments to pass to ansible-playbook.
-
-.EXAMPLE
-    Invoke-AnsiblePlaybook playbook.yml --check
+        Arguments to pass to ansible-playbook.
 #>
 function Invoke-AnsiblePlaybook {
     [CmdletBinding()]
@@ -77,13 +96,13 @@ function Invoke-AnsiblePlaybook {
 
 <#
 .SYNOPSIS
-    Runs ansible-galaxy with the correct invocation strategy for the current platform.
+        Runs ansible-galaxy with the correct invocation strategy for the current platform.
+
+.DESCRIPTION
+        Runs ansible-galaxy with the correct invocation strategy for the current platform.
 
 .PARAMETER Arguments
-    Arguments to pass to ansible-galaxy.
-
-.EXAMPLE
-    Invoke-AnsibleGalaxy install geerlingguy.docker
+        Arguments to pass to ansible-galaxy.
 #>
 function Invoke-AnsibleGalaxy {
     [CmdletBinding()]
@@ -93,13 +112,13 @@ function Invoke-AnsibleGalaxy {
 
 <#
 .SYNOPSIS
-    Runs ansible-vault with the correct invocation strategy for the current platform.
+        Runs ansible-vault with the correct invocation strategy for the current platform.
+
+.DESCRIPTION
+        Runs ansible-vault with the correct invocation strategy for the current platform.
 
 .PARAMETER Arguments
-    Arguments to pass to ansible-vault.
-
-.EXAMPLE
-    Invoke-AnsibleVault encrypt secrets.yml
+        Arguments to pass to ansible-vault.
 #>
 function Invoke-AnsibleVault {
     [CmdletBinding()]
@@ -109,13 +128,13 @@ function Invoke-AnsibleVault {
 
 <#
 .SYNOPSIS
-    Runs ansible-doc with the correct invocation strategy for the current platform.
+        Runs ansible-doc with the correct invocation strategy for the current platform.
+
+.DESCRIPTION
+        Runs ansible-doc with the correct invocation strategy for the current platform.
 
 .PARAMETER Arguments
-    Arguments to pass to ansible-doc.
-
-.EXAMPLE
-    Get-AnsibleDoc ping
+        Arguments to pass to ansible-doc.
 #>
 function Get-AnsibleDoc {
     [CmdletBinding()]
@@ -125,13 +144,13 @@ function Get-AnsibleDoc {
 
 <#
 .SYNOPSIS
-    Runs ansible-inventory with the correct invocation strategy for the current platform.
+        Runs ansible-inventory with the correct invocation strategy for the current platform.
+
+.DESCRIPTION
+        Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 .PARAMETER Arguments
-    Arguments to pass to ansible-inventory.
-
-.EXAMPLE
-    Get-AnsibleInventory --list
+        Arguments to pass to ansible-inventory.
 #>
 function Get-AnsibleInventory {
     [CmdletBinding()]

@@ -10,6 +10,7 @@
 
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/verify-cache-cleared.ps1
+
 #>
 
 [CmdletBinding()]
@@ -41,26 +42,19 @@ $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $scriptsLibDir = Join-Path $repoRoot 'scripts' 'lib'
 $fragmentLibDir = Join-Path $scriptsLibDir 'fragment'
 
-# Import cache modules
+# Import cache path module (FragmentCacheSqlite was removed; sqlite3 CLI is used when needed)
 $cachePathModule = Join-Path $fragmentLibDir 'FragmentCachePath.psm1'
-$cacheSqliteModule = Join-Path $fragmentLibDir 'FragmentCacheSqlite.psm1'
 
 if (-not (Test-Path -LiteralPath $cachePathModule)) {
     Write-Host "✗ FragmentCachePath module not found: $cachePathModule" -ForegroundColor Red
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
-if (-not (Test-Path -LiteralPath $cacheSqliteModule)) {
-    Write-Host "✗ FragmentCacheSqlite module not found: $cacheSqliteModule" -ForegroundColor Red
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
-}
-
 try {
     Import-Module $cachePathModule -DisableNameChecking -ErrorAction Stop -Force
-    Import-Module $cacheSqliteModule -DisableNameChecking -ErrorAction Stop -Force
 }
 catch {
-    Write-Host "✗ Failed to import modules: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "✗ Failed to import FragmentCachePath: $($_.Exception.Message)" -ForegroundColor Red
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
@@ -88,22 +82,19 @@ if ($dbPath -and (Test-Path -LiteralPath $dbPath)) {
     Write-Host "  Size: $($dbInfo.Length) bytes" -ForegroundColor DarkGray
     Write-Host "  Last modified: $($dbInfo.LastWriteTime)" -ForegroundColor DarkGray
     
-    # Check SQLite availability
-    if (-not (Get-Command Test-SqliteAvailable -ErrorAction SilentlyContinue)) {
-        Write-Host "✗ Test-SqliteAvailable not available" -ForegroundColor Red
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
+    $sqliteCmd = $null
+    if ((Get-Command Test-SqliteAvailable -ErrorAction SilentlyContinue) -and (Test-SqliteAvailable)) {
+        if (Get-Command Get-SqliteCommandName -ErrorAction SilentlyContinue) {
+            $sqliteCmd = Get-SqliteCommandName
+        }
     }
-    
-    $sqliteAvailable = Test-SqliteAvailable
-    if (-not $sqliteAvailable) {
-        Write-Host "✗ SQLite not available - cannot query database" -ForegroundColor Red
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
+    if (-not $sqliteCmd -and (Get-Command sqlite3 -ErrorAction SilentlyContinue)) {
+        $sqliteCmd = (Get-Command sqlite3).Source
     }
-    
-    $sqliteCmd = Get-SqliteCommandName
     if (-not $sqliteCmd) {
-        Write-Host "✗ SQLite command not found" -ForegroundColor Red
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
+        Write-Host "⚠ SQLite not available - cannot query database entry counts" -ForegroundColor Yellow
+        Write-Host "  Database file exists; run clear-fragment-cache if you expected an empty cache." -ForegroundColor Yellow
+        Exit-WithCode -ExitCode $EXIT_SUCCESS
     }
     
     Write-Host ""

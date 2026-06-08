@@ -317,6 +317,9 @@ except Exception as e:
     The path to the SPSS file (.sav, .zsav, or .por extension).
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-SpssToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-SpssToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -336,6 +339,9 @@ Set-AgentModeAlias -Name 'sav-to-json' -Target 'ConvertFrom-SpssToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output SPSS file. If not specified, uses input path with .sav extension.
+.EXAMPLE
+    ConvertTo-SpssFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-SpssFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -355,6 +361,9 @@ Set-AgentModeAlias -Name 'json-to-sav' -Target 'ConvertTo-SpssFromJson'
     The path to the SPSS file (.sav, .zsav, or .por extension).
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-SpssToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-SpssToCsv {
     param([string]$InputPath, [string]$OutputPath)

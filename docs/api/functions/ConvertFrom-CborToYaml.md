@@ -27,7 +27,11 @@ The path for the output YAML file. If not specified, uses input path with .yaml 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-CborToYaml -InputPath ./input.file
+``
 
 ## Aliases
 

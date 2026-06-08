@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Show-FileContent`
+bat wrapper
 
 ## Description
 
-This is an alias that points to the `Show-FileContent` command.
+bat wrapper
 
 ## Alias Information
 

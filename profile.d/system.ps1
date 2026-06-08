@@ -23,6 +23,9 @@
 .SYNOPSIS
     Sets up all system utility functions when any of them is called for the first time.
     This lazy loading approach improves profile startup performance.
+.DESCRIPTION
+    Sets up all system utility functions when any of them is called for the first time.
+    This lazy loading approach improves profile startup performance.
     Loads system modules from the system subdirectory.
 #>
 function Ensure-System {

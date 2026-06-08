@@ -27,7 +27,11 @@ The path for the output text file. If not specified, uses input path with .txt e
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-PdfToText -InputPath ./input.file
+``
 
 ## Aliases
 

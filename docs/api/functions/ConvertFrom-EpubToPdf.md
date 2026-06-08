@@ -27,7 +27,11 @@ The path for the output PDF file. If not specified, uses input path with .pdf ex
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-EpubToPdf -InputPath ./input.file
+``
 
 ## Aliases
 

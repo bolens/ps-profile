@@ -6,7 +6,7 @@ Searches for books by title and/or author.
 
 ## Description
 
-No description available.
+Queries Open Library and Google Books, returning normalized book records. Use -Pick to choose a result in Out-GridView when available.
 
 ## Signature
 
@@ -16,11 +16,39 @@ Find-Isbn
 
 ## Parameters
 
-No parameters.
+### -Title
+
+Book title search text.
+
+### -Author
+
+Author name search text.
+
+### -Limit
+
+Maximum number of results per provider.
+
+### -Provider
+
+Metadata provider to query.
+
+### -Pick
+
+Prompts for a single selected result.
+
+
+## Outputs
+
+PSCustomObject[] .EXAMPLE Find-Isbn -Title 'Dune' -Author 'Herbert'
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Find-Isbn -Title 'Dune' -Author 'Herbert'
+``
 
 ## Aliases
 

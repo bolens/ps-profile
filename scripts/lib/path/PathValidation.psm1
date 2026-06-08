@@ -25,7 +25,7 @@ if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
     Gets a default path if not provided, otherwise validates the provided path.
 
 .DESCRIPTION
-    Helper function for scripts that accept an optional Path parameter.
+    Helper function for scripts that accept an optional File or directory path.
     If Path is null or empty, returns the default path (typically profile.d).
     If Path is provided, validates it exists and returns it.
 

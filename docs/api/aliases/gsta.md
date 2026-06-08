@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Save-GitStash`
+Git stash - stash changes
 
 ## Description
 
-This is an alias that points to the `Save-GitStash` command.
+Git stash - stash changes
 
 ## Alias Information
 

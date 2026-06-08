@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Area`
+Convert Area
 
 ## Description
 
-This is an alias that points to the `Convert-Area` command.
+Convert Area
 
 ## Alias Information
 

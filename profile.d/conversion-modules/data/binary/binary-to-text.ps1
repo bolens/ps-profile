@@ -42,6 +42,9 @@ function Initialize-FileConversion-BinaryToText {
     The path to the BSON file.
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-BsonToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-BsonToCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -60,6 +63,9 @@ Set-AgentModeAlias -Name 'bson-to-csv' -Target 'ConvertFrom-BsonToCsv'
     The path to the MessagePack file.
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-MessagePackToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-MessagePackToCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -79,6 +85,9 @@ Set-AgentModeAlias -Name 'messagepack-to-csv' -Target 'ConvertFrom-MessagePackTo
     The path to the CBOR file.
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-CborToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-CborToCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -97,6 +106,9 @@ Set-AgentModeAlias -Name 'cbor-to-csv' -Target 'ConvertFrom-CborToCsv'
     The path to the BSON file.
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-BsonToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-BsonToYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -115,6 +127,9 @@ Set-AgentModeAlias -Name 'bson-to-yaml' -Target 'ConvertFrom-BsonToYaml'
     The path to the MessagePack file.
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-MessagePackToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-MessagePackToYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -134,6 +149,9 @@ Set-AgentModeAlias -Name 'messagepack-to-yaml' -Target 'ConvertFrom-MessagePackT
     The path to the CBOR file.
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-CborToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-CborToYaml {
     param([string]$InputPath, [string]$OutputPath)

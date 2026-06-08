@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Compress-Snappy`
+Compresses a file using Snappy compression.
 
 ## Description
 
-This is an alias that points to the `Compress-Snappy` command.
+Compresses a file using the Snappy compression algorithm. Snappy is a fast compression algorithm developed by Google, optimized for speed.
 
 ## Alias Information
 

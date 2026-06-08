@@ -22,13 +22,6 @@ No parameters.
 
 No examples provided.
 
-## Aliases
-
-This function has the following aliases:
-
-- `lS` - Lists directory contents sorted by size using eza.
-
-
 ## Source
 
 Defined in: ../profile.d/eza.ps1

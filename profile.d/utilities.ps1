@@ -20,6 +20,9 @@
 .SYNOPSIS
     Sets up all utility functions when any of them is called for the first time.
     This lazy loading approach improves profile startup performance.
+.DESCRIPTION
+    Sets up all utility functions when any of them is called for the first time.
+    This lazy loading approach improves profile startup performance.
     Loads utility modules from the utilities-modules subdirectory.
 #>
 function Ensure-Utilities {

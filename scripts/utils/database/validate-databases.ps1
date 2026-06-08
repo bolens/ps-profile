@@ -28,19 +28,14 @@
 [CmdletBinding()]
 param(
     [switch]$TestOperations,
-    
-    [OutputFormat]$OutputFormat = [OutputFormat]::Table
+
+    [ValidateSet('Table', 'Json', 'table', 'json')]
+    [string]$OutputFormat = 'Table'
 )
 
 # Import required modules
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
-
-# Import CommonEnums for OutputFormat enum
-$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'core' 'CommonEnums.psm1'
-if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
-    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
-}
 
 # Parse debug level once at script start
 $debugLevel = 0
@@ -53,9 +48,11 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChe
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PlatformPaths' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
-# Import SQLite utilities
+# Import SQLite utilities when the optional module is present
 $sqliteModule = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'utilities' 'SqliteDatabase.psm1'
-Import-Module $sqliteModule -DisableNameChecking -ErrorAction Stop
+if (Test-Path -LiteralPath $sqliteModule) {
+    Import-Module $sqliteModule -DisableNameChecking -ErrorAction Stop
+}
 
 # Import database modules
 $databaseModulesPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'database'
@@ -108,10 +105,7 @@ function Write-ValidationResult {
 # Level 1: Basic operation start
 if ($debugLevel -ge 1) {
     Write-Verbose "[database.validate] Starting database validation"
-    # Convert enum to string
-    $outputFormatString = $OutputFormat.ToString()
-    
-    Write-Verbose "[database.validate] Test operations: $TestOperations, Output format: $outputFormatString"
+    Write-Verbose "[database.validate] Test operations: $TestOperations, Output format: $OutputFormat"
 }
 
 try {
@@ -121,11 +115,22 @@ try {
     
     # Check SQLite availability
     Write-Host "Checking SQLite availability..." -ForegroundColor Yellow
-    $sqliteAvailable = Test-SqliteAvailable
+    $sqliteAvailable = $false
+    if (Get-Command Test-SqliteAvailable -ErrorAction SilentlyContinue) {
+        $sqliteAvailable = Test-SqliteAvailable
+    }
+    elseif (Get-Command sqlite3 -ErrorAction SilentlyContinue) {
+        $sqliteAvailable = $true
+    }
     $validationResults.SqliteAvailable = $sqliteAvailable
     
     if ($sqliteAvailable) {
-        $sqliteCmd = Get-SqliteCommandName
+        $sqliteCmd = if (Get-Command Get-SqliteCommandName -ErrorAction SilentlyContinue) {
+            Get-SqliteCommandName
+        }
+        else {
+            'sqlite3'
+        }
         Write-Host "  ✓ SQLite available: $sqliteCmd" -ForegroundColor Green
     }
     else {
@@ -176,10 +181,7 @@ try {
     if (-not $sqliteAvailable) {
         Write-Host "`n⚠ SQLite is not available. Database features will use fallback storage." -ForegroundColor Yellow
         $validationResults.OverallStatus = 'Degraded'
-        # Convert enum to string
-        $outputFormatString = $OutputFormat.ToString()
-        
-        if ($outputFormatString -eq 'Json') {
+        if ($OutputFormat -ieq 'Json') {
             $validationResults | ConvertTo-Json -Depth 10
         }
         exit $EXIT_SUCCESS
@@ -408,8 +410,8 @@ try {
     
     if ($validationResults.Errors.Count -gt 0) {
         Write-Host "`nErrors:" -ForegroundColor Red
-        foreach ($error in $validationResults.Errors) {
-            Write-Host "  - $error" -ForegroundColor Red
+        foreach ($validationError in $validationResults.Errors) {
+            Write-Host "  - $validationError" -ForegroundColor Red
         }
     }
     

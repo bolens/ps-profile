@@ -31,12 +31,16 @@ Base indentation level for the current parsing context.
 
 ## Outputs
 
-Hashtable with 'Object' (the parsed object) and 'Index' (the next index to process).
+Hashtable with 'Object' (the parsed object) and 'Index' (the next index to process). .EXAMPLE Parse-ToonLines
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Parse-ToonLines
+``
 
 ## Source
 

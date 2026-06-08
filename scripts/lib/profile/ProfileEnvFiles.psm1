@@ -11,6 +11,9 @@
     PS_PROFILE_PARALLEL_LOADING can be set in .env files.
 .PARAMETER ProfileDir
     Directory containing the profile files.
+.EXAMPLE
+    Initialize-ProfileEnvFiles
+
 #>
 function Initialize-ProfileEnvFiles {
     [CmdletBinding()]

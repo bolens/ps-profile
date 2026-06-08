@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-MetersPerSecondToSpeed`
+Convert from Meters per second
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-MetersPerSecondToSpeed` command.
+Convert from Meters per second
 
 ## Alias Information
 

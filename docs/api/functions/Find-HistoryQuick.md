@@ -16,11 +16,20 @@ Find-HistoryQuick
 
 ## Parameters
 
-No parameters.
+### -Pattern
+
+Text pattern to match against saved command history entries.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Find-HistoryQuick -Pattern 'git'
+.PARAMETER Pattern
+    Text pattern to match against saved command history entries.
+``
 
 ## Aliases
 

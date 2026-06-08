@@ -21,6 +21,7 @@ Describe 'scripts/utils/docs/modules/DocFunctionParser.psm1 structure extended s
     It 'Imports DocParserRegex patterns' {
         $c = Get-Content -LiteralPath $script:Fragment -Raw
         $c | Should -Match 'DocParserRegex.psm1'
+        $c | Should -Match 'DocHelpParser.psm1'
         $c | Should -Match 'Export-ModuleMember -Function Parse-FunctionDocumentation'
     }
 }

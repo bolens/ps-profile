@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Generates a UUID (Universally Unique Identifier).
+Generates a new UUID (GUID).
 
 ## Description
 
-Generates a UUID of the specified version. Supports v1 (time-based) and v4 (random). Note: v1 uses a simplified implementation. For true time-based UUIDs, use external libraries.
+Generates a new UUID (Universally Unique Identifier) using .NET Guid.NewGuid(). Can return the UUID in various formats.
 
 ## Alias Information
 

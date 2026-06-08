@@ -303,6 +303,9 @@ try {
     The path for the output Avro file. If not specified, uses input path with .avro extension.
 .PARAMETER SchemaPath
     The path to the Avro schema file (.avsc). Required.
+.EXAMPLE
+    ConvertTo-AvroFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-AvroFromJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
@@ -323,6 +326,9 @@ Set-AgentModeAlias -Name 'json-to-avro' -Target 'ConvertTo-AvroFromJson'
     The path for the output JSON file. If not specified, uses input path with .json extension.
 .PARAMETER SchemaPath
     The path to the Avro schema file (.avsc). Required.
+.EXAMPLE
+    ConvertFrom-AvroToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-AvroToJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
@@ -347,6 +353,9 @@ Set-AgentModeAlias -Name 'avro-to-json' -Target 'ConvertFrom-AvroToJson'
 .PARAMETER ReaderSchemaPath
     The path to the Avro schema file (.avsc) to use when reading the data. Optional if WriterSchemaPath is provided.
     If only one schema is provided, it will be used for both reading and writing.
+.EXAMPLE
+    ConvertFrom-AvroToJsonWithSchemaEvolution -InputPath ./input.file
+
 #>
 function ConvertFrom-AvroToJsonWithSchemaEvolution {
     param([string]$InputPath, [string]$OutputPath, [string]$WriterSchemaPath, [string]$ReaderSchemaPath)
@@ -372,6 +381,9 @@ Set-AgentModeAlias -Name 'avro-to-json-evolve' -Target 'ConvertFrom-AvroToJsonWi
     - ForwardCompatible: Whether reader can read writer's data
     - BackwardCompatible: Whether writer can read reader's data
     - Errors: Array of any compatibility errors
+.EXAMPLE
+    Test-AvroSchemaCompatibility
+
 #>
 function Test-AvroSchemaCompatibility {
     param([string]$WriterSchemaPath, [string]$ReaderSchemaPath)

@@ -170,6 +170,9 @@ function Initialize-FileConversion-Toon {
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output TOON file. If not specified, uses input path with .toon extension.
+.EXAMPLE
+    ConvertTo-ToonFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-ToonFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -187,6 +190,9 @@ Set-AgentModeAlias -Name 'json-to-toon' -Target 'ConvertTo-ToonFromJson'
     The path to the TOON file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-ToonToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-ToonToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -204,6 +210,9 @@ Set-AgentModeAlias -Name 'toon-to-json' -Target 'ConvertFrom-ToonToJson'
     The path to the TOON file.
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-ToonToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-ToonToYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -221,6 +230,9 @@ Set-AgentModeAlias -Name 'toon-to-yaml' -Target 'ConvertFrom-ToonToYaml'
     The path to the YAML file.
 .PARAMETER OutputPath
     The path for the output TOON file. If not specified, uses input path with .toon extension.
+.EXAMPLE
+    ConvertTo-ToonFromYaml -InputPath ./input.file
+
 #>
 function ConvertTo-ToonFromYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -238,6 +250,9 @@ Set-AgentModeAlias -Name 'yaml-to-toon' -Target 'ConvertTo-ToonFromYaml'
     The path to the TOON file.
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-ToonToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-ToonToCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -255,6 +270,9 @@ Set-AgentModeAlias -Name 'toon-to-csv' -Target 'ConvertFrom-ToonToCsv'
     The path to the CSV file.
 .PARAMETER OutputPath
     The path for the output TOON file. If not specified, uses input path with .toon extension.
+.EXAMPLE
+    ConvertTo-ToonFromCsv -InputPath ./input.file
+
 #>
 function ConvertTo-ToonFromCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -272,6 +290,9 @@ Set-AgentModeAlias -Name 'csv-to-toon' -Target 'ConvertTo-ToonFromCsv'
     The path to the TOON file.
 .PARAMETER OutputPath
     The path for the output XML file. If not specified, uses input path with .xml extension.
+.EXAMPLE
+    ConvertFrom-ToonToXml -InputPath ./input.file
+
 #>
 function ConvertFrom-ToonToXml {
     param([string]$InputPath, [string]$OutputPath)
@@ -289,6 +310,9 @@ Set-AgentModeAlias -Name 'toon-to-xml' -Target 'ConvertFrom-ToonToXml'
     The path to the XML file.
 .PARAMETER OutputPath
     The path for the output TOON file. If not specified, uses input path with .toon extension.
+.EXAMPLE
+    ConvertTo-ToonFromXml -InputPath ./input.file
+
 #>
 function ConvertTo-ToonFromXml {
     param([string]$InputPath, [string]$OutputPath)

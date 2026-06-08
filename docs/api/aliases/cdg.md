@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Set-LocationGitRoot`
+Git cd to root - change to repository root
 
 ## Description
 
-This is an alias that points to the `Set-LocationGitRoot` command.
+Git cd to root - change to repository root
 
 ## Alias Information
 

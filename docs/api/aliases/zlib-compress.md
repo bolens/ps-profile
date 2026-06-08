@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Compress-Zlib`
+Compresses a file using Zlib compression.
 
 ## Description
 
-This is an alias that points to the `Compress-Zlib` command.
+Compresses a file using Zlib (Deflate) compression algorithm.
 
 ## Alias Information
 

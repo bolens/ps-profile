@@ -23,7 +23,11 @@ Pattern to match against command history.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-LastCommand
+``
 
 ## Source
 

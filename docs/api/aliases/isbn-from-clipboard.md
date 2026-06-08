@@ -6,7 +6,7 @@ Reads an ISBN from the clipboard and optionally looks it up.
 
 ## Description
 
-This is an alias that points to the `Get-IsbnFromClipboard` command.
+Reads an ISBN from the clipboard and optionally looks it up.
 
 ## Alias Information
 

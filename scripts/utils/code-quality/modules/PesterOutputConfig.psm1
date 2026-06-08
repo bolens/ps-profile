@@ -15,6 +15,24 @@ scripts/utils/code-quality/modules/PesterOutputConfig.psm1
 .DESCRIPTION
     Sets the appropriate output verbosity based on the provided parameters,
     with priority given to Quiet/Verbose switches over OutputFormat.
+.PARAMETER Config
+    Pester configuration object to update.
+
+.PARAMETER OutputFormat
+    Named verbosity level such as Normal, Detailed, Minimal, or None.
+
+.PARAMETER CI
+    Uses CI-friendly normal verbosity when no explicit switches are set.
+
+.PARAMETER Quiet
+    Suppresses Pester output entirely.
+
+.PARAMETER Verbose
+    Enables detailed Pester output.
+
+.EXAMPLE
+    Set-PesterOutputVerbosity -Config $config -Quiet
+
 #>
 function Set-PesterOutputVerbosity {
     param(
@@ -50,6 +68,24 @@ function Set-PesterOutputVerbosity {
 <#
 .SYNOPSIS
     Applies CI-specific optimizations to Pester configuration.
+
+.DESCRIPTION
+    Enables NUnit test result output and Cobertura coverage formatting for CI runs.
+
+.PARAMETER Config
+    Pester configuration object to update.
+
+.PARAMETER OutputPath
+    Optional explicit test result output path.
+
+.PARAMETER Coverage
+    Switches coverage output to Cobertura when enabled.
+
+.PARAMETER RepoRoot
+    Repository root used for default test result output paths.
+
+.EXAMPLE
+    Set-PesterCIOptimizations -Config $config -RepoRoot $repoRoot -Coverage
 #>
 function Set-PesterCIOptimizations {
     param(
@@ -77,6 +113,21 @@ function Set-PesterCIOptimizations {
 <#
 .SYNOPSIS
     Configures test result output for Pester.
+
+.DESCRIPTION
+    Enables NUnit XML test result output and resolves the destination file path.
+
+.PARAMETER Config
+    Pester configuration object to update.
+
+.PARAMETER OutputPath
+    Base output directory for generated test result files.
+
+.PARAMETER TestResultPath
+    Explicit test result file path override.
+
+.EXAMPLE
+    Set-PesterTestResults -Config $config -OutputPath ./reports
 #>
 function Set-PesterTestResults {
     param(

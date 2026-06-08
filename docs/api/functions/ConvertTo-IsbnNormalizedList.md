@@ -6,7 +6,7 @@ Normalizes and deduplicates a list of ISBN values.
 
 ## Description
 
-No description available.
+Accepts pipeline input, normalizes each ISBN, and returns unique records.
 
 ## Signature
 
@@ -16,11 +16,23 @@ ConvertTo-IsbnNormalizedList
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+ISBN value from the pipeline.
+
+
+## Outputs
+
+PSCustomObject[] .EXAMPLE '9780306406157', '0-306-40615-2' | ConvertTo-IsbnNormalizedList
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+'9780306406157', '0-306-40615-2' | ConvertTo-IsbnNormalizedList
+``
 
 ## Aliases
 

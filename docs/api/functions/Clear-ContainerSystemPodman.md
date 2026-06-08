@@ -16,11 +16,18 @@ Clear-ContainerSystemPodman
 
 ## Parameters
 
-No parameters.
+### -args
+
+Additional arguments forwarded to system prune -f.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Clear-ContainerSystemPodman
+``
 
 ## Aliases
 

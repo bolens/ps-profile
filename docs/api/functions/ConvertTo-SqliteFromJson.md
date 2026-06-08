@@ -31,7 +31,11 @@ Optional. Name of the table to create. Defaults to 'data'. Ignored if JSON conta
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-SqliteFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

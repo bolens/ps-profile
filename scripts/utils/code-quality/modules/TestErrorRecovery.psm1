@@ -34,6 +34,9 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 
 .OUTPUTS
     Execution result with recovery information
+.EXAMPLE
+    Invoke-WithErrorRecovery -ScriptBlock { Invoke-Pester -Path 'tests/unit' }
+
 #>
 function Invoke-WithErrorRecovery {
     param(

@@ -15,6 +15,9 @@ $script:regexExample = [regex]::new('(?s)\.EXAMPLE\s*\n\s*(.+?)(?=\n\s*\.(?:EXAM
 $script:regexLink = [regex]::new('(?s)\.LINK\s*\n\s*(.+?)(?=\n\s*\.(?:LINK)|$)', [System.Text.RegularExpressions.RegexOptions]::Compiled)
 $script:regexEmptyLine = [regex]::new('^\s*$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
 $script:regexCodeLine = [regex]::new('^\s*[A-Za-z]', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$script:regexInlineComment = [regex]::new('#\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$script:regexSingleLineComment = [regex]::new('^\s*#\s*(.+)$', [System.Text.RegularExpressions.RegexOptions]::Compiled)
+$script:regexFunctionPath = [regex]::new('Function:(?:\\)?(?:Global:|global:|script:)?([A-Za-z0-9_\-\.~]+)', [System.Text.RegularExpressions.RegexOptions]::Compiled -bor [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
 
 # Export regex patterns as module variables
 Export-ModuleMember -Variable @(
@@ -23,6 +26,9 @@ Export-ModuleMember -Variable @(
     'regexExample',
     'regexLink',
     'regexEmptyLine',
-    'regexCodeLine'
+    'regexCodeLine',
+    'regexInlineComment',
+    'regexSingleLineComment',
+    'regexFunctionPath'
 )
 

@@ -6,7 +6,7 @@ Runs ansible-playbook with the correct invocation strategy for the current platf
 
 ## Description
 
-No description available.
+Runs ansible-playbook with the correct invocation strategy for the current platform.
 
 ## Signature
 
@@ -23,11 +23,7 @@ Arguments to pass to ansible-playbook.
 
 ## Examples
 
-### Example 1
-
-`powershell
-Invoke-AnsiblePlaybook playbook.yml --check
-``
+No examples provided.
 
 ## Aliases
 

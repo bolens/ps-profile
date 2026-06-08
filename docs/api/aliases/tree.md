@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-DirectoryTree`
+Listing helpers (prefer eza when available)
 
 ## Description
 
-This is an alias that points to the `Get-DirectoryTree` command.
+Listing helpers (prefer eza when available)
 
 ## Alias Information
 

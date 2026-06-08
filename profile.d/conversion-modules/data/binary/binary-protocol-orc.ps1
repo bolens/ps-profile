@@ -280,6 +280,9 @@ except Exception as e:
     The path to the ORC file (.orc extension).
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-OrcToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-OrcToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -298,6 +301,9 @@ Set-AgentModeAlias -Name 'orc-to-json' -Target 'ConvertFrom-OrcToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output ORC file. If not specified, uses input path with .orc extension.
+.EXAMPLE
+    ConvertTo-OrcFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-OrcFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -316,6 +322,9 @@ Set-AgentModeAlias -Name 'json-to-orc' -Target 'ConvertTo-OrcFromJson'
     The path to the ORC file (.orc extension).
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-OrcToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-OrcToCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -334,6 +343,9 @@ Set-AgentModeAlias -Name 'orc-to-csv' -Target 'ConvertFrom-OrcToCsv'
     The path to the ORC file (.orc extension).
 .PARAMETER OutputPath
     The path for the output Parquet file. If not specified, uses input path with .parquet extension.
+.EXAMPLE
+    ConvertFrom-OrcToParquet -InputPath ./input.file
+
 #>
 function ConvertFrom-OrcToParquet {
     param([string]$InputPath, [string]$OutputPath)

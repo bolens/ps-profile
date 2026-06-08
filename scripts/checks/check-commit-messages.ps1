@@ -47,7 +47,8 @@ catch {
 }
 
 # Get commit list between base and HEAD (exclude merges)
-$commits = & git rev-list --no-merges --reverse $Base..HEAD 2>$null
+$commitRange = '{0}..HEAD' -f $Base
+$commits = & git rev-list --no-merges --reverse $commitRange 2>$null
 if (-not $commits) {
     Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No commits to check against $Base"
 }

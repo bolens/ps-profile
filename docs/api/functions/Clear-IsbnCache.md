@@ -6,7 +6,7 @@ Clears cached ISBN lookup results.
 
 ## Description
 
-No description available.
+Removes cached provider responses under the profile ISBN cache directory.
 
 ## Signature
 
@@ -27,7 +27,17 @@ Provider scope for a single ISBN cache entry. Defaults to Auto.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Clear-IsbnCache
+``
+
+### Example 2
+
+`powershell
+Clear-IsbnCache -LookupIsbn '9780306406157'
+``
 
 ## Aliases
 

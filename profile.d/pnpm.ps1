@@ -18,11 +18,16 @@ if (Test-CachedCommand pnpm) {
     # Note: Invoke-PnpmInstall with flag support is defined later in this file
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Installs development packages using pnpm.
     .DESCRIPTION
         Adds packages as dev dependencies to the project using pnpm.
-    #>
+.EXAMPLE
+    Invoke-PnpmDevInstall typescript eslint
+.PARAMETER Packages
+    Package names to add as development dependencies.
+
+#>
     function Invoke-PnpmDevInstall {
         param([string[]]$Packages)
         pnpm add -D @Packages
@@ -30,11 +35,18 @@ if (Test-CachedCommand pnpm) {
     Set-Alias -Name pndev -Value Invoke-PnpmDevInstall -Option AllScope -Force
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Runs npm scripts using pnpm.
     .DESCRIPTION
         Executes package.json scripts using pnpm instead of npm.
-    #>
+.EXAMPLE
+    Invoke-PnpmRun -Script build -Args @('--watch')
+.PARAMETER Script
+    package.json script name to execute.
+.PARAMETER Args
+    Additional arguments forwarded to the script command.
+
+#>
     function Invoke-PnpmRun {
         param([string]$Script, [string[]]$Args)
         pnpm run $Script @Args

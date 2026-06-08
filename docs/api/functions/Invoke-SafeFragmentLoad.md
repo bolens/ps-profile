@@ -31,7 +31,11 @@ Maximum number of retry attempts.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-SafeFragmentLoad
+``
 
 ## Source
 

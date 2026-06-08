@@ -6,7 +6,7 @@ Validates an ISSN checksum.
 
 ## Description
 
-No description available.
+Validates an ISSN checksum.
 
 ## Signature
 
@@ -16,7 +16,15 @@ Test-IssnValid
 
 ## Parameters
 
-No parameters.
+### -Issn
+
+ISSN value from the pipeline.
+
+
+## Outputs
+
+System.Boolean
+
 
 ## Examples
 

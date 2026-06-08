@@ -21,6 +21,9 @@ scripts/utils/code-quality/modules/TestCategorization.psm1
 
 .OUTPUTS
     Test category string
+.EXAMPLE
+    Get-TestCategory
+
 #>
 function Get-TestCategory {
     param(

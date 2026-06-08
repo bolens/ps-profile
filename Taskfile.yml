@@ -18,6 +18,16 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
 
+  check-doc-coverage:
+    desc: Report API documentation coverage gaps (informational)
+    cmds:
+      - pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 {{.CLI_ARGS}}
+
+  check-doc-freshness:
+    desc: Verify docs/api matches incremental generator output
+    cmds:
+      - pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 {{.CLI_ARGS}}
+
   test:
     desc: Run Pester Tests
     cmds:
@@ -157,6 +167,11 @@ tasks:
     desc: Generate API Documentation
     cmds:
       - pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 {{.CLI_ARGS}}
+
+  generate-docs-incremental:
+    desc: Generate API docs incrementally (changed profile sources only)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 -Incremental {{.CLI_ARGS}}
 
   spellcheck:
     desc: Run Spellcheck

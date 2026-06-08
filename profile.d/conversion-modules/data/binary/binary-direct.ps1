@@ -43,6 +43,9 @@ function Initialize-FileConversion-BinaryDirect {
     The path to the BSON file.
 .PARAMETER OutputPath
     The path for the output MessagePack file. If not specified, uses input path with .msgpack extension.
+.EXAMPLE
+    ConvertTo-MessagePackFromBson -InputPath ./input.file
+
 #>
 function ConvertTo-MessagePackFromBson {
     param([string]$InputPath, [string]$OutputPath)
@@ -63,6 +66,9 @@ Set-AgentModeAlias -Name 'bson-to-messagepack' -Target 'ConvertTo-MessagePackFro
     The path to the MessagePack file.
 .PARAMETER OutputPath
     The path for the output BSON file. If not specified, uses input path with .bson extension.
+.EXAMPLE
+    ConvertTo-BsonFromMessagePack -InputPath ./input.file
+
 #>
 function ConvertTo-BsonFromMessagePack {
     param([string]$InputPath, [string]$OutputPath)
@@ -83,6 +89,9 @@ Set-AgentModeAlias -Name 'messagepack-to-bson' -Target 'ConvertTo-BsonFromMessag
     The path to the BSON file.
 .PARAMETER OutputPath
     The path for the output CBOR file. If not specified, uses input path with .cbor extension.
+.EXAMPLE
+    ConvertTo-CborFromBson -InputPath ./input.file
+
 #>
 function ConvertTo-CborFromBson {
     param([string]$InputPath, [string]$OutputPath)
@@ -102,6 +111,9 @@ Set-AgentModeAlias -Name 'bson-to-cbor' -Target 'ConvertTo-CborFromBson'
     The path to the CBOR file.
 .PARAMETER OutputPath
     The path for the output BSON file. If not specified, uses input path with .bson extension.
+.EXAMPLE
+    ConvertTo-BsonFromCbor -InputPath ./input.file
+
 #>
 function ConvertTo-BsonFromCbor {
     param([string]$InputPath, [string]$OutputPath)
@@ -121,6 +133,9 @@ Set-AgentModeAlias -Name 'cbor-to-bson' -Target 'ConvertTo-BsonFromCbor'
     The path to the MessagePack file.
 .PARAMETER OutputPath
     The path for the output CBOR file. If not specified, uses input path with .cbor extension.
+.EXAMPLE
+    ConvertTo-CborFromMessagePack -InputPath ./input.file
+
 #>
 function ConvertTo-CborFromMessagePack {
     param([string]$InputPath, [string]$OutputPath)
@@ -141,6 +156,9 @@ Set-AgentModeAlias -Name 'messagepack-to-cbor' -Target 'ConvertTo-CborFromMessag
     The path to the CBOR file.
 .PARAMETER OutputPath
     The path for the output MessagePack file. If not specified, uses input path with .msgpack extension.
+.EXAMPLE
+    ConvertTo-MessagePackFromCbor -InputPath ./input.file
+
 #>
 function ConvertTo-MessagePackFromCbor {
     param([string]$InputPath, [string]$OutputPath)

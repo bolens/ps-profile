@@ -24,6 +24,9 @@ scripts/utils/code-quality/modules/TestAnalysis.psm1
 
 .OUTPUTS
     Trend analysis
+.EXAMPLE
+    Analyze-TestTrends
+
 #>
 function Analyze-TestTrends {
     param($CurrentResult, $HistoricalData)
@@ -54,6 +57,9 @@ function Analyze-TestTrends {
 
 .OUTPUTS
     Array of recommendations
+.EXAMPLE
+    Get-ComprehensiveRecommendations
+
 #>
 function Get-ComprehensiveRecommendations {
     param($Report)

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-GitChanges`
+Fetches and merges changes from remote repository.
 
 ## Description
 
-This is an alias that points to the `Get-GitChanges` command.
+Downloads changes from the remote repository and merges them into the current branch. Forwards all arguments to git pull.
 
 ## Alias Information
 

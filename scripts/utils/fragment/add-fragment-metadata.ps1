@@ -27,6 +27,11 @@ scripts/utils/fragment/add-fragment-metadata.ps1
     Shows what would be added to go.ps1.
 #>
 
+param(
+    [string]$Fragment,
+    [switch]$DryRun
+)
+
 # Import ExitCodes for standardized exit handling
 $_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
 $_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
@@ -41,11 +46,6 @@ if (Test-Path $_ewcLibPath) {
     function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
     enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
 }
-
-param(
-    [string]$Fragment,
-    [switch]$DryRun
-)
 
 # Parse debug level once at script start
 $debugLevel = 0
@@ -332,6 +332,7 @@ foreach ($file in $fragments) {
         if ($debugLevel -ge 2) {
             Write-Verbose "[fragment.add-metadata] Fragment $($file.Name) processed in ${fileDuration}ms - Skipped (no changes needed)"
         }
+    }
     }
     catch {
         $processErrors.Add($file.Name)

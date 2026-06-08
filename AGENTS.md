@@ -4,10 +4,11 @@ This file provides guidance for AI coding assistants (Claude, Cursor, GitHub Cop
 
 ## Quick Start for AI Assistants
 
-This is a **modular PowerShell profile** with:
+This is a **modular, cross-platform PowerShell profile** with lazy-loaded fragments for dev tooling, data/document conversion, cloud and container helpers, and on-demand command access. See [README.md](README.md) for scope and the active-development warning.
 
-- **500+ functions** and **700+ aliases** (see `docs/api/README.md` for current counts)
-- **Comprehensive testing** with Pester (unit, integration, performance)
+- **1,400+ functions** and **1,500+ aliases** (see `docs/api/README.md` for current counts)
+- **130+ fragments** in `profile.d/` with dependency-aware loading
+- **Comprehensive testing** with Pester (1,300+ test files: unit, integration, performance)
 - **Strict code quality** standards (PSScriptAnalyzer, formatting, security scanning)
 - **Performance optimized** with lazy loading, caching, and deferred initialization
 - **Cross-platform** support (Windows, Linux, macOS)
@@ -16,15 +17,15 @@ This is a **modular PowerShell profile** with:
 
 ```
 ├── Microsoft.PowerShell_profile.ps1  # Main profile loader (keep minimal)
-├── profile.d/                         # Modular fragments (00-99)
-│   ├── 00-bootstrap.ps1               # Core helpers (Set-AgentModeFunction, etc.)
-│   ├── 01-env.ps1                     # Environment configuration
-│   ├── 02-files.ps1                   # File utilities (loads modules)
-│   ├── 05-utilities.ps1               # General utilities (loads modules)
-│   ├── 06-oh-my-posh.ps1              # Prompt framework
-│   ├── 11-git.ps1                     # Git helpers (loads modules)
-│   ├── 22-containers.ps1              # Container utilities (loads modules)
-│   ├── [other numbered fragments]     # Additional feature fragments
+├── profile.d/                         # Modular fragments (130+; dependency-aware loading)
+│   ├── bootstrap.ps1                  # Core helpers (Set-AgentModeFunction, etc.)
+│   ├── env.ps1                        # Environment configuration
+│   ├── files.ps1                      # File utilities (loads modules)
+│   ├── utilities.ps1                  # General utilities (loads modules)
+│   ├── oh-my-posh.ps1                 # Prompt framework
+│   ├── git.ps1                        # Git helpers (loads modules)
+│   ├── containers.ps1                 # Container utilities (loads modules)
+│   ├── [other fragments]              # Language, cloud, conversion, and tool fragments
 │   ├── cli-modules/                   # Modern CLI tool modules
 │   ├── container-modules/             # Container helper modules
 │   ├── conversion-modules/            # Data/document/media conversion modules
@@ -210,10 +211,10 @@ if (Test-CachedCommand 'docker') {
 # This script runs non-interactively, generates comprehensive coverage reports, and identifies coverage gaps
 
 # Analyze coverage for a specific file or directory
-pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap
 
 # Analyze coverage for multiple paths
-pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap,profile.d/11-git.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap,profile.d/git.ps1
 
 # The script automatically:
 # - Matches test files to source files based on naming conventions
@@ -321,13 +322,13 @@ task test-performance
 
 # ⚠️ CRITICAL: Use analyze-coverage.ps1 for test execution and coverage analysis
 # This script runs non-interactively, generates comprehensive coverage reports, and identifies coverage gaps
-pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap
 
 # Analyze coverage for specific file or directory
-pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/22-containers.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/containers.ps1
 
 # Analyze coverage for multiple paths
-pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap,profile.d/11-git.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap,profile.d/git.ps1
 
 # Advanced features (direct script execution - use analyze-coverage.ps1 instead)
 # pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -MaxRetries 3 -TrackPerformance
@@ -377,7 +378,7 @@ Fragments use numeric prefixes:
 
 ## Modular Subdirectory Structure
 
-Many fragments have been refactored to use organized subdirectories. Main fragments (e.g., `02-files.ps1`, `05-utilities.ps1`) load related modules from subdirectories:
+Many fragments have been refactored to use organized subdirectories. Main fragments (e.g., `files.ps1`, `utilities.ps1`) load related modules from subdirectories:
 
 - **`cli-modules/`** - Modern CLI tool integrations
 - **`container-modules/`** - Container helper modules
@@ -397,7 +398,7 @@ When working with modules:
 
 ## Bootstrap Helpers
 
-Available to all fragments from `00-bootstrap.ps1`:
+Available to all fragments from `bootstrap.ps1`:
 
 ### Set-AgentModeFunction
 

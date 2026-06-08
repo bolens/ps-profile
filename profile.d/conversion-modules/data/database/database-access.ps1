@@ -343,6 +343,9 @@ except Exception as e:
     The path for the output JSON file. If not specified, uses input path with .json extension.
 .PARAMETER TableName
     Optional. Name of the table to export. If not specified, exports all tables.
+.EXAMPLE
+    ConvertFrom-AccessToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-AccessToJson {
     param([string]$InputPath, [string]$OutputPath, [string]$TableName)
@@ -366,6 +369,9 @@ Set-AgentModeAlias -Name 'accdb-to-json' -Target 'ConvertFrom-AccessToJson'
     The path for the output Access database file. If not specified, uses input path with .accdb extension.
 .PARAMETER Format
     Optional. Format to create: 'accdb' (default) or 'mdb'.
+.EXAMPLE
+    ConvertTo-AccessFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-AccessFromJson {
     param([string]$InputPath, [string]$OutputPath, [string]$Format = 'accdb')
@@ -389,6 +395,9 @@ Set-AgentModeAlias -Name 'json-to-accdb' -Target 'ConvertTo-AccessFromJson'
     The path for the output CSV file. If not specified, uses input path with .csv extension.
 .PARAMETER TableName
     Optional. Name of the table to export. If not specified, exports the first table.
+.EXAMPLE
+    ConvertFrom-AccessToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-AccessToCsv {
     param([string]$InputPath, [string]$OutputPath, [string]$TableName)

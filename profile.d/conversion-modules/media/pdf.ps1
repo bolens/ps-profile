@@ -47,6 +47,9 @@ function Initialize-FileConversion-MediaPdf {
     The path to the PDF file.
 .PARAMETER OutputPath
     The path for the output text file. If not specified, uses input path with .txt extension.
+.EXAMPLE
+    ConvertFrom-PdfToText -InputPath ./input.file
+
 #>
 function ConvertFrom-PdfToText {
     param([string]$InputPath, [string]$OutputPath)
@@ -64,6 +67,9 @@ Set-AgentModeAlias -Name 'pdf-to-text' -Target 'ConvertFrom-PdfToText'
     Array of paths to PDF files to merge.
 .PARAMETER OutputPath
     The path for the output merged PDF file.
+.EXAMPLE
+    Merge-Pdf
+
 #>
 function Merge-Pdf {
     param([string[]]$InputPaths, [string]$OutputPath)

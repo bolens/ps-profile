@@ -218,6 +218,9 @@ function Get-PnpmGlobalPath {
 .SYNOPSIS
     Gets Node.js module search paths for global and repo-local packages.
 .OUTPUTS
+.DESCRIPTION
+    Gets Node.js module search paths for global and repo-local packages.
+    .OUTPUTS
     System.String[]
 #>
 function Get-NodeModuleSearchPaths {
@@ -760,6 +763,23 @@ function Expand-EmbeddedNodeInstallHints {
 <#
 .SYNOPSIS
     Replaces __NODE_INSTALL_CMD__ in a PowerShell error message at runtime.
+.PARAMETER Message
+    Optional message written before exiting.
+.PARAMETER PackageNames
+    PackageNames parameter.
+.PARAMETER Global
+    Global parameter.
+.EXAMPLE
+.DESCRIPTION
+    Replaces __NODE_INSTALL_CMD__ in a PowerShell error message at runtime.
+    .PARAMETER Message
+    Optional message written before exiting.
+    .PARAMETER PackageNames
+    PackageNames parameter.
+    .PARAMETER Global
+    Global parameter.
+    .EXAMPLE
+    Resolve-NodeInstallHintMessage
 #>
 function Resolve-NodeInstallHintMessage {
     [CmdletBinding()]

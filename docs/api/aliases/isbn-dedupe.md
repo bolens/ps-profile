@@ -6,7 +6,7 @@ Normalizes and deduplicates a list of ISBN values.
 
 ## Description
 
-This is an alias that points to the `ConvertTo-IsbnNormalizedList` command.
+Accepts pipeline input, normalizes each ISBN, and returns unique records.
 
 ## Alias Information
 

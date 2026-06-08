@@ -253,6 +253,9 @@ function Initialize-FileConversion-ScientificToColumnar {
     The path to the HDF5 file.
 .PARAMETER OutputPath
     The path for the output Parquet file. If not specified, uses input path with .parquet extension.
+.EXAMPLE
+    ConvertTo-ParquetFromHdf5 -InputPath ./input.file
+
 #>
 function ConvertTo-ParquetFromHdf5 {
     param([string]$InputPath, [string]$OutputPath)
@@ -273,6 +276,9 @@ Set-AgentModeAlias -Name 'h5-to-parquet' -Target 'ConvertTo-ParquetFromHdf5'
     The path to the Parquet file.
 .PARAMETER OutputPath
     The path for the output HDF5 file. If not specified, uses input path with .h5 extension.
+.EXAMPLE
+    ConvertTo-Hdf5FromParquet -InputPath ./input.file
+
 #>
 function ConvertTo-Hdf5FromParquet {
     param([string]$InputPath, [string]$OutputPath)
@@ -293,6 +299,9 @@ Set-AgentModeAlias -Name 'parquet-to-h5' -Target 'ConvertTo-Hdf5FromParquet'
     The path to the NetCDF file.
 .PARAMETER OutputPath
     The path for the output Parquet file. If not specified, uses input path with .parquet extension.
+.EXAMPLE
+    ConvertTo-ParquetFromNetCdf -InputPath ./input.file
+
 #>
 function ConvertTo-ParquetFromNetCdf {
     param([string]$InputPath, [string]$OutputPath)
@@ -313,6 +322,9 @@ Set-AgentModeAlias -Name 'nc-to-parquet' -Target 'ConvertTo-ParquetFromNetCdf'
     The path to the Parquet file.
 .PARAMETER OutputPath
     The path for the output NetCDF file. If not specified, uses input path with .nc extension.
+.EXAMPLE
+    ConvertTo-NetCdfFromParquet -InputPath ./input.file
+
 #>
 function ConvertTo-NetCdfFromParquet {
     param([string]$InputPath, [string]$OutputPath)

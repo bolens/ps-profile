@@ -2,9 +2,9 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 1493
-**Total Aliases:** 1557
-**Generated:** 2026-06-08 08:56:53
+**Total Functions:** 2342
+**Total Aliases:** 1498
+**Generated:** 2026-06-08 11:10:21
 
 ## Functions by Fragment
 
@@ -17,8 +17,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [Launch-OpenSCAD](functions/Launch-OpenSCAD.md) - Launches OpenSCAD programmatic CAD software.
 - [Render-3DScene](functions/Render-3DScene.md) - Renders a 3D scene using Blender.
 
-### aac (6 functions)
+### aac (8 functions)
 
+- [_ConvertFrom-AacToMp3](functions/_ConvertFrom-AacToMp3.md) - AAC conversions
+- [_ConvertFrom-AacToWav](functions/_ConvertFrom-AacToWav.md) - AAC conversions
 - [ConvertFrom-AacToFlac](functions/ConvertFrom-AacToFlac.md) - Converts AAC audio to FLAC format.
 - [ConvertFrom-AacToMp3](functions/ConvertFrom-AacToMp3.md) - Converts AAC audio to MP3 format.
 - [ConvertFrom-AacToOgg](functions/ConvertFrom-AacToOgg.md) - Converts AAC audio to OGG Vorbis format.
@@ -39,12 +41,21 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-LMStudio](functions/Invoke-LMStudio.md) - Executes LM Studio CLI commands.
 - [Invoke-OllamaEnhanced](functions/Invoke-OllamaEnhanced.md) - Executes Ollama commands with enhanced functionality.
 
-### aliases (1 functions)
+### aliases (4 functions)
 
 - [Enable-Aliases](functions/Enable-Aliases.md) - Enables user-defined aliases and helper functions for enhanced shell experience.
+- [Get-ChildItemEnhanced](functions/Get-ChildItemEnhanced.md) - List directory contents - enhanced ls
+- [Get-ChildItemEnhancedAll](functions/Get-ChildItemEnhancedAll.md) - List all directory contents - enhanced ls -a
+- [Show-Path](functions/Show-Path.md) - Show PATH entries as an array
 
-### angle (1 functions)
+### angle (7 functions)
 
+- [_Convert-Angle](functions/_Convert-Angle.md) - Convert to radians first, then to target unit
+- [_ConvertFrom-RadiansToAngle](functions/_ConvertFrom-RadiansToAngle.md) - Radians to other units
+- [_ConvertTo-RadiansFromAngle](functions/_ConvertTo-RadiansFromAngle.md) - Other units to radians
+- [Convert-Angle](functions/Convert-Angle.md) - Convert Angle
+- [ConvertFrom-RadiansToAngle](functions/ConvertFrom-RadiansToAngle.md) - Convert from Radians
+- [ConvertTo-RadiansFromAngle](functions/ConvertTo-RadiansFromAngle.md) - Convert to Radians
 - [Initialize-FileConversion-CoreUnitsAngle](functions/Initialize-FileConversion-CoreUnitsAngle.md) - Initializes Angle unit conversion utility functions.
 
 ### angular (3 functions)
@@ -76,12 +87,28 @@ This documentation is automatically generated from comment-based help in the pro
 - [Compress-ArchiveCustom](functions/Compress-ArchiveCustom.md) - Creates ZIP archives.
 - [Expand-ArchiveCustom](functions/Expand-ArchiveCustom.md) - Extracts ZIP archives.
 
-### area (1 functions)
+### area (7 functions)
 
+- [_Convert-Area](functions/_Convert-Area.md) - Convert to square meters first, then to target unit
+- [_ConvertFrom-SquareMetersToArea](functions/_ConvertFrom-SquareMetersToArea.md) - Square meters to other units
+- [_ConvertTo-SquareMetersFromArea](functions/_ConvertTo-SquareMetersFromArea.md) - Other units to square meters
+- [Convert-Area](functions/Convert-Area.md) - Convert Area
+- [ConvertFrom-SquareMetersToArea](functions/ConvertFrom-SquareMetersToArea.md) - Convert from Square meters
+- [ConvertTo-SquareMetersFromArea](functions/ConvertTo-SquareMetersFromArea.md) - Convert to Square meters
 - [Initialize-FileConversion-CoreUnitsArea](functions/Initialize-FileConversion-CoreUnitsArea.md) - Initializes Area unit conversion utility functions.
 
-### ascii (9 functions)
+### ascii (19 functions)
 
+- [_ConvertFrom-AsciiToBinary](functions/_ConvertFrom-AsciiToBinary.md) - ASCII to Binary
+- [_ConvertFrom-AsciiToDecimal](functions/_ConvertFrom-AsciiToDecimal.md) - ASCII to Decimal
+- [_ConvertFrom-AsciiToHex](functions/_ConvertFrom-AsciiToHex.md) - Initializes ASCII encoding conversion utility functions.
+- [_ConvertFrom-AsciiToOctal](functions/_ConvertFrom-AsciiToOctal.md) - ASCII to Octal
+- [_ConvertFrom-AsciiToRoman](functions/_ConvertFrom-AsciiToRoman.md) - ASCII to Roman
+- [_ConvertFrom-BinaryToAscii](functions/_ConvertFrom-BinaryToAscii.md) - Validate binary string contains only 0s and 1s
+- [_ConvertFrom-DecimalToAscii](functions/_ConvertFrom-DecimalToAscii.md) - Split by spaces or commas, or assume single numbers
+- [_ConvertFrom-HexToAscii](functions/_ConvertFrom-HexToAscii.md) - Remove spaces and common separators
+- [_ConvertFrom-OctalToAscii](functions/_ConvertFrom-OctalToAscii.md) - Validate octal string contains only 0-7
+- [_ConvertFrom-RomanToAscii](functions/_ConvertFrom-RomanToAscii.md) - Split by spaces or assume single Roman numerals
 - [ConvertFrom-AsciiToBase32](functions/ConvertFrom-AsciiToBase32.md) - Converts ASCII text to Base32 representation.
 - [ConvertFrom-AsciiToBinary](functions/ConvertFrom-AsciiToBinary.md) - Converts ASCII text to binary representation.
 - [ConvertFrom-AsciiToDecimal](functions/ConvertFrom-AsciiToDecimal.md) - Converts ASCII text to decimal representation.
@@ -99,15 +126,22 @@ This documentation is automatically generated from comment-based help in the pro
 - [Remove-AsdfTool](functions/Remove-AsdfTool.md) - Uninstalls tools from asdf.
 - [Update-AsdfSelf](functions/Update-AsdfSelf.md) - Updates asdf to the latest version.
 
-### asn1 (4 functions)
+### asn1 (9 functions)
 
+- [_ConvertFrom-Asn1ToJson](functions/_ConvertFrom-Asn1ToJson.md) - Convert to JSON
+- [_ConvertFrom-Asn1ToXml](functions/_ConvertFrom-Asn1ToXml.md) - Build XML
+- [_ConvertTo-Asn1FromJson](functions/_ConvertTo-Asn1FromJson.md) - Build type specification string
+- [_Parse-Asn1Module](functions/_Parse-Asn1Module.md) - Pattern: TypeName ::= TypeSpecification
+- [_Parse-Asn1Type](functions/_Parse-Asn1Type.md) - Tagged type
 - [ConvertFrom-Asn1ToJson](functions/ConvertFrom-Asn1ToJson.md) - Converts ASN.1 schema file to JSON format.
 - [ConvertFrom-Asn1ToXml](functions/ConvertFrom-Asn1ToXml.md) - Converts ASN.1 schema file to XML format.
 - [ConvertTo-Asn1FromJson](functions/ConvertTo-Asn1FromJson.md) - Converts JSON file to ASN.1 format.
 - [Initialize-FileConversion-Asn1](functions/Initialize-FileConversion-Asn1.md) - Initializes ASN.1 format conversion utility functions.
 
-### avif (7 functions)
+### avif (9 functions)
 
+- [_ConvertFrom-AvifToJpeg](functions/_ConvertFrom-AvifToJpeg.md) - AVIF conversions
+- [_ConvertFrom-AvifToPng](functions/_ConvertFrom-AvifToPng.md) - AVIF conversions
 - [ConvertFrom-AvifToJpeg](functions/ConvertFrom-AvifToJpeg.md) - Converts AVIF image to JPEG format.
 - [ConvertFrom-AvifToPng](functions/ConvertFrom-AvifToPng.md) - Converts AVIF image to PNG format.
 - [ConvertFrom-AvifToWebp](functions/ConvertFrom-AvifToWebp.md) - Converts AVIF image to WebP format.
@@ -135,14 +169,24 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-AzureDeveloper](functions/Invoke-AzureDeveloper.md) - Executes Azure Developer CLI commands.
 - [Start-AzureDeveloperUp](functions/Start-AzureDeveloperUp.md) - Provisions and deploys using Azure Developer CLI.
 
-### base-encoding (3 functions)
+### base-encoding (5 functions)
 
+- [_ConvertFrom-Base32](functions/_ConvertFrom-Base32.md) - Base32 Decoder
+- [_ConvertTo-Base32](functions/_ConvertTo-Base32.md) - Base32 Encoder
 - [ConvertFrom-Base32](functions/ConvertFrom-Base32.md) - Decodes Base32-encoded text.
 - [ConvertTo-Base32](functions/ConvertTo-Base32.md) - Encodes text to Base32 format.
 - [Initialize-DevTools-BaseEncoding](functions/Initialize-DevTools-BaseEncoding.md) - Initializes base encoding utility functions.
 
-### base122 (7 functions)
+### base122 (15 functions)
 
+- [_ConvertFrom-AsciiToBase122](functions/_ConvertFrom-AsciiToBase122.md) - ASCII to Base122
+- [_ConvertFrom-Base122ToAscii](functions/_ConvertFrom-Base122ToAscii.md) - Base122 to ASCII
+- [_ConvertFrom-Base122ToBase64](functions/_ConvertFrom-Base122ToBase64.md) - Base122 to Base64
+- [_ConvertFrom-Base122ToHex](functions/_ConvertFrom-Base122ToHex.md) - Base122 to Hex
+- [_ConvertFrom-Base64ToBase122](functions/_ConvertFrom-Base64ToBase122.md) - Base64 to Base122
+- [_ConvertFrom-HexToBase122](functions/_ConvertFrom-HexToBase122.md) - Remove spaces and dashes
+- [_Decode-Base122](functions/_Decode-Base122.md) - Handle leading zeros (represented by first character of alphabet)
+- [_Encode-Base122](functions/_Encode-Base122.md) - Add leading zeros (represented by first character of alphabet)
 - [ConvertFrom-AsciiToBase122](functions/ConvertFrom-AsciiToBase122.md) - Converts ASCII text to Base122 encoding.
 - [ConvertFrom-Base122ToAscii](functions/ConvertFrom-Base122ToAscii.md) - Converts Base122 encoding to ASCII text.
 - [ConvertFrom-Base122ToBase64](functions/ConvertFrom-Base122ToBase64.md) - Converts Base122 encoding to Base64 encoding.
@@ -151,8 +195,24 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-HexToBase122](functions/ConvertFrom-HexToBase122.md) - Converts hexadecimal string to Base122 encoding.
 - [Initialize-FileConversion-CoreEncodingBase122](functions/Initialize-FileConversion-CoreEncodingBase122.md) - Initializes Base122 encoding conversion utility functions.
 
-### base32 (9 functions)
+### base32 (25 functions)
 
+- [_ConvertFrom-AsciiToBase32](functions/_ConvertFrom-AsciiToBase32.md) - ASCII to Base32
+- [_ConvertFrom-Base32ToAscii](functions/_ConvertFrom-Base32ToAscii.md) - Base32 to ASCII
+- [_ConvertFrom-Base32ToBinary](functions/_ConvertFrom-Base32ToBinary.md) - First convert Base32 to ASCII, then ASCII to binary
+- [_ConvertFrom-Base32ToDecimal](functions/_ConvertFrom-Base32ToDecimal.md) - First convert Base32 to ASCII, then ASCII to decimal
+- [_ConvertFrom-Base32ToHex](functions/_ConvertFrom-Base32ToHex.md) - Base32 to Hex
+- [_ConvertFrom-Base32ToModHex](functions/_ConvertFrom-Base32ToModHex.md) - First convert Base32 to hex, then hex to ModHex
+- [_ConvertFrom-Base32ToOctal](functions/_ConvertFrom-Base32ToOctal.md) - First convert Base32 to ASCII, then ASCII to octal
+- [_ConvertFrom-Base32ToRoman](functions/_ConvertFrom-Base32ToRoman.md) - First convert Base32 to ASCII, then ASCII to Roman
+- [_ConvertFrom-BinaryToBase32](functions/_ConvertFrom-BinaryToBase32.md) - First convert binary to ASCII, then ASCII to Base32
+- [_ConvertFrom-DecimalToBase32](functions/_ConvertFrom-DecimalToBase32.md) - First convert decimal to ASCII, then ASCII to Base32
+- [_ConvertFrom-HexToBase32](functions/_ConvertFrom-HexToBase32.md) - Hex to Base32
+- [_ConvertFrom-ModHexToBase32](functions/_ConvertFrom-ModHexToBase32.md) - First convert ModHex to hex, then hex to Base32
+- [_ConvertFrom-OctalToBase32](functions/_ConvertFrom-OctalToBase32.md) - First convert octal to ASCII, then ASCII to Base32
+- [_ConvertFrom-RomanToBase32](functions/_ConvertFrom-RomanToBase32.md) - First convert Roman to ASCII, then ASCII to Base32
+- [_Decode-Base32](functions/_Decode-Base32.md) - Validate Base32 characters
+- [_Encode-Base32](functions/_Encode-Base32.md) - Add padding
 - [ConvertFrom-Base32ToAscii](functions/ConvertFrom-Base32ToAscii.md) - Converts Base32 string to ASCII text.
 - [ConvertFrom-Base32ToBinary](functions/ConvertFrom-Base32ToBinary.md) - Converts Base32 string to binary representation.
 - [ConvertFrom-Base32ToDecimal](functions/ConvertFrom-Base32ToDecimal.md) - Converts Base32 string to decimal representation.
@@ -163,8 +223,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-Base32ToUrl](functions/ConvertFrom-Base32ToUrl.md) - Converts Base32 string to URL/percent encoded representation.
 - [Initialize-FileConversion-CoreEncodingBase32](functions/Initialize-FileConversion-CoreEncodingBase32.md) - Initializes Base32 encoding conversion utility functions.
 
-### base36 (7 functions)
+### base36 (15 functions)
 
+- [_ConvertFrom-AsciiToBase36](functions/_ConvertFrom-AsciiToBase36.md) - ASCII to Base36
+- [_ConvertFrom-Base36ToAscii](functions/_ConvertFrom-Base36ToAscii.md) - Base36 to ASCII
+- [_ConvertFrom-Base36ToBase64](functions/_ConvertFrom-Base36ToBase64.md) - Base36 to Base64
+- [_ConvertFrom-Base36ToHex](functions/_ConvertFrom-Base36ToHex.md) - Base36 to Hex
+- [_ConvertFrom-Base64ToBase36](functions/_ConvertFrom-Base64ToBase36.md) - Base64 to Base36
+- [_ConvertFrom-HexToBase36](functions/_ConvertFrom-HexToBase36.md) - Remove spaces and dashes
+- [_Decode-Base36](functions/_Decode-Base36.md) - Handle leading zeros (represented by first character of alphabet)
+- [_Encode-Base36](functions/_Encode-Base36.md) - Add leading zeros (represented by first character of alphabet)
 - [ConvertFrom-AsciiToBase36](functions/ConvertFrom-AsciiToBase36.md) - Converts ASCII text to Base36 encoding.
 - [ConvertFrom-Base36ToAscii](functions/ConvertFrom-Base36ToAscii.md) - Converts Base36 encoding to ASCII text.
 - [ConvertFrom-Base36ToBase64](functions/ConvertFrom-Base36ToBase64.md) - Converts Base36 encoding to Base64 encoding.
@@ -173,8 +241,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-HexToBase36](functions/ConvertFrom-HexToBase36.md) - Converts hexadecimal string to Base36 encoding.
 - [Initialize-FileConversion-CoreEncodingBase36](functions/Initialize-FileConversion-CoreEncodingBase36.md) - Initializes Base36 encoding conversion utility functions.
 
-### base58 (7 functions)
+### base58 (15 functions)
 
+- [_ConvertFrom-AsciiToBase58](functions/_ConvertFrom-AsciiToBase58.md) - ASCII to Base58
+- [_ConvertFrom-Base58ToAscii](functions/_ConvertFrom-Base58ToAscii.md) - Base58 to ASCII
+- [_ConvertFrom-Base58ToBase64](functions/_ConvertFrom-Base58ToBase64.md) - Base58 to Base64
+- [_ConvertFrom-Base58ToHex](functions/_ConvertFrom-Base58ToHex.md) - Base58 to Hex
+- [_ConvertFrom-Base64ToBase58](functions/_ConvertFrom-Base64ToBase58.md) - Base64 to Base58
+- [_ConvertFrom-HexToBase58](functions/_ConvertFrom-HexToBase58.md) - Remove spaces and dashes
+- [_Decode-Base58](functions/_Decode-Base58.md) - Handle leading zeros (represented by first character of alphabet)
+- [_Encode-Base58](functions/_Encode-Base58.md) - Add leading zeros (represented by first character of alphabet)
 - [ConvertFrom-AsciiToBase58](functions/ConvertFrom-AsciiToBase58.md) - Converts ASCII text to Base58 encoding.
 - [ConvertFrom-Base58ToAscii](functions/ConvertFrom-Base58ToAscii.md) - Converts Base58 encoding to ASCII text.
 - [ConvertFrom-Base58ToBase64](functions/ConvertFrom-Base58ToBase64.md) - Converts Base58 encoding to Base64 encoding.
@@ -183,8 +259,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-HexToBase58](functions/ConvertFrom-HexToBase58.md) - Converts hexadecimal string to Base58 encoding.
 - [Initialize-FileConversion-CoreEncodingBase58](functions/Initialize-FileConversion-CoreEncodingBase58.md) - Initializes Base58 encoding conversion utility functions.
 
-### base62 (7 functions)
+### base62 (15 functions)
 
+- [_ConvertFrom-AsciiToBase62](functions/_ConvertFrom-AsciiToBase62.md) - ASCII to Base62
+- [_ConvertFrom-Base62ToAscii](functions/_ConvertFrom-Base62ToAscii.md) - Base62 to ASCII
+- [_ConvertFrom-Base62ToBase64](functions/_ConvertFrom-Base62ToBase64.md) - Base62 to Base64
+- [_ConvertFrom-Base62ToHex](functions/_ConvertFrom-Base62ToHex.md) - Base62 to Hex
+- [_ConvertFrom-Base64ToBase62](functions/_ConvertFrom-Base64ToBase62.md) - Base64 to Base62
+- [_ConvertFrom-HexToBase62](functions/_ConvertFrom-HexToBase62.md) - Remove spaces and dashes
+- [_Decode-Base62](functions/_Decode-Base62.md) - Handle leading zeros (represented by first character of alphabet)
+- [_Encode-Base62](functions/_Encode-Base62.md) - Add leading zeros (represented by first character of alphabet)
 - [ConvertFrom-AsciiToBase62](functions/ConvertFrom-AsciiToBase62.md) - Converts ASCII text to Base62 encoding.
 - [ConvertFrom-Base62ToAscii](functions/ConvertFrom-Base62ToAscii.md) - Converts Base62 encoding to ASCII text.
 - [ConvertFrom-Base62ToBase64](functions/ConvertFrom-Base62ToBase64.md) - Converts Base62 encoding to Base64 encoding.
@@ -193,14 +277,24 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-HexToBase62](functions/ConvertFrom-HexToBase62.md) - Converts hexadecimal string to Base62 encoding.
 - [Initialize-FileConversion-CoreEncodingBase62](functions/Initialize-FileConversion-CoreEncodingBase62.md) - Initializes Base62 encoding conversion utility functions.
 
-### base64 (3 functions)
+### base64 (5 functions)
 
+- [_ConvertFrom-Base64](functions/_ConvertFrom-Base64.md) - Level 3: Stack trace
+- [_ConvertTo-Base64](functions/_ConvertTo-Base64.md) - Level 3: Stack trace
 - [ConvertFrom-Base64](functions/ConvertFrom-Base64.md) - Decodes base64 input to text.
 - [ConvertTo-Base64](functions/ConvertTo-Base64.md) - Encodes input to base64 format.
 - [Initialize-FileConversion-CoreBasicBase64](functions/Initialize-FileConversion-CoreBasicBase64.md) - Initializes Base64 format conversion utility functions.
 
-### base85 (7 functions)
+### base85 (15 functions)
 
+- [_ConvertFrom-AsciiToBase85](functions/_ConvertFrom-AsciiToBase85.md) - ASCII to Base85
+- [_ConvertFrom-Base64ToBase85](functions/_ConvertFrom-Base64ToBase85.md) - Base64 to Base85
+- [_ConvertFrom-Base85ToAscii](functions/_ConvertFrom-Base85ToAscii.md) - Base85 to ASCII
+- [_ConvertFrom-Base85ToBase64](functions/_ConvertFrom-Base85ToBase64.md) - Base85 to Base64
+- [_ConvertFrom-Base85ToHex](functions/_ConvertFrom-Base85ToHex.md) - Base85 to Hex
+- [_ConvertFrom-HexToBase85](functions/_ConvertFrom-HexToBase85.md) - Remove spaces and dashes
+- [_Decode-Base85](functions/_Decode-Base85.md) - Convert to 4 bytes (always output 4 bytes, caller will trim if needed)
+- [_Encode-Base85](functions/_Encode-Base85.md) - For 4 bytes, output all 5 digits; for fewer, output (groupSize + 1) digits
 - [ConvertFrom-AsciiToBase85](functions/ConvertFrom-AsciiToBase85.md) - Converts ASCII text to Base85/Ascii85 encoding.
 - [ConvertFrom-Base64ToBase85](functions/ConvertFrom-Base64ToBase85.md) - Converts Base64 encoding to Base85 encoding.
 - [ConvertFrom-Base85ToAscii](functions/ConvertFrom-Base85ToAscii.md) - Converts Base85/Ascii85 encoding to ASCII text.
@@ -209,8 +303,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-HexToBase85](functions/ConvertFrom-HexToBase85.md) - Converts hexadecimal string to Base85 encoding.
 - [Initialize-FileConversion-CoreEncodingBase85](functions/Initialize-FileConversion-CoreEncodingBase85.md) - Initializes Base85/Ascii85 encoding conversion utility functions.
 
-### base91 (7 functions)
+### base91 (15 functions)
 
+- [_ConvertFrom-AsciiToBase91](functions/_ConvertFrom-AsciiToBase91.md) - ASCII to Base91
+- [_ConvertFrom-Base64ToBase91](functions/_ConvertFrom-Base64ToBase91.md) - Base64 to Base91
+- [_ConvertFrom-Base91ToAscii](functions/_ConvertFrom-Base91ToAscii.md) - Base91 to ASCII
+- [_ConvertFrom-Base91ToBase64](functions/_ConvertFrom-Base91ToBase64.md) - Base91 to Base64
+- [_ConvertFrom-Base91ToHex](functions/_ConvertFrom-Base91ToHex.md) - Base91 to Hex
+- [_ConvertFrom-HexToBase91](functions/_ConvertFrom-HexToBase91.md) - Remove spaces and dashes
+- [_Decode-Base91](functions/_Decode-Base91.md) - Handle trailing single character (matching Python reference: if v+1)
+- [_Encode-Base91](functions/_Encode-Base91.md) - Match Python: if n: out += alphabet[b % 91]; if n>7 or b>90: out += alphabet[b // 91]
 - [ConvertFrom-AsciiToBase91](functions/ConvertFrom-AsciiToBase91.md) - Converts ASCII text to Base91 encoding.
 - [ConvertFrom-Base64ToBase91](functions/ConvertFrom-Base64ToBase91.md) - Converts Base64 encoding to Base91 encoding.
 - [ConvertFrom-Base91ToAscii](functions/ConvertFrom-Base91ToAscii.md) - Converts Base91 encoding to ASCII text.
@@ -232,8 +334,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [New-BeadsIssue](functions/New-BeadsIssue.md) - Creates a new Beads issue.
 - [Update-BeadsIssue](functions/Update-BeadsIssue.md) - Updates a Beads issue.
 
-### binary-direct (7 functions)
+### binary-direct (13 functions)
 
+- [_ConvertTo-BsonFromCbor](functions/_ConvertTo-BsonFromCbor.md) - CBOR to BSON
+- [_ConvertTo-BsonFromMessagePack](functions/_ConvertTo-BsonFromMessagePack.md) - MessagePack to BSON
+- [_ConvertTo-CborFromBson](functions/_ConvertTo-CborFromBson.md) - BSON to CBOR
+- [_ConvertTo-CborFromMessagePack](functions/_ConvertTo-CborFromMessagePack.md) - MessagePack to CBOR
+- [_ConvertTo-MessagePackFromBson](functions/_ConvertTo-MessagePackFromBson.md) - BSON to MessagePack
+- [_ConvertTo-MessagePackFromCbor](functions/_ConvertTo-MessagePackFromCbor.md) - CBOR to MessagePack
 - [ConvertTo-BsonFromCbor](functions/ConvertTo-BsonFromCbor.md) - Converts CBOR file to BSON format.
 - [ConvertTo-BsonFromMessagePack](functions/ConvertTo-BsonFromMessagePack.md) - Converts MessagePack file to BSON format.
 - [ConvertTo-CborFromBson](functions/ConvertTo-CborFromBson.md) - Converts BSON file to CBOR format.
@@ -242,62 +350,90 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-MessagePackFromCbor](functions/ConvertTo-MessagePackFromCbor.md) - Converts CBOR file to MessagePack format.
 - [Initialize-FileConversion-BinaryDirect](functions/Initialize-FileConversion-BinaryDirect.md) - Initializes binary format conversion utility functions.
 
-### binary-protocol-capnp (3 functions)
+### binary-protocol-capnp (5 functions)
 
+- [_ConvertFrom-CapnpToJson](functions/_ConvertFrom-CapnpToJson.md) - Cap'n Proto to JSON
+- [_ConvertTo-CapnpFromJson](functions/_ConvertTo-CapnpFromJson.md) - JSON to Cap'n Proto
 - [ConvertFrom-CapnpToJson](functions/ConvertFrom-CapnpToJson.md) - Converts Cap'n Proto file to JSON format.
 - [ConvertTo-CapnpFromJson](functions/ConvertTo-CapnpFromJson.md) - Converts JSON file to Cap'n Proto format.
 - [Initialize-FileConversion-BinaryProtocolCapnp](functions/Initialize-FileConversion-BinaryProtocolCapnp.md) - Initializes Cap'n Proto format conversion utility functions.
 
-### binary-protocol-delta (4 functions)
+### binary-protocol-delta (7 functions)
 
+- [_ConvertFrom-DeltaToJson](functions/_ConvertFrom-DeltaToJson.md) - Convert to JSON
+- [_ConvertFrom-DeltaToParquet](functions/_ConvertFrom-DeltaToParquet.md) - Write Parquet file
+- [_ConvertTo-DeltaFromJson](functions/_ConvertTo-DeltaFromJson.md) - Try deltalake
 - [ConvertFrom-DeltaToJson](functions/ConvertFrom-DeltaToJson.md) - Converts Delta Lake table to JSON format.
 - [ConvertFrom-DeltaToParquet](functions/ConvertFrom-DeltaToParquet.md) - Converts Delta Lake table to Parquet format.
 - [ConvertTo-DeltaFromJson](functions/ConvertTo-DeltaFromJson.md) - Converts JSON file to Delta Lake table format.
 - [Initialize-FileConversion-BinaryProtocolDelta](functions/Initialize-FileConversion-BinaryProtocolDelta.md) - Initializes Delta Lake format conversion utility functions.
 
-### binary-protocol-iceberg (4 functions)
+### binary-protocol-iceberg (7 functions)
 
+- [_ConvertFrom-IcebergToJson](functions/_ConvertFrom-IcebergToJson.md) - This is a placeholder - full Iceberg support requires catalog configuration
+- [_ConvertFrom-IcebergToParquet](functions/_ConvertFrom-IcebergToParquet.md) - This is a placeholder - full Iceberg support requires catalog configuration
+- [_ConvertTo-IcebergFromJson](functions/_ConvertTo-IcebergFromJson.md) - This is a placeholder - full Iceberg support requires catalog configuration
 - [ConvertFrom-IcebergToJson](functions/ConvertFrom-IcebergToJson.md) - Converts Apache Iceberg table to JSON format.
 - [ConvertFrom-IcebergToParquet](functions/ConvertFrom-IcebergToParquet.md) - Converts Apache Iceberg table to Parquet format.
 - [ConvertTo-IcebergFromJson](functions/ConvertTo-IcebergFromJson.md) - Converts JSON file to Apache Iceberg table format.
 - [Initialize-FileConversion-BinaryProtocolIceberg](functions/Initialize-FileConversion-BinaryProtocolIceberg.md) - Initializes Apache Iceberg format conversion utility functions.
 
-### binary-protocol-orc (5 functions)
+### binary-protocol-orc (9 functions)
 
+- [_ConvertFrom-OrcToCsv](functions/_ConvertFrom-OrcToCsv.md) - Convert to CSV
+- [_ConvertFrom-OrcToJson](functions/_ConvertFrom-OrcToJson.md) - Convert PyArrow table to list of dictionaries
+- [_ConvertFrom-OrcToParquet](functions/_ConvertFrom-OrcToParquet.md) - Write Parquet file
+- [_ConvertTo-OrcFromJson](functions/_ConvertTo-OrcFromJson.md) - Write ORC file
 - [ConvertFrom-OrcToCsv](functions/ConvertFrom-OrcToCsv.md) - Converts Apache ORC file to CSV format.
 - [ConvertFrom-OrcToJson](functions/ConvertFrom-OrcToJson.md) - Converts Apache ORC file to JSON format.
 - [ConvertFrom-OrcToParquet](functions/ConvertFrom-OrcToParquet.md) - Converts Apache ORC file to Parquet format.
 - [ConvertTo-OrcFromJson](functions/ConvertTo-OrcFromJson.md) - Converts JSON file to Apache ORC format.
 - [Initialize-FileConversion-BinaryProtocolOrc](functions/Initialize-FileConversion-BinaryProtocolOrc.md) - Initializes Apache ORC format conversion utility functions.
 
-### binary-schema-avro (5 functions)
+### binary-schema-avro (9 functions)
 
+- [_ConvertFrom-AvroToJson](functions/_ConvertFrom-AvroToJson.md) - Check if Invoke-NodeScript is available (should be loaded during initialization)
+- [_ConvertFrom-AvroToJsonWithSchemaEvolution](functions/_ConvertFrom-AvroToJsonWithSchemaEvolution.md) - Check if Invoke-NodeScript is available (should be loaded during initialization)
+- [_ConvertTo-AvroFromJson](functions/_ConvertTo-AvroFromJson.md) - Check if Invoke-NodeScript is available (should be loaded during initialization)
+- [_Test-AvroSchemaCompatibility](functions/_Test-AvroSchemaCompatibility.md) - Schema compatibility check
 - [ConvertFrom-AvroToJson](functions/ConvertFrom-AvroToJson.md) - Converts Avro file to JSON format.
 - [ConvertFrom-AvroToJsonWithSchemaEvolution](functions/ConvertFrom-AvroToJsonWithSchemaEvolution.md) - Converts Avro file to JSON format using schema evolution.
 - [ConvertTo-AvroFromJson](functions/ConvertTo-AvroFromJson.md) - Converts JSON file to Avro format.
 - [Initialize-FileConversion-BinarySchemaAvro](functions/Initialize-FileConversion-BinarySchemaAvro.md) - Initializes Avro schema conversion utility functions.
 - [Test-AvroSchemaCompatibility](functions/Test-AvroSchemaCompatibility.md) - Tests compatibility between two Avro schemas.
 
-### binary-schema-flatbuffers (3 functions)
+### binary-schema-flatbuffers (5 functions)
 
+- [_ConvertFrom-FlatBuffersToJson](functions/_ConvertFrom-FlatBuffersToJson.md) - FlatBuffers to JSON
+- [_ConvertTo-FlatBuffersFromJson](functions/_ConvertTo-FlatBuffersFromJson.md) - JSON to FlatBuffers
 - [ConvertFrom-FlatBuffersToJson](functions/ConvertFrom-FlatBuffersToJson.md) - Converts FlatBuffers file to JSON format.
 - [ConvertTo-FlatBuffersFromJson](functions/ConvertTo-FlatBuffersFromJson.md) - Converts JSON file to FlatBuffers format.
 - [Initialize-FileConversion-BinarySchemaFlatBuffers](functions/Initialize-FileConversion-BinarySchemaFlatBuffers.md) - Initializes FlatBuffers schema conversion utility functions.
 
-### binary-schema-protobuf (3 functions)
+### binary-schema-protobuf (5 functions)
 
+- [_ConvertFrom-ProtobufToJson](functions/_ConvertFrom-ProtobufToJson.md) - Protocol Buffers (protobuf) to JSON - Note: Requires schema file
+- [_ConvertTo-ProtobufFromJson](functions/_ConvertTo-ProtobufFromJson.md) - JSON to Protocol Buffers (protobuf) - Note: Requires schema file
 - [ConvertFrom-ProtobufToJson](functions/ConvertFrom-ProtobufToJson.md) - Converts Protocol Buffers file to JSON format.
 - [ConvertTo-ProtobufFromJson](functions/ConvertTo-ProtobufFromJson.md) - Converts JSON file to Protocol Buffers format.
 - [Initialize-FileConversion-BinarySchemaProtobuf](functions/Initialize-FileConversion-BinarySchemaProtobuf.md) - Initializes Protocol Buffers schema conversion utility functions.
 
-### binary-schema-thrift (3 functions)
+### binary-schema-thrift (5 functions)
 
+- [_ConvertFrom-ThriftToJson](functions/_ConvertFrom-ThriftToJson.md) - Thrift to JSON
+- [_ConvertTo-ThriftFromJson](functions/_ConvertTo-ThriftFromJson.md) - JSON to Thrift
 - [ConvertFrom-ThriftToJson](functions/ConvertFrom-ThriftToJson.md) - Converts Thrift file to JSON format.
 - [ConvertTo-ThriftFromJson](functions/ConvertTo-ThriftFromJson.md) - Converts JSON file to Thrift format.
 - [Initialize-FileConversion-BinarySchemaThrift](functions/Initialize-FileConversion-BinarySchemaThrift.md) - Initializes Thrift schema conversion utility functions.
 
-### binary-simple (7 functions)
+### binary-simple (13 functions)
 
+- [_ConvertFrom-BsonToJson](functions/_ConvertFrom-BsonToJson.md) - Check if Invoke-NodeScript is available (should be loaded during initialization)
+- [_ConvertFrom-CborToJson](functions/_ConvertFrom-CborToJson.md) - CBOR to JSON
+- [_ConvertFrom-MessagePackToJson](functions/_ConvertFrom-MessagePackToJson.md) - Check if Invoke-NodeScript is available (should be loaded during initialization)
+- [_ConvertTo-BsonFromJson](functions/_ConvertTo-BsonFromJson.md) - Check if Invoke-NodeScript is available (should be loaded during initialization)
+- [_ConvertTo-CborFromJson](functions/_ConvertTo-CborFromJson.md) - JSON to CBOR
+- [_ConvertTo-MessagePackFromJson](functions/_ConvertTo-MessagePackFromJson.md) - JSON to MessagePack
 - [ConvertFrom-BsonToJson](functions/ConvertFrom-BsonToJson.md) - Converts BSON file to JSON format.
 - [ConvertFrom-CborToJson](functions/ConvertFrom-CborToJson.md) - Converts CBOR file to JSON format.
 - [ConvertFrom-MessagePackToJson](functions/ConvertFrom-MessagePackToJson.md) - Converts MessagePack file to JSON format.
@@ -306,8 +442,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-MessagePackFromJson](functions/ConvertTo-MessagePackFromJson.md) - Converts JSON file to MessagePack format.
 - [Initialize-FileConversion-BinarySimple](functions/Initialize-FileConversion-BinarySimple.md) - Initializes binary format conversion utility functions.
 
-### binary-to-text (7 functions)
+### binary-to-text (13 functions)
 
+- [_ConvertFrom-BsonToCsv](functions/_ConvertFrom-BsonToCsv.md) - Use PowerShell's ConvertFrom-Json and Export-Csv
+- [_ConvertFrom-BsonToYaml](functions/_ConvertFrom-BsonToYaml.md) - Convert BSON to JSON first, then JSON to YAML
+- [_ConvertFrom-CborToCsv](functions/_ConvertFrom-CborToCsv.md) - Use PowerShell's ConvertFrom-Json and Export-Csv
+- [_ConvertFrom-CborToYaml](functions/_ConvertFrom-CborToYaml.md) - Convert CBOR to JSON first, then JSON to YAML
+- [_ConvertFrom-MessagePackToCsv](functions/_ConvertFrom-MessagePackToCsv.md) - Use PowerShell's ConvertFrom-Json and Export-Csv
+- [_ConvertFrom-MessagePackToYaml](functions/_ConvertFrom-MessagePackToYaml.md) - Convert MessagePack to JSON first, then JSON to YAML
 - [ConvertFrom-BsonToCsv](functions/ConvertFrom-BsonToCsv.md) - Converts BSON file to CSV format.
 - [ConvertFrom-BsonToYaml](functions/ConvertFrom-BsonToYaml.md) - Converts BSON file to YAML format.
 - [ConvertFrom-CborToCsv](functions/ConvertFrom-CborToCsv.md) - Converts CBOR file to CSV format.
@@ -316,8 +458,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-MessagePackToYaml](functions/ConvertFrom-MessagePackToYaml.md) - Converts MessagePack file to YAML format.
 - [Initialize-FileConversion-BinaryToText](functions/Initialize-FileConversion-BinaryToText.md) - Initializes binary format conversion utility functions.
 
-### binary (9 functions)
+### binary (15 functions)
 
+- [_ConvertFrom-BinaryToDecimal](functions/_ConvertFrom-BinaryToDecimal.md) - First convert binary to ASCII, then ASCII to decimal
+- [_ConvertFrom-BinaryToOctal](functions/_ConvertFrom-BinaryToOctal.md) - First convert binary to ASCII, then ASCII to octal
+- [_ConvertFrom-BinaryToRoman](functions/_ConvertFrom-BinaryToRoman.md) - First convert binary to ASCII, then ASCII to roman
+- [_ConvertFrom-DecimalToBinary](functions/_ConvertFrom-DecimalToBinary.md) - First convert decimal to ASCII, then ASCII to binary
+- [_ConvertFrom-OctalToBinary](functions/_ConvertFrom-OctalToBinary.md) - First convert octal to ASCII, then ASCII to binary
+- [_ConvertFrom-RomanToBinary](functions/_ConvertFrom-RomanToBinary.md) - First convert roman to ASCII, then ASCII to binary
 - [ConvertFrom-BinaryToAscii](functions/ConvertFrom-BinaryToAscii.md) - Converts binary string to ASCII text.
 - [ConvertFrom-BinaryToBase32](functions/ConvertFrom-BinaryToBase32.md) - Converts binary string to Base32 representation.
 - [ConvertFrom-BinaryToDecimal](functions/ConvertFrom-BinaryToDecimal.md) - Converts binary string to decimal representation.
@@ -328,22 +476,32 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-BinaryToUrl](functions/ConvertFrom-BinaryToUrl.md) - Converts binary string to URL/percent encoded representation.
 - [Initialize-FileConversion-CoreEncodingBinary](functions/Initialize-FileConversion-CoreEncodingBinary.md) - Initializes binary encoding conversion utility functions.
 
-### bmp (5 functions)
+### bmp (7 functions)
 
+- [_ConvertFrom-BmpToJpeg](functions/_ConvertFrom-BmpToJpeg.md) - BMP conversions
+- [_ConvertFrom-BmpToPng](functions/_ConvertFrom-BmpToPng.md) - BMP conversions
 - [ConvertFrom-BmpToJpeg](functions/ConvertFrom-BmpToJpeg.md) - Converts BMP image to JPEG format.
 - [ConvertFrom-BmpToPng](functions/ConvertFrom-BmpToPng.md) - Converts BMP image to PNG format.
 - [ConvertTo-BmpFromJpeg](functions/ConvertTo-BmpFromJpeg.md) - Converts JPEG image to BMP format.
 - [ConvertTo-BmpFromPng](functions/ConvertTo-BmpFromPng.md) - Converts PNG image to BMP format.
 - [Initialize-FileConversion-MediaImagesBmp](functions/Initialize-FileConversion-MediaImagesBmp.md) - Initializes BMP image format conversion utility functions.
 
-### braille (3 functions)
+### braille (7 functions)
 
+- [_ConvertFrom-AsciiToBraille](functions/_ConvertFrom-AsciiToBraille.md) - ASCII to Braille
+- [_ConvertFrom-BrailleToAscii](functions/_ConvertFrom-BrailleToAscii.md) - Braille to ASCII
+- [_Decode-Braille](functions/_Decode-Braille.md) - Unknown Braille pattern - skip or use placeholder
+- [_Encode-Braille](functions/_Encode-Braille.md) - Unknown character - use space
 - [ConvertFrom-AsciiToBraille](functions/ConvertFrom-AsciiToBraille.md) - Converts ASCII text to Braille encoding.
 - [ConvertFrom-BrailleToAscii](functions/ConvertFrom-BrailleToAscii.md) - Converts Braille encoding to ASCII text.
 - [Initialize-FileConversion-CoreEncodingBraille](functions/Initialize-FileConversion-CoreEncodingBraille.md) - Initializes Braille encoding conversion utility functions.
 
-### brotli (1 functions)
+### brotli (5 functions)
 
+- [_Compress-Brotli](functions/_Compress-Brotli.md) - Check if BrotliStream is available
+- [_Decompress-Brotli](functions/_Decompress-Brotli.md) - Remove .br extension if present
+- [Compress-Brotli](functions/Compress-Brotli.md) - Compresses a file using Brotli compression.
+- [Expand-Brotli](functions/Expand-Brotli.md) - Decompresses a Brotli compressed file.
 - [Initialize-FileConversion-CoreCompressionBrotli](functions/Initialize-FileConversion-CoreCompressionBrotli.md) - Initializes Brotli compression format conversion utility functions.
 
 ### build-tools (5 functions)
@@ -362,8 +520,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [Remove-BunPackage](functions/Remove-BunPackage.md) - Removes packages using Bun.
 - [Update-BunSelf](functions/Update-BunSelf.md) - Updates Bun to the latest version.
 
-### cfg (7 functions)
+### cfg (13 functions)
 
+- [_ConvertFrom-CfgToIni](functions/_ConvertFrom-CfgToIni.md) - Level 3: Stack trace
+- [_ConvertFrom-CfgToJson](functions/_ConvertFrom-CfgToJson.md) - Level 3: Stack trace
+- [_ConvertFrom-CfgToYaml](functions/_ConvertFrom-CfgToYaml.md) - Level 3: Stack trace
+- [_ConvertTo-CfgFromIni](functions/_ConvertTo-CfgFromIni.md) - Level 3: Stack trace
+- [_ConvertTo-CfgFromJson](functions/_ConvertTo-CfgFromJson.md) - Level 3: Stack trace
+- [_ConvertTo-CfgFromYaml](functions/_ConvertTo-CfgFromYaml.md) - Level 3: Stack trace
 - [ConvertFrom-CfgToIni](functions/ConvertFrom-CfgToIni.md) - Converts CFG/ConfigParser file to INI format.
 - [ConvertFrom-CfgToJson](functions/ConvertFrom-CfgToJson.md) - Converts CFG/ConfigParser file to JSON format.
 - [ConvertFrom-CfgToYaml](functions/ConvertFrom-CfgToYaml.md) - Converts CFG/ConfigParser file to YAML format.
@@ -410,13 +574,15 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Get-CloudResources](functions/Get-CloudResources.md) - Lists cloud provider resources using service/action pattern.
 - [Invoke-CloudCommand](functions/Invoke-CloudCommand.md) - Executes a cloud provider CLI command with standardized error handling.
-- [Invoke-CloudMissingToolWarning](functions/Invoke-CloudMissingToolWarning.md) - Base module providing common patterns for cloud provider CLI wrappers.
+- [Invoke-CloudMissingToolWarning](functions/Invoke-CloudMissingToolWarning.md) - Resolves an install hint for a cloud provider CLI.
 - [Resolve-CloudInstallHint](functions/Resolve-CloudInstallHint.md) - Base module providing common patterns for cloud provider CLI wrappers.
 - [Set-CloudProfile](functions/Set-CloudProfile.md) - Sets cloud provider profile, account, or configuration.
 - [Test-CloudConnection](functions/Test-CloudConnection.md) - Tests connection to cloud provider.
 
-### cmyk (1 functions)
+### cmyk (3 functions)
 
+- [_Convert-CmykToRgb](functions/_Convert-CmykToRgb.md) - Initializes CMYK/CMYKA color conversion utility functions.
+- [_Convert-RgbToCmyk](functions/_Convert-RgbToCmyk.md) - Convert RGB to CMYK
 - [Initialize-FileConversion-MediaColorsCmyk](functions/Initialize-FileConversion-MediaColorsCmyk.md) - Initializes CMYK/CMYKA color conversion utility functions.
 
 ### cocoapods (3 functions)
@@ -425,34 +591,48 @@ This documentation is automatically generated from comment-based help in the pro
 - [Remove-CocoaPodsIntegration](functions/Remove-CocoaPodsIntegration.md) - Removes CocoaPods integration from project.
 - [Update-CocoaPodsDependencies](functions/Update-CocoaPodsDependencies.md) - Updates CocoaPods dependencies.
 
-### columnar-arrow (3 functions)
+### columnar-arrow (5 functions)
 
+- [_ConvertFrom-ArrowToJson](functions/_ConvertFrom-ArrowToJson.md) - Arrow to JSON
+- [_ConvertTo-ArrowFromJson](functions/_ConvertTo-ArrowFromJson.md) - JSON to Arrow
 - [ConvertFrom-ArrowToJson](functions/ConvertFrom-ArrowToJson.md) - Converts Arrow file to JSON format.
 - [ConvertTo-ArrowFromJson](functions/ConvertTo-ArrowFromJson.md) - Converts JSON file to Arrow format.
 - [Initialize-FileConversion-ColumnarArrow](functions/Initialize-FileConversion-ColumnarArrow.md) - Initializes Arrow format conversion utility functions.
 
-### columnar-direct (3 functions)
+### columnar-direct (5 functions)
 
+- [_ConvertTo-ArrowFromParquet](functions/_ConvertTo-ArrowFromParquet.md) - Parquet to Arrow (direct columnar conversion)
+- [_ConvertTo-ParquetFromArrow](functions/_ConvertTo-ParquetFromArrow.md) - Arrow to Parquet (direct columnar conversion)
 - [ConvertTo-ArrowFromParquet](functions/ConvertTo-ArrowFromParquet.md) - Converts Parquet file to Arrow format.
 - [ConvertTo-ParquetFromArrow](functions/ConvertTo-ParquetFromArrow.md) - Converts Arrow file to Parquet format.
 - [Initialize-FileConversion-ColumnarDirect](functions/Initialize-FileConversion-ColumnarDirect.md) - Initializes direct columnar format conversion utility functions.
 
-### columnar-parquet (3 functions)
+### columnar-parquet (5 functions)
 
+- [_ConvertFrom-ParquetToJson](functions/_ConvertFrom-ParquetToJson.md) - Parquet to JSON
+- [_ConvertTo-ParquetFromJson](functions/_ConvertTo-ParquetFromJson.md) - JSON to Parquet
 - [ConvertFrom-ParquetToJson](functions/ConvertFrom-ParquetToJson.md) - Converts Parquet file to JSON format.
 - [ConvertTo-ParquetFromJson](functions/ConvertTo-ParquetFromJson.md) - Converts JSON file to Parquet format.
 - [Initialize-FileConversion-ColumnarParquet](functions/Initialize-FileConversion-ColumnarParquet.md) - Initializes Parquet format conversion utility functions.
 
-### columnar-to-csv (5 functions)
+### columnar-to-csv (9 functions)
 
+- [_ConvertFrom-ArrowToCsv](functions/_ConvertFrom-ArrowToCsv.md) - Use PowerShell's ConvertFrom-Json and Export-Csv
+- [_ConvertFrom-ParquetToCsv](functions/_ConvertFrom-ParquetToCsv.md) - Parquet to CSV
+- [_ConvertTo-ArrowFromCsv](functions/_ConvertTo-ArrowFromCsv.md) - Use PowerShell's Import-Csv and ConvertTo-Json
+- [_ConvertTo-ParquetFromCsv](functions/_ConvertTo-ParquetFromCsv.md) - Use PowerShell's Import-Csv and ConvertTo-Json
 - [ConvertFrom-ArrowToCsv](functions/ConvertFrom-ArrowToCsv.md) - Converts Arrow file to CSV format.
 - [ConvertFrom-ParquetToCsv](functions/ConvertFrom-ParquetToCsv.md) - Converts Parquet file to CSV format.
 - [ConvertTo-ArrowFromCsv](functions/ConvertTo-ArrowFromCsv.md) - Converts CSV file to Arrow format.
 - [ConvertTo-ParquetFromCsv](functions/ConvertTo-ParquetFromCsv.md) - Converts CSV file to Parquet format.
 - [Initialize-FileConversion-ColumnarToCsv](functions/Initialize-FileConversion-ColumnarToCsv.md) - Initializes columnar to CSV format conversion utility functions.
 
-### common (2 functions)
+### common (6 functions)
 
+- [_Convert-AudioFormat](functions/_Convert-AudioFormat.md) - Execute FFmpeg
+- [_Convert-ImageFormat](functions/_Convert-ImageFormat.md) - Execute command
+- [_Ensure-Ffmpeg](functions/_Ensure-Ffmpeg.md) - Initializes common audio conversion helper functions.
+- [_Ensure-ImageMagick](functions/_Ensure-ImageMagick.md) - Try GraphicsMagick 'gm' command
 - [Initialize-FileConversion-MediaAudioCommon](functions/Initialize-FileConversion-MediaAudioCommon.md) - Initializes common audio conversion helper functions.
 - [Initialize-FileConversion-MediaImagesCommon](functions/Initialize-FileConversion-MediaImagesCommon.md) - Initializes common image conversion helper functions.
 
@@ -519,12 +699,19 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-FormatConversion](functions/Invoke-FormatConversion.md) - Executes a format conversion with standardized validation and error handling.
 - [Test-ConversionToolAvailable](functions/Test-ConversionToolAvailable.md) - Tests if a conversion tool is available.
 
-### convert (1 functions)
+### convert (4 functions)
 
+- [_Convert-ColorFormat](functions/_Convert-ColorFormat.md) - Otherwise return the closest approximation
+- [Convert-Color](functions/Convert-Color.md) - ff0000 to RGB format.
 - [Initialize-FileConversion-MediaColorsConvert](functions/Initialize-FileConversion-MediaColorsConvert.md) - Initializes color conversion routing and public functions.
+- [Parse-Color](functions/Parse-Color.md) - ff0000"
 
-### csv (5 functions)
+### csv (9 functions)
 
+- [_ConvertFrom-CsvToJson](functions/_ConvertFrom-CsvToJson.md) - Level 3: Stack trace
+- [_ConvertFrom-CsvToYaml](functions/_ConvertFrom-CsvToYaml.md) - Level 3: Stack trace
+- [_ConvertFrom-YamlToCsv](functions/_ConvertFrom-YamlToCsv.md) - YAML to CSV
+- [_ConvertTo-CsvFromJson](functions/_ConvertTo-CsvFromJson.md) - Level 3: Stack trace
 - [ConvertFrom-CsvToJson](functions/ConvertFrom-CsvToJson.md) - Converts CSV file to JSON format.
 - [ConvertFrom-CsvToYaml](functions/ConvertFrom-CsvToYaml.md) - Converts CSV file to YAML format.
 - [ConvertFrom-YamlToCsv](functions/ConvertFrom-YamlToCsv.md) - Converts YAML file to CSV format.
@@ -542,8 +729,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [Update-DartPackages](functions/Update-DartPackages.md) - Updates Dart packages.
 - [Update-FlutterPackages](functions/Update-FlutterPackages.md) - Updates Flutter packages.
 
-### database-access (4 functions)
+### database-access (7 functions)
 
+- [_ConvertFrom-AccessToCsv](functions/_ConvertFrom-AccessToCsv.md) - Get table names
+- [_ConvertFrom-AccessToJson](functions/_ConvertFrom-AccessToJson.md) - Skip tables that can't be read
+- [_ConvertTo-AccessFromJson](functions/_ConvertTo-AccessFromJson.md) - This is a simplified approach that requires an existing template or manual creation
 - [ConvertFrom-AccessToCsv](functions/ConvertFrom-AccessToCsv.md) - Converts Microsoft Access database to CSV format.
 - [ConvertFrom-AccessToJson](functions/ConvertFrom-AccessToJson.md) - Converts Microsoft Access database to JSON format.
 - [ConvertTo-AccessFromJson](functions/ConvertTo-AccessFromJson.md) - Converts JSON file to Microsoft Access database format.
@@ -558,22 +748,32 @@ This documentation is automatically generated from comment-based help in the pro
 - [Start-SqlWorkbench](functions/Start-SqlWorkbench.md) - Launches SQL Workbench/J.
 - [Start-TablePlus](functions/Start-TablePlus.md) - Launches TablePlus.
 
-### database-dbf (4 functions)
+### database-dbf (7 functions)
 
+- [_ConvertFrom-DbfToCsv](functions/_ConvertFrom-DbfToCsv.md) - Write rows
+- [_ConvertFrom-DbfToJson](functions/_ConvertFrom-DbfToJson.md) - Fallback to dbf package
+- [_ConvertTo-DbfFromJson](functions/_ConvertTo-DbfFromJson.md) - Infer field type from first value
 - [ConvertFrom-DbfToCsv](functions/ConvertFrom-DbfToCsv.md) - Converts DBF file to CSV format.
 - [ConvertFrom-DbfToJson](functions/ConvertFrom-DbfToJson.md) - Converts DBF file to JSON format.
 - [ConvertTo-DbfFromJson](functions/ConvertTo-DbfFromJson.md) - Converts JSON file to DBF format.
 - [Initialize-FileConversion-DatabaseDbf](functions/Initialize-FileConversion-DatabaseDbf.md) - Initializes DBF (dBase) format conversion utility functions.
 
-### database-sql-dump (4 functions)
+### database-sql-dump (7 functions)
 
+- [_ConvertFrom-SqlDumpToCsv](functions/_ConvertFrom-SqlDumpToCsv.md) - Use first table
+- [_ConvertFrom-SqlDumpToJson](functions/_ConvertFrom-SqlDumpToJson.md) - Try to infer column names from first INSERT or use generic names
+- [_ConvertTo-SqlDumpFromJson](functions/_ConvertTo-SqlDumpFromJson.md) - Single table (array of objects)
 - [ConvertFrom-SqlDumpToCsv](functions/ConvertFrom-SqlDumpToCsv.md) - Converts SQL dump file to CSV format.
 - [ConvertFrom-SqlDumpToJson](functions/ConvertFrom-SqlDumpToJson.md) - Converts SQL dump file to JSON format.
 - [ConvertTo-SqlDumpFromJson](functions/ConvertTo-SqlDumpFromJson.md) - Converts JSON file to SQL dump format.
 - [Initialize-FileConversion-DatabaseSqlDump](functions/Initialize-FileConversion-DatabaseSqlDump.md) - Initializes SQL Dump format conversion utility functions.
 
-### database-sqlite (5 functions)
+### database-sqlite (9 functions)
 
+- [_ConvertFrom-SqliteToCsv](functions/_ConvertFrom-SqliteToCsv.md) - Export first table or all tables
+- [_ConvertFrom-SqliteToJson](functions/_ConvertFrom-SqliteToJson.md) - Get all tables
+- [_ConvertFrom-SqliteToSql](functions/_ConvertFrom-SqliteToSql.md) - SQLite to SQL Dump
+- [_ConvertTo-SqliteFromJson](functions/_ConvertTo-SqliteFromJson.md) - Single table
 - [ConvertFrom-SqliteToCsv](functions/ConvertFrom-SqliteToCsv.md) - Converts SQLite database to CSV format.
 - [ConvertFrom-SqliteToJson](functions/ConvertFrom-SqliteToJson.md) - Converts SQLite database to JSON format.
 - [ConvertFrom-SqliteToSql](functions/ConvertFrom-SqliteToSql.md) - Converts SQLite database to SQL dump format.
@@ -594,8 +794,14 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Initialize-FileConversion-CoreUnitsDataRate](functions/Initialize-FileConversion-CoreUnitsDataRate.md) - Initializes Data rate unit conversion utility functions.
 
-### datasize (1 functions)
+### datasize (7 functions)
 
+- [_Convert-DataSize](functions/_Convert-DataSize.md) - Convert to bytes first, then to target unit
+- [_ConvertFrom-BytesToDataSize](functions/_ConvertFrom-BytesToDataSize.md) - Bytes to other units
+- [_ConvertTo-BytesFromDataSize](functions/_ConvertTo-BytesFromDataSize.md) - Other units to bytes
+- [Convert-DataSize](functions/Convert-DataSize.md) - Convert Data Size
+- [ConvertFrom-BytesToDataSize](functions/ConvertFrom-BytesToDataSize.md) - Convert from Bytes
+- [ConvertTo-BytesFromDataSize](functions/ConvertTo-BytesFromDataSize.md) - Convert to Bytes
 - [Initialize-FileConversion-CoreUnitsDataSize](functions/Initialize-FileConversion-CoreUnitsDataSize.md) - Initializes Data Size unit conversion utility functions.
 
 ### deno (4 functions)
@@ -609,16 +815,60 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Initialize-FileConversion-CoreUnitsDensity](functions/Initialize-FileConversion-CoreUnitsDensity.md) - Initializes Density unit conversion utility functions.
 
+### dev (39 functions)
+
+- [activate](functions/activate.md) - activate: activate virtual environment
+- [ca](functions/ca.md) - ca: cargo add wrapper
+- [cb](functions/cb.md) - cb: cargo build wrapper
+- [cc](functions/cc.md) - cc: cargo check wrapper
+- [cd](functions/cd.md) - cd: cargo doc --open wrapper
+- [cf](functions/cf.md) - cf: cargo fmt wrapper
+- [ci](functions/ci.md) - ci: cargo install wrapper
+- [cl](functions/cl.md) - cl: cargo clippy wrapper
+- [cr](functions/cr.md) - cr: cargo run wrapper
+- [ct](functions/ct.md) - ct: cargo test wrapper
+- [cu](functions/cu.md) - cu: cargo update wrapper
+- [cw](functions/cw.md) - cw: cargo watch -x run wrapper
+- [d](functions/d.md) - docker, dc: docker-compose, k: kubectl, n: node, p: python, c: cargo
+- [dc](functions/dc.md) - dc: docker-compose wrapper
+- [dexec](functions/dexec.md) - dexec: docker exec -it wrapper
+- [di](functions/di.md) - di: docker images wrapper
+- [dlogs](functions/dlogs.md) - dlogs: docker logs wrapper
+- [dps](functions/dps.md) - dps: docker ps wrapper
+- [drm](functions/drm.md) - drm: docker rm wrapper
+- [drmi](functions/drmi.md) - drmi: docker rmi wrapper
+- [n](functions/n.md) - n: npm wrapper
+- [nb](functions/nb.md) - nb: npm run build wrapper
+- [ni](functions/ni.md) - ni: npm install wrapper
+- [np](functions/np.md) - np: npm publish wrapper
+- [nr](functions/nr.md) - nr: npm run wrapper
+- [nrd](functions/nrd.md) - nrd: npm run dev wrapper
+- [ns](functions/ns.md) - ns: npm start wrapper
+- [nt](functions/nt.md) - nt: npm test wrapper
+- [pd](functions/pd.md) - pd: podman wrapper
+- [pdexec](functions/pdexec.md) - pdexec: podman exec -it wrapper
+- [pdlogs](functions/pdlogs.md) - pdlogs: podman logs wrapper
+- [pi](functions/pi.md) - pi: podman images wrapper
+- [pipi](functions/pipi.md) - pipi: pip install wrapper
+- [pipu](functions/pipu.md) - pipu: pip install --upgrade wrapper
+- [pps](functions/pps.md) - pps: podman ps wrapper
+- [prmi](functions/prmi.md) - prmi: podman rmi wrapper
+- [py](functions/py.md) - py: python wrapper
+- [req](functions/req.md) - req: generate requirements.txt
+- [venv](functions/venv.md) - venv: python virtual environment wrapper
+
 ### diagnostics-error-handling (3 functions)
 
 - [Invoke-ProfileErrorHandler](functions/Invoke-ProfileErrorHandler.md) - Enhanced global error handler with recovery suggestions.
 - [Invoke-SafeFragmentLoad](functions/Invoke-SafeFragmentLoad.md) - Loads profile fragments with enhanced error handling and retry logic.
 - [Write-ProfileError](functions/Write-ProfileError.md) - Logs errors with enhanced context and formatting.
 
-### diagnostics-performance (4 functions)
+### diagnostics-performance (6 functions)
 
 - [Clear-PerformanceData](functions/Clear-PerformanceData.md) - Clears all collected performance data.
 - [Show-PerformanceInsights](functions/Show-PerformanceInsights.md) - Shows performance insights for command execution.
+- [Start-CommandTimer](functions/Start-CommandTimer.md) - Create function in global scope explicitly
+- [Stop-CommandTimer](functions/Stop-CommandTimer.md) - Create function in global scope explicitly
 - [Test-PerformanceHealth](functions/Test-PerformanceHealth.md) - Performs a quick performance check of the current session.
 - [Update-PerformanceInsightsPrompt](functions/Update-PerformanceInsightsPrompt.md) - Wraps the current prompt function with performance timing.
 
@@ -638,33 +888,55 @@ This documentation is automatically generated from comment-based help in the pro
 - [Show-SystemDashboard](functions/Show-SystemDashboard.md) - Shows a comprehensive system status dashboard.
 - [Show-SystemStatus](functions/Show-SystemStatus.md) - Shows a compact system status overview.
 
-### diff (2 functions)
+### diff (3 functions)
 
+- [_Compare-TextFiles](functions/_Compare-TextFiles.md) - Use diff if available, otherwise show basic comparison
 - [Compare-TextFiles](functions/Compare-TextFiles.md) - Compares two text files and shows differences.
 - [Initialize-DevTools-Diff](functions/Initialize-DevTools-Diff.md) - Initializes text comparison utility functions.
 
-### digest-checksum (1 functions)
+### digest-checksum (5 functions)
 
+- [_Get-Adler32](functions/_Get-Adler32.md) - Combine into 32-bit value: (adler2 << 16) | adler1
+- [_Get-ChecksumFromFile](functions/_Get-ChecksumFromFile.md) - Calculate checksum from file
+- [_Get-ChecksumFromString](functions/_Get-ChecksumFromString.md) - Calculate checksum from string
+- [_Get-Crc32](functions/_Get-Crc32.md) - Convert to unsigned 32-bit integer (CRC32 high-bit values are negative as [int32])
 - [Initialize-FileConversion-DigestChecksum](functions/Initialize-FileConversion-DigestChecksum.md) - Initializes checksum calculation utility functions.
 
-### digest-hash-format (1 functions)
+### digest-hash-format (7 functions)
 
+- [_ConvertFrom-HashBase32ToBase64](functions/_ConvertFrom-HashBase32ToBase64.md) - First convert Base32 to hex, then hex to Base64
+- [_ConvertFrom-HashBase32ToHex](functions/_ConvertFrom-HashBase32ToHex.md) - Convert bytes to hex
+- [_ConvertFrom-HashBase64ToBase32](functions/_ConvertFrom-HashBase64ToBase32.md) - First convert Base64 to hex, then hex to Base32
+- [_ConvertFrom-HashBase64ToHex](functions/_ConvertFrom-HashBase64ToHex.md) - Convert bytes to hex
+- [_ConvertFrom-HashHexToBase32](functions/_ConvertFrom-HashHexToBase32.md) - Fallback: convert to ASCII first, then Base32
+- [_ConvertFrom-HashHexToBase64](functions/_ConvertFrom-HashHexToBase64.md) - Convert bytes to Base64
 - [Initialize-FileConversion-DigestHashFormat](functions/Initialize-FileConversion-DigestHashFormat.md) - Initializes hash format conversion utility functions.
 
 ### digest (1 functions)
 
 - [Initialize-FileConversion-Digest](functions/Initialize-FileConversion-Digest.md) - Initializes hash and digest format conversion utility functions.
 
-### document-common-docx (5 functions)
+### document-common-docx (9 functions)
 
+- [_ConvertFrom-DocxToMarkdown](functions/_ConvertFrom-DocxToMarkdown.md) - Execute with error capture
+- [_ConvertTo-HtmlFromDocx](functions/_ConvertTo-HtmlFromDocx.md) - Execute with error capture
+- [_ConvertTo-LaTeXFromDocx](functions/_ConvertTo-LaTeXFromDocx.md) - Execute with error capture
+- [_ConvertTo-PdfFromDocx](functions/_ConvertTo-PdfFromDocx.md) - Execute with error capture
 - [ConvertFrom-DocxToMarkdown](functions/ConvertFrom-DocxToMarkdown.md) - Converts DOCX file to Markdown.
 - [ConvertTo-HtmlFromDocx](functions/ConvertTo-HtmlFromDocx.md) - Converts DOCX file to HTML.
 - [ConvertTo-LaTeXFromDocx](functions/ConvertTo-LaTeXFromDocx.md) - Converts DOCX file to LaTeX.
 - [ConvertTo-PdfFromDocx](functions/ConvertTo-PdfFromDocx.md) - Converts DOCX file to PDF.
 - [Initialize-FileConversion-DocumentCommonDocx](functions/Initialize-FileConversion-DocumentCommonDocx.md) - Initializes DOCX document format conversion utility functions.
 
-### document-common-epub (8 functions)
+### document-common-epub (15 functions)
 
+- [_ConvertFrom-EpubToDocx](functions/_ConvertFrom-EpubToDocx.md) - EPUB to DOCX
+- [_ConvertFrom-EpubToHtml](functions/_ConvertFrom-EpubToHtml.md) - Execute with error capture
+- [_ConvertFrom-EpubToLatex](functions/_ConvertFrom-EpubToLatex.md) - Execute with error capture
+- [_ConvertFrom-EpubToMarkdown](functions/_ConvertFrom-EpubToMarkdown.md) - Execute with error capture
+- [_ConvertFrom-EpubToPdf](functions/_ConvertFrom-EpubToPdf.md) - Execute with error capture
+- [_ConvertTo-EpubFromHtml](functions/_ConvertTo-EpubFromHtml.md) - HTML to EPUB
+- [_ConvertTo-EpubFromMarkdown](functions/_ConvertTo-EpubFromMarkdown.md) - Markdown to EPUB
 - [ConvertFrom-EpubToDocx](functions/ConvertFrom-EpubToDocx.md) - Converts EPUB file to DOCX.
 - [ConvertFrom-EpubToHtml](functions/ConvertFrom-EpubToHtml.md) - Converts EPUB file to HTML.
 - [ConvertFrom-EpubToLatex](functions/ConvertFrom-EpubToLatex.md) - Converts EPUB file to LaTeX.
@@ -674,23 +946,36 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-EpubFromMarkdown](functions/ConvertTo-EpubFromMarkdown.md) - Converts Markdown file to EPUB.
 - [Initialize-FileConversion-DocumentCommonEpub](functions/Initialize-FileConversion-DocumentCommonEpub.md) - Initializes EPUB document format conversion utility functions.
 
-### document-common-html (4 functions)
+### document-common-html (7 functions)
 
+- [_ConvertFrom-HtmlToMarkdown](functions/_ConvertFrom-HtmlToMarkdown.md) - Execute with error capture
+- [_ConvertTo-LaTeXFromHtml](functions/_ConvertTo-LaTeXFromHtml.md) - Execute with error capture
+- [_ConvertTo-PdfFromHtml](functions/_ConvertTo-PdfFromHtml.md) - Execute with error capture
 - [ConvertFrom-HtmlToMarkdown](functions/ConvertFrom-HtmlToMarkdown.md) - Converts HTML file to Markdown.
 - [ConvertTo-LaTeXFromHtml](functions/ConvertTo-LaTeXFromHtml.md) - Converts HTML file to LaTeX.
 - [ConvertTo-PdfFromHtml](functions/ConvertTo-PdfFromHtml.md) - Converts HTML file to PDF.
 - [Initialize-FileConversion-DocumentCommonHtml](functions/Initialize-FileConversion-DocumentCommonHtml.md) - Initializes HTML document format conversion utility functions.
 
-### document-djvu (5 functions)
+### document-djvu (9 functions)
 
+- [_ConvertFrom-DjvuToJpeg](functions/_ConvertFrom-DjvuToJpeg.md) - Fallback to ddjvu (djvulibre)
+- [_ConvertFrom-DjvuToPdf](functions/_ConvertFrom-DjvuToPdf.md) - Fallback to djvups + ps2pdf (if available)
+- [_ConvertFrom-DjvuToPng](functions/_ConvertFrom-DjvuToPng.md) - Fallback to ddjvu (djvulibre)
+- [_ConvertFrom-DjvuToText](functions/_ConvertFrom-DjvuToText.md) - Use djvutxt (djvulibre) for text extraction
 - [ConvertFrom-DjvuToJpeg](functions/ConvertFrom-DjvuToJpeg.md) - Converts DjVu file to JPEG.
 - [ConvertFrom-DjvuToPdf](functions/ConvertFrom-DjvuToPdf.md) - Converts DjVu file to PDF.
 - [ConvertFrom-DjvuToPng](functions/ConvertFrom-DjvuToPng.md) - Converts DjVu file to PNG.
 - [ConvertFrom-DjvuToText](functions/ConvertFrom-DjvuToText.md) - Extracts text from DjVu file.
 - [Initialize-FileConversion-DocumentDjvu](functions/Initialize-FileConversion-DocumentDjvu.md) - Initializes DjVu document format conversion utility functions.
 
-### document-ebook-mobi (7 functions)
+### document-ebook-mobi (13 functions)
 
+- [_ConvertFrom-MobiToEpub](functions/_ConvertFrom-MobiToEpub.md) - Fallback to pandoc (if available)
+- [_ConvertFrom-MobiToHtml](functions/_ConvertFrom-MobiToHtml.md) - Fallback to pandoc
+- [_ConvertFrom-MobiToMarkdown](functions/_ConvertFrom-MobiToMarkdown.md) - MOBI/AZW to Markdown
+- [_ConvertFrom-MobiToPdf](functions/_ConvertFrom-MobiToPdf.md) - Fallback to pandoc
+- [_ConvertTo-MobiFromEpub](functions/_ConvertTo-MobiFromEpub.md) - Fallback to pandoc (if available)
+- [_ConvertTo-MobiFromMarkdown](functions/_ConvertTo-MobiFromMarkdown.md) - Fallback to pandoc
 - [ConvertFrom-MobiToEpub](functions/ConvertFrom-MobiToEpub.md) - Converts MOBI/AZW file to EPUB.
 - [ConvertFrom-MobiToHtml](functions/ConvertFrom-MobiToHtml.md) - Converts MOBI/AZW file to HTML.
 - [ConvertFrom-MobiToMarkdown](functions/ConvertFrom-MobiToMarkdown.md) - Converts MOBI/AZW file to Markdown.
@@ -699,8 +984,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-MobiFromMarkdown](functions/ConvertTo-MobiFromMarkdown.md) - Converts Markdown file to MOBI/AZW.
 - [Initialize-FileConversion-DocumentEbookMobi](functions/Initialize-FileConversion-DocumentEbookMobi.md) - Initializes MOBI/AZW e-book format conversion utility functions.
 
-### document-fb2 (6 functions)
+### document-fb2 (11 functions)
 
+- [_ConvertFrom-Fb2ToMarkdown](functions/_ConvertFrom-Fb2ToMarkdown.md) - Execute with error capture
+- [_ConvertTo-DocxFromFb2](functions/_ConvertTo-DocxFromFb2.md) - Execute with error capture
+- [_ConvertTo-HtmlFromFb2](functions/_ConvertTo-HtmlFromFb2.md) - Execute with error capture
+- [_ConvertTo-LaTeXFromFb2](functions/_ConvertTo-LaTeXFromFb2.md) - Execute with error capture
+- [_ConvertTo-PdfFromFb2](functions/_ConvertTo-PdfFromFb2.md) - Execute with error capture
 - [ConvertFrom-Fb2ToMarkdown](functions/ConvertFrom-Fb2ToMarkdown.md) - Converts FB2 file to Markdown.
 - [ConvertTo-DocxFromFb2](functions/ConvertTo-DocxFromFb2.md) - Converts FB2 file to DOCX.
 - [ConvertTo-HtmlFromFb2](functions/ConvertTo-HtmlFromFb2.md) - Converts FB2 file to HTML.
@@ -708,8 +998,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-PdfFromFb2](functions/ConvertTo-PdfFromFb2.md) - Converts FB2 file to PDF.
 - [Initialize-FileConversion-DocumentFb2](functions/Initialize-FileConversion-DocumentFb2.md) - Initializes FB2 (FictionBook) e-book format conversion utility functions.
 
-### document-latex (6 functions)
+### document-latex (11 functions)
 
+- [_ConvertFrom-LaTeXToMarkdown](functions/_ConvertFrom-LaTeXToMarkdown.md) - Execute with error capture
+- [_ConvertTo-DocxFromLaTeX](functions/_ConvertTo-DocxFromLaTeX.md) - Execute with error capture
+- [_ConvertTo-HtmlFromLaTeX](functions/_ConvertTo-HtmlFromLaTeX.md) - Execute with error capture
+- [_ConvertTo-PdfFromLaTeX](functions/_ConvertTo-PdfFromLaTeX.md) - Execute with error capture
+- [_ConvertTo-RstFromLaTeX](functions/_ConvertTo-RstFromLaTeX.md) - Execute with error capture
 - [ConvertFrom-LaTeXToMarkdown](functions/ConvertFrom-LaTeXToMarkdown.md) - Converts LaTeX file to Markdown.
 - [ConvertTo-DocxFromLaTeX](functions/ConvertTo-DocxFromLaTeX.md) - Converts LaTeX file to DOCX.
 - [ConvertTo-HtmlFromLaTeX](functions/ConvertTo-HtmlFromLaTeX.md) - Converts LaTeX file to HTML.
@@ -717,8 +1012,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-RstFromLaTeX](functions/ConvertTo-RstFromLaTeX.md) - Converts LaTeX file to RST.
 - [Initialize-FileConversion-DocumentLaTeX](functions/Initialize-FileConversion-DocumentLaTeX.md) - Initializes LaTeX document format conversion utility functions.
 
-### document-markdown-dialects (18 functions)
+### document-markdown-dialects (19 functions)
 
+- [_Invoke-PandocMarkdownConversion](functions/_Invoke-PandocMarkdownConversion.md) - Initializes markdown dialect conversion utility functions.
 - [Convert-MarkdownDialect](functions/Convert-MarkdownDialect.md) - Converts markdown between dialects/standards using pandoc.
 - [ConvertFrom-DokuwikiToMarkdown](functions/ConvertFrom-DokuwikiToMarkdown.md) - Converts markdown between dialects/standards using pandoc.
 - [ConvertFrom-GfmToCommonmark](functions/ConvertFrom-GfmToCommonmark.md) - Converts markdown between dialects/standards using pandoc.
@@ -736,7 +1032,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-ObsidianMarkdownFromGfm](functions/ConvertTo-ObsidianMarkdownFromGfm.md) - Converts markdown between dialects/standards using pandoc.
 - [Get-MarkdownDialectPandocFormat](functions/Get-MarkdownDialectPandocFormat.md) - Resolves a markdown dialect alias to a pandoc reader/writer format string.
 - [Initialize-FileConversion-DocumentMarkdownDialects](functions/Initialize-FileConversion-DocumentMarkdownDialects.md) - Initializes markdown dialect conversion utility functions.
-- [Invoke-MarkdownDialectConversion](functions/Invoke-MarkdownDialectConversion.md) - Initializes markdown dialect conversion utility functions.
+- [Invoke-MarkdownDialectConversion](functions/Invoke-MarkdownDialectConversion.md) - Converts markdown between dialects using pandoc.
 
 ### document-markdown-notes (10 functions)
 
@@ -751,8 +1047,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-NotionifyCli](functions/Invoke-NotionifyCli.md) - Invokes notionify-cli with standard argument forwarding.
 - [Sync-JoplinObsidianNotes](functions/Sync-JoplinObsidianNotes.md) - Synchronizes notes between Joplin and Obsidian using joplin-obsidian-bridge.
 
-### document-markdown (6 functions)
+### document-markdown (11 functions)
 
+- [_ConvertTo-DocxFromMarkdown](functions/_ConvertTo-DocxFromMarkdown.md) - Execute with error capture
+- [_ConvertTo-HtmlFromMarkdown](functions/_ConvertTo-HtmlFromMarkdown.md) - Execute with error capture
+- [_ConvertTo-LaTeXFromMarkdown](functions/_ConvertTo-LaTeXFromMarkdown.md) - Execute with error capture
+- [_ConvertTo-PdfFromMarkdown](functions/_ConvertTo-PdfFromMarkdown.md) - Execute with error capture
+- [_ConvertTo-RstFromMarkdown](functions/_ConvertTo-RstFromMarkdown.md) - Execute with error capture
 - [ConvertTo-DocxFromMarkdown](functions/ConvertTo-DocxFromMarkdown.md) - Converts Markdown file to DOCX.
 - [ConvertTo-HtmlFromMarkdown](functions/ConvertTo-HtmlFromMarkdown.md) - Converts Markdown file to HTML.
 - [ConvertTo-LaTeXFromMarkdown](functions/ConvertTo-LaTeXFromMarkdown.md) - Converts Markdown file to LaTeX.
@@ -760,8 +1061,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-RstFromMarkdown](functions/ConvertTo-RstFromMarkdown.md) - Converts Markdown file to RST.
 - [Initialize-FileConversion-DocumentMarkdown](functions/Initialize-FileConversion-DocumentMarkdown.md) - Initializes Markdown document format conversion utility functions.
 
-### document-office-asciidoc (7 functions)
+### document-office-asciidoc (13 functions)
 
+- [_ConvertFrom-AsciidocToDocx](functions/_ConvertFrom-AsciidocToDocx.md) - AsciiDoc to DOCX
+- [_ConvertFrom-AsciidocToHtml](functions/_ConvertFrom-AsciidocToHtml.md) - Fallback to asciidoc command
+- [_ConvertFrom-AsciidocToLatex](functions/_ConvertFrom-AsciidocToLatex.md) - AsciiDoc to LaTeX
+- [_ConvertFrom-AsciidocToMarkdown](functions/_ConvertFrom-AsciidocToMarkdown.md) - For now, just indicate that pandoc is preferred
+- [_ConvertFrom-AsciidocToPdf](functions/_ConvertFrom-AsciidocToPdf.md) - Fallback to asciidoctor-pdf (if available)
+- [_ConvertTo-AsciidocFromMarkdown](functions/_ConvertTo-AsciidocFromMarkdown.md) - Markdown to AsciiDoc
 - [ConvertFrom-AsciidocToDocx](functions/ConvertFrom-AsciidocToDocx.md) - Converts AsciiDoc file to DOCX.
 - [ConvertFrom-AsciidocToHtml](functions/ConvertFrom-AsciidocToHtml.md) - Converts AsciiDoc file to HTML.
 - [ConvertFrom-AsciidocToLatex](functions/ConvertFrom-AsciidocToLatex.md) - Converts AsciiDoc file to LaTeX.
@@ -770,8 +1077,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-AsciidocFromMarkdown](functions/ConvertTo-AsciidocFromMarkdown.md) - Converts Markdown file to AsciiDoc.
 - [Initialize-FileConversion-DocumentOfficeAsciidoc](functions/Initialize-FileConversion-DocumentOfficeAsciidoc.md) - Initializes AsciiDoc document format conversion utility functions.
 
-### document-office-excel (9 functions)
+### document-office-excel (17 functions)
 
+- [_ConvertFrom-ExcelToCsv](functions/_ConvertFrom-ExcelToCsv.md) - Fallback to pandoc (if available)
+- [_ConvertFrom-ExcelToHtml](functions/_ConvertFrom-ExcelToHtml.md) - Excel to HTML
+- [_ConvertFrom-ExcelToJson](functions/_ConvertFrom-ExcelToJson.md) - Try ImportExcel module first
+- [_ConvertFrom-ExcelToOds](functions/_ConvertFrom-ExcelToOds.md) - Excel to ODS
+- [_ConvertFrom-ExcelToPdf](functions/_ConvertFrom-ExcelToPdf.md) - LibreOffice creates file with same name but .pdf extension
+- [_ConvertTo-ExcelFromCsv](functions/_ConvertTo-ExcelFromCsv.md) - Fallback to pandoc
+- [_ConvertTo-ExcelFromJson](functions/_ConvertTo-ExcelFromJson.md) - Convert to array if single object
+- [_ConvertTo-ExcelFromOds](functions/_ConvertTo-ExcelFromOds.md) - ODS to Excel
 - [ConvertFrom-ExcelToCsv](functions/ConvertFrom-ExcelToCsv.md) - Converts Excel file to CSV.
 - [ConvertFrom-ExcelToHtml](functions/ConvertFrom-ExcelToHtml.md) - Converts Excel file to HTML.
 - [ConvertFrom-ExcelToJson](functions/ConvertFrom-ExcelToJson.md) - Converts Excel file to JSON.
@@ -782,24 +1097,39 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-ExcelFromOds](functions/ConvertTo-ExcelFromOds.md) - Converts ODS file to Excel.
 - [Initialize-FileConversion-DocumentOfficeExcel](functions/Initialize-FileConversion-DocumentOfficeExcel.md) - Initializes Excel document format conversion utility functions.
 
-### document-office-odp (5 functions)
+### document-office-odp (9 functions)
 
+- [_ConvertFrom-OdpToHtml](functions/_ConvertFrom-OdpToHtml.md) - Initializes ODP document format conversion utility functions.
+- [_ConvertFrom-OdpToPdf](functions/_ConvertFrom-OdpToPdf.md) - LibreOffice creates file with same name but .pdf extension
+- [_ConvertFrom-OdpToPptx](functions/_ConvertFrom-OdpToPptx.md) - ODP to PPTX
+- [_ConvertTo-OdpFromPptx](functions/_ConvertTo-OdpFromPptx.md) - PPTX to ODP
 - [ConvertFrom-OdpToHtml](functions/ConvertFrom-OdpToHtml.md) - Converts ODP file to HTML.
 - [ConvertFrom-OdpToPdf](functions/ConvertFrom-OdpToPdf.md) - Converts ODP file to PDF.
 - [ConvertFrom-OdpToPptx](functions/ConvertFrom-OdpToPptx.md) - Converts ODP file to PPTX.
 - [ConvertTo-OdpFromPptx](functions/ConvertTo-OdpFromPptx.md) - Converts PPTX file to ODP.
 - [Initialize-FileConversion-DocumentOfficeOdp](functions/Initialize-FileConversion-DocumentOfficeOdp.md) - Initializes ODP document format conversion utility functions.
 
-### document-office-ods (5 functions)
+### document-office-ods (9 functions)
 
+- [_ConvertFrom-OdsToCsv](functions/_ConvertFrom-OdsToCsv.md) - LibreOffice creates file with same name but .csv extension
+- [_ConvertFrom-OdsToHtml](functions/_ConvertFrom-OdsToHtml.md) - ODS to HTML
+- [_ConvertFrom-OdsToPdf](functions/_ConvertFrom-OdsToPdf.md) - LibreOffice creates file with same name but .pdf extension
+- [_ConvertTo-OdsFromCsv](functions/_ConvertTo-OdsFromCsv.md) - CSV to ODS
 - [ConvertFrom-OdsToCsv](functions/ConvertFrom-OdsToCsv.md) - Converts ODS file to CSV.
 - [ConvertFrom-OdsToHtml](functions/ConvertFrom-OdsToHtml.md) - Converts ODS file to HTML.
 - [ConvertFrom-OdsToPdf](functions/ConvertFrom-OdsToPdf.md) - Converts ODS file to PDF.
 - [ConvertTo-OdsFromCsv](functions/ConvertTo-OdsFromCsv.md) - Converts CSV file to ODS.
 - [Initialize-FileConversion-DocumentOfficeOds](functions/Initialize-FileConversion-DocumentOfficeOds.md) - Initializes ODS document format conversion utility functions.
 
-### document-office-odt (8 functions)
+### document-office-odt (15 functions)
 
+- [_ConvertFrom-OdtToDocx](functions/_ConvertFrom-OdtToDocx.md) - ODT to DOCX
+- [_ConvertFrom-OdtToHtml](functions/_ConvertFrom-OdtToHtml.md) - ODT to HTML
+- [_ConvertFrom-OdtToLatex](functions/_ConvertFrom-OdtToLatex.md) - ODT to LaTeX
+- [_ConvertFrom-OdtToMarkdown](functions/_ConvertFrom-OdtToMarkdown.md) - Initializes ODT document format conversion utility functions.
+- [_ConvertFrom-OdtToPdf](functions/_ConvertFrom-OdtToPdf.md) - ODT to PDF
+- [_ConvertTo-OdtFromDocx](functions/_ConvertTo-OdtFromDocx.md) - DOCX to ODT
+- [_ConvertTo-OdtFromMarkdown](functions/_ConvertTo-OdtFromMarkdown.md) - Markdown to ODT
 - [ConvertFrom-OdtToDocx](functions/ConvertFrom-OdtToDocx.md) - Converts ODT file to DOCX.
 - [ConvertFrom-OdtToHtml](functions/ConvertFrom-OdtToHtml.md) - Converts ODT file to HTML.
 - [ConvertFrom-OdtToLatex](functions/ConvertFrom-OdtToLatex.md) - Converts ODT file to LaTeX.
@@ -809,8 +1139,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-OdtFromMarkdown](functions/ConvertTo-OdtFromMarkdown.md) - Converts Markdown file to ODT.
 - [Initialize-FileConversion-DocumentOfficeOdt](functions/Initialize-FileConversion-DocumentOfficeOdt.md) - Initializes ODT document format conversion utility functions.
 
-### document-office-orgmode (7 functions)
+### document-office-orgmode (13 functions)
 
+- [_ConvertFrom-OrgmodeToDocx](functions/_ConvertFrom-OrgmodeToDocx.md) - Org-mode to DOCX
+- [_ConvertFrom-OrgmodeToHtml](functions/_ConvertFrom-OrgmodeToHtml.md) - Org-mode to HTML
+- [_ConvertFrom-OrgmodeToLatex](functions/_ConvertFrom-OrgmodeToLatex.md) - Org-mode to LaTeX
+- [_ConvertFrom-OrgmodeToMarkdown](functions/_ConvertFrom-OrgmodeToMarkdown.md) - Initializes Org-mode document format conversion utility functions.
+- [_ConvertFrom-OrgmodeToPdf](functions/_ConvertFrom-OrgmodeToPdf.md) - Org-mode to PDF
+- [_ConvertTo-OrgmodeFromMarkdown](functions/_ConvertTo-OrgmodeFromMarkdown.md) - Markdown to Org-mode
 - [ConvertFrom-OrgmodeToDocx](functions/ConvertFrom-OrgmodeToDocx.md) - Converts Org-mode file to DOCX.
 - [ConvertFrom-OrgmodeToHtml](functions/ConvertFrom-OrgmodeToHtml.md) - Converts Org-mode file to HTML.
 - [ConvertFrom-OrgmodeToLatex](functions/ConvertFrom-OrgmodeToLatex.md) - Converts Org-mode file to LaTeX.
@@ -819,8 +1155,15 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-OrgmodeFromMarkdown](functions/ConvertTo-OrgmodeFromMarkdown.md) - Converts Markdown file to Org-mode.
 - [Initialize-FileConversion-DocumentOfficeOrgmode](functions/Initialize-FileConversion-DocumentOfficeOrgmode.md) - Initializes Org-mode document format conversion utility functions.
 
-### document-office-plaintext (8 functions)
+### document-office-plaintext (15 functions)
 
+- [_ConvertFrom-PlainTextToDocx](functions/_ConvertFrom-PlainTextToDocx.md) - Plain Text to DOCX
+- [_ConvertFrom-PlainTextToHtml](functions/_ConvertFrom-PlainTextToHtml.md) - Plain Text to HTML
+- [_ConvertFrom-PlainTextToMarkdown](functions/_ConvertFrom-PlainTextToMarkdown.md) - More sophisticated conversion could detect structure and add markdown formatting
+- [_ConvertFrom-PlainTextToPdf](functions/_ConvertFrom-PlainTextToPdf.md) - Plain Text to PDF
+- [_ConvertFrom-PlainTextToRtf](functions/_ConvertFrom-PlainTextToRtf.md) - Plain Text to RTF
+- [_ConvertTo-PlainTextFromHtml](functions/_ConvertTo-PlainTextFromHtml.md) - Apply encoding if specified
+- [_ConvertTo-PlainTextFromMarkdown](functions/_ConvertTo-PlainTextFromMarkdown.md) - Apply encoding if specified
 - [ConvertFrom-PlainTextToDocx](functions/ConvertFrom-PlainTextToDocx.md) - Converts Plain Text file to DOCX.
 - [ConvertFrom-PlainTextToHtml](functions/ConvertFrom-PlainTextToHtml.md) - Converts Plain Text file to HTML.
 - [ConvertFrom-PlainTextToMarkdown](functions/ConvertFrom-PlainTextToMarkdown.md) - Converts Plain Text file to Markdown.
@@ -830,8 +1173,15 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-PlainTextFromMarkdown](functions/ConvertTo-PlainTextFromMarkdown.md) - Converts Markdown file to Plain Text.
 - [Initialize-FileConversion-DocumentOfficePlaintext](functions/Initialize-FileConversion-DocumentOfficePlaintext.md) - Initializes Plain Text document format conversion utility functions.
 
-### document-office-rtf (8 functions)
+### document-office-rtf (15 functions)
 
+- [_ConvertFrom-RtfToDocx](functions/_ConvertFrom-RtfToDocx.md) - RTF to DOCX
+- [_ConvertFrom-RtfToHtml](functions/_ConvertFrom-RtfToHtml.md) - RTF to HTML
+- [_ConvertFrom-RtfToMarkdown](functions/_ConvertFrom-RtfToMarkdown.md) - Initializes RTF document format conversion utility functions.
+- [_ConvertFrom-RtfToPdf](functions/_ConvertFrom-RtfToPdf.md) - RTF to PDF
+- [_ConvertFrom-RtfToText](functions/_ConvertFrom-RtfToText.md) - RTF to Plain Text
+- [_ConvertTo-RtfFromDocx](functions/_ConvertTo-RtfFromDocx.md) - DOCX to RTF
+- [_ConvertTo-RtfFromMarkdown](functions/_ConvertTo-RtfFromMarkdown.md) - Markdown to RTF
 - [ConvertFrom-RtfToDocx](functions/ConvertFrom-RtfToDocx.md) - Converts RTF file to DOCX.
 - [ConvertFrom-RtfToHtml](functions/ConvertFrom-RtfToHtml.md) - Converts RTF file to HTML.
 - [ConvertFrom-RtfToMarkdown](functions/ConvertFrom-RtfToMarkdown.md) - Converts RTF file to Markdown.
@@ -841,8 +1191,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-RtfFromMarkdown](functions/ConvertTo-RtfFromMarkdown.md) - Converts Markdown file to RTF.
 - [Initialize-FileConversion-DocumentOfficeRtf](functions/Initialize-FileConversion-DocumentOfficeRtf.md) - Initializes RTF document format conversion utility functions.
 
-### document-rst (6 functions)
+### document-rst (11 functions)
 
+- [_ConvertFrom-RstToMarkdown](functions/_ConvertFrom-RstToMarkdown.md) - Execute with error capture
+- [_ConvertTo-DocxFromRst](functions/_ConvertTo-DocxFromRst.md) - Execute with error capture
+- [_ConvertTo-HtmlFromRst](functions/_ConvertTo-HtmlFromRst.md) - Execute with error capture
+- [_ConvertTo-LaTeXFromRst](functions/_ConvertTo-LaTeXFromRst.md) - Execute with error capture
+- [_ConvertTo-PdfFromRst](functions/_ConvertTo-PdfFromRst.md) - Execute with error capture
 - [ConvertFrom-RstToMarkdown](functions/ConvertFrom-RstToMarkdown.md) - Converts RST file to Markdown.
 - [ConvertTo-DocxFromRst](functions/ConvertTo-DocxFromRst.md) - Converts RST file to DOCX.
 - [ConvertTo-HtmlFromRst](functions/ConvertTo-HtmlFromRst.md) - Converts RST file to HTML.
@@ -850,8 +1205,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-PdfFromRst](functions/ConvertTo-PdfFromRst.md) - Converts RST file to PDF.
 - [Initialize-FileConversion-DocumentRst](functions/Initialize-FileConversion-DocumentRst.md) - Initializes RST document format conversion utility functions.
 
-### document-textile (6 functions)
+### document-textile (11 functions)
 
+- [_ConvertFrom-TextileToMarkdown](functions/_ConvertFrom-TextileToMarkdown.md) - Execute with error capture
+- [_ConvertTo-DocxFromTextile](functions/_ConvertTo-DocxFromTextile.md) - Execute with error capture
+- [_ConvertTo-HtmlFromTextile](functions/_ConvertTo-HtmlFromTextile.md) - Execute with error capture
+- [_ConvertTo-LaTeXFromTextile](functions/_ConvertTo-LaTeXFromTextile.md) - Execute with error capture
+- [_ConvertTo-PdfFromTextile](functions/_ConvertTo-PdfFromTextile.md) - Execute with error capture
 - [ConvertFrom-TextileToMarkdown](functions/ConvertFrom-TextileToMarkdown.md) - Converts Textile file to Markdown.
 - [ConvertTo-DocxFromTextile](functions/ConvertTo-DocxFromTextile.md) - Converts Textile file to DOCX.
 - [ConvertTo-HtmlFromTextile](functions/ConvertTo-HtmlFromTextile.md) - Converts Textile file to HTML.
@@ -868,8 +1228,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [Update-DotnetPackages](functions/Update-DotnetPackages.md) - Updates NuGet packages in .NET projects.
 - [Update-DotnetTools](functions/Update-DotnetTools.md) - Updates all .NET global tools.
 
-### duration (7 functions)
+### duration (13 functions)
 
+- [_ConvertFrom-DurationToMilliseconds](functions/_ConvertFrom-DurationToMilliseconds.md) - Duration to milliseconds
+- [_ConvertFrom-DurationToSeconds](functions/_ConvertFrom-DurationToSeconds.md) - Duration to seconds
+- [_ConvertFrom-DurationToTimeSpan](functions/_ConvertFrom-DurationToTimeSpan.md) - Try parsing as simple number (assume seconds)
+- [_ConvertTo-DurationFromMilliseconds](functions/_ConvertTo-DurationFromMilliseconds.md) - Milliseconds to Duration
+- [_ConvertTo-DurationFromSeconds](functions/_ConvertTo-DurationFromSeconds.md) - Seconds to Duration
+- [_ConvertTo-DurationFromTimeSpan](functions/_ConvertTo-DurationFromTimeSpan.md) - Custom format - use TimeSpan.ToString
 - [ConvertFrom-DurationToMilliseconds](functions/ConvertFrom-DurationToMilliseconds.md) - Converts a TimeSpan object to a human-readable duration string.
 - [ConvertFrom-DurationToSeconds](functions/ConvertFrom-DurationToSeconds.md) - Converts a TimeSpan object to a human-readable duration string.
 - [ConvertFrom-DurationToTimeSpan](functions/ConvertFrom-DurationToTimeSpan.md) - Converts a human-readable duration string to a TimeSpan object.
@@ -878,14 +1244,25 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-DurationFromTimeSpan](functions/ConvertTo-DurationFromTimeSpan.md) - Converts a TimeSpan object to a human-readable duration string.
 - [Initialize-FileConversion-CoreTimeDuration](functions/Initialize-FileConversion-CoreTimeDuration.md) - Initializes Duration/TimeSpan conversion utility functions.
 
-### ebcdic (3 functions)
+### ebcdic (7 functions)
 
+- [_ConvertFrom-AsciiToEBCDIC](functions/_ConvertFrom-AsciiToEBCDIC.md) - Return as hex string for display
+- [_ConvertFrom-EBCDICToAscii](functions/_ConvertFrom-EBCDICToAscii.md) - Parse hex string to bytes
+- [_Decode-EBCDIC](functions/_Decode-EBCDIC.md) - Helper function to decode EBCDIC to bytes (ASCII)
+- [_Encode-EBCDIC](functions/_Encode-EBCDIC.md) - Helper function to encode bytes (ASCII) to EBCDIC
 - [ConvertFrom-AsciiToEBCDIC](functions/ConvertFrom-AsciiToEBCDIC.md) - Converts ASCII text to EBCDIC encoding.
 - [ConvertFrom-EBCDICToAscii](functions/ConvertFrom-EBCDICToAscii.md) - Converts EBCDIC encoding to ASCII text.
 - [Initialize-FileConversion-CoreEncodingEBCDIC](functions/Initialize-FileConversion-CoreEncodingEBCDIC.md) - Initializes EBCDIC encoding conversion utility functions.
 
-### edifact (5 functions)
+### edifact (12 functions)
 
+- [_Build-EdifactSegment](functions/_Build-EdifactSegment.md) - Helper function to build EDIFACT segment
+- [_ConvertFrom-EdifactToCsv](functions/_ConvertFrom-EdifactToCsv.md) - Pad to at least 5 elements for consistency
+- [_ConvertFrom-EdifactToJson](functions/_ConvertFrom-EdifactToJson.md) - Convert to JSON
+- [_ConvertFrom-EdifactToXml](functions/_ConvertFrom-EdifactToXml.md) - Build XML
+- [_ConvertTo-EdifactFromJson](functions/_ConvertTo-EdifactFromJson.md) - Join segments with apostrophe delimiter
+- [_Parse-EdifactMessage](functions/_Parse-EdifactMessage.md) - Remove whitespace and split by apostrophe (segment terminator)
+- [_Parse-EdifactSegment](functions/_Parse-EdifactSegment.md) - Split by : to get components
 - [ConvertFrom-EdifactToCsv](functions/ConvertFrom-EdifactToCsv.md) - Converts EDIFACT file to CSV format.
 - [ConvertFrom-EdifactToJson](functions/ConvertFrom-EdifactToJson.md) - Converts EDIFACT file to JSON format.
 - [ConvertFrom-EdifactToXml](functions/ConvertFrom-EdifactToXml.md) - Converts EDIFACT file to XML format.
@@ -907,8 +1284,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [Launch-Lapce](functions/Launch-Lapce.md) - Launches Lapce editor.
 - [Launch-Zed](functions/Launch-Zed.md) - Launches Zed editor.
 
-### edn (6 functions)
+### edn (11 functions)
 
+- [_ConvertFrom-EdnToJson](functions/_ConvertFrom-EdnToJson.md) - Convert keywords in maps to regular strings
+- [_ConvertFrom-EdnToYaml](functions/_ConvertFrom-EdnToYaml.md) - Fallback: simple key-value format
+- [_ConvertTo-Edn](functions/_ConvertTo-Edn.md) - Escape string
+- [_ConvertTo-EdnFromJson](functions/_ConvertTo-EdnFromJson.md) - JSON to EDN
+- [_Parse-Edn](functions/_Parse-Edn.md) - Return as string if nothing else matches
 - [Convert-EdnToJsonObject](functions/Convert-EdnToJsonObject.md) - Initializes EDN format conversion utility functions.
 - [ConvertFrom-EdnToJson](functions/ConvertFrom-EdnToJson.md) - Converts EDN file to JSON format.
 - [ConvertFrom-EdnToYaml](functions/ConvertFrom-EdnToYaml.md) - Converts EDN file to YAML format.
@@ -916,8 +1298,12 @@ This documentation is automatically generated from comment-based help in the pro
 - [Initialize-FileConversion-Edn](functions/Initialize-FileConversion-Edn.md) - Initializes EDN format conversion utility functions.
 - [Parse-EdnValue](functions/Parse-EdnValue.md) - Initializes EDN format conversion utility functions.
 
-### encoding (6 functions)
+### encoding (10 functions)
 
+- [_ConvertFrom-HtmlEncoded](functions/_ConvertFrom-HtmlEncoded.md) - HTML Encoder/Decoder
+- [_ConvertFrom-UrlEncoded](functions/_ConvertFrom-UrlEncoded.md) - Fallback to PowerShell's built-in decoding
+- [_ConvertTo-HtmlEncoded](functions/_ConvertTo-HtmlEncoded.md) - HTML Encoder/Decoder
+- [_ConvertTo-UrlEncoded](functions/_ConvertTo-UrlEncoded.md) - Fallback to PowerShell's built-in encoding
 - [ConvertFrom-HtmlEncoded](functions/ConvertFrom-HtmlEncoded.md) - HTML-decodes a string.
 - [ConvertFrom-UrlEncoded](functions/ConvertFrom-UrlEncoded.md) - URL-decodes a string.
 - [ConvertTo-HtmlEncoded](functions/ConvertTo-HtmlEncoded.md) - HTML-encodes a string.
@@ -925,12 +1311,25 @@ This documentation is automatically generated from comment-based help in the pro
 - [Initialize-DevTools-Encoding](functions/Initialize-DevTools-Encoding.md) - Initializes URL and HTML encoding utility functions.
 - [Initialize-FileConversion-CoreEncoding](functions/Initialize-FileConversion-CoreEncoding.md) - Initializes encoding conversion utility functions.
 
-### energy (1 functions)
+### energy (7 functions)
 
+- [_Convert-Energy](functions/_Convert-Energy.md) - Convert to joules first, then to target unit
+- [_ConvertFrom-JoulesToEnergy](functions/_ConvertFrom-JoulesToEnergy.md) - Joules to other units
+- [_ConvertTo-JoulesFromEnergy](functions/_ConvertTo-JoulesFromEnergy.md) - Other units to joules
+- [Convert-Energy](functions/Convert-Energy.md) - Convert Energy
+- [ConvertFrom-JoulesToEnergy](functions/ConvertFrom-JoulesToEnergy.md) - Convert from Joules
+- [ConvertTo-JoulesFromEnergy](functions/ConvertTo-JoulesFromEnergy.md) - Convert to Joules
 - [Initialize-FileConversion-CoreUnitsEnergy](functions/Initialize-FileConversion-CoreUnitsEnergy.md) - Initializes Energy unit conversion utility functions.
 
-### env (7 functions)
+### env (14 functions)
 
+- [_ConvertFrom-EnvToIni](functions/_ConvertFrom-EnvToIni.md) - Level 3: Stack trace
+- [_ConvertFrom-EnvToJson](functions/_ConvertFrom-EnvToJson.md) - Level 3: Stack trace
+- [_ConvertFrom-EnvToYaml](functions/_ConvertFrom-EnvToYaml.md) - Level 3: Stack trace
+- [_ConvertTo-EnvFromIni](functions/_ConvertTo-EnvFromIni.md) - Level 3: Stack trace
+- [_ConvertTo-EnvFromJson](functions/_ConvertTo-EnvFromJson.md) - Level 3: Stack trace
+- [_ConvertTo-EnvFromYaml](functions/_ConvertTo-EnvFromYaml.md) - Level 3: Stack trace
+- [_Parse-EnvFile](functions/_Parse-EnvFile.md) - Save last key-value
 - [ConvertFrom-EnvToIni](functions/ConvertFrom-EnvToIni.md) - Converts a .env file to INI format.
 - [ConvertFrom-EnvToJson](functions/ConvertFrom-EnvToJson.md) - Converts a .env file to JSON format.
 - [ConvertFrom-EnvToYaml](functions/ConvertFrom-EnvToYaml.md) - Converts a .env file to YAML format.
@@ -975,8 +1374,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [New-EmptyFile](functions/New-EmptyFile.md) - Creates empty files or updates file timestamps.
 - [Remove-ItemCustom](functions/Remove-ItemCustom.md) - Removes files and directories.
 
-### files-hash (2 functions)
+### files-hash (3 functions)
 
+- [_Get-FileHashValue](functions/_Get-FileHashValue.md) - Only show warning when not running in Pester tests
 - [Get-FileHashValue](functions/Get-FileHashValue.md) - Calculates cryptographic hash of a file.
 - [Initialize-FileUtilities-Hash](functions/Initialize-FileUtilities-Hash.md) - Initializes file hash utility functions.
 
@@ -986,31 +1386,39 @@ This documentation is automatically generated from comment-based help in the pro
 - [Get-FileTail](functions/Get-FileTail.md) - Shows the last N lines of a file or pipeline input.
 - [Initialize-FileUtilities-HeadTail](functions/Initialize-FileUtilities-HeadTail.md) - Initializes file head and tail utility functions.
 
-### files-hexdump (2 functions)
+### files-hexdump (3 functions)
 
+- [_Get-HexDump](functions/_Get-HexDump.md) - Initializes file hex dump utility functions.
 - [Get-HexDump](functions/Get-HexDump.md) - Shows hexadecimal dump of a file's contents.
 - [Initialize-FileUtilities-HexDump](functions/Initialize-FileUtilities-HexDump.md) - Initializes file hex dump utility functions.
 
-### files-listing (1 functions)
+### files-listing (6 functions)
 
 - [Ensure-FileListing](functions/Ensure-FileListing.md) - Initializes file listing utility functions on first use.
+- [Get-ChildItemAll](functions/Get-ChildItemAll.md) - Listing helpers (prefer eza when available)
+- [Get-ChildItemDetailed](functions/Get-ChildItemDetailed.md) - Listing helpers (prefer eza when available)
+- [Get-ChildItemVisible](functions/Get-ChildItemVisible.md) - Listing helpers (prefer eza when available)
+- [Get-DirectoryTree](functions/Get-DirectoryTree.md) - Listing helpers (prefer eza when available)
+- [Show-FileContent](functions/Show-FileContent.md) - bat wrapper
 
 ### files-module-registry (1 functions)
 
 - [Load-EnsureModules](functions/Load-EnsureModules.md) - Loads modules for a specific Ensure function from the registry.
 
-### files-navigation (7 functions)
+### files-navigation (8 functions)
 
 - [..](functions/...md) - Changes to the parent directory.
 - [...](functions/....md) - Changes to the grandparent directory.
 - [....](functions/.....md) - Changes to the great-grandparent directory.
+- [~](functions/~.md) - Go to user home directory
 - [Ensure-FileNavigation](functions/Ensure-FileNavigation.md) - Initializes file navigation utility functions on first use.
 - [Set-LocationDesktop](functions/Set-LocationDesktop.md) - Changes to the Desktop directory.
 - [Set-LocationDocuments](functions/Set-LocationDocuments.md) - Changes to the Documents directory.
 - [Set-LocationDownloads](functions/Set-LocationDownloads.md) - Changes to the Downloads directory.
 
-### files-size (2 functions)
+### files-size (3 functions)
 
+- [_Get-FileSize](functions/_Get-FileSize.md) - Initializes file size utility functions.
 - [Get-FileSize](functions/Get-FileSize.md) - Shows human-readable file size.
 - [Initialize-FileUtilities-Size](functions/Initialize-FileUtilities-Size.md) - Initializes file size utility functions.
 
@@ -1023,7 +1431,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [Ensure-FileConversion-Specialized](functions/Ensure-FileConversion-Specialized.md) - Initializes specialized format conversion utility functions on first use.
 - [Ensure-FileUtilities](functions/Ensure-FileUtilities.md) - Sets up all file utility functions when any of them is called for the first time.
     This lazy loading approach improves profile startup performance.
-    Loads file utility modules from the files-modules subdirectory.
 - [Write-SubModuleError](functions/Write-SubModuleError.md) - Provides consistent error handling when loading sub-modules.
 
 ### firebase (3 functions)
@@ -1032,8 +1439,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [Publish-FirebaseDeployment](functions/Publish-FirebaseDeployment.md) - Deploys to Firebase hosting.
 - [Start-FirebaseServer](functions/Start-FirebaseServer.md) - Starts Firebase local development server.
 
-### flac (6 functions)
+### flac (8 functions)
 
+- [_ConvertFrom-FlacToMp3](functions/_ConvertFrom-FlacToMp3.md) - FLAC conversions
+- [_ConvertFrom-FlacToWav](functions/_ConvertFrom-FlacToWav.md) - FLAC conversions
 - [ConvertFrom-FlacToAac](functions/ConvertFrom-FlacToAac.md) - Converts FLAC audio to AAC format.
 - [ConvertFrom-FlacToMp3](functions/ConvertFrom-FlacToMp3.md) - Converts FLAC audio to MP3 format.
 - [ConvertFrom-FlacToOgg](functions/ConvertFrom-FlacToOgg.md) - Converts FLAC audio to OGG Vorbis format.
@@ -1103,9 +1512,30 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-GitHubPullRequest](functions/Invoke-GitHubPullRequest.md) - Manages GitHub pull requests.
 - [Open-GitHubRepository](functions/Open-GitHubRepository.md) - Opens a GitHub repository in the web browser.
 
-### git-advanced (1 functions)
+### git-advanced (16 functions)
 
+- [Clear-GitUntracked](functions/Clear-GitUntracked.md) - Git clean - remove untracked files
+- [Continue-GitRebase](functions/Continue-GitRebase.md) - Git rebase continue - continue rebase
 - [Ensure-GitHelper](functions/Ensure-GitHelper.md) - Ensures Git helper functions are initialized.
+- [Get-GitDefaultBranch](functions/Get-GitDefaultBranch.md) - Git default branch - get default branch name
+- [Invoke-GitClone](functions/Invoke-GitClone.md) - Git clone - clone a repository
+- [Merge-GitRebase](functions/Merge-GitRebase.md) - Git rebase - rebase commits
+- [New-GitHubPullRequest](functions/New-GitHubPullRequest.md) - GitHub PR create - create a pull request
+- [Remove-GitMergedBranches](functions/Remove-GitMergedBranches.md) - Git prune merged - remove merged branches
+- [Restore-GitStash](functions/Restore-GitStash.md) - Git stash pop - apply stashed changes
+- [Save-GitStash](functions/Save-GitStash.md) - Git stash - stash changes
+- [Set-LocationGitRoot](functions/Set-LocationGitRoot.md) - Git cd to root - change to repository root
+- [Show-GitHubPullRequest](functions/Show-GitHubPullRequest.md) - GitHub PR view - view pull request in browser
+- [Switch-GitPreviousBranch](functions/Switch-GitPreviousBranch.md) - Git checkout previous - switch to previous branch
+- [Sync-GitRepository](functions/Sync-GitRepository.md) - Git sync - fetch and rebase
+- [Undo-GitCommit](functions/Undo-GitCommit.md) - Git undo - soft reset last commit
+- [Update-GitSubmodule](functions/Update-GitSubmodule.md) - Git submodule update - update submodules
+
+### git-basic (3 functions)
+
+- [Get-GitChanges](functions/Get-GitChanges.md) - Fetches and merges changes from remote repository.
+- [Receive-GitChanges](functions/Receive-GitChanges.md) - Downloads objects and refs from remote repository.
+- [Save-GitCommitWithMessage](functions/Save-GitCommitWithMessage.md) - Commits staged changes with a message.
 
 ### git-changelog (1 functions)
 
@@ -1138,11 +1568,21 @@ This documentation is automatically generated from comment-based help in the pro
 - [New-GitWorktree](functions/New-GitWorktree.md) - Creates a new Git worktree.
 - [Sync-GitRepos](functions/Sync-GitRepos.md) - Syncs multiple Git repositories.
 
-### git (1 functions)
+### git (12 functions)
 
+- [Add-GitChanges](functions/Add-GitChanges.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- [Compare-GitChanges](functions/Compare-GitChanges.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 - [Ensure-Git](functions/Ensure-Git.md) - Sets up all Git utility functions when any of them is called for the first time.
         This lazy loading approach improves profile startup performance.
-        Loads Git modules from the git-modules subdirectory.
+- [Format-PromptGitSegment](functions/Format-PromptGitSegment.md) - Git prompt segment - show current branch in prompt
+- [Get-GitBranch](functions/Get-GitBranch.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- [Get-GitCurrentBranch](functions/Get-GitCurrentBranch.md) - Git current branch - get current branch name
+- [Get-GitLog](functions/Get-GitLog.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- [Get-GitStatusShort](functions/Get-GitStatusShort.md) - Git status short - show concise status
+- [Invoke-GitStatus](functions/Invoke-GitStatus.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- [Publish-GitChanges](functions/Publish-GitChanges.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- [Save-GitCommit](functions/Save-GitCommit.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- [Switch-GitBranch](functions/Switch-GitBranch.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ### gradle (4 functions)
 
@@ -1151,9 +1591,27 @@ This documentation is automatically generated from comment-based help in the pro
 - [Test-GradleOutdated](functions/Test-GradleOutdated.md) - Checks for outdated Gradle dependencies.
 - [Update-GradleWrapper](functions/Update-GradleWrapper.md) - Updates Gradle wrapper to latest version.
 
-### guid (1 functions)
+### guid (19 functions)
 
+- [_ConvertFrom-GuidToBase64](functions/_ConvertFrom-GuidToBase64.md) - GUID to Base64
+- [_ConvertFrom-GuidToHex](functions/_ConvertFrom-GuidToHex.md) - Remove braces and dashes, convert to uppercase
+- [_ConvertFrom-GuidToRegistryFormat](functions/_ConvertFrom-GuidToRegistryFormat.md) - Ensure it's in standard format
+- [_ConvertFrom-GuidToUuid](functions/_ConvertFrom-GuidToUuid.md) - Validate format
+- [_ConvertTo-GuidFromBase64](functions/_ConvertTo-GuidFromBase64.md) - Base64 to GUID
+- [_ConvertTo-GuidFromHex](functions/_ConvertTo-GuidFromHex.md) - Format as GUID: 8-4-4-4-12
+- [_ConvertTo-GuidFromRegistryFormat](functions/_ConvertTo-GuidFromRegistryFormat.md) - Remove braces
+- [_ConvertTo-GuidFromUuid](functions/_ConvertTo-GuidFromUuid.md) - Validate format
+- [_New-Guid](functions/_New-Guid.md) - Generate new GUID
+- [ConvertFrom-GuidToBase64](functions/ConvertFrom-GuidToBase64.md) - Converts a GUID to Base64 format.
+- [ConvertFrom-GuidToHex](functions/ConvertFrom-GuidToHex.md) - Converts a GUID to hexadecimal format (no dashes).
+- [ConvertFrom-GuidToRegistryFormat](functions/ConvertFrom-GuidToRegistryFormat.md) - Converts a GUID to Windows registry format.
+- [ConvertFrom-GuidToUuid](functions/ConvertFrom-GuidToUuid.md) - Converts a GUID to UUID format.
+- [ConvertTo-GuidFromBase64](functions/ConvertTo-GuidFromBase64.md) - Converts a Base64 string to GUID format.
+- [ConvertTo-GuidFromHex](functions/ConvertTo-GuidFromHex.md) - Converts a hexadecimal string to GUID format.
+- [ConvertTo-GuidFromRegistryFormat](functions/ConvertTo-GuidFromRegistryFormat.md) - Converts a Windows registry format GUID to standard format.
+- [ConvertTo-GuidFromUuid](functions/ConvertTo-GuidFromUuid.md) - Converts a UUID to GUID format.
 - [Initialize-FileConversion-CoreEncodingGuid](functions/Initialize-FileConversion-CoreEncodingGuid.md) - Initializes GUID format conversion utility functions.
+- [New-Guid](functions/New-Guid.md) - Generates a new GUID (Globally Unique Identifier).
 
 ### gum (5 functions)
 
@@ -1163,12 +1621,21 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-GumSpin](functions/Invoke-GumSpin.md) - Shows a spinner while executing a script block using gum.
 - [Invoke-GumStyle](functions/Invoke-GumStyle.md) - Styles text output using gum.
 
-### gzip (1 functions)
+### gzip (9 functions)
 
+- [_Compress-Gzip](functions/_Compress-Gzip.md) - Level 3: Stack trace
+- [_Compress-Zlib](functions/_Compress-Zlib.md) - Level 3: Stack trace
+- [_Decompress-Gzip](functions/_Decompress-Gzip.md) - Level 3: Stack trace
+- [_Decompress-Zlib](functions/_Decompress-Zlib.md) - Level 3: Stack trace
+- [Compress-Gzip](functions/Compress-Gzip.md) - Compresses a file using Gzip compression.
+- [Compress-Zlib](functions/Compress-Zlib.md) - Compresses a file using Zlib compression.
+- [Expand-Gzip](functions/Expand-Gzip.md) - Decompresses a Gzip-compressed file.
+- [Expand-Zlib](functions/Expand-Zlib.md) - Decompresses a Zlib-compressed file.
 - [Initialize-FileConversion-CoreCompressionGzip](functions/Initialize-FileConversion-CoreCompressionGzip.md) - Initializes Gzip/Zlib compression format conversion utility functions.
 
-### hash (2 functions)
+### hash (3 functions)
 
+- [_Get-TextHash](functions/_Get-TextHash.md) - Initializes hash generator utility functions.
 - [Get-TextHash](functions/Get-TextHash.md) - Calculates cryptographic hash of text input.
 - [Initialize-DevTools-Hash](functions/Initialize-DevTools-Hash.md) - Initializes hash generator utility functions.
 
@@ -1179,8 +1646,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [New-HatchEnvironment](functions/New-HatchEnvironment.md) - Creates a virtual environment using Hatch.
 - [Set-HatchVersion](functions/Set-HatchVersion.md) - Gets or sets project version.
 
-### heic (5 functions)
+### heic (7 functions)
 
+- [_ConvertFrom-HeicToJpeg](functions/_ConvertFrom-HeicToJpeg.md) - HEIC/HEIF conversions
+- [_ConvertFrom-HeicToPng](functions/_ConvertFrom-HeicToPng.md) - HEIC/HEIF conversions
 - [ConvertFrom-HeicToJpeg](functions/ConvertFrom-HeicToJpeg.md) - Converts HEIC/HEIF image to JPEG format.
 - [ConvertFrom-HeicToPng](functions/ConvertFrom-HeicToPng.md) - Converts HEIC/HEIF image to PNG format.
 - [ConvertTo-HeicFromJpeg](functions/ConvertTo-HeicFromJpeg.md) - Converts JPEG image to HEIC format.
@@ -1208,8 +1677,17 @@ This documentation is automatically generated from comment-based help in the pro
 - [Convert-XmlToJsonObject](functions/Convert-XmlToJsonObject.md) - Converts an XML element to a JSON-compatible PowerShell object.
 - [Sanitize-XmlName](functions/Sanitize-XmlName.md) - Converts a JSON object to XML format.
 
-### hex (10 functions)
+### hex (19 functions)
 
+- [_Convert-RgbToHex](functions/_Convert-RgbToHex.md) - ' + $redClamped.ToString('X2') + $greenClamped.ToString('X2') + $blueClamped.ToString('X2')
+- [_ConvertFrom-BinaryToHex](functions/_ConvertFrom-BinaryToHex.md) - Remove spaces and split into 8-bit chunks
+- [_ConvertFrom-DecimalToHex](functions/_ConvertFrom-DecimalToHex.md) - First convert decimal to ASCII, then ASCII to hex
+- [_ConvertFrom-HexToBinary](functions/_ConvertFrom-HexToBinary.md) - Remove spaces and common separators
+- [_ConvertFrom-HexToDecimal](functions/_ConvertFrom-HexToDecimal.md) - First convert hex to ASCII, then ASCII to decimal
+- [_ConvertFrom-HexToOctal](functions/_ConvertFrom-HexToOctal.md) - First convert hex to ASCII, then ASCII to octal
+- [_ConvertFrom-HexToRoman](functions/_ConvertFrom-HexToRoman.md) - First convert hex to ASCII, then ASCII to roman
+- [_ConvertFrom-OctalToHex](functions/_ConvertFrom-OctalToHex.md) - First convert octal to ASCII, then ASCII to hex
+- [_ConvertFrom-RomanToHex](functions/_ConvertFrom-RomanToHex.md) - First convert roman to ASCII, then ASCII to hex
 - [ConvertFrom-HexToAscii](functions/ConvertFrom-HexToAscii.md) - Converts hexadecimal string to ASCII text.
 - [ConvertFrom-HexToBase32](functions/ConvertFrom-HexToBase32.md) - Converts hexadecimal string to Base32 representation.
 - [ConvertFrom-HexToBinary](functions/ConvertFrom-HexToBinary.md) - Converts hexadecimal string to binary representation.
@@ -1221,8 +1699,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [Initialize-FileConversion-CoreEncodingHex](functions/Initialize-FileConversion-CoreEncodingHex.md) - Initializes hexadecimal encoding conversion utility functions.
 - [Initialize-FileConversion-MediaColorsHex](functions/Initialize-FileConversion-MediaColorsHex.md) - Initializes HEX color conversion utility functions.
 
-### hjson (5 functions)
+### hjson (11 functions)
 
+- [_ConvertFrom-HjsonToJson](functions/_ConvertFrom-HjsonToJson.md) - Level 3: Stack trace
+- [_ConvertFrom-HjsonToYaml](functions/_ConvertFrom-HjsonToYaml.md) - Level 3: Stack trace
+- [_ConvertTo-HjsonFromJson](functions/_ConvertTo-HjsonFromJson.md) - Level 3: Stack trace
+- [_ConvertTo-HjsonFromYaml](functions/_ConvertTo-HjsonFromYaml.md) - Level 3: Stack trace
+- [_Normalize-HjsonToJson](functions/_Normalize-HjsonToJson.md) - Add quotes to unquoted string values (e.g. name: John)
+- [_Remove-HjsonComments](functions/_Remove-HjsonComments.md) - Handle line comments //
 - [ConvertFrom-HjsonToJson](functions/ConvertFrom-HjsonToJson.md) - Converts an HJSON file to JSON format.
 - [ConvertFrom-HjsonToYaml](functions/ConvertFrom-HjsonToYaml.md) - Converts an HJSON file to YAML format.
 - [ConvertTo-HjsonFromJson](functions/ConvertTo-HjsonFromJson.md) - Converts a JSON file to HJSON format.
@@ -1243,12 +1727,22 @@ This documentation is automatically generated from comment-based help in the pro
 - [Update-BrewPackages](functions/Update-BrewPackages.md) - Updates Homebrew packages.
 - [Update-BrewSelf](functions/Update-BrewSelf.md) - Updates Homebrew to the latest version.
 
-### hsl (1 functions)
+### hsl (3 functions)
 
+- [_Convert-HslToRgb](functions/_Convert-HslToRgb.md) - Create and return result hashtable
+- [_Convert-RgbToHsl](functions/_Convert-RgbToHsl.md) - Convert RGB to HSL
 - [Initialize-FileConversion-MediaColorsHsl](functions/Initialize-FileConversion-MediaColorsHsl.md) - Initializes HSL/HSLA color conversion utility functions.
 
-### human-readable (9 functions)
+### human-readable (17 functions)
 
+- [_ConvertFrom-HumanReadableToDateTime](functions/_ConvertFrom-HumanReadableToDateTime.md) - Try parsing as standard date format
+- [_ConvertFrom-HumanReadableToIso8601](functions/_ConvertFrom-HumanReadableToIso8601.md) - Human-readable to ISO 8601
+- [_ConvertFrom-HumanReadableToRfc3339](functions/_ConvertFrom-HumanReadableToRfc3339.md) - Human-readable to RFC 3339
+- [_ConvertFrom-HumanReadableToUnixTimestamp](functions/_ConvertFrom-HumanReadableToUnixTimestamp.md) - Human-readable to Unix Timestamp
+- [_ConvertTo-HumanReadableFromDateTime](functions/_ConvertTo-HumanReadableFromDateTime.md) - Final fallback to standard format
+- [_ConvertTo-HumanReadableFromIso8601](functions/_ConvertTo-HumanReadableFromIso8601.md) - ISO 8601 to Human-readable
+- [_ConvertTo-HumanReadableFromRfc3339](functions/_ConvertTo-HumanReadableFromRfc3339.md) - RFC 3339 to Human-readable
+- [_ConvertTo-HumanReadableFromUnixTimestamp](functions/_ConvertTo-HumanReadableFromUnixTimestamp.md) - Unix Timestamp to Human-readable
 - [ConvertFrom-HumanReadableToDateTime](functions/ConvertFrom-HumanReadableToDateTime.md) - Converts a human-readable date string to a DateTime object.
 - [ConvertFrom-HumanReadableToIso8601](functions/ConvertFrom-HumanReadableToIso8601.md) - Converts a DateTime object to a human-readable string.
 - [ConvertFrom-HumanReadableToRfc3339](functions/ConvertFrom-HumanReadableToRfc3339.md) - Converts a DateTime object to a human-readable string.
@@ -1259,20 +1753,32 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-HumanReadableFromUnixTimestamp](functions/ConvertTo-HumanReadableFromUnixTimestamp.md) - Converts a DateTime object to a human-readable string.
 - [Initialize-FileConversion-CoreTimeHumanReadable](functions/Initialize-FileConversion-CoreTimeHumanReadable.md) - Initializes Human-readable date/time conversion utility functions.
 
-### hwb (1 functions)
+### hwb (3 functions)
 
+- [_Convert-HwbToRgb](functions/_Convert-HwbToRgb.md) - Mix with black (subtract blackness)
+- [_Convert-RgbToHwb](functions/_Convert-RgbToHwb.md) - Convert RGB to HWB
 - [Initialize-FileConversion-MediaColorsHwb](functions/Initialize-FileConversion-MediaColorsHwb.md) - Initializes HWB/HWBA color conversion utility functions.
 
-### ico (5 functions)
+### ico (7 functions)
 
+- [_ConvertFrom-IcoToJpeg](functions/_ConvertFrom-IcoToJpeg.md) - ICO conversions
+- [_ConvertFrom-IcoToPng](functions/_ConvertFrom-IcoToPng.md) - ICO conversions
 - [ConvertFrom-IcoToJpeg](functions/ConvertFrom-IcoToJpeg.md) - Converts ICO image to JPEG format.
 - [ConvertFrom-IcoToPng](functions/ConvertFrom-IcoToPng.md) - Converts ICO image to PNG format.
 - [ConvertTo-IcoFromJpeg](functions/ConvertTo-IcoFromJpeg.md) - Converts JPEG image to ICO format.
 - [ConvertTo-IcoFromPng](functions/ConvertTo-IcoFromPng.md) - Converts PNG image to ICO format.
 - [Initialize-FileConversion-MediaImagesIco](functions/Initialize-FileConversion-MediaImagesIco.md) - Initializes ICO image format conversion utility functions.
 
-### ini (9 functions)
+### ini (17 functions)
 
+- [_ConvertFrom-IniToJson](functions/_ConvertFrom-IniToJson.md) - Level 3: Stack trace
+- [_ConvertFrom-IniToToml](functions/_ConvertFrom-IniToToml.md) - Level 3: Stack trace
+- [_ConvertFrom-IniToXml](functions/_ConvertFrom-IniToXml.md) - Level 3: Stack trace
+- [_ConvertFrom-IniToYaml](functions/_ConvertFrom-IniToYaml.md) - Level 3: Stack trace
+- [_ConvertTo-IniFromJson](functions/_ConvertTo-IniFromJson.md) - Level 3: Stack trace
+- [_ConvertTo-IniFromToml](functions/_ConvertTo-IniFromToml.md) - Level 3: Stack trace
+- [_ConvertTo-IniFromXml](functions/_ConvertTo-IniFromXml.md) - Level 3: Stack trace
+- [_ConvertTo-IniFromYaml](functions/_ConvertTo-IniFromYaml.md) - Level 3: Stack trace
 - [ConvertFrom-IniToJson](functions/ConvertFrom-IniToJson.md) - Converts INI file to JSON format.
 - [ConvertFrom-IniToToml](functions/ConvertFrom-IniToToml.md) - Converts INI file to TOML format.
 - [ConvertFrom-IniToXml](functions/ConvertFrom-IniToXml.md) - Converts INI file to XML format.
@@ -1283,12 +1789,23 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-IniFromYaml](functions/ConvertTo-IniFromYaml.md) - Converts YAML file to INI format.
 - [Initialize-FileConversion-Ini](functions/Initialize-FileConversion-Ini.md) - Initializes INI format conversion utility functions.
 
-### ion (1 functions)
+### ion (5 functions)
 
+- [_ConvertFrom-IonToJson](functions/_ConvertFrom-IonToJson.md) - Convert Ion types to JSON-serializable types
+- [_ConvertTo-IonFromJson](functions/_ConvertTo-IonFromJson.md) - Convert JSON to Ion types
+- [ConvertFrom-IonToJson](functions/ConvertFrom-IonToJson.md) - Converts Ion file to JSON format.
+- [ConvertTo-IonFromJson](functions/ConvertTo-IonFromJson.md) - Converts JSON file to Ion format.
 - [Initialize-FileConversion-Ion](functions/Initialize-FileConversion-Ion.md) - Initializes Ion format conversion utility functions.
 
-### iso8601 (7 functions)
+### iso8601 (14 functions)
 
+- [_ConvertFrom-Iso8601ToDateTime](functions/_ConvertFrom-Iso8601ToDateTime.md) - Try alternative parsing methods
+- [_ConvertFrom-Iso8601ToHumanReadable](functions/_ConvertFrom-Iso8601ToHumanReadable.md) - ISO 8601 to Human-readable
+- [_ConvertFrom-Iso8601ToRfc3339](functions/_ConvertFrom-Iso8601ToRfc3339.md) - Most ISO 8601 strings are valid RFC 3339, but we normalize it
+- [_ConvertFrom-Iso8601ToUnixTimestamp](functions/_ConvertFrom-Iso8601ToUnixTimestamp.md) - ISO 8601 to Unix Timestamp
+- [_ConvertTo-Iso8601FromDateTime](functions/_ConvertTo-Iso8601FromDateTime.md) - DateTime to ISO 8601
+- [_ConvertTo-Iso8601FromRfc3339](functions/_ConvertTo-Iso8601FromRfc3339.md) - RFC 3339 is a subset of ISO 8601, so we can parse it the same way
+- [_ConvertTo-Iso8601FromUnixTimestamp](functions/_ConvertTo-Iso8601FromUnixTimestamp.md) - Unix Timestamp to ISO 8601
 - [ConvertFrom-Iso8601ToDateTime](functions/ConvertFrom-Iso8601ToDateTime.md) - Converts an ISO 8601 date/time string to a DateTime object.
 - [ConvertFrom-Iso8601ToHumanReadable](functions/ConvertFrom-Iso8601ToHumanReadable.md) - Converts an ISO 8601 date/time string to a human-readable format.
 - [ConvertFrom-Iso8601ToRfc3339](functions/ConvertFrom-Iso8601ToRfc3339.md) - Converts an ISO 8601 date/time string to RFC 3339 format.
@@ -1302,8 +1819,12 @@ This documentation is automatically generated from comment-based help in the pro
 - [Convert-JqToJson](functions/Convert-JqToJson.md) - Converts JSON to compact JSON format using jq.
 - [Convert-YqToJson](functions/Convert-YqToJson.md) - Converts YAML to JSON format using yq.
 
-### json-extended (7 functions)
+### json-extended (11 functions)
 
+- [_ConvertFrom-Json5ToJson](functions/_ConvertFrom-Json5ToJson.md) - Level 3: Stack trace
+- [_ConvertFrom-JsonLToJson](functions/_ConvertFrom-JsonLToJson.md) - Level 3: Stack trace
+- [_ConvertTo-Json5FromJson](functions/_ConvertTo-Json5FromJson.md) - Level 3: Stack trace
+- [_ConvertTo-JsonLFromJson](functions/_ConvertTo-JsonLFromJson.md) - Level 3: Stack trace
 - [ConvertFrom-Json5ToJson](functions/ConvertFrom-Json5ToJson.md) - Converts JSON5 file to JSON format.
 - [ConvertFrom-JsonLToJson](functions/ConvertFrom-JsonLToJson.md) - Converts JSONL file to JSON format.
 - [ConvertFrom-XmlToYaml](functions/ConvertFrom-XmlToYaml.md) - Converts XML file to YAML format.
@@ -1312,13 +1833,19 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-JsonLFromJson](functions/ConvertTo-JsonLFromJson.md) - Converts JSON file to JSONL format.
 - [Initialize-FileConversion-CoreJsonExtended](functions/Initialize-FileConversion-CoreJsonExtended.md) - Initializes extended JSON format conversion utility functions.
 
-### json (2 functions)
+### json (3 functions)
 
+- [_Format-Json](functions/_Format-Json.md) - Level 3: Stack trace
 - [Format-Json](functions/Format-Json.md) - Pretty-prints JSON data.
 - [Initialize-FileConversion-CoreBasicJson](functions/Initialize-FileConversion-CoreBasicJson.md) - Initializes JSON format conversion utility functions.
 
-### jsonc (5 functions)
+### jsonc (10 functions)
 
+- [_ConvertFrom-JsoncToJson](functions/_ConvertFrom-JsoncToJson.md) - Level 3: Stack trace
+- [_ConvertFrom-JsoncToYaml](functions/_ConvertFrom-JsoncToYaml.md) - Level 3: Stack trace
+- [_ConvertTo-JsoncFromJson](functions/_ConvertTo-JsoncFromJson.md) - Level 3: Stack trace
+- [_ConvertTo-JsoncFromYaml](functions/_ConvertTo-JsoncFromYaml.md) - Level 3: Stack trace
+- [_Remove-JsoncComments](functions/_Remove-JsoncComments.md) - Handle line comments //
 - [ConvertFrom-JsoncToJson](functions/ConvertFrom-JsoncToJson.md) - Converts a JSONC file to JSON format.
 - [ConvertFrom-JsoncToYaml](functions/ConvertFrom-JsoncToYaml.md) - Converts a JSONC file to YAML format.
 - [ConvertTo-JsoncFromJson](functions/ConvertTo-JsoncFromJson.md) - Converts a JSON file to JSONC format.
@@ -1332,8 +1859,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [Remove-JuliaPackage](functions/Remove-JuliaPackage.md) - Removes Julia packages.
 - [Update-JuliaPackages](functions/Update-JuliaPackages.md) - Updates Julia packages.
 
-### jwt (3 functions)
+### jwt (6 functions)
 
+- [_ConvertFrom-Base64Url](functions/_ConvertFrom-Base64Url.md) - Initializes JWT utility functions.
+- [_Decode-Jwt](functions/_Decode-Jwt.md) - Decode header and payload (explicit args — Set-Item scriptblocks do not bind pipeline input)
+- [_Encode-Jwt](functions/_Encode-Jwt.md) - JWT Encoder
 - [Decode-Jwt](functions/Decode-Jwt.md) - Decodes a JSON Web Token (JWT).
 - [Encode-Jwt](functions/Encode-Jwt.md) - Encodes data into a JSON Web Token (JWT).
 - [Initialize-DevTools-Jwt](functions/Initialize-DevTools-Jwt.md) - Initializes JWT utility functions.
@@ -1373,8 +1903,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-Kubectl](functions/Invoke-Kubectl.md) - Executes kubectl with the specified arguments.
 - [Set-KubectlContext](functions/Set-KubectlContext.md) - Switches the current Kubernetes context.
 
-### lab (1 functions)
+### lab (9 functions)
 
+- [_Convert-LabToRgb](functions/_Convert-LabToRgb.md) - Convert LAB to RGB
+- [_Convert-LabToXyz](functions/_Convert-LabToXyz.md) - Convert f to x, y, z
+- [_Convert-LinearRgbToRgb](functions/_Convert-LinearRgbToRgb.md) - Helper: Convert linear RGB to RGB (gamma correction)
+- [_Convert-RgbToLab](functions/_Convert-RgbToLab.md) - Convert RGB to LAB
+- [_Convert-RgbToLinearRgb](functions/_Convert-RgbToLinearRgb.md) - Initializes LAB/LABa color conversion utility functions.
+- [_Convert-RgbToXyz](functions/_Convert-RgbToXyz.md) - Convert linear RGB to XYZ (sRGB to XYZ matrix, D65 white point)
+- [_Convert-XyzToLab](functions/_Convert-XyzToLab.md) - Apply f function
+- [_Convert-XyzToRgb](functions/_Convert-XyzToRgb.md) - Convert linear RGB to RGB
 - [Initialize-FileConversion-MediaColorsLab](functions/Initialize-FileConversion-MediaColorsLab.md) - Initializes LAB/LABa color conversion utility functions.
 
 ### lang-go-basic (8 functions)
@@ -1461,27 +1999,44 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Invoke-LazyDocker](functions/Invoke-LazyDocker.md) - Launches lazydocker terminal UI.
 
-### lch (1 functions)
+### lch (5 functions)
 
+- [_Convert-LabToLch](functions/_Convert-LabToLch.md) - Normalize hue to 0-360
+- [_Convert-LchToLab](functions/_Convert-LchToLab.md) - Convert LCH to LAB
+- [_Convert-LchToRgb](functions/_Convert-LchToRgb.md) - Convert LCH to RGB
+- [_Convert-RgbToLch](functions/_Convert-RgbToLch.md) - Convert RGB to LCH
 - [Initialize-FileConversion-MediaColorsLch](functions/Initialize-FileConversion-MediaColorsLch.md) - Initializes LCH/LCHa color conversion utility functions.
 
-### legacy-image (3 functions)
+### legacy-image (5 functions)
 
+- [_Convert-Image](functions/_Convert-Image.md) - Initializes image media format conversion utility functions.
+- [_Resize-Image](functions/_Resize-Image.md) - Image resize
 - [Convert-Image](functions/Convert-Image.md) - Converts image file formats.
 - [Initialize-FileConversion-MediaImages](functions/Initialize-FileConversion-MediaImages.md) - Initializes image media format conversion utility functions.
 - [Resize-Image](functions/Resize-Image.md) - Resizes an image.
 
-### length (1 functions)
+### length (7 functions)
 
+- [_Convert-Length](functions/_Convert-Length.md) - Convert to meters first, then to target unit
+- [_ConvertFrom-MetersToLength](functions/_ConvertFrom-MetersToLength.md) - Meters to other units
+- [_ConvertTo-MetersFromLength](functions/_ConvertTo-MetersFromLength.md) - Other units to meters
+- [Convert-Length](functions/Convert-Length.md) - Convert Length
+- [ConvertFrom-MetersToLength](functions/ConvertFrom-MetersToLength.md) - Convert from Meters
+- [ConvertTo-MetersFromLength](functions/ConvertTo-MetersFromLength.md) - Convert to Meters
 - [Initialize-FileConversion-CoreUnitsLength](functions/Initialize-FileConversion-CoreUnitsLength.md) - Initializes Length unit conversion utility functions.
 
-### lorem (2 functions)
+### lorem (3 functions)
 
+- [_Get-LoremIpsum](functions/_Get-LoremIpsum.md) - Initializes Lorem Ipsum generator utility functions.
 - [Get-LoremIpsum](functions/Get-LoremIpsum.md) - Generates Lorem Ipsum placeholder text.
 - [Initialize-DevTools-Lorem](functions/Initialize-DevTools-Lorem.md) - Initializes Lorem Ipsum generator utility functions.
 
-### lz4 (1 functions)
+### lz4 (5 functions)
 
+- [_Compress-Lz4](functions/_Compress-Lz4.md) - -f: force overwrite, -z: compress, -#: compression level
+- [_Decompress-Lz4](functions/_Decompress-Lz4.md) - Use lz4 command-line tool with -d flag for decompression
+- [Compress-Lz4](functions/Compress-Lz4.md) - Compresses a file using LZ4 compression.
+- [Expand-Lz4](functions/Expand-Lz4.md) - Decompresses an LZ4 compressed file.
 - [Initialize-FileConversion-CoreCompressionLz4](functions/Initialize-FileConversion-CoreCompressionLz4.md) - Initializes LZ4 compression format conversion utility functions.
 
 ### maven (4 functions)
@@ -1538,8 +2093,20 @@ This documentation is automatically generated from comment-based help in the pro
 - [Navigate-WithZoxide](functions/Navigate-WithZoxide.md) - Navigates to directories using zoxide's smart matching.
 - [View-WithBat](functions/View-WithBat.md) - Views files with syntax highlighting using bat.
 
-### modhex (9 functions)
+### modhex (21 functions)
 
+- [_ConvertFrom-AsciiToModHex](functions/_ConvertFrom-AsciiToModHex.md) - ASCII to ModHex
+- [_ConvertFrom-BinaryToModHex](functions/_ConvertFrom-BinaryToModHex.md) - First convert binary to hex, then hex to modhex
+- [_ConvertFrom-DecimalToModHex](functions/_ConvertFrom-DecimalToModHex.md) - First convert decimal to hex, then hex to modhex
+- [_ConvertFrom-HexToModHex](functions/_ConvertFrom-HexToModHex.md) - Remove spaces and common separators
+- [_ConvertFrom-ModHexToAscii](functions/_ConvertFrom-ModHexToAscii.md) - Remove spaces and convert to lowercase
+- [_ConvertFrom-ModHexToBinary](functions/_ConvertFrom-ModHexToBinary.md) - First convert modhex to hex, then hex to binary
+- [_ConvertFrom-ModHexToDecimal](functions/_ConvertFrom-ModHexToDecimal.md) - First convert modhex to hex, then hex to decimal
+- [_ConvertFrom-ModHexToHex](functions/_ConvertFrom-ModHexToHex.md) - Remove spaces and convert to lowercase
+- [_ConvertFrom-ModHexToOctal](functions/_ConvertFrom-ModHexToOctal.md) - First convert modhex to hex, then hex to octal
+- [_ConvertFrom-ModHexToRoman](functions/_ConvertFrom-ModHexToRoman.md) - First convert modhex to hex, then hex to roman
+- [_ConvertFrom-OctalToModHex](functions/_ConvertFrom-OctalToModHex.md) - First convert octal to hex, then hex to modhex
+- [_ConvertFrom-RomanToModHex](functions/_ConvertFrom-RomanToModHex.md) - First convert roman to hex, then hex to modhex
 - [ConvertFrom-ModHexToAscii](functions/ConvertFrom-ModHexToAscii.md) - Converts ModHex string to ASCII text.
 - [ConvertFrom-ModHexToBase32](functions/ConvertFrom-ModHexToBase32.md) - Converts ModHex string to Base32 representation.
 - [ConvertFrom-ModHexToBinary](functions/ConvertFrom-ModHexToBinary.md) - Converts ModHex string to binary representation.
@@ -1556,14 +2123,23 @@ This documentation is automatically generated from comment-based help in the pro
 - [IsSuccess](functions/IsSuccess.md) - Loads multiple fragment modules with batch optimization.
 - [ModuleImportResult](functions/ModuleImportResult.md) - Loads multiple fragment modules with batch optimization.
 
+### modules (2 functions)
+
+- [Enable-PoshGit](functions/Enable-PoshGit.md) - Expose explicit enable helpers so scripts can opt-in to loading.
+- [Enable-PSReadLine](functions/Enable-PSReadLine.md) - PSReadLine enable helper (idempotent if other fragments already declare it)
+
 ### mojo (3 functions)
 
 - [Build-MojoProgram](functions/Build-MojoProgram.md) - Builds Mojo programs.
 - [Invoke-MojoRun](functions/Invoke-MojoRun.md) - Runs Mojo programs.
 - [Update-MojoSelf](functions/Update-MojoSelf.md) - Updates Mojo to the latest version.
 
-### morse (3 functions)
+### morse (7 functions)
 
+- [_ConvertFrom-AsciiToMorse](functions/_ConvertFrom-AsciiToMorse.md) - ASCII to Morse Code
+- [_ConvertFrom-MorseToAscii](functions/_ConvertFrom-MorseToAscii.md) - Morse Code to ASCII
+- [_Decode-Morse](functions/_Decode-Morse.md) - Add space between words (but not after last word)
+- [_Encode-Morse](functions/_Encode-Morse.md) - Process each character in the word
 - [ConvertFrom-AsciiToMorse](functions/ConvertFrom-AsciiToMorse.md) - Converts ASCII text to Morse Code encoding.
 - [ConvertFrom-MorseToAscii](functions/ConvertFrom-MorseToAscii.md) - Converts Morse Code encoding to ASCII text.
 - [Initialize-FileConversion-CoreEncodingMorse](functions/Initialize-FileConversion-CoreEncodingMorse.md) - Initializes Morse Code encoding conversion utility functions.
@@ -1578,8 +2154,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-NaviPrint](functions/Invoke-NaviPrint.md) - Prints commands from navi cheatsheets without executing them.
 - [Invoke-NaviSearch](functions/Invoke-NaviSearch.md) - Searches navi cheatsheets interactively.
 
-### ncol (1 functions)
+### ncol (2 functions)
 
+- [_Convert-NcolToRgb](functions/_Convert-NcolToRgb.md) - Convert NCOL to HWB (they're similar)
 - [Initialize-FileConversion-MediaColorsNcol](functions/Initialize-FileConversion-MediaColorsNcol.md) - Initializes NCOL/NCOLA color conversion utility functions.
 
 ### network-analysis (5 functions)
@@ -1590,16 +2167,24 @@ This documentation is automatically generated from comment-based help in the pro
 - [Start-CloudflareTunnel](functions/Start-CloudflareTunnel.md) - Starts a Cloudflare tunnel using cloudflared.
 - [Start-Wireshark](functions/Start-Wireshark.md) - Launches Wireshark network protocol analyzer.
 
-### network-http-headers (5 functions)
+### network-http-headers (9 functions)
 
+- [_Build-HttpHeaders](functions/_Build-HttpHeaders.md) - Build HTTP headers from hashtable
+- [_ConvertFrom-HttpHeadersToJson](functions/_ConvertFrom-HttpHeadersToJson.md) - Convert to JSON
+- [_ConvertTo-HttpHeadersFromJson](functions/_ConvertTo-HttpHeadersFromJson.md) - Convert to hashtable
+- [_Parse-HttpHeaders](functions/_Parse-HttpHeaders.md) - Multiple values - convert to array
 - [Build-HttpHeaders](functions/Build-HttpHeaders.md) - Builds HTTP headers from a hashtable.
 - [ConvertFrom-HttpHeadersToJson](functions/ConvertFrom-HttpHeadersToJson.md) - Converts HTTP headers file to JSON format.
 - [ConvertTo-HttpHeadersFromJson](functions/ConvertTo-HttpHeadersFromJson.md) - Converts JSON file to HTTP headers format.
 - [Initialize-FileConversion-NetworkHttpHeaders](functions/Initialize-FileConversion-NetworkHttpHeaders.md) - Initializes HTTP headers parsing and conversion utility functions.
 - [Parse-HttpHeaders](functions/Parse-HttpHeaders.md) - Parses HTTP headers into a hashtable.
 
-### network-mime-types (6 functions)
+### network-mime-types (10 functions)
 
+- [_Build-MimeType](functions/_Build-MimeType.md) - Add parameters
+- [_ConvertFrom-MimeTypeToJson](functions/_ConvertFrom-MimeTypeToJson.md) - Convert to JSON
+- [_ConvertTo-MimeTypeFromJson](functions/_ConvertTo-MimeTypeFromJson.md) - Convert to hashtable
+- [_Parse-MimeType](functions/_Parse-MimeType.md) - Remove quotes if present
 - [ConvertFrom-MimeTypeToJson](functions/ConvertFrom-MimeTypeToJson.md) - Converts MIME type file to JSON format.
 - [ConvertTo-MimeTypeFromJson](functions/ConvertTo-MimeTypeFromJson.md) - Converts JSON file to MIME type format.
 - [Get-ExtensionFromMimeType](functions/Get-ExtensionFromMimeType.md) - Gets file extension(s) from a MIME type.
@@ -1607,16 +2192,24 @@ This documentation is automatically generated from comment-based help in the pro
 - [Initialize-FileConversion-NetworkMimeTypes](functions/Initialize-FileConversion-NetworkMimeTypes.md) - Initializes MIME types parsing and conversion utility functions.
 - [Parse-MimeType](functions/Parse-MimeType.md) - Parses a MIME type into its components.
 
-### network-query-string (5 functions)
+### network-query-string (9 functions)
 
+- [_Build-QueryString](functions/_Build-QueryString.md) - Build query string from hashtable
+- [_ConvertFrom-QueryStringToJson](functions/_ConvertFrom-QueryStringToJson.md) - Convert to JSON
+- [_ConvertTo-QueryStringFromJson](functions/_ConvertTo-QueryStringFromJson.md) - Convert to hashtable
+- [_Parse-QueryString](functions/_Parse-QueryString.md) - Key without value
 - [Build-QueryString](functions/Build-QueryString.md) - Builds a query string from a hashtable.
 - [ConvertFrom-QueryStringToJson](functions/ConvertFrom-QueryStringToJson.md) - Converts query string file to JSON format.
 - [ConvertTo-QueryStringFromJson](functions/ConvertTo-QueryStringFromJson.md) - Converts JSON file to query string format.
 - [Initialize-FileConversion-NetworkQueryString](functions/Initialize-FileConversion-NetworkQueryString.md) - Initializes query string parsing and conversion utility functions.
 - [Parse-QueryString](functions/Parse-QueryString.md) - Parses a query string into a hashtable.
 
-### network-url-uri (5 functions)
+### network-url-uri (9 functions)
 
+- [_Build-UrlUri](functions/_Build-UrlUri.md) - Build query string from QueryParameters if provided
+- [_ConvertFrom-UrlUriToJson](functions/_ConvertFrom-UrlUriToJson.md) - Convert to JSON
+- [_ConvertTo-UrlUriFromJson](functions/_ConvertTo-UrlUriFromJson.md) - Convert to hashtable
+- [_Parse-UrlUri](functions/_Parse-UrlUri.md) - Key without value
 - [Build-UrlUri](functions/Build-UrlUri.md) - Builds a URL/URI from components.
 - [ConvertFrom-UrlUriToJson](functions/ConvertFrom-UrlUriToJson.md) - Converts URL/URI file to JSON format.
 - [ConvertTo-UrlUriFromJson](functions/ConvertTo-UrlUriFromJson.md) - Converts JSON file to URL/URI format.
@@ -1667,13 +2260,20 @@ This documentation is automatically generated from comment-based help in the pro
 - [Restore-NuGetPackages](functions/Restore-NuGetPackages.md) - Restores packages from packages.config or project.json.
 - [Update-NuGetPackages](functions/Update-NuGetPackages.md) - Updates packages in packages.config.
 
-### number-base (2 functions)
+### number-base (3 functions)
 
+- [_Convert-NumberBase](functions/_Convert-NumberBase.md) - Initializes number base conversion utility functions.
 - [Convert-NumberBase](functions/Convert-NumberBase.md) - Converts numbers between different bases.
 - [Initialize-DevTools-NumberBase](functions/Initialize-DevTools-NumberBase.md) - Initializes number base conversion utility functions.
 
-### numeric (17 functions)
+### numeric (23 functions)
 
+- [_ConvertFrom-DecimalToOctal](functions/_ConvertFrom-DecimalToOctal.md) - First convert decimal to ASCII, then ASCII to octal
+- [_ConvertFrom-DecimalToRoman](functions/_ConvertFrom-DecimalToRoman.md) - First convert decimal to ASCII, then ASCII to roman
+- [_ConvertFrom-OctalToDecimal](functions/_ConvertFrom-OctalToDecimal.md) - First convert octal to ASCII, then ASCII to decimal
+- [_ConvertFrom-OctalToRoman](functions/_ConvertFrom-OctalToRoman.md) - First convert octal to ASCII, then ASCII to roman
+- [_ConvertFrom-RomanToDecimal](functions/_ConvertFrom-RomanToDecimal.md) - First convert roman to ASCII, then ASCII to decimal
+- [_ConvertFrom-RomanToOctal](functions/_ConvertFrom-RomanToOctal.md) - First convert roman to ASCII, then ASCII to octal
 - [ConvertFrom-DecimalToAscii](functions/ConvertFrom-DecimalToAscii.md) - Converts decimal string to ASCII text.
 - [ConvertFrom-DecimalToBase32](functions/ConvertFrom-DecimalToBase32.md) - Converts decimal string to Base32 representation.
 - [ConvertFrom-DecimalToBinary](functions/ConvertFrom-DecimalToBinary.md) - Converts decimal string to binary representation.
@@ -1699,8 +2299,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [New-NuxtApp](functions/New-NuxtApp.md) - Creates a new Nuxt.js application.
 - [Start-NuxtDev](functions/Start-NuxtDev.md) - Starts Nuxt.js development server.
 
-### ogg (6 functions)
+### ogg (8 functions)
 
+- [_ConvertFrom-OggToMp3](functions/_ConvertFrom-OggToMp3.md) - OGG Vorbis conversions
+- [_ConvertFrom-OggToWav](functions/_ConvertFrom-OggToWav.md) - OGG Vorbis conversions
 - [ConvertFrom-OggToAac](functions/ConvertFrom-OggToAac.md) - Converts OGG Vorbis audio to AAC format.
 - [ConvertFrom-OggToFlac](functions/ConvertFrom-OggToFlac.md) - Converts OGG Vorbis audio to FLAC format.
 - [ConvertFrom-OggToMp3](functions/ConvertFrom-OggToMp3.md) - Converts OGG Vorbis audio to MP3 format.
@@ -1713,12 +2315,18 @@ This documentation is automatically generated from comment-based help in the pro
 - [Initialize-OhMyPosh](functions/Initialize-OhMyPosh.md) - Initializes oh-my-posh prompt framework lazily.
 - [prompt](functions/prompt.md) - PowerShell prompt function with lazy oh-my-posh initialization.
 
-### oklab (1 functions)
+### oklab (3 functions)
 
+- [_Convert-OklabToRgb](functions/_Convert-OklabToRgb.md) - Step 4: Linear RGB to RGB (reuse existing helper)
+- [_Convert-RgbToOklab](functions/_Convert-RgbToOklab.md) - Step 3: LMS to OKLAB
 - [Initialize-FileConversion-MediaColorsOklab](functions/Initialize-FileConversion-MediaColorsOklab.md) - Initializes OKLAB/OKLABa color conversion utility functions.
 
-### oklch (1 functions)
+### oklch (5 functions)
 
+- [_Convert-OklabToOklch](functions/_Convert-OklabToOklch.md) - Normalize hue to 0-360
+- [_Convert-OklchToOklab](functions/_Convert-OklchToOklab.md) - Convert OKLCH to OKLAB
+- [_Convert-OklchToRgb](functions/_Convert-OklchToRgb.md) - Convert OKLCH to RGB
+- [_Convert-RgbToOklch](functions/_Convert-RgbToOklch.md) - Convert RGB to OKLCH
 - [Initialize-FileConversion-MediaColorsOklch](functions/Initialize-FileConversion-MediaColorsOklch.md) - Initializes OKLCH/OKLCHa color conversion utility functions.
 
 ### ollama (4 functions)
@@ -1732,8 +2340,10 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Open-Item](functions/Open-Item.md) - Opens files or URLs using the system's default application.
 
-### opus (6 functions)
+### opus (8 functions)
 
+- [_ConvertFrom-OpusToMp3](functions/_ConvertFrom-OpusToMp3.md) - Opus conversions
+- [_ConvertFrom-OpusToWav](functions/_ConvertFrom-OpusToWav.md) - Opus conversions
 - [ConvertFrom-OpusToAac](functions/ConvertFrom-OpusToAac.md) - Converts Opus audio to AAC format.
 - [ConvertFrom-OpusToFlac](functions/ConvertFrom-OpusToFlac.md) - Converts Opus audio to FLAC format.
 - [ConvertFrom-OpusToMp3](functions/ConvertFrom-OpusToMp3.md) - Converts Opus audio to MP3 format.
@@ -1745,12 +2355,15 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Register-PackageManager](functions/Register-PackageManager.md) - Registers a package manager with standardized commands.
 
-### parse (1 functions)
+### parse (2 functions)
 
+- [_Parse-Color](functions/_Parse-Color.md) - Normalize hue to 0-360
 - [Initialize-FileConversion-MediaColorsParse](functions/Initialize-FileConversion-MediaColorsParse.md) - Initializes color parsing utility functions.
 
-### pdf (3 functions)
+### pdf (5 functions)
 
+- [_ConvertFrom-PdfToText](functions/_ConvertFrom-PdfToText.md) - Initializes PDF media format conversion utility functions.
+- [_Merge-Pdf](functions/_Merge-Pdf.md) - PDF merge
 - [ConvertFrom-PdfToText](functions/ConvertFrom-PdfToText.md) - Extracts text from PDF file.
 - [Initialize-FileConversion-MediaPdf](functions/Initialize-FileConversion-MediaPdf.md) - Initializes PDF media format conversion utility functions.
 - [Merge-Pdf](functions/Merge-Pdf.md) - Merges multiple PDF files.
@@ -1827,12 +2440,19 @@ This documentation is automatically generated from comment-based help in the pro
 - [Update-PoetryDependencies](functions/Update-PoetryDependencies.md) - Updates Poetry project dependencies.
 - [Update-PoetrySelf](functions/Update-PoetrySelf.md) - Updates Poetry to the latest version.
 
-### power (1 functions)
+### power (2 functions)
 
+- [_Convert-Power](functions/_Convert-Power.md) - Thermal
 - [Initialize-FileConversion-CoreUnitsPower](functions/Initialize-FileConversion-CoreUnitsPower.md) - Initializes Power unit conversion utility functions.
 
-### pressure (1 functions)
+### pressure (7 functions)
 
+- [_Convert-Pressure](functions/_Convert-Pressure.md) - Convert to pascals first, then to target unit
+- [_ConvertFrom-PascalsToPressure](functions/_ConvertFrom-PascalsToPressure.md) - Pascals to other units
+- [_ConvertTo-PascalsFromPressure](functions/_ConvertTo-PascalsFromPressure.md) - Other units to pascals
+- [Convert-Pressure](functions/Convert-Pressure.md) - Convert Pressure
+- [ConvertFrom-PascalsToPressure](functions/ConvertFrom-PascalsToPressure.md) - Convert from Pascals
+- [ConvertTo-PascalsFromPressure](functions/ConvertTo-PascalsFromPressure.md) - Convert to Pascals
 - [Initialize-FileConversion-CoreUnitsPressure](functions/Initialize-FileConversion-CoreUnitsPressure.md) - Initializes Pressure unit conversion utility functions.
 
 ### profile-updates (1 functions)
@@ -1844,27 +2464,49 @@ This documentation is automatically generated from comment-based help in the pro
 - [Initialize-PromptFramework](functions/Initialize-PromptFramework.md) - Initializes a prompt framework with standardized error handling and fallback.
 - [Test-PromptCommandAvailable](functions/Test-PromptCommandAvailable.md) - Tests if a prompt framework command is available.
 
-### properties (1 functions)
+### properties (10 functions)
 
+- [_ConvertFrom-PropertiesToIni](functions/_ConvertFrom-PropertiesToIni.md) - Level 3: Stack trace
+- [_ConvertFrom-PropertiesToJson](functions/_ConvertFrom-PropertiesToJson.md) - Level 3: Stack trace
+- [_ConvertFrom-PropertiesToYaml](functions/_ConvertFrom-PropertiesToYaml.md) - Level 3: Stack trace
+- [_ConvertTo-PropertiesFromIni](functions/_ConvertTo-PropertiesFromIni.md) - Level 3: Stack trace
+- [_ConvertTo-PropertiesFromJson](functions/_ConvertTo-PropertiesFromJson.md) - Level 3: Stack trace
+- [_ConvertTo-PropertiesFromYaml](functions/_ConvertTo-PropertiesFromYaml.md) - Level 3: Stack trace
+- [_Escape-PropertiesValue](functions/_Escape-PropertiesValue.md) - Unicode character - use \uXXXX
+- [_Parse-PropertiesFile](functions/_Parse-PropertiesFile.md) - Save last key-value
+- [_Unescape-PropertiesValue](functions/_Unescape-PropertiesValue.md) - Unknown escape, treat backslash as literal
 - [Initialize-FileConversion-Properties](functions/Initialize-FileConversion-Properties.md) - Initializes Java Properties file format conversion utility functions.
 
-### qrcode-communication (5 functions)
+### qrcode-communication (9 functions)
 
+- [_New-QrCodeEmail](functions/_New-QrCodeEmail.md) - Format: mailto:email?subject=Subject&body=Body
+- [_New-QrCodePhone](functions/_New-QrCodePhone.md) - Format: tel:number
+- [_New-QrCodeSms](functions/_New-QrCodeSms.md) - Format: SMSTO:number:message
+- [_New-QrCodeUrl](functions/_New-QrCodeUrl.md) - Initializes communication-specific QR code generation functions.
 - [Initialize-DevTools-QrCode-Communication](functions/Initialize-DevTools-QrCode-Communication.md) - Initializes communication-specific QR code generation functions.
 - [New-QrCodeEmail](functions/New-QrCodeEmail.md) - Generates an email QR code.
 - [New-QrCodePhone](functions/New-QrCodePhone.md) - Generates a phone call QR code.
 - [New-QrCodeSms](functions/New-QrCodeSms.md) - Generates an SMS/text message QR code.
 - [New-QrCodeUrl](functions/New-QrCodeUrl.md) - Generates a URL QR code.
 
-### qrcode-formats (4 functions)
+### qrcode-formats (7 functions)
 
+- [_New-QrCodeDataUri](functions/_New-QrCodeDataUri.md) - FFFFFF',
+- [_New-QrCodeSvg](functions/_New-QrCodeSvg.md) - FFFFFF',
+- [_New-QrCodeTerminal](functions/_New-QrCodeTerminal.md) - Terminal QR Code Generator
 - [Initialize-DevTools-QrCode-Formats](functions/Initialize-DevTools-QrCode-Formats.md) - Initializes format-specific QR code generation functions.
 - [New-QrCodeDataUri](functions/New-QrCodeDataUri.md) - Generates a QR code as a data URI.
 - [New-QrCodeSvg](functions/New-QrCodeSvg.md) - Generates a QR code as an SVG image.
 - [New-QrCodeTerminal](functions/New-QrCodeTerminal.md) - Displays a QR code in the terminal.
 
-### qrcode-specialized (7 functions)
+### qrcode-specialized (13 functions)
 
+- [_New-QrCodeCalendar](functions/_New-QrCodeCalendar.md) - Build iCal format
+- [_New-QrCodeContact](functions/_New-QrCodeContact.md) - Build vCard format
+- [_New-QrCodeCrypto](functions/_New-QrCodeCrypto.md) - Cryptocurrency Payment QR Code Generator
+- [_New-QrCodeLocation](functions/_New-QrCodeLocation.md) - Format: geo:lat,lon or geo:lat,lon,altitude
+- [_New-QrCodeTotp](functions/_New-QrCodeTotp.md) - Format: otpauth://totp/Issuer:AccountName?secret=Secret&issuer=Issuer&algorithm=Algorithm&digits=Digits&period=Period
+- [_New-QrCodeWiFi](functions/_New-QrCodeWiFi.md) - Format: WIFI:T:WPA;S:mynetwork;P:mypass;;
 - [Initialize-DevTools-QrCode-Specialized](functions/Initialize-DevTools-QrCode-Specialized.md) - Initializes specialized QR code generation functions.
 - [New-QrCodeCalendar](functions/New-QrCodeCalendar.md) - Generates a calendar event QR code.
 - [New-QrCodeContact](functions/New-QrCodeContact.md) - Generates a contact card (vCard) QR code.
@@ -1873,8 +2515,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [New-QrCodeTotp](functions/New-QrCodeTotp.md) - Generates a TOTP/2FA QR code.
 - [New-QrCodeWiFi](functions/New-QrCodeWiFi.md) - Generates a WiFi network QR code.
 
-### qrcode (2 functions)
+### qrcode (3 functions)
 
+- [_New-QrCode](functions/_New-QrCode.md) - FFFFFF',
 - [Initialize-DevTools-QrCode](functions/Initialize-DevTools-QrCode.md) - Initializes QR code generation utility functions.
 - [New-QrCode](functions/New-QrCode.md) - Generates a QR code image from data.
 
@@ -1891,8 +2534,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [Dump-IL2CPP](functions/Dump-IL2CPP.md) - Dumps IL2CPP metadata from Unity games.
 - [Extract-AndroidApk](functions/Extract-AndroidApk.md) - Extracts and decompiles Android APK files.
 
-### regex (16 functions)
+### regex (19 functions)
 
+- [_Ensure-RegexUtilitiesModule](functions/_Ensure-RegexUtilitiesModule.md) - Natural language to regex converter
+- [_Invoke-RegexAiConversion](functions/_Invoke-RegexAiConversion.md) - Natural language to regex converter
+- [_Test-Regex](functions/_Test-Regex.md) - Regex Tester
 - [Compare-RegexDescriptions](functions/Compare-RegexDescriptions.md) - Compares two natural language regex descriptions.
 - [ConvertTo-RegexFromDescription](functions/ConvertTo-RegexFromDescription.md) - Converts a natural language description into a regular expression pattern.
 - [Explain-RegexPattern](functions/Explain-RegexPattern.md) - Explains a regular expression pattern in plain language.
@@ -1910,8 +2556,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [Test-RegexDescriptionRoundTrip](functions/Test-RegexDescriptionRoundTrip.md) - Validates natural language regex description round-trip consistency.
 - [Test-RegexFromDescription](functions/Test-RegexFromDescription.md) - Converts a natural language description to regex and tests it against input.
 
-### rfc3339 (7 functions)
+### rfc3339 (12 functions)
 
+- [_ConvertFrom-Rfc3339ToDateTime](functions/_ConvertFrom-Rfc3339ToDateTime.md) - RFC 3339 is a subset of ISO 8601, so we can parse it the same way
+- [_ConvertFrom-Rfc3339ToHumanReadable](functions/_ConvertFrom-Rfc3339ToHumanReadable.md) - RFC 3339 to Human-readable
+- [_ConvertFrom-Rfc3339ToUnixTimestamp](functions/_ConvertFrom-Rfc3339ToUnixTimestamp.md) - Add milliseconds if present
+- [_ConvertTo-Rfc3339FromDateTime](functions/_ConvertTo-Rfc3339FromDateTime.md) - Assume UTC if kind is unspecified
+- [_ConvertTo-Rfc3339FromUnixTimestamp](functions/_ConvertTo-Rfc3339FromUnixTimestamp.md) - Handle milliseconds if present
 - [ConvertFrom-Rfc3339ToDateTime](functions/ConvertFrom-Rfc3339ToDateTime.md) - Converts an RFC 3339 date/time string to a DateTime object.
 - [ConvertFrom-Rfc3339ToHumanReadable](functions/ConvertFrom-Rfc3339ToHumanReadable.md) - Converts an RFC 3339 date/time string to a human-readable format.
 - [ConvertFrom-Rfc3339ToUnixTimestamp](functions/ConvertFrom-Rfc3339ToUnixTimestamp.md) - Converts an RFC 3339 date/time string to a Unix timestamp.
@@ -1924,8 +2575,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Find-RipgrepText](functions/Find-RipgrepText.md) - Finds text using ripgrep with common options.
 
-### roman (9 functions)
+### roman (10 functions)
 
+- [_ConvertTo-RomanNumeral](functions/_ConvertTo-RomanNumeral.md) - Initializes Roman numeral encoding conversion utility functions.
 - [ConvertFrom-RomanToAscii](functions/ConvertFrom-RomanToAscii.md) - Converts Roman numeral string to ASCII text.
 - [ConvertFrom-RomanToBase32](functions/ConvertFrom-RomanToBase32.md) - Converts Roman numeral string to Base32 representation.
 - [ConvertFrom-RomanToBinary](functions/ConvertFrom-RomanToBinary.md) - Converts Roman numeral string to binary representation.
@@ -1936,8 +2588,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-RomanToUrl](functions/ConvertFrom-RomanToUrl.md) - Converts Roman numeral string to URL/percent encoded representation.
 - [Initialize-FileConversion-CoreEncodingRoman](functions/Initialize-FileConversion-CoreEncodingRoman.md) - Initializes Roman numeral encoding conversion utility functions.
 
-### rot (5 functions)
+### rot (11 functions)
 
+- [_ConvertFrom-AsciiToRot13](functions/_ConvertFrom-AsciiToRot13.md) - ASCII to ROT13
+- [_ConvertFrom-AsciiToRot47](functions/_ConvertFrom-AsciiToRot47.md) - ASCII to ROT47
+- [_ConvertFrom-Rot13ToAscii](functions/_ConvertFrom-Rot13ToAscii.md) - ROT13 to ASCII (same as encoding, since ROT13 is self-inverse)
+- [_ConvertFrom-Rot47ToAscii](functions/_ConvertFrom-Rot47ToAscii.md) - ROT47 to ASCII (same as encoding, since ROT47 is self-inverse)
+- [_Encode-Rot13](functions/_Encode-Rot13.md) - Initializes ROT13/ROT47 cipher encoding conversion utility functions.
+- [_Encode-Rot47](functions/_Encode-Rot47.md) - Wrap around (126 - 33 + 1 = 94)
 - [ConvertFrom-AsciiToRot13](functions/ConvertFrom-AsciiToRot13.md) - Converts ASCII text to ROT13 cipher encoding.
 - [ConvertFrom-AsciiToRot47](functions/ConvertFrom-AsciiToRot47.md) - Converts ASCII text to ROT47 cipher encoding.
 - [ConvertFrom-Rot13ToAscii](functions/ConvertFrom-Rot13ToAscii.md) - Converts ROT13 cipher encoding to ASCII text.
@@ -1963,68 +2621,97 @@ This documentation is automatically generated from comment-based help in the pro
 - [Sync-RyeDependencies](functions/Sync-RyeDependencies.md) - Syncs dependencies using Rye.
 - [Update-RyePackages](functions/Update-RyePackages.md) - Updates packages using Rye.
 
-### scientific-direct (3 functions)
+### scientific-direct (5 functions)
 
+- [_ConvertTo-Hdf5FromNetCdf](functions/_ConvertTo-Hdf5FromNetCdf.md) - Convert NetCDF to JSON first, then JSON to HDF5
+- [_ConvertTo-NetCdfFromHdf5](functions/_ConvertTo-NetCdfFromHdf5.md) - Convert HDF5 to JSON first, then JSON to NetCDF
 - [ConvertTo-Hdf5FromNetCdf](functions/ConvertTo-Hdf5FromNetCdf.md) - Converts NetCDF file to HDF5 format.
 - [ConvertTo-NetCdfFromHdf5](functions/ConvertTo-NetCdfFromHdf5.md) - Converts HDF5 file to NetCDF format.
 - [Initialize-FileConversion-ScientificDirect](functions/Initialize-FileConversion-ScientificDirect.md) - Initializes direct scientific format conversion utility functions.
 
-### scientific-fits (4 functions)
+### scientific-fits (7 functions)
 
+- [_ConvertFrom-FitsToCsv](functions/_ConvertFrom-FitsToCsv.md) - Write rows
+- [_ConvertFrom-FitsToJson](functions/_ConvertFrom-FitsToJson.md) - For table HDUs
+- [_ConvertTo-FitsFromJson](functions/_ConvertTo-FitsFromJson.md) - Infer data type from first row
 - [ConvertFrom-FitsToCsv](functions/ConvertFrom-FitsToCsv.md) - Converts FITS file to CSV format.
 - [ConvertFrom-FitsToJson](functions/ConvertFrom-FitsToJson.md) - Converts FITS file to JSON format.
 - [ConvertTo-FitsFromJson](functions/ConvertTo-FitsFromJson.md) - Converts JSON file to FITS format.
 - [Initialize-FileConversion-ScientificFits](functions/Initialize-FileConversion-ScientificFits.md) - Initializes FITS format conversion utility functions.
 
-### scientific-hdf5 (3 functions)
+### scientific-hdf5 (5 functions)
 
+- [_ConvertFrom-Hdf5ToJson](functions/_ConvertFrom-Hdf5ToJson.md) - HDF5 to JSON
+- [_ConvertTo-Hdf5FromJson](functions/_ConvertTo-Hdf5FromJson.md) - JSON to HDF5
 - [ConvertFrom-Hdf5ToJson](functions/ConvertFrom-Hdf5ToJson.md) - Converts HDF5 file to JSON format.
 - [ConvertTo-Hdf5FromJson](functions/ConvertTo-Hdf5FromJson.md) - Converts JSON file to HDF5 format.
 - [Initialize-FileConversion-ScientificHdf5](functions/Initialize-FileConversion-ScientificHdf5.md) - Initializes HDF5 format conversion utility functions.
 
-### scientific-matlab (4 functions)
+### scientific-matlab (7 functions)
 
+- [_ConvertFrom-MatlabToCsv](functions/_ConvertFrom-MatlabToCsv.md) - Write data
+- [_ConvertFrom-MatlabToJson](functions/_ConvertFrom-MatlabToJson.md) - Remove MATLAB metadata keys (keys starting with '__')
+- [_ConvertTo-MatlabFromJson](functions/_ConvertTo-MatlabFromJson.md) - 2D array
 - [ConvertFrom-MatlabToCsv](functions/ConvertFrom-MatlabToCsv.md) - Converts MATLAB .mat file to CSV format.
 - [ConvertFrom-MatlabToJson](functions/ConvertFrom-MatlabToJson.md) - Converts MATLAB .mat file to JSON format.
 - [ConvertTo-MatlabFromJson](functions/ConvertTo-MatlabFromJson.md) - Converts JSON file to MATLAB .mat format.
 - [Initialize-FileConversion-ScientificMatlab](functions/Initialize-FileConversion-ScientificMatlab.md) - Initializes MATLAB .mat format conversion utility functions.
 
-### scientific-netcdf (3 functions)
+### scientific-netcdf (5 functions)
 
+- [_ConvertFrom-NetCdfToJson](functions/_ConvertFrom-NetCdfToJson.md) - NetCDF to JSON
+- [_ConvertTo-NetCdfFromJson](functions/_ConvertTo-NetCdfFromJson.md) - JSON to NetCDF
 - [ConvertFrom-NetCdfToJson](functions/ConvertFrom-NetCdfToJson.md) - Converts NetCDF file to JSON format.
 - [ConvertTo-NetCdfFromJson](functions/ConvertTo-NetCdfFromJson.md) - Converts JSON file to NetCDF format.
 - [Initialize-FileConversion-ScientificNetCdf](functions/Initialize-FileConversion-ScientificNetCdf.md) - Initializes NetCDF format conversion utility functions.
 
-### scientific-sas (4 functions)
+### scientific-sas (7 functions)
 
+- [_ConvertFrom-SasToCsv](functions/_ConvertFrom-SasToCsv.md) - Fallback to pandas if polars not available
+- [_ConvertFrom-SasToJson](functions/_ConvertFrom-SasToJson.md) - Add metadata if available
+- [_ConvertTo-SasFromJson](functions/_ConvertTo-SasFromJson.md) - Fallback: pandas doesn't have write_sas, so we'll save as CSV and suggest using SAS
 - [ConvertFrom-SasToCsv](functions/ConvertFrom-SasToCsv.md) - Converts SAS file to CSV format.
 - [ConvertFrom-SasToJson](functions/ConvertFrom-SasToJson.md) - Converts SAS file to JSON format.
 - [ConvertTo-SasFromJson](functions/ConvertTo-SasFromJson.md) - Converts JSON file to SAS format.
 - [Initialize-FileConversion-ScientificSas](functions/Initialize-FileConversion-ScientificSas.md) - Initializes SAS format conversion utility functions.
 
-### scientific-spss (4 functions)
+### scientific-spss (7 functions)
 
+- [_ConvertFrom-SpssToCsv](functions/_ConvertFrom-SpssToCsv.md) - Fallback to pandas if polars not available
+- [_ConvertFrom-SpssToJson](functions/_ConvertFrom-SpssToJson.md) - Add metadata if available
+- [_ConvertTo-SpssFromJson](functions/_ConvertTo-SpssFromJson.md) - Use pyreadstat for writing SPSS files
 - [ConvertFrom-SpssToCsv](functions/ConvertFrom-SpssToCsv.md) - Converts SPSS file to CSV format.
 - [ConvertFrom-SpssToJson](functions/ConvertFrom-SpssToJson.md) - Converts SPSS file to JSON format.
 - [ConvertTo-SpssFromJson](functions/ConvertTo-SpssFromJson.md) - Converts JSON file to SPSS format.
 - [Initialize-FileConversion-ScientificSpss](functions/Initialize-FileConversion-ScientificSpss.md) - Initializes SPSS format conversion utility functions.
 
-### scientific-stata (4 functions)
+### scientific-stata (7 functions)
 
+- [_ConvertFrom-StataToCsv](functions/_ConvertFrom-StataToCsv.md) - Fallback to pandas if polars not available
+- [_ConvertFrom-StataToJson](functions/_ConvertFrom-StataToJson.md) - Add metadata if available
+- [_ConvertTo-StataFromJson](functions/_ConvertTo-StataFromJson.md) - Fallback to pandas
 - [ConvertFrom-StataToCsv](functions/ConvertFrom-StataToCsv.md) - Converts Stata file to CSV format.
 - [ConvertFrom-StataToJson](functions/ConvertFrom-StataToJson.md) - Converts Stata file to JSON format.
 - [ConvertTo-StataFromJson](functions/ConvertTo-StataFromJson.md) - Converts JSON file to Stata format.
 - [Initialize-FileConversion-ScientificStata](functions/Initialize-FileConversion-ScientificStata.md) - Initializes Stata format conversion utility functions.
 
-### scientific-to-columnar (5 functions)
+### scientific-to-columnar (9 functions)
 
+- [_ConvertTo-Hdf5FromParquet](functions/_ConvertTo-Hdf5FromParquet.md) - Use columnar module function
+- [_ConvertTo-NetCdfFromParquet](functions/_ConvertTo-NetCdfFromParquet.md) - Use columnar module function
+- [_ConvertTo-ParquetFromHdf5](functions/_ConvertTo-ParquetFromHdf5.md) - Use columnar module function
+- [_ConvertTo-ParquetFromNetCdf](functions/_ConvertTo-ParquetFromNetCdf.md) - Use columnar module function
 - [ConvertTo-Hdf5FromParquet](functions/ConvertTo-Hdf5FromParquet.md) - Converts Parquet file to HDF5 format.
 - [ConvertTo-NetCdfFromParquet](functions/ConvertTo-NetCdfFromParquet.md) - Converts Parquet file to NetCDF format.
 - [ConvertTo-ParquetFromHdf5](functions/ConvertTo-ParquetFromHdf5.md) - Converts HDF5 file to Parquet format.
 - [ConvertTo-ParquetFromNetCdf](functions/ConvertTo-ParquetFromNetCdf.md) - Converts NetCDF file to Parquet format.
 - [Initialize-FileConversion-ScientificToColumnar](functions/Initialize-FileConversion-ScientificToColumnar.md) - Initializes scientific to columnar format conversion utility functions.
 
-### scoop (10 functions)
+### scoop-completion (1 functions)
+
+- [Enable-ScoopCompletion](functions/Enable-ScoopCompletion.md) - Instead, it creates an Enable-ScoopCompletion function that can be called on-demand to enable
+
+### scoop (11 functions)
 
 - [Clear-ScoopCache](functions/Clear-ScoopCache.md) - Cleans up Scoop cache and old versions.
 - [Export-ScoopPackages](functions/Export-ScoopPackages.md) - Exports installed Scoop packages to a backup file.
@@ -2033,6 +2720,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Get-ScoopPackageInfo](functions/Get-ScoopPackageInfo.md) - Shows information about Scoop packages.
 - [Import-ScoopPackages](functions/Import-ScoopPackages.md) - Restores Scoop packages from a backup file.
 - [Install-ScoopPackage](functions/Install-ScoopPackage.md) - Installs packages using Scoop.
+- [Repair-ScoopBuckets](functions/Repair-ScoopBuckets.md) - Remove read-only attribute if present
 - [Uninstall-ScoopPackage](functions/Uninstall-ScoopPackage.md) - Uninstalls packages using Scoop.
 - [Update-ScoopAll](functions/Update-ScoopAll.md) - Updates all installed Scoop packages.
 - [Update-ScoopPackage](functions/Update-ScoopPackage.md) - Updates packages using Scoop.
@@ -2046,8 +2734,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-TruffleHogScan](functions/Invoke-TruffleHogScan.md) - Scans for secrets using TruffleHog.
 - [Invoke-YaraScan](functions/Invoke-YaraScan.md) - Scans files using YARA rules.
 
-### sexpr (4 functions)
+### sexpr (10 functions)
 
+- [_ConvertFrom-SexprToJson](functions/_ConvertFrom-SexprToJson.md) - S-Expression to JSON
+- [_ConvertFrom-SexprToYaml](functions/_ConvertFrom-SexprToYaml.md) - Fallback: simple key-value format
+- [_ConvertSexprItemToJson](functions/_ConvertSexprItemToJson.md) - _ConvertFrom-SexprToYaml can use it without duplicating the body.
+- [_ConvertTo-Sexpr](functions/_ConvertTo-Sexpr.md) - Escape special characters
+- [_ConvertTo-SexprFromJson](functions/_ConvertTo-SexprFromJson.md) - JSON to S-Expression
+- [_Parse-Sexpr](functions/_Parse-Sexpr.md) - Skip ')'
 - [Initialize-FileConversion-Sexpr](functions/Initialize-FileConversion-Sexpr.md) - Initializes S-Expressions format conversion utility functions.
 - [ParseAtom](functions/ParseAtom.md) - Initializes S-Expressions format conversion utility functions.
 - [ParseList](functions/ParseList.md) - Initializes S-Expressions format conversion utility functions.
@@ -2059,25 +2753,37 @@ This documentation is automatically generated from comment-based help in the pro
 - [Open-Editor](functions/Open-Editor.md) - Opens file in the best available editor.
 - [Open-VSCode](functions/Open-VSCode.md) - Opens current directory in the best available editor.
 
-### snappy (1 functions)
+### snappy (5 functions)
 
+- [_Compress-Snappy](functions/_Compress-Snappy.md) - Fallback to Python with python-snappy
+- [_Decompress-Snappy](functions/_Decompress-Snappy.md) - Fallback to Python with python-snappy
+- [Compress-Snappy](functions/Compress-Snappy.md) - Compresses a file using Snappy compression.
+- [Expand-Snappy](functions/Expand-Snappy.md) - Decompresses a Snappy compressed file.
 - [Initialize-FileConversion-CoreCompressionSnappy](functions/Initialize-FileConversion-CoreCompressionSnappy.md) - Initializes Snappy compression format conversion utility functions.
 
-### specialized-barcode (4 functions)
+### specialized-barcode (7 functions)
 
+- [_ConvertFrom-BarcodeToText](functions/_ConvertFrom-BarcodeToText.md) - For now, we'll indicate that decoding requires additional tools
+- [_ConvertTo-BarcodeFromJson](functions/_ConvertTo-BarcodeFromJson.md) - Create temporary text file with JSON string
+- [_ConvertTo-BarcodeFromText](functions/_ConvertTo-BarcodeFromText.md) - Initializes Barcode conversion utility functions.
 - [ConvertFrom-BarcodeToText](functions/ConvertFrom-BarcodeToText.md) - Converts Barcode image to text.
 - [ConvertTo-BarcodeFromJson](functions/ConvertTo-BarcodeFromJson.md) - Converts JSON file to Barcode image.
 - [ConvertTo-BarcodeFromText](functions/ConvertTo-BarcodeFromText.md) - Converts text file to Barcode image.
 - [Initialize-FileConversion-SpecializedBarcode](functions/Initialize-FileConversion-SpecializedBarcode.md) - Initializes Barcode conversion utility functions.
 
-### specialized-jwt (3 functions)
+### specialized-jwt (5 functions)
 
+- [_ConvertFrom-JwtToJson](functions/_ConvertFrom-JwtToJson.md) - Convert to JSON (include header and payload)
+- [_ConvertTo-JwtFromJson](functions/_ConvertTo-JwtFromJson.md) - Use existing JWT encoding function if available
 - [ConvertFrom-JwtToJson](functions/ConvertFrom-JwtToJson.md) - Converts JWT token file to JSON format.
 - [ConvertTo-JwtFromJson](functions/ConvertTo-JwtFromJson.md) - Converts JSON file to JWT token.
 - [Initialize-FileConversion-SpecializedJwt](functions/Initialize-FileConversion-SpecializedJwt.md) - Initializes JWT conversion utility functions.
 
-### specialized-qrcode (4 functions)
+### specialized-qrcode (7 functions)
 
+- [_ConvertFrom-QrCodeToText](functions/_ConvertFrom-QrCodeToText.md) - For now, we'll indicate that decoding requires additional tools
+- [_ConvertTo-QrCodeFromJson](functions/_ConvertTo-QrCodeFromJson.md) - Use existing QR code generation function if available
+- [_ConvertTo-QrCodeFromText](functions/_ConvertTo-QrCodeFromText.md) - Use existing QR code generation function if available
 - [ConvertFrom-QrCodeToText](functions/ConvertFrom-QrCodeToText.md) - Converts QR Code image to text.
 - [ConvertTo-QrCodeFromJson](functions/ConvertTo-QrCodeFromJson.md) - Converts JSON file to QR Code image.
 - [ConvertTo-QrCodeFromText](functions/ConvertTo-QrCodeFromText.md) - Converts text file to QR Code image.
@@ -2087,9 +2793,21 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Initialize-FileConversion-Specialized](functions/Initialize-FileConversion-Specialized.md) - Initializes specialized format conversion utility functions.
 
-### speed (1 functions)
+### speed (7 functions)
 
+- [_Convert-Speed](functions/_Convert-Speed.md) - Convert to m/s first, then to target unit
+- [_ConvertFrom-MetersPerSecondToSpeed](functions/_ConvertFrom-MetersPerSecondToSpeed.md) - Meters per second to other units
+- [_ConvertTo-MetersPerSecondFromSpeed](functions/_ConvertTo-MetersPerSecondFromSpeed.md) - Other units to meters per second
+- [Convert-Speed](functions/Convert-Speed.md) - Convert Speed
+- [ConvertFrom-MetersPerSecondToSpeed](functions/ConvertFrom-MetersPerSecondToSpeed.md) - Convert from Meters per second
+- [ConvertTo-MetersPerSecondFromSpeed](functions/ConvertTo-MetersPerSecondFromSpeed.md) - Convert to Meters per second
 - [Initialize-FileConversion-CoreUnitsSpeed](functions/Initialize-FileConversion-CoreUnitsSpeed.md) - Initializes Speed unit conversion utility functions.
+
+### ssh (3 functions)
+
+- [Add-SSHKeyIfNotLoaded](functions/Add-SSHKeyIfNotLoaded.md) - idempotent key loader
+- [Get-SSHKeys](functions/Get-SSHKeys.md) - list loaded keys
+- [Start-SSHAgent](functions/Start-SSHAgent.md) - start agent if not running
 
 ### StarshipHelpers (3 functions)
 
@@ -2113,8 +2831,20 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Update-VSCodePrompt](functions/Update-VSCodePrompt.md) - Updates VS Code's prompt state if VS Code is active.
 
-### superjson (13 functions)
+### superjson (25 functions)
 
+- [_ConvertFrom-SuperJsonToCsv](functions/_ConvertFrom-SuperJsonToCsv.md) - SuperJSON to CSV
+- [_ConvertFrom-SuperJsonToJson](functions/_ConvertFrom-SuperJsonToJson.md) - SuperJSON to JSON
+- [_ConvertFrom-SuperJsonToToml](functions/_ConvertFrom-SuperJsonToToml.md) - SuperJSON to TOML
+- [_ConvertFrom-SuperJsonToToon](functions/_ConvertFrom-SuperJsonToToon.md) - SuperJSON to TOON
+- [_ConvertFrom-SuperJsonToXml](functions/_ConvertFrom-SuperJsonToXml.md) - SuperJSON to XML
+- [_ConvertFrom-SuperJsonToYaml](functions/_ConvertFrom-SuperJsonToYaml.md) - SuperJSON to YAML
+- [_ConvertTo-SuperJsonFromCsv](functions/_ConvertTo-SuperJsonFromCsv.md) - CSV to SuperJSON
+- [_ConvertTo-SuperJsonFromJson](functions/_ConvertTo-SuperJsonFromJson.md) - JSON to SuperJSON
+- [_ConvertTo-SuperJsonFromToml](functions/_ConvertTo-SuperJsonFromToml.md) - TOML to SuperJSON
+- [_ConvertTo-SuperJsonFromToon](functions/_ConvertTo-SuperJsonFromToon.md) - TOON to SuperJSON
+- [_ConvertTo-SuperJsonFromXml](functions/_ConvertTo-SuperJsonFromXml.md) - XML to SuperJSON
+- [_ConvertTo-SuperJsonFromYaml](functions/_ConvertTo-SuperJsonFromYaml.md) - YAML to SuperJSON
 - [ConvertFrom-SuperJsonToCsv](functions/ConvertFrom-SuperJsonToCsv.md) - Converts SuperJSON file to CSV format.
 - [ConvertFrom-SuperJsonToJson](functions/ConvertFrom-SuperJsonToJson.md) - Converts SuperJSON file to JSON format.
 - [ConvertFrom-SuperJsonToToml](functions/ConvertFrom-SuperJsonToToml.md) - Converts SuperJSON file to TOML format.
@@ -2129,8 +2859,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-SuperJsonFromYaml](functions/ConvertTo-SuperJsonFromYaml.md) - Converts YAML file to SuperJSON format.
 - [Initialize-FileConversion-SuperJson](functions/Initialize-FileConversion-SuperJson.md) - Initializes SuperJSON format conversion utility functions.
 
-### svg (6 functions)
+### svg (8 functions)
 
+- [_ConvertFrom-SvgToJpeg](functions/_ConvertFrom-SvgToJpeg.md) - SVG conversions
+- [_ConvertFrom-SvgToPng](functions/_ConvertFrom-SvgToPng.md) - SVG conversions
 - [ConvertFrom-SvgToJpeg](functions/ConvertFrom-SvgToJpeg.md) - Converts SVG image to JPEG format.
 - [ConvertFrom-SvgToPdf](functions/ConvertFrom-SvgToPdf.md) - Converts SVG image to PDF format.
 - [ConvertFrom-SvgToPng](functions/ConvertFrom-SvgToPng.md) - Converts SVG image to PNG format.
@@ -2157,7 +2889,6 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Ensure-System](functions/Ensure-System.md) - Sets up all system utility functions when any of them is called for the first time.
     This lazy loading approach improves profile startup performance.
-    Loads system modules from the system subdirectory.
 
 ### SystemInfo (3 functions)
 
@@ -2172,8 +2903,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [Get-TailscaleStatus](functions/Get-TailscaleStatus.md) - Gets Tailscale connection status.
 - [Invoke-Tailscale](functions/Invoke-Tailscale.md) - Executes Tailscale commands.
 
-### temperature (1 functions)
+### temperature (7 functions)
 
+- [_Convert-Temperature](functions/_Convert-Temperature.md) - Calculate all three scales for reference
+- [_ConvertFrom-CelsiusToTemperature](functions/_ConvertFrom-CelsiusToTemperature.md) - Celsius to other units
+- [_ConvertTo-CelsiusFromTemperature](functions/_ConvertTo-CelsiusFromTemperature.md) - Other units to Celsius
+- [Convert-Temperature](functions/Convert-Temperature.md) - Convert Temperature
+- [ConvertFrom-CelsiusToTemperature](functions/ConvertFrom-CelsiusToTemperature.md) - Convert from Celsius
+- [ConvertTo-CelsiusFromTemperature](functions/ConvertTo-CelsiusFromTemperature.md) - Convert to Celsius
 - [Initialize-FileConversion-CoreUnitsTemperature](functions/Initialize-FileConversion-CoreUnitsTemperature.md) - Initializes Temperature unit conversion utility functions.
 
 ### terminal-enhanced (6 functions)
@@ -2201,21 +2938,29 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-Playwright](functions/Invoke-Playwright.md) - Executes Playwright commands.
 - [Invoke-Vitest](functions/Invoke-Vitest.md) - Executes Vitest test runner.
 
-### text-gaps (6 functions)
+### text-gaps (12 functions)
 
+- [_ConvertFrom-JsonLToCsv](functions/_ConvertFrom-JsonLToCsv.md) - Empty file is valid, just create empty CSV
+- [_ConvertFrom-JsonLToYaml](functions/_ConvertFrom-JsonLToYaml.md) - Filter out warnings
+- [_ConvertFrom-XmlToYaml](functions/_ConvertFrom-XmlToYaml.md) - Filter out warnings
+- [_ConvertTo-JsonLFromCsv](functions/_ConvertTo-JsonLFromCsv.md) - CSV to JSONL (line-by-line conversion)
+- [_ConvertTo-JsonLFromYaml](functions/_ConvertTo-JsonLFromYaml.md) - Convert YAML to JSON first, then JSON to JSONL
+- [_ConvertTo-XmlFromYaml](functions/_ConvertTo-XmlFromYaml.md) - Filter out warnings
 - [ConvertFrom-JsonLToCsv](functions/ConvertFrom-JsonLToCsv.md) - Converts JSONL file to CSV format.
 - [ConvertFrom-JsonLToYaml](functions/ConvertFrom-JsonLToYaml.md) - Converts JSONL file to YAML format.
 - [ConvertTo-JsonLFromCsv](functions/ConvertTo-JsonLFromCsv.md) - Converts CSV file to JSONL format.
 - [ConvertTo-JsonLFromYaml](functions/ConvertTo-JsonLFromYaml.md) - Converts YAML file to JSONL format.
-- [ConvertTo-XmlFromYaml](functions/ConvertTo-XmlFromYaml.md) - Initializes text format gap conversion utility functions.
+- [ConvertTo-XmlFromYaml](functions/ConvertTo-XmlFromYaml.md) - Converts a YAML file to XML format.
 - [Initialize-FileConversion-CoreTextGaps](functions/Initialize-FileConversion-CoreTextGaps.md) - Initializes text format gap conversion utility functions.
 
 ### TextSearch (1 functions)
 
 - [Find-String](functions/Find-String.md) - Searches for patterns in files.
 
-### tiff (7 functions)
+### tiff (9 functions)
 
+- [_ConvertFrom-TiffToJpeg](functions/_ConvertFrom-TiffToJpeg.md) - TIFF conversions
+- [_ConvertFrom-TiffToPng](functions/_ConvertFrom-TiffToPng.md) - TIFF conversions
 - [ConvertFrom-TiffToJpeg](functions/ConvertFrom-TiffToJpeg.md) - Converts TIFF image to JPEG format.
 - [ConvertFrom-TiffToPdf](functions/ConvertFrom-TiffToPdf.md) - Converts TIFF image to PDF format.
 - [ConvertFrom-TiffToPng](functions/ConvertFrom-TiffToPng.md) - Converts TIFF image to PNG format.
@@ -2228,22 +2973,36 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Initialize-FileConversion-CoreUnitsTime](functions/Initialize-FileConversion-CoreUnitsTime.md) - Initializes Time duration unit conversion utility functions.
 
-### timestamp (3 functions)
+### timestamp (5 functions)
 
+- [_ConvertFrom-Epoch](functions/_ConvertFrom-Epoch.md) - Initializes timestamp conversion utility functions.
+- [_ConvertTo-Epoch](functions/_ConvertTo-Epoch.md) - Epoch/Unix Timestamp Converter
 - [ConvertFrom-Epoch](functions/ConvertFrom-Epoch.md) - Converts Unix epoch timestamp to DateTime.
 - [ConvertTo-Epoch](functions/ConvertTo-Epoch.md) - Converts DateTime to Unix epoch timestamp.
 - [Initialize-DevTools-Timestamp](functions/Initialize-DevTools-Timestamp.md) - Initializes timestamp conversion utility functions.
 
-### timezone (5 functions)
+### timezone (9 functions)
 
+- [_Convert-TimeZone](functions/_Convert-TimeZone.md) - Initializes Timezone conversion utility functions.
+- [_ConvertFrom-TimeZone](functions/_ConvertFrom-TimeZone.md) - Treat input as being in specified timezone, convert to local
+- [_ConvertTo-TimeZone](functions/_ConvertTo-TimeZone.md) - Assume input is in local time, convert to target timezone
+- [_Get-TimeZones](functions/_Get-TimeZones.md) - List available timezones
 - [Convert-TimeZone](functions/Convert-TimeZone.md) - Converts a DateTime between two timezones.
 - [ConvertFrom-TimeZone](functions/ConvertFrom-TimeZone.md) - Converts a DateTime from a specific timezone to local time.
 - [ConvertTo-TimeZone](functions/ConvertTo-TimeZone.md) - Converts a DateTime to a specific timezone.
 - [Get-TimeZones](functions/Get-TimeZones.md) - Gets a list of available timezones.
 - [Initialize-FileConversion-CoreTimeTimezone](functions/Initialize-FileConversion-CoreTimeTimezone.md) - Initializes Timezone conversion utility functions.
 
-### toml (9 functions)
+### toml (17 functions)
 
+- [_ConvertFrom-TomlToJson](functions/_ConvertFrom-TomlToJson.md) - Level 3: Stack trace
+- [_ConvertFrom-TomlToToon](functions/_ConvertFrom-TomlToToon.md) - Level 3: Stack trace
+- [_ConvertFrom-TomlToXml](functions/_ConvertFrom-TomlToXml.md) - Level 3: Stack trace
+- [_ConvertFrom-TomlToYaml](functions/_ConvertFrom-TomlToYaml.md) - Level 3: Stack trace
+- [_ConvertTo-TomlFromJson](functions/_ConvertTo-TomlFromJson.md) - Level 3: Stack trace
+- [_ConvertTo-TomlFromToon](functions/_ConvertTo-TomlFromToon.md) - Level 3: Stack trace
+- [_ConvertTo-TomlFromXml](functions/_ConvertTo-TomlFromXml.md) - Level 3: Stack trace
+- [_ConvertTo-TomlFromYaml](functions/_ConvertTo-TomlFromYaml.md) - Level 3: Stack trace
 - [ConvertFrom-TomlToJson](functions/ConvertFrom-TomlToJson.md) - Converts TOML file to JSON format.
 - [ConvertFrom-TomlToToon](functions/ConvertFrom-TomlToToon.md) - Converts TOML file to TOON format.
 - [ConvertFrom-TomlToXml](functions/ConvertFrom-TomlToXml.md) - Converts TOML file to XML format.
@@ -2254,8 +3013,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-TomlFromYaml](functions/ConvertTo-TomlFromYaml.md) - Converts YAML file to TOML format.
 - [Initialize-FileConversion-Toml](functions/Initialize-FileConversion-Toml.md) - Initializes TOML format conversion utility functions.
 
-### toon (9 functions)
+### toon (17 functions)
 
+- [_ConvertFrom-ToonToCsv](functions/_ConvertFrom-ToonToCsv.md) - TOON to CSV
+- [_ConvertFrom-ToonToJson](functions/_ConvertFrom-ToonToJson.md) - TOON to JSON helper
+- [_ConvertFrom-ToonToXml](functions/_ConvertFrom-ToonToXml.md) - TOON to XML
+- [_ConvertFrom-ToonToYaml](functions/_ConvertFrom-ToonToYaml.md) - TOON to YAML
+- [_ConvertTo-ToonFromCsv](functions/_ConvertTo-ToonFromCsv.md) - CSV to TOON
+- [_ConvertTo-ToonFromJson](functions/_ConvertTo-ToonFromJson.md) - Initializes TOON format conversion utility functions.
+- [_ConvertTo-ToonFromXml](functions/_ConvertTo-ToonFromXml.md) - XML to TOON
+- [_ConvertTo-ToonFromYaml](functions/_ConvertTo-ToonFromYaml.md) - YAML to TOON
 - [ConvertFrom-ToonToCsv](functions/ConvertFrom-ToonToCsv.md) - Converts TOON file to CSV format.
 - [ConvertFrom-ToonToJson](functions/ConvertFrom-ToonToJson.md) - Converts TOON file to JSON format.
 - [ConvertFrom-ToonToXml](functions/ConvertFrom-ToonToXml.md) - Converts TOON file to XML format.
@@ -2274,17 +3041,27 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Initialize-FileConversion-CoreUnitsTypography](functions/Initialize-FileConversion-CoreUnitsTypography.md) - Initializes Typography unit conversion utility functions.
 
-### ubjson (1 functions)
+### ubjson (5 functions)
 
+- [_ConvertFrom-UbjsonToJson](functions/_ConvertFrom-UbjsonToJson.md) - Try Node.js with ubjson package
+- [_ConvertTo-UbjsonFromJson](functions/_ConvertTo-UbjsonFromJson.md) - Try Node.js with ubjson package
+- [ConvertFrom-UbjsonToJson](functions/ConvertFrom-UbjsonToJson.md) - Converts UBJSON file to JSON format.
+- [ConvertTo-UbjsonFromJson](functions/ConvertTo-UbjsonFromJson.md) - Converts JSON file to UBJSON format.
 - [Initialize-FileConversion-Ubjson](functions/Initialize-FileConversion-Ubjson.md) - Initializes UBJSON format conversion utility functions.
 
-### units (2 functions)
+### units (3 functions)
 
+- [_Convert-Units](functions/_Convert-Units.md) - Time conversions
 - [Convert-Units](functions/Convert-Units.md) - Converts values between different units.
 - [Initialize-DevTools-Units](functions/Initialize-DevTools-Units.md) - Initializes unit conversion utility functions.
 
-### unix (6 functions)
+### unix (11 functions)
 
+- [_ConvertFrom-UnixTimestampToDateTime](functions/_ConvertFrom-UnixTimestampToDateTime.md) - Try with milliseconds if seconds conversion fails
+- [_ConvertFrom-UnixTimestampToHumanReadable](functions/_ConvertFrom-UnixTimestampToHumanReadable.md) - Unix Timestamp to Human-readable
+- [_ConvertFrom-UnixTimestampToIso8601](functions/_ConvertFrom-UnixTimestampToIso8601.md) - Unix Timestamp to ISO 8601
+- [_ConvertTo-UnixTimestampFromDateTime](functions/_ConvertTo-UnixTimestampFromDateTime.md) - DateTime to Unix Timestamp
+- [_ConvertTo-UnixTimestampFromIso8601](functions/_ConvertTo-UnixTimestampFromIso8601.md) - ISO 8601 to Unix Timestamp
 - [ConvertFrom-UnixTimestampToDateTime](functions/ConvertFrom-UnixTimestampToDateTime.md) - Converts a Unix timestamp to a DateTime object.
 - [ConvertFrom-UnixTimestampToHumanReadable](functions/ConvertFrom-UnixTimestampToHumanReadable.md) - Converts a Unix timestamp to a human-readable date/time string.
 - [ConvertFrom-UnixTimestampToIso8601](functions/ConvertFrom-UnixTimestampToIso8601.md) - Converts a Unix timestamp to ISO 8601 format.
@@ -2292,8 +3069,24 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-UnixTimestampFromIso8601](functions/ConvertTo-UnixTimestampFromIso8601.md) - Converts an ISO 8601 date/time string to a Unix timestamp.
 - [Initialize-FileConversion-CoreTimeUnix](functions/Initialize-FileConversion-CoreTimeUnix.md) - Initializes Unix Timestamp conversion utility functions.
 
-### url (9 functions)
+### url (25 functions)
 
+- [_ConvertFrom-AsciiToUrl](functions/_ConvertFrom-AsciiToUrl.md) - Percent encode: %XX
+- [_ConvertFrom-Base32ToUrl](functions/_ConvertFrom-Base32ToUrl.md) - First convert Base32 to ASCII, then ASCII to URL encoding
+- [_ConvertFrom-BinaryToUrl](functions/_ConvertFrom-BinaryToUrl.md) - First convert binary to ASCII, then ASCII to URL encoding
+- [_ConvertFrom-DecimalToUrl](functions/_ConvertFrom-DecimalToUrl.md) - First convert decimal to ASCII, then ASCII to URL encoding
+- [_ConvertFrom-HexToUrl](functions/_ConvertFrom-HexToUrl.md) - First convert hex to ASCII, then ASCII to URL encoding
+- [_ConvertFrom-ModHexToUrl](functions/_ConvertFrom-ModHexToUrl.md) - First convert ModHex to hex, then hex to URL encoding
+- [_ConvertFrom-OctalToUrl](functions/_ConvertFrom-OctalToUrl.md) - First convert octal to ASCII, then ASCII to URL encoding
+- [_ConvertFrom-RomanToUrl](functions/_ConvertFrom-RomanToUrl.md) - First convert Roman to ASCII, then ASCII to URL encoding
+- [_ConvertFrom-UrlToAscii](functions/_ConvertFrom-UrlToAscii.md) - Regular character
+- [_ConvertFrom-UrlToBase32](functions/_ConvertFrom-UrlToBase32.md) - First convert URL encoding to ASCII, then ASCII to Base32
+- [_ConvertFrom-UrlToBinary](functions/_ConvertFrom-UrlToBinary.md) - First convert URL encoding to ASCII, then ASCII to binary
+- [_ConvertFrom-UrlToDecimal](functions/_ConvertFrom-UrlToDecimal.md) - First convert URL encoding to ASCII, then ASCII to decimal
+- [_ConvertFrom-UrlToHex](functions/_ConvertFrom-UrlToHex.md) - First convert URL encoding to ASCII, then ASCII to hex
+- [_ConvertFrom-UrlToModHex](functions/_ConvertFrom-UrlToModHex.md) - First convert URL encoding to hex, then hex to ModHex
+- [_ConvertFrom-UrlToOctal](functions/_ConvertFrom-UrlToOctal.md) - First convert URL encoding to ASCII, then ASCII to octal
+- [_ConvertFrom-UrlToRoman](functions/_ConvertFrom-UrlToRoman.md) - First convert URL encoding to ASCII, then ASCII to Roman
 - [ConvertFrom-UrlToAscii](functions/ConvertFrom-UrlToAscii.md) - Converts URL/percent encoded string to ASCII text.
 - [ConvertFrom-UrlToBase32](functions/ConvertFrom-UrlToBase32.md) - Converts URL/percent encoded string to Base32 representation.
 - [ConvertFrom-UrlToBinary](functions/ConvertFrom-UrlToBinary.md) - Converts URL/percent encoded string to binary representation.
@@ -2304,8 +3097,20 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-UrlToRoman](functions/ConvertFrom-UrlToRoman.md) - Converts URL/percent encoded string to Roman numeral representation.
 - [Initialize-FileConversion-CoreEncodingUrl](functions/Initialize-FileConversion-CoreEncodingUrl.md) - Initializes URL/Percent encoding conversion utility functions.
 
-### utf16-utf32 (1 functions)
+### utf16-utf32 (13 functions)
 
+- [_Decode-Utf16](functions/_Decode-Utf16.md) - Little-endian
+- [_Decode-Utf32](functions/_Decode-Utf32.md) - Replacement character
+- [_Encode-Utf16](functions/_Encode-Utf16.md) - Little-endian
+- [_Encode-Utf32](functions/_Encode-Utf32.md) - This is a simplified version - full implementation would handle pairs
+- [ConvertFrom-AsciiToUtf16](functions/ConvertFrom-AsciiToUtf16.md) - ASCII to UTF-16
+- [ConvertFrom-AsciiToUtf32](functions/ConvertFrom-AsciiToUtf32.md) - ASCII to UTF-32
+- [ConvertFrom-Base64ToUtf16](functions/ConvertFrom-Base64ToUtf16.md) - Treat input as Base64 (UTF-8 bytes), decode to text, then encode as UTF-16
+- [ConvertFrom-HexToUtf16](functions/ConvertFrom-HexToUtf16.md) - Treat input as UTF-8 hex, decode to text, then encode as UTF-16
+- [ConvertFrom-Utf16ToAscii](functions/ConvertFrom-Utf16ToAscii.md) - Remove spaces and common separators
+- [ConvertFrom-Utf16ToBase64](functions/ConvertFrom-Utf16ToBase64.md) - Treat input as UTF-16 hex, decode to text, then encode as UTF-8 Base64
+- [ConvertFrom-Utf16ToHex](functions/ConvertFrom-Utf16ToHex.md) - Treat input as UTF-16 hex, decode to text, then encode as UTF-8 hex
+- [ConvertFrom-Utf32ToAscii](functions/ConvertFrom-Utf32ToAscii.md) - Remove spaces and common separators
 - [Initialize-FileConversion-CoreEncodingUtf16Utf32](functions/Initialize-FileConversion-CoreEncodingUtf16Utf32.md) - Initializes UTF-16/UTF-32 encoding conversion utility functions.
 
 ### utilities-datetime (4 functions)
@@ -2413,12 +3218,26 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [Ensure-Utilities](functions/Ensure-Utilities.md) - Sets up all utility functions when any of them is called for the first time.
     This lazy loading approach improves profile startup performance.
-    Loads utility modules from the utilities-modules subdirectory.
 
-### uuid (4 functions)
+### uuid (19 functions)
 
+- [_ConvertFrom-UuidToBase32](functions/_ConvertFrom-UuidToBase32.md) - UUID to Base32
+- [_ConvertFrom-UuidToBase64](functions/_ConvertFrom-UuidToBase64.md) - UUID to Base64
+- [_ConvertFrom-UuidToHex](functions/_ConvertFrom-UuidToHex.md) - Remove dashes and convert to uppercase
+- [_ConvertTo-UuidFromBase32](functions/_ConvertTo-UuidFromBase32.md) - Base32 to UUID
+- [_ConvertTo-UuidFromBase64](functions/_ConvertTo-UuidFromBase64.md) - Base64 to UUID
+- [_ConvertTo-UuidFromHex](functions/_ConvertTo-UuidFromHex.md) - Format as UUID: 8-4-4-4-12
+- [_New-Uuid](functions/_New-Uuid.md) - Generate new UUID
+- [_New-UuidV5](functions/_New-UuidV5.md) - Name-based UUID (requires namespace and name)
+- [ConvertFrom-UuidToBase32](functions/ConvertFrom-UuidToBase32.md) - Converts a UUID to Base32 format.
+- [ConvertFrom-UuidToBase64](functions/ConvertFrom-UuidToBase64.md) - Converts a UUID to Base64 format.
+- [ConvertFrom-UuidToHex](functions/ConvertFrom-UuidToHex.md) - Converts a UUID to hexadecimal format (no dashes).
+- [ConvertTo-UuidFromBase32](functions/ConvertTo-UuidFromBase32.md) - Converts a Base32 string to UUID format.
+- [ConvertTo-UuidFromBase64](functions/ConvertTo-UuidFromBase64.md) - Converts a Base64 string to UUID format.
+- [ConvertTo-UuidFromHex](functions/ConvertTo-UuidFromHex.md) - Converts a hexadecimal string to UUID format.
 - [Initialize-DevTools-Uuid](functions/Initialize-DevTools-Uuid.md) - Initializes UUID generator utility functions.
 - [Initialize-FileConversion-CoreEncodingUuid](functions/Initialize-FileConversion-CoreEncodingUuid.md) - Initializes UUID format conversion utility functions.
+- [New-Uuid](functions/New-Uuid.md) - Generates a new UUID (GUID).
 - [New-Uuid](functions/New-Uuid.md) - Generates a UUID (Universally Unique Identifier).
 - [New-UuidV5](functions/New-UuidV5.md) - Generates a UUID v5 (name-based).
 
@@ -2440,8 +3259,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [Remove-VcpkgPackage](functions/Remove-VcpkgPackage.md) - Removes C++ libraries using vcpkg.
 - [Update-VcpkgPackages](functions/Update-VcpkgPackages.md) - Upgrades vcpkg packages.
 
-### video (4 functions)
+### video (6 functions)
 
+- [_ConvertFrom-VideoToAudio](functions/_ConvertFrom-VideoToAudio.md) - Video to audio extraction
+- [_ConvertFrom-VideoToGif](functions/_ConvertFrom-VideoToGif.md) - Initializes video media format conversion utility functions.
 - [ConvertFrom-VideoToAudio](functions/ConvertFrom-VideoToAudio.md) - Extracts audio from video file.
 - [ConvertFrom-VideoToGif](functions/ConvertFrom-VideoToGif.md) - Converts video to GIF.
 - [Initialize-FileConversion-MediaAudioVideo](functions/Initialize-FileConversion-MediaAudioVideo.md) - Initializes video to audio extraction utility functions.
@@ -2462,8 +3283,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [Remove-VoltaTool](functions/Remove-VoltaTool.md) - Uninstalls tools from Volta.
 - [Update-VoltaSelf](functions/Update-VoltaSelf.md) - Updates Volta to the latest version.
 
-### volume (1 functions)
+### volume (7 functions)
 
+- [_Convert-Volume](functions/_Convert-Volume.md) - Convert to liters first, then to target unit
+- [_ConvertFrom-LitersToVolume](functions/_ConvertFrom-LitersToVolume.md) - Liters to other units
+- [_ConvertTo-LitersFromVolume](functions/_ConvertTo-LitersFromVolume.md) - Other units to liters
+- [Convert-Volume](functions/Convert-Volume.md) - Convert Volume
+- [ConvertFrom-LitersToVolume](functions/ConvertFrom-LitersToVolume.md) - Convert from Liters
+- [ConvertTo-LitersFromVolume](functions/ConvertTo-LitersFromVolume.md) - Convert to Liters
 - [Initialize-FileConversion-CoreUnitsVolume](functions/Initialize-FileConversion-CoreUnitsVolume.md) - Initializes Volume unit conversion utility functions.
 
 ### vue (3 functions)
@@ -2472,8 +3299,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [New-VueApp](functions/New-VueApp.md) - Creates a new Vue.js project.
 - [Start-VueDev](functions/Start-VueDev.md) - Starts Vue.js development server.
 
-### wav (6 functions)
+### wav (8 functions)
 
+- [_ConvertFrom-WavToFlac](functions/_ConvertFrom-WavToFlac.md) - WAV conversions
+- [_ConvertFrom-WavToMp3](functions/_ConvertFrom-WavToMp3.md) - WAV conversions
 - [ConvertFrom-WavToAac](functions/ConvertFrom-WavToAac.md) - Converts WAV audio to AAC format.
 - [ConvertFrom-WavToFlac](functions/ConvertFrom-WavToFlac.md) - Converts WAV audio to FLAC format.
 - [ConvertFrom-WavToMp3](functions/ConvertFrom-WavToMp3.md) - Converts WAV audio to MP3 format.
@@ -2481,8 +3310,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertFrom-WavToOpus](functions/ConvertFrom-WavToOpus.md) - Converts WAV audio to Opus format.
 - [Initialize-FileConversion-MediaAudioWav](functions/Initialize-FileConversion-MediaAudioWav.md) - Initializes WAV audio format conversion utility functions.
 
-### webp (7 functions)
+### webp (9 functions)
 
+- [_ConvertFrom-WebpToJpeg](functions/_ConvertFrom-WebpToJpeg.md) - WebP conversions
+- [_ConvertFrom-WebpToPng](functions/_ConvertFrom-WebpToPng.md) - WebP conversions
 - [ConvertFrom-WebpToGif](functions/ConvertFrom-WebpToGif.md) - Converts WebP image to GIF format.
 - [ConvertFrom-WebpToJpeg](functions/ConvertFrom-WebpToJpeg.md) - Converts WebP image to JPEG format.
 - [ConvertFrom-WebpToPng](functions/ConvertFrom-WebpToPng.md) - Converts WebP image to PNG format.
@@ -2491,8 +3322,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-WebpFromPng](functions/ConvertTo-WebpFromPng.md) - Converts PNG image to WebP format.
 - [Initialize-FileConversion-MediaImagesWebp](functions/Initialize-FileConversion-MediaImagesWebp.md) - Initializes WebP image format conversion utility functions.
 
-### weight (1 functions)
+### weight (7 functions)
 
+- [_Convert-Weight](functions/_Convert-Weight.md) - Convert to kilograms first, then to target unit
+- [_ConvertFrom-KilogramsToWeight](functions/_ConvertFrom-KilogramsToWeight.md) - Kilograms to other units
+- [_ConvertTo-KilogramsFromWeight](functions/_ConvertTo-KilogramsFromWeight.md) - Other units to kilograms
+- [Convert-Weight](functions/Convert-Weight.md) - Convert Weight
+- [ConvertFrom-KilogramsToWeight](functions/ConvertFrom-KilogramsToWeight.md) - Convert from Kilograms
+- [ConvertTo-KilogramsFromWeight](functions/ConvertTo-KilogramsFromWeight.md) - Convert to Kilograms
 - [Initialize-FileConversion-CoreUnitsWeight](functions/Initialize-FileConversion-CoreUnitsWeight.md) - Initializes Weight/Mass unit conversion utility functions.
 
 ### winget (10 functions)
@@ -2514,17 +3351,28 @@ This documentation is automatically generated from comment-based help in the pro
 - [Start-UbuntuWSL](functions/Start-UbuntuWSL.md) - Launches or switches to Ubuntu WSL distribution.
 - [Stop-WSL](functions/Stop-WSL.md) - Shuts down all WSL distributions.
 
-### xml (2 functions)
+### xml (3 functions)
 
+- [_ConvertFrom-XmlToJson](functions/_ConvertFrom-XmlToJson.md) - Level 3: Stack trace
 - [ConvertFrom-XmlToJson](functions/ConvertFrom-XmlToJson.md) - Converts XML file to JSON format.
 - [Initialize-FileConversion-CoreBasicXml](functions/Initialize-FileConversion-CoreBasicXml.md) - Initializes XML format conversion utility functions.
 
-### xz (1 functions)
+### xz (9 functions)
 
+- [_Compress-Lzma](functions/_Compress-Lzma.md) - Use xz command-line tool with --format=lzma for LZMA format
+- [_Compress-Xz](functions/_Compress-Xz.md) - -k: keep original file, -#: compression level (0-9)
+- [_Decompress-Lzma](functions/_Decompress-Lzma.md) - Use xz command-line tool with -d flag for decompression
+- [_Decompress-Xz](functions/_Decompress-Xz.md) - Use xz command-line tool with -d flag for decompression
+- [Compress-Lzma](functions/Compress-Lzma.md) - Compresses a file using LZMA compression.
+- [Compress-Xz](functions/Compress-Xz.md) - Compresses a file using XZ compression.
+- [Expand-Lzma](functions/Expand-Lzma.md) - Decompresses an LZMA compressed file.
+- [Expand-Xz](functions/Expand-Xz.md) - Decompresses an XZ compressed file.
 - [Initialize-FileConversion-CoreCompressionXz](functions/Initialize-FileConversion-CoreCompressionXz.md) - Initializes XZ/LZMA compression format conversion utility functions.
 
-### yaml (3 functions)
+### yaml (5 functions)
 
+- [_ConvertFrom-Yaml](functions/_ConvertFrom-Yaml.md) - Level 3: Stack trace
+- [_ConvertTo-Yaml](functions/_ConvertTo-Yaml.md) - Level 3: Stack trace
 - [ConvertFrom-Yaml](functions/ConvertFrom-Yaml.md) - Converts YAML to JSON format.
 - [ConvertTo-Yaml](functions/ConvertTo-Yaml.md) - Converts JSON to YAML format.
 - [Initialize-FileConversion-CoreBasicYaml](functions/Initialize-FileConversion-CoreBasicYaml.md) - Initializes YAML format conversion utility functions.
@@ -2540,12 +3388,24 @@ This documentation is automatically generated from comment-based help in the pro
 - [Update-YarnPackages](functions/Update-YarnPackages.md) - Updates all packages in the current project to their latest versions.
 - [Update-YarnSelf](functions/Update-YarnSelf.md) - Updates Yarn to the latest version.
 
-### z85 (1 functions)
+### z85 (9 functions)
 
+- [_Decode-Z85](functions/_Decode-Z85.md) - Convert to bytes (big-endian, output only needed bytes)
+- [_Encode-Z85](functions/_Encode-Z85.md) - This matches Base85 behavior and allows proper roundtrip for variable-length data
+- [ConvertFrom-AsciiToZ85](functions/ConvertFrom-AsciiToZ85.md) - ASCII to Z85
+- [ConvertFrom-Base64ToZ85](functions/ConvertFrom-Base64ToZ85.md) - Base64 to Z85
+- [ConvertFrom-HexToZ85](functions/ConvertFrom-HexToZ85.md) - Hex to Z85
+- [ConvertFrom-Z85ToAscii](functions/ConvertFrom-Z85ToAscii.md) - Z85 to ASCII
+- [ConvertFrom-Z85ToBase64](functions/ConvertFrom-Z85ToBase64.md) - Z85 to Base64
+- [ConvertFrom-Z85ToHex](functions/ConvertFrom-Z85ToHex.md) - Z85 to Hex
 - [Initialize-FileConversion-CoreEncodingZ85](functions/Initialize-FileConversion-CoreEncodingZ85.md) - Initializes Z85 encoding conversion utility functions.
 
-### zstd (1 functions)
+### zstd (5 functions)
 
+- [_Compress-Zstd](functions/_Compress-Zstd.md) - Invoke zstd using the command object - works for both executables and PowerShell script shims
+- [_Decompress-Zstd](functions/_Decompress-Zstd.md) - Invoke zstd using the command object - works for both executables and PowerShell script shims
+- [Compress-Zstd](functions/Compress-Zstd.md) - Compresses a file using Zstandard (zstd) compression.
+- [Expand-Zstd](functions/Expand-Zstd.md) - Decompresses a Zstandard (zstd) compressed file.
 - [Initialize-FileConversion-CoreCompressionZstd](functions/Initialize-FileConversion-CoreCompressionZstd.md) - Initializes Zstandard (zstd) compression format conversion utility functions.
 
 
@@ -2566,31 +3426,25 @@ This documentation is automatically generated from comment-based help in the pro
 - [acceleration-to-m-s2](aliases/acceleration-to-m-s2.md) - Alias for `ConvertTo-MetersPerSecondSquaredFromAcceleration` (alias for `ConvertTo-MetersPerSecondSquaredFromAcceleration`)
 - [m-s2-to-acceleration](aliases/m-s2-to-acceleration.md) - Alias for `ConvertFrom-MetersPerSecondSquaredToAcceleration` (alias for `ConvertFrom-MetersPerSecondSquaredToAcceleration`)
 
-### ai-tools (12 aliases)
+### ai-tools (6 aliases)
 
 - [comfy](aliases/comfy.md) - Executes ComfyUI CLI commands. (alias for `Invoke-ComfyUI`)
-- [comfy](aliases/comfy.md) - Executes ComfyUI CLI commands. (alias for `Invoke-ComfyUI`)
-- [koboldcpp](aliases/koboldcpp.md) - Executes KoboldCpp commands. (alias for `Invoke-KoboldCpp`)
 - [koboldcpp](aliases/koboldcpp.md) - Executes KoboldCpp commands. (alias for `Invoke-KoboldCpp`)
 - [llama-cpp](aliases/llama-cpp.md) - Executes llama.cpp commands. (alias for `Invoke-LlamaCpp`)
-- [llama-cpp](aliases/llama-cpp.md) - Executes llama.cpp commands. (alias for `Invoke-LlamaCpp`)
-- [llamafile](aliases/llamafile.md) - Executes Llamafile commands. (alias for `Invoke-Llamafile`)
 - [llamafile](aliases/llamafile.md) - Executes Llamafile commands. (alias for `Invoke-Llamafile`)
 - [lms](aliases/lms.md) - Executes LM Studio CLI commands. (alias for `Invoke-LMStudio`)
-- [lms](aliases/lms.md) - Executes LM Studio CLI commands. (alias for `Invoke-LMStudio`)
-- [ollama-enhanced](aliases/ollama-enhanced.md) - Executes Ollama commands with enhanced functionality. (alias for `Invoke-OllamaEnhanced`)
 - [ollama-enhanced](aliases/ollama-enhanced.md) - Executes Ollama commands with enhanced functionality. (alias for `Invoke-OllamaEnhanced`)
 
 ### aliases (2 aliases)
 
-- [la](aliases/la.md) - Alias for `Get-ChildItemEnhancedAll` (alias for `Get-ChildItemEnhancedAll`)
-- [ll](aliases/ll.md) - Alias for `Get-ChildItemEnhanced` (alias for `Get-ChildItemEnhanced`)
+- [la](aliases/la.md) - List all directory contents - enhanced ls -a (alias for `Get-ChildItemEnhancedAll`)
+- [ll](aliases/ll.md) - List directory contents - enhanced ls (alias for `Get-ChildItemEnhanced`)
 
 ### angle (3 aliases)
 
-- [angle](aliases/angle.md) - Alias for `Convert-Angle` (alias for `Convert-Angle`)
-- [angle-to-radians](aliases/angle-to-radians.md) - Alias for `ConvertTo-RadiansFromAngle` (alias for `ConvertTo-RadiansFromAngle`)
-- [radians-to-angle](aliases/radians-to-angle.md) - Alias for `ConvertFrom-RadiansToAngle` (alias for `ConvertFrom-RadiansToAngle`)
+- [angle](aliases/angle.md) - Convert Angle (alias for `Convert-Angle`)
+- [angle-to-radians](aliases/angle-to-radians.md) - Convert to Radians (alias for `ConvertTo-RadiansFromAngle`)
+- [radians-to-angle](aliases/radians-to-angle.md) - Convert from Radians (alias for `ConvertFrom-RadiansToAngle`)
 
 ### angular (3 aliases)
 
@@ -2623,9 +3477,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### area (3 aliases)
 
-- [area](aliases/area.md) - Alias for `Convert-Area` (alias for `Convert-Area`)
-- [area-to-m2](aliases/area-to-m2.md) - Alias for `ConvertTo-SquareMetersFromArea` (alias for `ConvertTo-SquareMetersFromArea`)
-- [m2-to-area](aliases/m2-to-area.md) - Alias for `ConvertFrom-SquareMetersToArea` (alias for `ConvertFrom-SquareMetersToArea`)
+- [area](aliases/area.md) - Convert Area (alias for `Convert-Area`)
+- [area-to-m2](aliases/area-to-m2.md) - Convert to Square meters (alias for `ConvertTo-SquareMetersFromArea`)
+- [m2-to-area](aliases/m2-to-area.md) - Convert from Square meters (alias for `ConvertFrom-SquareMetersToArea`)
 
 ### ascii (9 aliases)
 
@@ -2758,9 +3612,8 @@ This documentation is automatically generated from comment-based help in the pro
 - [base91-to-hex](aliases/base91-to-hex.md) - Converts Base91 encoding to hexadecimal string. (alias for `ConvertFrom-Base91ToHex`)
 - [hex-to-base91](aliases/hex-to-base91.md) - Converts hexadecimal string to Base91 encoding. (alias for `ConvertFrom-HexToBase91`)
 
-### beads (2 aliases)
+### beads (1 aliases)
 
-- [bd](aliases/bd.md) - Executes Beads (bd) commands. (alias for `Invoke-Beads`)
 - [bd](aliases/bd.md) - Executes Beads (bd) commands. (alias for `Invoke-Beads`)
 
 ### binary-direct (10 aliases)
@@ -2881,11 +3734,11 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### brotli (5 aliases)
 
-- [brotli](aliases/brotli.md) - Alias for `Compress-Brotli` (alias for `Compress-Brotli`)
-- [compress-brotli](aliases/compress-brotli.md) - Alias for `Compress-Brotli` (alias for `Compress-Brotli`)
-- [decompress-brotli](aliases/decompress-brotli.md) - Alias for `Expand-Brotli` (alias for `Expand-Brotli`)
-- [expand-brotli](aliases/expand-brotli.md) - Alias for `Expand-Brotli` (alias for `Expand-Brotli`)
-- [uncompress-brotli](aliases/uncompress-brotli.md) - Alias for `Expand-Brotli` (alias for `Expand-Brotli`)
+- [brotli](aliases/brotli.md) - Compresses a file using Brotli compression. (alias for `Compress-Brotli`)
+- [compress-brotli](aliases/compress-brotli.md) - Compresses a file using Brotli compression. (alias for `Compress-Brotli`)
+- [decompress-brotli](aliases/decompress-brotli.md) - Decompresses a Brotli compressed file. (alias for `Expand-Brotli`)
+- [expand-brotli](aliases/expand-brotli.md) - Decompresses a Brotli compressed file. (alias for `Expand-Brotli`)
+- [uncompress-brotli](aliases/uncompress-brotli.md) - Decompresses a Brotli compressed file. (alias for `Expand-Brotli`)
 
 ### build-tools (5 aliases)
 
@@ -3001,8 +3854,8 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### convert (2 aliases)
 
-- [color-convert](aliases/color-convert.md) - Alias for `Convert-Color` (alias for `Convert-Color`)
-- [color-parse](aliases/color-parse.md) - Alias for `Parse-Color` (alias for `Parse-Color`)
+- [color-convert](aliases/color-convert.md) - ff0000 to RGB format. (alias for `Convert-Color`)
+- [color-parse](aliases/color-parse.md) - ff0000" (alias for `Parse-Color`)
 
 ### csv (4 aliases)
 
@@ -3087,9 +3940,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### datasize (3 aliases)
 
-- [bytes-to-datasize](aliases/bytes-to-datasize.md) - Alias for `ConvertFrom-BytesToDataSize` (alias for `ConvertFrom-BytesToDataSize`)
-- [datasize](aliases/datasize.md) - Alias for `Convert-DataSize` (alias for `Convert-DataSize`)
-- [datasize-to-bytes](aliases/datasize-to-bytes.md) - Alias for `ConvertTo-BytesFromDataSize` (alias for `ConvertTo-BytesFromDataSize`)
+- [bytes-to-datasize](aliases/bytes-to-datasize.md) - Convert from Bytes (alias for `ConvertFrom-BytesToDataSize`)
+- [datasize](aliases/datasize.md) - Convert Data Size (alias for `Convert-DataSize`)
+- [datasize-to-bytes](aliases/datasize-to-bytes.md) - Convert to Bytes (alias for `ConvertTo-BytesFromDataSize`)
 
 ### deno (4 aliases)
 
@@ -3209,7 +4062,7 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [commonmark-to-gfm](aliases/commonmark-to-gfm.md) - Converts markdown between dialects/standards using pandoc. (alias for `ConvertTo-GfmFromCommonmark`)
 - [confluence-to-markdown](aliases/confluence-to-markdown.md) - Converts markdown between dialects/standards using pandoc. (alias for `ConvertFrom-JiraToMarkdown`)
-- [convert-markdown-dialect](aliases/convert-markdown-dialect.md) - Initializes markdown dialect conversion utility functions. (alias for `Invoke-MarkdownDialectConversion`)
+- [convert-markdown-dialect](aliases/convert-markdown-dialect.md) - Converts markdown between dialects using pandoc. (alias for `Invoke-MarkdownDialectConversion`)
 - [dokuwiki-to-markdown](aliases/dokuwiki-to-markdown.md) - Converts markdown between dialects/standards using pandoc. (alias for `ConvertFrom-DokuwikiToMarkdown`)
 - [gfm-to-commonmark](aliases/gfm-to-commonmark.md) - Converts markdown between dialects/standards using pandoc. (alias for `ConvertFrom-GfmToCommonmark`)
 - [gfm-to-multimarkdown](aliases/gfm-to-multimarkdown.md) - Converts markdown between dialects/standards using pandoc. (alias for `ConvertTo-MultiMarkdownFromGfm`)
@@ -3431,9 +4284,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### energy (3 aliases)
 
-- [energy](aliases/energy.md) - Alias for `Convert-Energy` (alias for `Convert-Energy`)
-- [energy-to-joules](aliases/energy-to-joules.md) - Alias for `ConvertTo-JoulesFromEnergy` (alias for `ConvertTo-JoulesFromEnergy`)
-- [joules-to-energy](aliases/joules-to-energy.md) - Alias for `ConvertFrom-JoulesToEnergy` (alias for `ConvertFrom-JoulesToEnergy`)
+- [energy](aliases/energy.md) - Convert Energy (alias for `Convert-Energy`)
+- [energy-to-joules](aliases/energy-to-joules.md) - Convert to Joules (alias for `ConvertTo-JoulesFromEnergy`)
+- [joules-to-energy](aliases/joules-to-energy.md) - Convert from Joules (alias for `ConvertFrom-JoulesToEnergy`)
 
 ### env (6 aliases)
 
@@ -3444,7 +4297,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [json-to-env](aliases/json-to-env.md) - Converts a JSON file to .env format. (alias for `ConvertTo-EnvFromJson`)
 - [yaml-to-env](aliases/yaml-to-env.md) - Converts a YAML file to .env format. (alias for `ConvertTo-EnvFromYaml`)
 
-### eza (11 aliases)
+### eza (10 aliases)
 
 - [l](aliases/l.md) - Lists directory contents using eza (short alias). (alias for `Get-ChildItemEzaShort`)
 - [la](aliases/la.md) - Lists all directory contents including hidden files using eza. (alias for `Get-ChildItemEzaAll`)
@@ -3453,7 +4306,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [lla](aliases/lla.md) - Lists all directory contents in long format using eza. (alias for `Get-ChildItemEzaAllLong`)
 - [llg](aliases/llg.md) - Lists directory contents in long format with git status using eza. (alias for `Get-ChildItemEzaLongGit`)
 - [ls](aliases/ls.md) - Lists directory contents using eza. (alias for `Get-ChildItemEza`)
-- [lS](aliases/lS.md) - Lists directory contents sorted by size using eza. (alias for `Get-ChildItemEzaBySize`)
 - [lt](aliases/lt.md) - Lists directory contents in tree format using eza. (alias for `Get-ChildItemEzaTree`)
 - [lta](aliases/lta.md) - Lists all directory contents in tree format using eza. (alias for `Get-ChildItemEzaTreeAll`)
 - [ltime](aliases/ltime.md) - Lists directory contents sorted by modification time using eza. (alias for `Get-ChildItemEzaByTime`)
@@ -3479,11 +4331,11 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### files-listing (5 aliases)
 
-- [bat-cat](aliases/bat-cat.md) - Alias for `Show-FileContent` (alias for `Show-FileContent`)
-- [la](aliases/la.md) - Alias for `Get-ChildItemAll` (alias for `Get-ChildItemAll`)
-- [ll](aliases/ll.md) - Alias for `Get-ChildItemDetailed` (alias for `Get-ChildItemDetailed`)
-- [lx](aliases/lx.md) - Alias for `Get-ChildItemVisible` (alias for `Get-ChildItemVisible`)
-- [tree](aliases/tree.md) - Alias for `Get-DirectoryTree` (alias for `Get-DirectoryTree`)
+- [bat-cat](aliases/bat-cat.md) - bat wrapper (alias for `Show-FileContent`)
+- [la](aliases/la.md) - Listing helpers (prefer eza when available) (alias for `Get-ChildItemAll`)
+- [ll](aliases/ll.md) - Listing helpers (prefer eza when available) (alias for `Get-ChildItemDetailed`)
+- [lx](aliases/lx.md) - Listing helpers (prefer eza when available) (alias for `Get-ChildItemVisible`)
+- [tree](aliases/tree.md) - Listing helpers (prefer eza when available) (alias for `Get-DirectoryTree`)
 
 ### files-navigation (3 aliases)
 
@@ -3560,52 +4412,37 @@ This documentation is automatically generated from comment-based help in the pro
 - [gh-open](aliases/gh-open.md) - Opens a GitHub repository in the web browser. (alias for `Open-GitHubRepository`)
 - [gh-pr](aliases/gh-pr.md) - Manages GitHub pull requests. (alias for `Invoke-GitHubPullRequest`)
 
-### git-advanced (30 aliases)
+### git-advanced (15 aliases)
 
-- [cdg](aliases/cdg.md) - Alias for `Set-LocationGitRoot` (alias for `Set-LocationGitRoot`)
-- [cdg](aliases/cdg.md) - Alias for `Set-LocationGitRoot` (alias for `Set-LocationGitRoot`)
-- [gcl](aliases/gcl.md) - Alias for `Invoke-GitClone` (alias for `Invoke-GitClone`)
-- [gcl](aliases/gcl.md) - Alias for `Invoke-GitClone` (alias for `Invoke-GitClone`)
-- [gclean](aliases/gclean.md) - Alias for `Clear-GitUntracked` (alias for `Clear-GitUntracked`)
-- [gclean](aliases/gclean.md) - Alias for `Clear-GitUntracked` (alias for `Clear-GitUntracked`)
-- [gdefault](aliases/gdefault.md) - Alias for `Get-GitDefaultBranch` (alias for `Get-GitDefaultBranch`)
-- [gdefault](aliases/gdefault.md) - Alias for `Get-GitDefaultBranch` (alias for `Get-GitDefaultBranch`)
-- [gob](aliases/gob.md) - Alias for `Switch-GitPreviousBranch` (alias for `Switch-GitPreviousBranch`)
-- [gob](aliases/gob.md) - Alias for `Switch-GitPreviousBranch` (alias for `Switch-GitPreviousBranch`)
-- [gprune](aliases/gprune.md) - Alias for `Remove-GitMergedBranches` (alias for `Remove-GitMergedBranches`)
-- [gprune](aliases/gprune.md) - Alias for `Remove-GitMergedBranches` (alias for `Remove-GitMergedBranches`)
-- [gr](aliases/gr.md) - Alias for `Merge-GitRebase` (alias for `Merge-GitRebase`)
-- [gr](aliases/gr.md) - Alias for `Merge-GitRebase` (alias for `Merge-GitRebase`)
-- [grc](aliases/grc.md) - Alias for `Continue-GitRebase` (alias for `Continue-GitRebase`)
-- [grc](aliases/grc.md) - Alias for `Continue-GitRebase` (alias for `Continue-GitRebase`)
-- [gsta](aliases/gsta.md) - Alias for `Save-GitStash` (alias for `Save-GitStash`)
-- [gsta](aliases/gsta.md) - Alias for `Save-GitStash` (alias for `Save-GitStash`)
-- [gstp](aliases/gstp.md) - Alias for `Restore-GitStash` (alias for `Restore-GitStash`)
-- [gstp](aliases/gstp.md) - Alias for `Restore-GitStash` (alias for `Restore-GitStash`)
-- [gsub](aliases/gsub.md) - Alias for `Update-GitSubmodule` (alias for `Update-GitSubmodule`)
-- [gsub](aliases/gsub.md) - Alias for `Update-GitSubmodule` (alias for `Update-GitSubmodule`)
-- [gsync](aliases/gsync.md) - Alias for `Sync-GitRepository` (alias for `Sync-GitRepository`)
-- [gsync](aliases/gsync.md) - Alias for `Sync-GitRepository` (alias for `Sync-GitRepository`)
-- [gundo](aliases/gundo.md) - Alias for `Undo-GitCommit` (alias for `Undo-GitCommit`)
-- [gundo](aliases/gundo.md) - Alias for `Undo-GitCommit` (alias for `Undo-GitCommit`)
-- [prc](aliases/prc.md) - Alias for `New-GitHubPullRequest` (alias for `New-GitHubPullRequest`)
-- [prc](aliases/prc.md) - Alias for `New-GitHubPullRequest` (alias for `New-GitHubPullRequest`)
-- [prv](aliases/prv.md) - Alias for `Show-GitHubPullRequest` (alias for `Show-GitHubPullRequest`)
-- [prv](aliases/prv.md) - Alias for `Show-GitHubPullRequest` (alias for `Show-GitHubPullRequest`)
+- [cdg](aliases/cdg.md) - Git cd to root - change to repository root (alias for `Set-LocationGitRoot`)
+- [gcl](aliases/gcl.md) - Git clone - clone a repository (alias for `Invoke-GitClone`)
+- [gclean](aliases/gclean.md) - Git clean - remove untracked files (alias for `Clear-GitUntracked`)
+- [gdefault](aliases/gdefault.md) - Git default branch - get default branch name (alias for `Get-GitDefaultBranch`)
+- [gob](aliases/gob.md) - Git checkout previous - switch to previous branch (alias for `Switch-GitPreviousBranch`)
+- [gprune](aliases/gprune.md) - Git prune merged - remove merged branches (alias for `Remove-GitMergedBranches`)
+- [gr](aliases/gr.md) - Git rebase - rebase commits (alias for `Merge-GitRebase`)
+- [grc](aliases/grc.md) - Git rebase continue - continue rebase (alias for `Continue-GitRebase`)
+- [gsta](aliases/gsta.md) - Git stash - stash changes (alias for `Save-GitStash`)
+- [gstp](aliases/gstp.md) - Git stash pop - apply stashed changes (alias for `Restore-GitStash`)
+- [gsub](aliases/gsub.md) - Git submodule update - update submodules (alias for `Update-GitSubmodule`)
+- [gsync](aliases/gsync.md) - Git sync - fetch and rebase (alias for `Sync-GitRepository`)
+- [gundo](aliases/gundo.md) - Git undo - soft reset last commit (alias for `Undo-GitCommit`)
+- [prc](aliases/prc.md) - GitHub PR create - create a pull request (alias for `New-GitHubPullRequest`)
+- [prv](aliases/prv.md) - GitHub PR view - view pull request in browser (alias for `Show-GitHubPullRequest`)
 
 ### git-basic (11 aliases)
 
-- [ga](aliases/ga.md) - Alias for `Add-GitChanges` (alias for `Add-GitChanges`)
-- [gb](aliases/gb.md) - Alias for `Get-GitBranch` (alias for `Get-GitBranch`)
-- [gc](aliases/gc.md) - Alias for `Save-GitCommit` (alias for `Save-GitCommit`)
-- [gcm](aliases/gcm.md) - Alias for `Save-GitCommitWithMessage` (alias for `Save-GitCommitWithMessage`)
-- [gco](aliases/gco.md) - Alias for `Switch-GitBranch` (alias for `Switch-GitBranch`)
-- [gd](aliases/gd.md) - Alias for `Compare-GitChanges` (alias for `Compare-GitChanges`)
-- [gf](aliases/gf.md) - Alias for `Receive-GitChanges` (alias for `Receive-GitChanges`)
-- [gl](aliases/gl.md) - Alias for `Get-GitLog` (alias for `Get-GitLog`)
-- [gp](aliases/gp.md) - Alias for `Publish-GitChanges` (alias for `Publish-GitChanges`)
-- [gpl](aliases/gpl.md) - Alias for `Get-GitChanges` (alias for `Get-GitChanges`)
-- [gs](aliases/gs.md) - Alias for `Invoke-GitStatus` (alias for `Invoke-GitStatus`)
+- [ga](aliases/ga.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Add-GitChanges`)
+- [gb](aliases/gb.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Get-GitBranch`)
+- [gc](aliases/gc.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Save-GitCommit`)
+- [gcm](aliases/gcm.md) - Commits staged changes with a message. (alias for `Save-GitCommitWithMessage`)
+- [gco](aliases/gco.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Switch-GitBranch`)
+- [gd](aliases/gd.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Compare-GitChanges`)
+- [gf](aliases/gf.md) - Downloads objects and refs from remote repository. (alias for `Receive-GitChanges`)
+- [gl](aliases/gl.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Get-GitLog`)
+- [gp](aliases/gp.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Publish-GitChanges`)
+- [gpl](aliases/gpl.md) - Fetches and merges changes from remote repository. (alias for `Get-GitChanges`)
+- [gs](aliases/gs.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Invoke-GitStatus`)
 
 ### git-changelog (1 aliases)
 
@@ -3613,8 +4450,8 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### git-github (2 aliases)
 
-- [prc](aliases/prc.md) - Creates a GitHub pull request. (alias for `New-GitHubPullRequest`)
-- [prv](aliases/prv.md) - Views a GitHub pull request in the browser. (alias for `Show-GitHubPullRequest`)
+- [prc](aliases/prc.md) - GitHub PR create - create a pull request (alias for `New-GitHubPullRequest`)
+- [prv](aliases/prv.md) - GitHub PR view - view pull request in browser (alias for `Show-GitHubPullRequest`)
 
 ### git-gui (4 aliases)
 
@@ -3623,11 +4460,19 @@ This documentation is automatically generated from comment-based help in the pro
 - [gitkraken](aliases/gitkraken.md) - Launches GitKraken GUI. (alias for `Invoke-GitKraken`)
 - [jj](aliases/jj.md) - Runs Jujutsu version control commands. (alias for `Invoke-Jujutsu`)
 
-### git (3 aliases)
+### git (11 aliases)
 
-- [Git-CurrentBranch](aliases/Git-CurrentBranch.md) - Alias for `Get-GitCurrentBranch` (alias for `Get-GitCurrentBranch`)
-- [Git-StatusShort](aliases/Git-StatusShort.md) - Alias for `Get-GitStatusShort` (alias for `Get-GitStatusShort`)
-- [Prompt-GitSegment](aliases/Prompt-GitSegment.md) - Alias for `Format-PromptGitSegment` (alias for `Format-PromptGitSegment`)
+- [ga](aliases/ga.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Add-GitChanges`)
+- [gb](aliases/gb.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Get-GitBranch`)
+- [gc](aliases/gc.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Save-GitCommit`)
+- [gco](aliases/gco.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Switch-GitBranch`)
+- [gd](aliases/gd.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Compare-GitChanges`)
+- [Git-CurrentBranch](aliases/Git-CurrentBranch.md) - Git current branch - get current branch name (alias for `Get-GitCurrentBranch`)
+- [Git-StatusShort](aliases/Git-StatusShort.md) - Git status short - show concise status (alias for `Get-GitStatusShort`)
+- [gl](aliases/gl.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Get-GitLog`)
+- [gp](aliases/gp.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Publish-GitChanges`)
+- [gs](aliases/gs.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Invoke-GitStatus`)
+- [Prompt-GitSegment](aliases/Prompt-GitSegment.md) - Git prompt segment - show current branch in prompt (alias for `Format-PromptGitSegment`)
 
 ### gradle (4 aliases)
 
@@ -3638,14 +4483,14 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### guid (8 aliases)
 
-- [base64-to-guid](aliases/base64-to-guid.md) - Alias for `ConvertTo-GuidFromBase64` (alias for `ConvertTo-GuidFromBase64`)
-- [guid-to-base64](aliases/guid-to-base64.md) - Alias for `ConvertFrom-GuidToBase64` (alias for `ConvertFrom-GuidToBase64`)
-- [guid-to-hex](aliases/guid-to-hex.md) - Alias for `ConvertFrom-GuidToHex` (alias for `ConvertFrom-GuidToHex`)
-- [guid-to-registry](aliases/guid-to-registry.md) - Alias for `ConvertFrom-GuidToRegistryFormat` (alias for `ConvertFrom-GuidToRegistryFormat`)
-- [guid-to-uuid](aliases/guid-to-uuid.md) - Alias for `ConvertFrom-GuidToUuid` (alias for `ConvertFrom-GuidToUuid`)
-- [hex-to-guid](aliases/hex-to-guid.md) - Alias for `ConvertTo-GuidFromHex` (alias for `ConvertTo-GuidFromHex`)
-- [registry-to-guid](aliases/registry-to-guid.md) - Alias for `ConvertTo-GuidFromRegistryFormat` (alias for `ConvertTo-GuidFromRegistryFormat`)
-- [uuid-to-guid](aliases/uuid-to-guid.md) - Alias for `ConvertTo-GuidFromUuid` (alias for `ConvertTo-GuidFromUuid`)
+- [base64-to-guid](aliases/base64-to-guid.md) - Converts a Base64 string to GUID format. (alias for `ConvertTo-GuidFromBase64`)
+- [guid-to-base64](aliases/guid-to-base64.md) - Converts a GUID to Base64 format. (alias for `ConvertFrom-GuidToBase64`)
+- [guid-to-hex](aliases/guid-to-hex.md) - Converts a GUID to hexadecimal format (no dashes). (alias for `ConvertFrom-GuidToHex`)
+- [guid-to-registry](aliases/guid-to-registry.md) - Converts a GUID to Windows registry format. (alias for `ConvertFrom-GuidToRegistryFormat`)
+- [guid-to-uuid](aliases/guid-to-uuid.md) - Converts a GUID to UUID format. (alias for `ConvertFrom-GuidToUuid`)
+- [hex-to-guid](aliases/hex-to-guid.md) - Converts a hexadecimal string to GUID format. (alias for `ConvertTo-GuidFromHex`)
+- [registry-to-guid](aliases/registry-to-guid.md) - Converts a Windows registry format GUID to standard format. (alias for `ConvertTo-GuidFromRegistryFormat`)
+- [uuid-to-guid](aliases/uuid-to-guid.md) - Converts a UUID to GUID format. (alias for `ConvertTo-GuidFromUuid`)
 
 ### gum (5 aliases)
 
@@ -3657,11 +4502,11 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### gzip (5 aliases)
 
-- [gunzip](aliases/gunzip.md) - Alias for `Expand-Gzip` (alias for `Expand-Gzip`)
-- [gzip-compress](aliases/gzip-compress.md) - Alias for `Compress-Gzip` (alias for `Compress-Gzip`)
-- [gzip-decompress](aliases/gzip-decompress.md) - Alias for `Expand-Gzip` (alias for `Expand-Gzip`)
-- [zlib-compress](aliases/zlib-compress.md) - Alias for `Compress-Zlib` (alias for `Compress-Zlib`)
-- [zlib-decompress](aliases/zlib-decompress.md) - Alias for `Expand-Zlib` (alias for `Expand-Zlib`)
+- [gunzip](aliases/gunzip.md) - Decompresses a Gzip-compressed file. (alias for `Expand-Gzip`)
+- [gzip-compress](aliases/gzip-compress.md) - Compresses a file using Gzip compression. (alias for `Compress-Gzip`)
+- [gzip-decompress](aliases/gzip-decompress.md) - Decompresses a Gzip-compressed file. (alias for `Expand-Gzip`)
+- [zlib-compress](aliases/zlib-compress.md) - Compresses a file using Zlib compression. (alias for `Compress-Zlib`)
+- [zlib-decompress](aliases/zlib-decompress.md) - Decompresses a Zlib-compressed file. (alias for `Expand-Zlib`)
 
 ### hash (1 aliases)
 
@@ -3767,8 +4612,8 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### ion (2 aliases)
 
-- [ion-to-json](aliases/ion-to-json.md) - Alias for `ConvertFrom-IonToJson` (alias for `ConvertFrom-IonToJson`)
-- [json-to-ion](aliases/json-to-ion.md) - Alias for `ConvertTo-IonFromJson` (alias for `ConvertTo-IonFromJson`)
+- [ion-to-json](aliases/ion-to-json.md) - Converts Ion file to JSON format. (alias for `ConvertFrom-IonToJson`)
+- [json-to-ion](aliases/json-to-ion.md) - Converts JSON file to Ion format. (alias for `ConvertTo-IonFromJson`)
 
 ### iso8601 (6 aliases)
 
@@ -3793,9 +4638,8 @@ This documentation is automatically generated from comment-based help in the pro
 - [xml-to-yaml](aliases/xml-to-yaml.md) - Converts XML file to YAML format. (alias for `ConvertFrom-XmlToYaml`)
 - [yaml-to-xml](aliases/yaml-to-xml.md) - Converts YAML file to XML format. (alias for `ConvertFrom-YamlToXml`)
 
-### json (2 aliases)
+### json (1 aliases)
 
-- [json-pretty](aliases/json-pretty.md) - Pretty-prints JSON data. (alias for `Format-Json`)
 - [json-pretty](aliases/json-pretty.md) - Pretty-prints JSON data. (alias for `Format-Json`)
 
 ### jsonc (4 aliases)
@@ -3841,75 +4685,53 @@ This documentation is automatically generated from comment-based help in the pro
 - [go-tools-update](aliases/go-tools-update.md) - Updates Go development tools to their latest versions. (alias for `Update-GoTools`)
 - [go-update](aliases/go-update.md) - Updates all module dependencies in the current Go project. (alias for `Update-GoDependencies`)
 
-### lang-go-tools (10 aliases)
+### lang-go-tools (5 aliases)
 
 - [go-build-project](aliases/go-build-project.md) - Builds a Go project with common optimizations. (alias for `Build-GoProject`)
-- [go-build-project](aliases/go-build-project.md) - Builds a Go project with common optimizations. (alias for `Build-GoProject`)
-- [go-test-project](aliases/go-test-project.md) - Runs Go tests with common options. (alias for `Test-GoProject`)
 - [go-test-project](aliases/go-test-project.md) - Runs Go tests with common options. (alias for `Test-GoProject`)
 - [golangci-lint](aliases/golangci-lint.md) - Lints Go code using golangci-lint. (alias for `Lint-GoProject`)
-- [golangci-lint](aliases/golangci-lint.md) - Lints Go code using golangci-lint. (alias for `Lint-GoProject`)
-- [goreleaser](aliases/goreleaser.md) - Creates Go project releases using goreleaser. (alias for `Release-GoProject`)
 - [goreleaser](aliases/goreleaser.md) - Creates Go project releases using goreleaser. (alias for `Release-GoProject`)
 - [mage](aliases/mage.md) - Runs mage build targets for Go projects. (alias for `Invoke-Mage`)
-- [mage](aliases/mage.md) - Runs mage build targets for Go projects. (alias for `Invoke-Mage`)
 
-### lang-java-build (6 aliases)
+### lang-java-build (3 aliases)
 
 - [ant](aliases/ant.md) - Builds Java projects using Apache Ant. (alias for `Build-Ant`)
-- [ant](aliases/ant.md) - Builds Java projects using Apache Ant. (alias for `Build-Ant`)
-- [gradle](aliases/gradle.md) - Builds Java projects using Gradle. (alias for `Build-Gradle`)
 - [gradle](aliases/gradle.md) - Builds Java projects using Gradle. (alias for `Build-Gradle`)
 - [mvn](aliases/mvn.md) - Builds Java projects using Maven. (alias for `Build-Maven`)
-- [mvn](aliases/mvn.md) - Builds Java projects using Maven. (alias for `Build-Maven`)
 
-### lang-java-compilers (4 aliases)
+### lang-java-compilers (2 aliases)
 
 - [kotlinc](aliases/kotlinc.md) - Compiles Kotlin code. (alias for `Compile-Kotlin`)
-- [kotlinc](aliases/kotlinc.md) - Compiles Kotlin code. (alias for `Compile-Kotlin`)
-- [scalac](aliases/scalac.md) - Compiles Scala code. (alias for `Compile-Scala`)
 - [scalac](aliases/scalac.md) - Compiles Scala code. (alias for `Compile-Scala`)
 
-### lang-python-env (2 aliases)
+### lang-python-env (1 aliases)
 
 - [pyvenv](aliases/pyvenv.md) - Creates a Python virtual environment. (alias for `New-PythonVirtualEnv`)
-- [pyvenv](aliases/pyvenv.md) - Creates a Python virtual environment. (alias for `New-PythonVirtualEnv`)
 
-### lang-python-packages (2 aliases)
+### lang-python-packages (1 aliases)
 
 - [pyinstall](aliases/pyinstall.md) - Installs Python packages using the best available tool. (alias for `Install-PythonPackage`)
-- [pyinstall](aliases/pyinstall.md) - Installs Python packages using the best available tool. (alias for `Install-PythonPackage`)
 
-### lang-python-pipx (4 aliases)
+### lang-python-pipx (2 aliases)
 
 - [pipx](aliases/pipx.md) - Runs pipx-installed applications. (alias for `Invoke-Pipx`)
-- [pipx](aliases/pipx.md) - Runs pipx-installed applications. (alias for `Invoke-Pipx`)
-- [pipx-install](aliases/pipx-install.md) - Installs Python applications using pipx. (alias for `Install-PythonApp`)
 - [pipx-install](aliases/pipx-install.md) - Installs Python applications using pipx. (alias for `Install-PythonApp`)
 
-### lang-rust-audit (4 aliases)
+### lang-rust-audit (2 aliases)
 
 - [cargo-audit](aliases/cargo-audit.md) - Audits Rust project dependencies for security vulnerabilities. (alias for `Audit-RustProject`)
-- [cargo-audit](aliases/cargo-audit.md) - Audits Rust project dependencies for security vulnerabilities. (alias for `Audit-RustProject`)
-- [cargo-outdated](aliases/cargo-outdated.md) - Checks for outdated Rust dependencies. (alias for `Test-RustOutdated`)
 - [cargo-outdated](aliases/cargo-outdated.md) - Checks for outdated Rust dependencies. (alias for `Test-RustOutdated`)
 
-### lang-rust-build (8 aliases)
+### lang-rust-build (4 aliases)
 
 - [cargo-build-release](aliases/cargo-build-release.md) - Builds a Rust project in release mode with optimizations. (alias for `Build-RustRelease`)
-- [cargo-build-release](aliases/cargo-build-release.md) - Builds a Rust project in release mode with optimizations. (alias for `Build-RustRelease`)
-- [cargo-clean](aliases/cargo-clean.md) - Cleans up Cargo cache and build artifacts. (alias for `Clear-CargoCache`)
 - [cargo-clean](aliases/cargo-clean.md) - Cleans up Cargo cache and build artifacts. (alias for `Clear-CargoCache`)
 - [cargo-cleanup](aliases/cargo-cleanup.md) - Cleans up Cargo cache and build artifacts. (alias for `Clear-CargoCache`)
-- [cargo-cleanup](aliases/cargo-cleanup.md) - Cleans up Cargo cache and build artifacts. (alias for `Clear-CargoCache`)
-- [cargo-update-deps](aliases/cargo-update-deps.md) - Updates Rust project dependencies to their latest compatible versions. (alias for `Update-RustDependencies`)
 - [cargo-update-deps](aliases/cargo-update-deps.md) - Updates Rust project dependencies to their latest compatible versions. (alias for `Update-RustDependencies`)
 
-### lang-rust-tools (4 aliases)
+### lang-rust-tools (2 aliases)
 
 - [cargo-binstall](aliases/cargo-binstall.md) - Installs Rust binaries using cargo-binstall. (alias for `Install-RustBinary`)
-- [cargo-binstall](aliases/cargo-binstall.md) - Installs Rust binaries using cargo-binstall. (alias for `Install-RustBinary`)
-- [cargo-watch](aliases/cargo-watch.md) - Watches files and runs cargo commands on changes. (alias for `Watch-RustProject`)
 - [cargo-watch](aliases/cargo-watch.md) - Watches files and runs cargo commands on changes. (alias for `Watch-RustProject`)
 
 ### laravel (3 aliases)
@@ -3929,9 +4751,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### length (3 aliases)
 
-- [length](aliases/length.md) - Alias for `Convert-Length` (alias for `Convert-Length`)
-- [length-to-meters](aliases/length-to-meters.md) - Alias for `ConvertTo-MetersFromLength` (alias for `ConvertTo-MetersFromLength`)
-- [meters-to-length](aliases/meters-to-length.md) - Alias for `ConvertFrom-MetersToLength` (alias for `ConvertFrom-MetersToLength`)
+- [length](aliases/length.md) - Convert Length (alias for `Convert-Length`)
+- [length-to-meters](aliases/length-to-meters.md) - Convert to Meters (alias for `ConvertTo-MetersFromLength`)
+- [meters-to-length](aliases/meters-to-length.md) - Convert from Meters (alias for `ConvertFrom-MetersToLength`)
 
 ### lorem (1 aliases)
 
@@ -3939,10 +4761,10 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### lz4 (4 aliases)
 
-- [compress-lz4](aliases/compress-lz4.md) - Alias for `Compress-Lz4` (alias for `Compress-Lz4`)
-- [decompress-lz4](aliases/decompress-lz4.md) - Alias for `Expand-Lz4` (alias for `Expand-Lz4`)
-- [expand-lz4](aliases/expand-lz4.md) - Alias for `Expand-Lz4` (alias for `Expand-Lz4`)
-- [lz4](aliases/lz4.md) - Alias for `Compress-Lz4` (alias for `Compress-Lz4`)
+- [compress-lz4](aliases/compress-lz4.md) - Compresses a file using LZ4 compression. (alias for `Compress-Lz4`)
+- [decompress-lz4](aliases/decompress-lz4.md) - Decompresses an LZ4 compressed file. (alias for `Expand-Lz4`)
+- [expand-lz4](aliases/expand-lz4.md) - Decompresses an LZ4 compressed file. (alias for `Expand-Lz4`)
+- [lz4](aliases/lz4.md) - Compresses a file using LZ4 compression. (alias for `Compress-Lz4`)
 
 ### maven (4 aliases)
 
@@ -4166,9 +4988,8 @@ This documentation is automatically generated from comment-based help in the pro
 - [pdmuninstall](aliases/pdmuninstall.md) - Removes packages using PDM. (alias for `Remove-PdmPackage`)
 - [pdmupdate](aliases/pdmupdate.md) - Updates packages using PDM. (alias for `Update-PdmPackages`)
 
-### php (12 aliases)
+### php (9 aliases)
 
-- [composer](aliases/composer.md) - Executes Composer commands. (alias for `Invoke-Composer`)
 - [composer](aliases/composer.md) - Executes Composer commands. (alias for `Invoke-Composer`)
 - [composer-add](aliases/composer-add.md) - Adds packages to Composer project. (alias for `Add-ComposerPackage`)
 - [composer-outdated](aliases/composer-outdated.md) - Executes Composer commands. (alias for `Test-ComposerOutdated`)
@@ -4177,8 +4998,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [composer-self-update](aliases/composer-self-update.md) - Updates Composer to the latest version. (alias for `Update-ComposerSelf`)
 - [composer-update](aliases/composer-update.md) - Updates all packages in the current Composer project to their latest versions. (alias for `Update-ComposerPackages`)
 - [php](aliases/php.md) - Executes PHP commands. (alias for `Invoke-Php`)
-- [php](aliases/php.md) - Executes PHP commands. (alias for `Invoke-Php`)
-- [php-server](aliases/php-server.md) - Starts PHP built-in development server. (alias for `Start-PhpServer`)
 - [php-server](aliases/php-server.md) - Starts PHP built-in development server. (alias for `Start-PhpServer`)
 
 ### pip (11 aliases)
@@ -4255,9 +5074,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### pressure (3 aliases)
 
-- [pa-to-pressure](aliases/pa-to-pressure.md) - Alias for `ConvertFrom-PascalsToPressure` (alias for `ConvertFrom-PascalsToPressure`)
-- [pressure](aliases/pressure.md) - Alias for `Convert-Pressure` (alias for `Convert-Pressure`)
-- [pressure-to-pa](aliases/pressure-to-pa.md) - Alias for `ConvertTo-PascalsFromPressure` (alias for `ConvertTo-PascalsFromPressure`)
+- [pa-to-pressure](aliases/pa-to-pressure.md) - Convert from Pascals (alias for `ConvertFrom-PascalsToPressure`)
+- [pressure](aliases/pressure.md) - Convert Pressure (alias for `Convert-Pressure`)
+- [pressure-to-pa](aliases/pressure-to-pa.md) - Convert to Pascals (alias for `ConvertTo-PascalsFromPressure`)
 
 ### procs (2 aliases)
 
@@ -4441,12 +5260,12 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### scoop (14 aliases)
 
-- [fixscoop](aliases/fixscoop.md) - Alias for `Repair-ScoopBuckets` (alias for `Repair-ScoopBuckets`)
+- [fixscoop](aliases/fixscoop.md) - Remove read-only attribute if present (alias for `Repair-ScoopBuckets`)
 - [scleanup](aliases/scleanup.md) - Cleans up Scoop cache and old versions. (alias for `Clear-ScoopCache`)
 - [scoopbackup](aliases/scoopbackup.md) - Exports installed Scoop packages to a backup file. (alias for `Export-ScoopPackages`)
 - [scoopexport](aliases/scoopexport.md) - Exports installed Scoop packages to a backup file. (alias for `Export-ScoopPackages`)
 - [scoopimport](aliases/scoopimport.md) - Restores Scoop packages from a backup file. (alias for `Import-ScoopPackages`)
-- [scooprepair](aliases/scooprepair.md) - Alias for `Repair-ScoopBuckets` (alias for `Repair-ScoopBuckets`)
+- [scooprepair](aliases/scooprepair.md) - Remove read-only attribute if present (alias for `Repair-ScoopBuckets`)
 - [scooprestore](aliases/scooprestore.md) - Restores Scoop packages from a backup file. (alias for `Import-ScoopPackages`)
 - [sh](aliases/sh.md) - Shows information about Scoop packages. (alias for `Get-ScoopPackageInfo`)
 - [sinstall](aliases/sinstall.md) - Installs packages using Scoop. (alias for `Install-ScoopPackage`)
@@ -4474,10 +5293,10 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### snappy (4 aliases)
 
-- [compress-snappy](aliases/compress-snappy.md) - Alias for `Compress-Snappy` (alias for `Compress-Snappy`)
-- [decompress-snappy](aliases/decompress-snappy.md) - Alias for `Expand-Snappy` (alias for `Expand-Snappy`)
-- [expand-snappy](aliases/expand-snappy.md) - Alias for `Expand-Snappy` (alias for `Expand-Snappy`)
-- [snappy](aliases/snappy.md) - Alias for `Compress-Snappy` (alias for `Compress-Snappy`)
+- [compress-snappy](aliases/compress-snappy.md) - Compresses a file using Snappy compression. (alias for `Compress-Snappy`)
+- [decompress-snappy](aliases/decompress-snappy.md) - Decompresses a Snappy compressed file. (alias for `Expand-Snappy`)
+- [expand-snappy](aliases/expand-snappy.md) - Decompresses a Snappy compressed file. (alias for `Expand-Snappy`)
+- [snappy](aliases/snappy.md) - Compresses a file using Snappy compression. (alias for `Compress-Snappy`)
 
 ### specialized-barcode (3 aliases)
 
@@ -4498,15 +5317,15 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### speed (3 aliases)
 
-- [mps-to-speed](aliases/mps-to-speed.md) - Alias for `ConvertFrom-MetersPerSecondToSpeed` (alias for `ConvertFrom-MetersPerSecondToSpeed`)
-- [speed](aliases/speed.md) - Alias for `Convert-Speed` (alias for `Convert-Speed`)
-- [speed-to-mps](aliases/speed-to-mps.md) - Alias for `ConvertTo-MetersPerSecondFromSpeed` (alias for `ConvertTo-MetersPerSecondFromSpeed`)
+- [mps-to-speed](aliases/mps-to-speed.md) - Convert from Meters per second (alias for `ConvertFrom-MetersPerSecondToSpeed`)
+- [speed](aliases/speed.md) - Convert Speed (alias for `Convert-Speed`)
+- [speed-to-mps](aliases/speed-to-mps.md) - Convert to Meters per second (alias for `ConvertTo-MetersPerSecondFromSpeed`)
 
 ### ssh (3 aliases)
 
-- [ssh-add-if](aliases/ssh-add-if.md) - Alias for `Add-SSHKeyIfNotLoaded` (alias for `Add-SSHKeyIfNotLoaded`)
-- [ssh-agent-start](aliases/ssh-agent-start.md) - Alias for `Start-SSHAgent` (alias for `Start-SSHAgent`)
-- [ssh-list](aliases/ssh-list.md) - Alias for `Get-SSHKeys` (alias for `Get-SSHKeys`)
+- [ssh-add-if](aliases/ssh-add-if.md) - idempotent key loader (alias for `Add-SSHKeyIfNotLoaded`)
+- [ssh-agent-start](aliases/ssh-agent-start.md) - start agent if not running (alias for `Start-SSHAgent`)
+- [ssh-list](aliases/ssh-list.md) - list loaded keys (alias for `Get-SSHKeys`)
 
 ### superjson (12 aliases)
 
@@ -4563,9 +5382,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### temperature (3 aliases)
 
-- [celsius-to-temp](aliases/celsius-to-temp.md) - Alias for `ConvertFrom-CelsiusToTemperature` (alias for `ConvertFrom-CelsiusToTemperature`)
-- [temp](aliases/temp.md) - Alias for `Convert-Temperature` (alias for `Convert-Temperature`)
-- [temp-to-celsius](aliases/temp-to-celsius.md) - Alias for `ConvertTo-CelsiusFromTemperature` (alias for `ConvertTo-CelsiusFromTemperature`)
+- [celsius-to-temp](aliases/celsius-to-temp.md) - Convert from Celsius (alias for `ConvertFrom-CelsiusToTemperature`)
+- [temp](aliases/temp.md) - Convert Temperature (alias for `Convert-Temperature`)
+- [temp-to-celsius](aliases/temp-to-celsius.md) - Convert to Celsius (alias for `ConvertTo-CelsiusFromTemperature`)
 
 ### terraform (5 aliases)
 
@@ -4589,7 +5408,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [jsonl-to-csv](aliases/jsonl-to-csv.md) - Converts JSONL file to CSV format. (alias for `ConvertFrom-JsonLToCsv`)
 - [jsonl-to-yaml](aliases/jsonl-to-yaml.md) - Converts JSONL file to YAML format. (alias for `ConvertFrom-JsonLToYaml`)
 - [yaml-to-jsonl](aliases/yaml-to-jsonl.md) - Converts YAML file to JSONL format. (alias for `ConvertTo-JsonLFromYaml`)
-- [yaml-to-xml](aliases/yaml-to-xml.md) - Initializes text format gap conversion utility functions. (alias for `ConvertTo-XmlFromYaml`)
+- [yaml-to-xml](aliases/yaml-to-xml.md) - Converts a YAML file to XML format. (alias for `ConvertTo-XmlFromYaml`)
 
 ### TextSearch (1 aliases)
 
@@ -4625,15 +5444,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [date-to-epoch](aliases/date-to-epoch.md) - Converts DateTime to Unix epoch timestamp. (alias for `ConvertTo-Epoch`)
 - [epoch-to-date](aliases/epoch-to-date.md) - Converts Unix epoch timestamp to DateTime. (alias for `ConvertFrom-Epoch`)
 
-### timezone (8 aliases)
+### timezone (4 aliases)
 
 - [datetime-to-timezone](aliases/datetime-to-timezone.md) - Converts a DateTime to a specific timezone. (alias for `ConvertTo-TimeZone`)
-- [datetime-to-timezone](aliases/datetime-to-timezone.md) - Converts a DateTime to a specific timezone. (alias for `ConvertTo-TimeZone`)
-- [list-timezones](aliases/list-timezones.md) - Gets a list of available timezones. (alias for `Get-TimeZones`)
 - [list-timezones](aliases/list-timezones.md) - Gets a list of available timezones. (alias for `Get-TimeZones`)
 - [timezone-to-datetime](aliases/timezone-to-datetime.md) - Converts a DateTime from a specific timezone to local time. (alias for `ConvertFrom-TimeZone`)
-- [timezone-to-datetime](aliases/timezone-to-datetime.md) - Converts a DateTime from a specific timezone to local time. (alias for `ConvertFrom-TimeZone`)
-- [tz-convert](aliases/tz-convert.md) - Converts a DateTime between two timezones. (alias for `Convert-TimeZone`)
 - [tz-convert](aliases/tz-convert.md) - Converts a DateTime between two timezones. (alias for `Convert-TimeZone`)
 
 ### toml (8 aliases)
@@ -4672,8 +5487,8 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### ubjson (2 aliases)
 
-- [json-to-ubjson](aliases/json-to-ubjson.md) - Alias for `ConvertTo-UbjsonFromJson` (alias for `ConvertTo-UbjsonFromJson`)
-- [ubjson-to-json](aliases/ubjson-to-json.md) - Alias for `ConvertFrom-UbjsonToJson` (alias for `ConvertFrom-UbjsonToJson`)
+- [json-to-ubjson](aliases/json-to-ubjson.md) - Converts JSON file to UBJSON format. (alias for `ConvertTo-UbjsonFromJson`)
+- [ubjson-to-json](aliases/ubjson-to-json.md) - Converts UBJSON file to JSON format. (alias for `ConvertFrom-UbjsonToJson`)
 
 ### units (1 aliases)
 
@@ -4700,24 +5515,16 @@ This documentation is automatically generated from comment-based help in the pro
 - [url-to-octal](aliases/url-to-octal.md) - Converts URL/percent encoded string to octal representation. (alias for `ConvertFrom-UrlToOctal`)
 - [url-to-roman](aliases/url-to-roman.md) - Converts URL/percent encoded string to Roman numeral representation. (alias for `ConvertFrom-UrlToRoman`)
 
-### utf16-utf32 (16 aliases)
+### utf16-utf32 (8 aliases)
 
-- [ascii-to-utf16](aliases/ascii-to-utf16.md) - Alias for `ConvertFrom-AsciiToUtf16` (alias for `ConvertFrom-AsciiToUtf16`)
-- [ascii-to-utf16](aliases/ascii-to-utf16.md) - Alias for `ConvertFrom-AsciiToUtf16` (alias for `ConvertFrom-AsciiToUtf16`)
-- [ascii-to-utf32](aliases/ascii-to-utf32.md) - Alias for `ConvertFrom-AsciiToUtf32` (alias for `ConvertFrom-AsciiToUtf32`)
-- [ascii-to-utf32](aliases/ascii-to-utf32.md) - Alias for `ConvertFrom-AsciiToUtf32` (alias for `ConvertFrom-AsciiToUtf32`)
-- [base64-to-utf16](aliases/base64-to-utf16.md) - Alias for `ConvertFrom-Base64ToUtf16` (alias for `ConvertFrom-Base64ToUtf16`)
-- [base64-to-utf16](aliases/base64-to-utf16.md) - Alias for `ConvertFrom-Base64ToUtf16` (alias for `ConvertFrom-Base64ToUtf16`)
-- [hex-to-utf16](aliases/hex-to-utf16.md) - Alias for `ConvertFrom-HexToUtf16` (alias for `ConvertFrom-HexToUtf16`)
-- [hex-to-utf16](aliases/hex-to-utf16.md) - Alias for `ConvertFrom-HexToUtf16` (alias for `ConvertFrom-HexToUtf16`)
-- [utf16-to-ascii](aliases/utf16-to-ascii.md) - Alias for `ConvertFrom-Utf16ToAscii` (alias for `ConvertFrom-Utf16ToAscii`)
-- [utf16-to-ascii](aliases/utf16-to-ascii.md) - Alias for `ConvertFrom-Utf16ToAscii` (alias for `ConvertFrom-Utf16ToAscii`)
-- [utf16-to-base64](aliases/utf16-to-base64.md) - Alias for `ConvertFrom-Utf16ToBase64` (alias for `ConvertFrom-Utf16ToBase64`)
-- [utf16-to-base64](aliases/utf16-to-base64.md) - Alias for `ConvertFrom-Utf16ToBase64` (alias for `ConvertFrom-Utf16ToBase64`)
-- [utf16-to-hex](aliases/utf16-to-hex.md) - Alias for `ConvertFrom-Utf16ToHex` (alias for `ConvertFrom-Utf16ToHex`)
-- [utf16-to-hex](aliases/utf16-to-hex.md) - Alias for `ConvertFrom-Utf16ToHex` (alias for `ConvertFrom-Utf16ToHex`)
-- [utf32-to-ascii](aliases/utf32-to-ascii.md) - Alias for `ConvertFrom-Utf32ToAscii` (alias for `ConvertFrom-Utf32ToAscii`)
-- [utf32-to-ascii](aliases/utf32-to-ascii.md) - Alias for `ConvertFrom-Utf32ToAscii` (alias for `ConvertFrom-Utf32ToAscii`)
+- [ascii-to-utf16](aliases/ascii-to-utf16.md) - ASCII to UTF-16 (alias for `ConvertFrom-AsciiToUtf16`)
+- [ascii-to-utf32](aliases/ascii-to-utf32.md) - ASCII to UTF-32 (alias for `ConvertFrom-AsciiToUtf32`)
+- [base64-to-utf16](aliases/base64-to-utf16.md) - Treat input as Base64 (UTF-8 bytes), decode to text, then encode as UTF-16 (alias for `ConvertFrom-Base64ToUtf16`)
+- [hex-to-utf16](aliases/hex-to-utf16.md) - Treat input as UTF-8 hex, decode to text, then encode as UTF-16 (alias for `ConvertFrom-HexToUtf16`)
+- [utf16-to-ascii](aliases/utf16-to-ascii.md) - Remove spaces and common separators (alias for `ConvertFrom-Utf16ToAscii`)
+- [utf16-to-base64](aliases/utf16-to-base64.md) - Treat input as UTF-16 hex, decode to text, then encode as UTF-8 Base64 (alias for `ConvertFrom-Utf16ToBase64`)
+- [utf16-to-hex](aliases/utf16-to-hex.md) - Treat input as UTF-16 hex, decode to text, then encode as UTF-8 hex (alias for `ConvertFrom-Utf16ToHex`)
+- [utf32-to-ascii](aliases/utf32-to-ascii.md) - Remove spaces and common separators (alias for `ConvertFrom-Utf32ToAscii`)
 
 ### utilities-datetime (4 aliases)
 
@@ -4796,14 +5603,14 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### uuid (9 aliases)
 
-- [base32-to-uuid](aliases/base32-to-uuid.md) - Alias for `ConvertTo-UuidFromBase32` (alias for `ConvertTo-UuidFromBase32`)
-- [base64-to-uuid](aliases/base64-to-uuid.md) - Alias for `ConvertTo-UuidFromBase64` (alias for `ConvertTo-UuidFromBase64`)
-- [guid](aliases/guid.md) - Generates a UUID (Universally Unique Identifier). (alias for `New-Uuid`)
-- [hex-to-uuid](aliases/hex-to-uuid.md) - Alias for `ConvertTo-UuidFromHex` (alias for `ConvertTo-UuidFromHex`)
-- [uuid](aliases/uuid.md) - Generates a UUID (Universally Unique Identifier). (alias for `New-Uuid`)
-- [uuid-to-base32](aliases/uuid-to-base32.md) - Alias for `ConvertFrom-UuidToBase32` (alias for `ConvertFrom-UuidToBase32`)
-- [uuid-to-base64](aliases/uuid-to-base64.md) - Alias for `ConvertFrom-UuidToBase64` (alias for `ConvertFrom-UuidToBase64`)
-- [uuid-to-hex](aliases/uuid-to-hex.md) - Alias for `ConvertFrom-UuidToHex` (alias for `ConvertFrom-UuidToHex`)
+- [base32-to-uuid](aliases/base32-to-uuid.md) - Converts a Base32 string to UUID format. (alias for `ConvertTo-UuidFromBase32`)
+- [base64-to-uuid](aliases/base64-to-uuid.md) - Converts a Base64 string to UUID format. (alias for `ConvertTo-UuidFromBase64`)
+- [guid](aliases/guid.md) - Generates a new UUID (GUID). (alias for `New-Uuid`)
+- [hex-to-uuid](aliases/hex-to-uuid.md) - Converts a hexadecimal string to UUID format. (alias for `ConvertTo-UuidFromHex`)
+- [uuid](aliases/uuid.md) - Generates a new UUID (GUID). (alias for `New-Uuid`)
+- [uuid-to-base32](aliases/uuid-to-base32.md) - Converts a UUID to Base32 format. (alias for `ConvertFrom-UuidToBase32`)
+- [uuid-to-base64](aliases/uuid-to-base64.md) - Converts a UUID to Base64 format. (alias for `ConvertFrom-UuidToBase64`)
+- [uuid-to-hex](aliases/uuid-to-hex.md) - Converts a UUID to hexadecimal format (no dashes). (alias for `ConvertFrom-UuidToHex`)
 - [uuid-v5](aliases/uuid-v5.md) - Generates a UUID v5 (name-based). (alias for `New-UuidV5`)
 
 ### uv (9 aliases)
@@ -4851,9 +5658,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### volume (3 aliases)
 
-- [liters-to-volume](aliases/liters-to-volume.md) - Alias for `ConvertFrom-LitersToVolume` (alias for `ConvertFrom-LitersToVolume`)
-- [volume](aliases/volume.md) - Alias for `Convert-Volume` (alias for `Convert-Volume`)
-- [volume-to-liters](aliases/volume-to-liters.md) - Alias for `ConvertTo-LitersFromVolume` (alias for `ConvertTo-LitersFromVolume`)
+- [liters-to-volume](aliases/liters-to-volume.md) - Convert from Liters (alias for `ConvertFrom-LitersToVolume`)
+- [volume](aliases/volume.md) - Convert Volume (alias for `Convert-Volume`)
+- [volume-to-liters](aliases/volume-to-liters.md) - Convert to Liters (alias for `ConvertTo-LitersFromVolume`)
 
 ### vue (3 aliases)
 
@@ -4882,10 +5689,10 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### weight (4 aliases)
 
-- [kg-to-weight](aliases/kg-to-weight.md) - Alias for `ConvertFrom-KilogramsToWeight` (alias for `ConvertFrom-KilogramsToWeight`)
-- [mass](aliases/mass.md) - Alias for `Convert-Weight` (alias for `Convert-Weight`)
-- [weight](aliases/weight.md) - Alias for `Convert-Weight` (alias for `Convert-Weight`)
-- [weight-to-kg](aliases/weight-to-kg.md) - Alias for `ConvertTo-KilogramsFromWeight` (alias for `ConvertTo-KilogramsFromWeight`)
+- [kg-to-weight](aliases/kg-to-weight.md) - Convert from Kilograms (alias for `ConvertFrom-KilogramsToWeight`)
+- [mass](aliases/mass.md) - Convert Weight (alias for `Convert-Weight`)
+- [weight](aliases/weight.md) - Convert Weight (alias for `Convert-Weight`)
+- [weight-to-kg](aliases/weight-to-kg.md) - Convert to Kilograms (alias for `ConvertTo-KilogramsFromWeight`)
 
 ### winget (17 aliases)
 
@@ -4919,14 +5726,14 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### xz (8 aliases)
 
-- [compress-lzma](aliases/compress-lzma.md) - Alias for `Compress-Lzma` (alias for `Compress-Lzma`)
-- [compress-xz](aliases/compress-xz.md) - Alias for `Compress-Xz` (alias for `Compress-Xz`)
-- [decompress-lzma](aliases/decompress-lzma.md) - Alias for `Expand-Lzma` (alias for `Expand-Lzma`)
-- [decompress-xz](aliases/decompress-xz.md) - Alias for `Expand-Xz` (alias for `Expand-Xz`)
-- [expand-lzma](aliases/expand-lzma.md) - Alias for `Expand-Lzma` (alias for `Expand-Lzma`)
-- [expand-xz](aliases/expand-xz.md) - Alias for `Expand-Xz` (alias for `Expand-Xz`)
-- [lzma](aliases/lzma.md) - Alias for `Compress-Lzma` (alias for `Compress-Lzma`)
-- [xz](aliases/xz.md) - Alias for `Compress-Xz` (alias for `Compress-Xz`)
+- [compress-lzma](aliases/compress-lzma.md) - Compresses a file using LZMA compression. (alias for `Compress-Lzma`)
+- [compress-xz](aliases/compress-xz.md) - Compresses a file using XZ compression. (alias for `Compress-Xz`)
+- [decompress-lzma](aliases/decompress-lzma.md) - Decompresses an LZMA compressed file. (alias for `Expand-Lzma`)
+- [decompress-xz](aliases/decompress-xz.md) - Decompresses an XZ compressed file. (alias for `Expand-Xz`)
+- [expand-lzma](aliases/expand-lzma.md) - Decompresses an LZMA compressed file. (alias for `Expand-Lzma`)
+- [expand-xz](aliases/expand-xz.md) - Decompresses an XZ compressed file. (alias for `Expand-Xz`)
+- [lzma](aliases/lzma.md) - Compresses a file using LZMA compression. (alias for `Compress-Lzma`)
+- [xz](aliases/xz.md) - Compresses a file using XZ compression. (alias for `Compress-Xz`)
 
 ### yaml (2 aliases)
 
@@ -4944,28 +5751,22 @@ This documentation is automatically generated from comment-based help in the pro
 - [yarn-update](aliases/yarn-update.md) - Updates Yarn to the latest version. (alias for `Update-YarnSelf`)
 - [yarn-upgrade](aliases/yarn-upgrade.md) - Updates all packages in the current project to their latest versions. (alias for `Update-YarnPackages`)
 
-### z85 (12 aliases)
+### z85 (6 aliases)
 
-- [ascii-to-z85](aliases/ascii-to-z85.md) - Alias for `ConvertFrom-AsciiToZ85` (alias for `ConvertFrom-AsciiToZ85`)
-- [ascii-to-z85](aliases/ascii-to-z85.md) - Alias for `ConvertFrom-AsciiToZ85` (alias for `ConvertFrom-AsciiToZ85`)
-- [base64-to-z85](aliases/base64-to-z85.md) - Alias for `ConvertFrom-Base64ToZ85` (alias for `ConvertFrom-Base64ToZ85`)
-- [base64-to-z85](aliases/base64-to-z85.md) - Alias for `ConvertFrom-Base64ToZ85` (alias for `ConvertFrom-Base64ToZ85`)
-- [hex-to-z85](aliases/hex-to-z85.md) - Alias for `ConvertFrom-HexToZ85` (alias for `ConvertFrom-HexToZ85`)
-- [hex-to-z85](aliases/hex-to-z85.md) - Alias for `ConvertFrom-HexToZ85` (alias for `ConvertFrom-HexToZ85`)
-- [z85-to-ascii](aliases/z85-to-ascii.md) - Alias for `ConvertFrom-Z85ToAscii` (alias for `ConvertFrom-Z85ToAscii`)
-- [z85-to-ascii](aliases/z85-to-ascii.md) - Alias for `ConvertFrom-Z85ToAscii` (alias for `ConvertFrom-Z85ToAscii`)
-- [z85-to-base64](aliases/z85-to-base64.md) - Alias for `ConvertFrom-Z85ToBase64` (alias for `ConvertFrom-Z85ToBase64`)
-- [z85-to-base64](aliases/z85-to-base64.md) - Alias for `ConvertFrom-Z85ToBase64` (alias for `ConvertFrom-Z85ToBase64`)
-- [z85-to-hex](aliases/z85-to-hex.md) - Alias for `ConvertFrom-Z85ToHex` (alias for `ConvertFrom-Z85ToHex`)
-- [z85-to-hex](aliases/z85-to-hex.md) - Alias for `ConvertFrom-Z85ToHex` (alias for `ConvertFrom-Z85ToHex`)
+- [ascii-to-z85](aliases/ascii-to-z85.md) - ASCII to Z85 (alias for `ConvertFrom-AsciiToZ85`)
+- [base64-to-z85](aliases/base64-to-z85.md) - Base64 to Z85 (alias for `ConvertFrom-Base64ToZ85`)
+- [hex-to-z85](aliases/hex-to-z85.md) - Hex to Z85 (alias for `ConvertFrom-HexToZ85`)
+- [z85-to-ascii](aliases/z85-to-ascii.md) - Z85 to ASCII (alias for `ConvertFrom-Z85ToAscii`)
+- [z85-to-base64](aliases/z85-to-base64.md) - Z85 to Base64 (alias for `ConvertFrom-Z85ToBase64`)
+- [z85-to-hex](aliases/z85-to-hex.md) - Z85 to Hex (alias for `ConvertFrom-Z85ToHex`)
 
 ### zstd (5 aliases)
 
-- [compress-zstd](aliases/compress-zstd.md) - Alias for `Compress-Zstd` (alias for `Compress-Zstd`)
-- [decompress-zstd](aliases/decompress-zstd.md) - Alias for `Expand-Zstd` (alias for `Expand-Zstd`)
-- [expand-zstd](aliases/expand-zstd.md) - Alias for `Expand-Zstd` (alias for `Expand-Zstd`)
-- [uncompress-zstd](aliases/uncompress-zstd.md) - Alias for `Expand-Zstd` (alias for `Expand-Zstd`)
-- [zstd](aliases/zstd.md) - Alias for `Compress-Zstd` (alias for `Compress-Zstd`)
+- [compress-zstd](aliases/compress-zstd.md) - Compresses a file using Zstandard (zstd) compression. (alias for `Compress-Zstd`)
+- [decompress-zstd](aliases/decompress-zstd.md) - Decompresses a Zstandard (zstd) compressed file. (alias for `Expand-Zstd`)
+- [expand-zstd](aliases/expand-zstd.md) - Decompresses a Zstandard (zstd) compressed file. (alias for `Expand-Zstd`)
+- [uncompress-zstd](aliases/uncompress-zstd.md) - Decompresses a Zstandard (zstd) compressed file. (alias for `Expand-Zstd`)
+- [zstd](aliases/zstd.md) - Compresses a file using Zstandard (zstd) compression. (alias for `Compress-Zstd`)
 
 
 ## Generation

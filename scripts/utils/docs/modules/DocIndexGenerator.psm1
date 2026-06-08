@@ -26,6 +26,9 @@ scripts/utils/docs/modules/DocIndexGenerator.psm1
 
 .OUTPUTS
     None. File is written directly to disk.
+.EXAMPLE
+    Write-DocumentationIndex
+
 #>
 function Write-DocumentationIndex {
     [CmdletBinding()]

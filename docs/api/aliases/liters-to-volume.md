@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-LitersToVolume`
+Convert from Liters
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-LitersToVolume` command.
+Convert from Liters
 
 ## Alias Information
 

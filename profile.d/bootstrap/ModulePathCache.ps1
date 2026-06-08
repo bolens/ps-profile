@@ -106,6 +106,9 @@ function global:Clear-ModulePathCache {
 
 .OUTPUTS
     System.Boolean. True if entry was removed, false otherwise.
+.EXAMPLE
+    Remove-ModulePathCacheEntry
+
 #>
 function global:Remove-ModulePathCacheEntry {
     [CmdletBinding()]

@@ -27,7 +27,11 @@ The path for the output Parquet file. If not specified, uses input path with .pa
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-ParquetFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

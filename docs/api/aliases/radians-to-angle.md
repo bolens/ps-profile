@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-RadiansToAngle`
+Convert from Radians
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-RadiansToAngle` command.
+Convert from Radians
 
 ## Alias Information
 

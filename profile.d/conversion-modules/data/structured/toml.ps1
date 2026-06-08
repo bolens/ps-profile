@@ -606,6 +606,9 @@ function Initialize-FileConversion-Toml {
     The path to the TOML file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-TomlToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-TomlToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -623,6 +626,9 @@ Set-AgentModeAlias -Name 'toml-to-json' -Target 'ConvertFrom-TomlToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output TOML file. If not specified, uses input path with .toml extension.
+.EXAMPLE
+    ConvertTo-TomlFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-TomlFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -640,6 +646,9 @@ Set-AgentModeAlias -Name 'json-to-toml' -Target 'ConvertTo-TomlFromJson'
     The path to the TOML file.
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-TomlToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-TomlToYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -657,6 +666,9 @@ Set-AgentModeAlias -Name 'toml-to-yaml' -Target 'ConvertFrom-TomlToYaml'
     The path to the YAML file.
 .PARAMETER OutputPath
     The path for the output TOML file. If not specified, uses input path with .toml extension.
+.EXAMPLE
+    ConvertTo-TomlFromYaml -InputPath ./input.file
+
 #>
 function ConvertTo-TomlFromYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -674,6 +686,9 @@ Set-AgentModeAlias -Name 'yaml-to-toml' -Target 'ConvertTo-TomlFromYaml'
     The path to the TOML file.
 .PARAMETER OutputPath
     The path for the output TOON file. If not specified, uses input path with .toon extension.
+.EXAMPLE
+    ConvertFrom-TomlToToon -InputPath ./input.file
+
 #>
 function ConvertFrom-TomlToToon {
     param([string]$InputPath, [string]$OutputPath)
@@ -691,6 +706,9 @@ Set-AgentModeAlias -Name 'toml-to-toon' -Target 'ConvertFrom-TomlToToon'
     The path to the TOON file.
 .PARAMETER OutputPath
     The path for the output TOML file. If not specified, uses input path with .toml extension.
+.EXAMPLE
+    ConvertTo-TomlFromToon -InputPath ./input.file
+
 #>
 function ConvertTo-TomlFromToon {
     param([string]$InputPath, [string]$OutputPath)
@@ -708,6 +726,9 @@ Set-AgentModeAlias -Name 'toon-to-toml' -Target 'ConvertTo-TomlFromToon'
     The path to the TOML file.
 .PARAMETER OutputPath
     The path for the output XML file. If not specified, uses input path with .xml extension.
+.EXAMPLE
+    ConvertFrom-TomlToXml -InputPath ./input.file
+
 #>
 function ConvertFrom-TomlToXml {
     param([string]$InputPath, [string]$OutputPath)
@@ -725,6 +746,9 @@ Set-AgentModeAlias -Name 'toml-to-xml' -Target 'ConvertFrom-TomlToXml'
     The path to the XML file.
 .PARAMETER OutputPath
     The path for the output TOML file. If not specified, uses input path with .toml extension.
+.EXAMPLE
+    ConvertTo-TomlFromXml -InputPath ./input.file
+
 #>
 function ConvertTo-TomlFromXml {
     param([string]$InputPath, [string]$OutputPath)

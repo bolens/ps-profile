@@ -27,6 +27,9 @@ scripts/utils/code-quality/modules/TestSummaryGeneration.psm1
 
 .OUTPUTS
     Test execution summary object
+.EXAMPLE
+    New-TestExecutionSummary
+
 #>
 function New-TestExecutionSummary {
     param(

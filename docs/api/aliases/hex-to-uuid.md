@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-UuidFromHex`
+Converts a hexadecimal string to UUID format.
 
 ## Description
 
-This is an alias that points to the `ConvertTo-UuidFromHex` command.
+Converts a 32-character hexadecimal string to standard UUID format with dashes.
 
 ## Alias Information
 

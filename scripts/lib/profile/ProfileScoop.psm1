@@ -11,6 +11,9 @@
     Uses ScoopDetection module if available, falls back to legacy detection.
 .PARAMETER ProfileDir
     Directory containing the profile files.
+.EXAMPLE
+    Initialize-ProfileScoop
+
 #>
 function Initialize-ProfileScoop {
     [CmdletBinding()]

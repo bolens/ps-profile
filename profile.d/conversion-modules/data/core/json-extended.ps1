@@ -391,6 +391,9 @@ try {
     The path to the JSON5 file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-Json5ToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-Json5ToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -440,6 +443,9 @@ Set-AgentModeAlias -Name 'json5-to-json' -Target 'ConvertFrom-Json5ToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output JSON5 file. If not specified, uses input path with .json5 extension.
+.EXAMPLE
+    ConvertTo-Json5FromJson -InputPath ./input.file
+
 #>
 function ConvertTo-Json5FromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -459,6 +465,9 @@ Set-AgentModeAlias -Name 'json-to-json5' -Target 'ConvertTo-Json5FromJson'
     The path to the JSONL file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-JsonLToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-JsonLToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -482,6 +491,9 @@ Set-AgentModeAlias -Name 'jsonl-to-json' -Target 'ConvertFrom-JsonLToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output JSONL file. If not specified, uses input path with .jsonl extension.
+.EXAMPLE
+    ConvertTo-JsonLFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-JsonLFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -507,6 +519,9 @@ Set-AgentModeAlias -Name 'json-to-jsonl' -Target 'ConvertTo-JsonLFromJson'
     The path to the XML file.
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-XmlToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-XmlToYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -532,6 +547,9 @@ Set-AgentModeAlias -Name 'xml-to-yaml' -Target 'ConvertFrom-XmlToYaml'
     The path to the YAML file.
 .PARAMETER OutputPath
     The path for the output XML file. If not specified, uses input path with .xml extension.
+.EXAMPLE
+    ConvertFrom-YamlToXml -InputPath ./input.file
+
 #>
 function ConvertFrom-YamlToXml {
     param([string]$InputPath, [string]$OutputPath)

@@ -6,7 +6,7 @@ Reads the local ISBN reading-list library.
 
 ## Description
 
-This is an alias that points to the `Get-IsbnLibrary` command.
+Reads the local ISBN reading-list library.
 
 ## Alias Information
 

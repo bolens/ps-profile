@@ -16,11 +16,22 @@ Invoke-GumChoose
 
 ## Parameters
 
-No parameters.
+### -Options
+
+Choices presented to the user.
+
+### -Prompt
+
+Header text shown above the chooser.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-GumChoose -Options 'dev', 'staging', 'prod' -Prompt 'Environment'
+``
 
 ## Aliases
 

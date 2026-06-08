@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-ChildItemAll`
+Listing helpers (prefer eza when available)
 
 ## Description
 
-This is an alias that points to the `Get-ChildItemAll` command.
+Listing helpers (prefer eza when available)
 
 ## Alias Information
 

@@ -38,6 +38,13 @@ scripts/utils/fragment/sync-profile-fragments.ps1
     Shows what would be changed without modifying the file.
 #>
 
+param(
+    [string]$ProfileDir,
+    [string]$ConfigPath,
+    [switch]$DryRun,
+    [switch]$PreserveManual
+)
+
 # Import ExitCodes for standardized exit handling
 $_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
 $_ewcLibPath = Join-Path $_ewcScriptsDir 'lib' 'ModuleImport.psm1'
@@ -52,13 +59,6 @@ if (Test-Path $_ewcLibPath) {
     function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
     enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
 }
-
-param(
-    [string]$ProfileDir,
-    [string]$ConfigPath,
-    [switch]$DryRun,
-    [switch]$PreserveManual
-)
 
 # Parse debug level once at script start
 $debugLevel = 0

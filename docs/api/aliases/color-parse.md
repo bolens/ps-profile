@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Parse-Color`
+ff0000"
 
 ## Description
 
-This is an alias that points to the `Parse-Color` command.
+ff0000"
 
 ## Alias Information
 

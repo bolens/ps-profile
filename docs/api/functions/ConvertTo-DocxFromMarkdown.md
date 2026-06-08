@@ -27,7 +27,11 @@ The path for the output DOCX file. If not specified, uses input path with .docx 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-DocxFromMarkdown -InputPath ./input.file
+``
 
 ## Aliases
 

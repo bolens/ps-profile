@@ -140,6 +140,9 @@ const fs = require('fs');
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output Parquet file. If not specified, uses input path with .parquet extension.
+.EXAMPLE
+    ConvertTo-ParquetFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-ParquetFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -158,6 +161,9 @@ Set-AgentModeAlias -Name 'json-to-parquet' -Target 'ConvertTo-ParquetFromJson'
     The path to the Parquet file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-ParquetToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-ParquetToJson {
     param([string]$InputPath, [string]$OutputPath)

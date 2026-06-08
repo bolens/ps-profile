@@ -29,6 +29,9 @@ function Initialize-FileConversion-DocumentMarkdownNotes {
     Optional path to write transformed content.
 .OUTPUTS
     System.String when -PassThru is specified or content is piped.
+.EXAMPLE
+    ConvertTo-WikilinksFromMarkdownLinks -InputPath ./input.file
+
 #>
 function ConvertTo-WikilinksFromMarkdownLinks {
     [CmdletBinding(DefaultParameterSetName = 'Content')]
@@ -107,6 +110,9 @@ Set-AgentModeAlias -Name 'md-links-to-wikilinks' -Target 'ConvertTo-WikilinksFro
     Optional path to write transformed content.
 .OUTPUTS
     System.String when content is piped or -PassThru is used.
+.EXAMPLE
+    ConvertTo-MarkdownLinksFromWikilinks -InputPath ./input.file
+
 #>
 function ConvertTo-MarkdownLinksFromWikilinks {
     [CmdletBinding(DefaultParameterSetName = 'Content')]
@@ -182,6 +188,9 @@ Set-AgentModeAlias -Name 'wikilinks-to-md-links' -Target 'ConvertTo-MarkdownLink
     Optional path to write transformed content.
 .OUTPUTS
     System.String when content is piped or -PassThru is used.
+.EXAMPLE
+    Convert-LogseqPropertiesToYamlFrontMatter
+
 #>
 function Convert-LogseqPropertiesToYamlFrontMatter {
     [CmdletBinding(DefaultParameterSetName = 'Content')]
@@ -289,6 +298,9 @@ Set-AgentModeAlias -Name 'logseq-to-yaml' -Target 'Convert-LogseqPropertiesToYam
     Directory containing exported Joplin resources (matches by filename prefix).
 .OUTPUTS
     System.String when content is piped or -PassThru is used.
+.EXAMPLE
+    Convert-JoplinResourceLinksToLocal
+
 #>
 function Convert-JoplinResourceLinksToLocal {
     [CmdletBinding(DefaultParameterSetName = 'Content')]
@@ -382,6 +394,9 @@ Set-AgentModeAlias -Name 'joplin-links-to-local' -Target 'Convert-JoplinResource
     Optional path to write transformed content.
 .OUTPUTS
     System.String when content is piped or -PassThru is used.
+.EXAMPLE
+    Convert-NotionCalloutsToObsidian
+
 #>
 function Convert-NotionCalloutsToObsidian {
     [CmdletBinding(DefaultParameterSetName = 'Content')]
@@ -493,6 +508,9 @@ Set-AgentModeAlias -Name 'notion-callouts-to-obsidian' -Target 'Convert-NotionCa
     Preview changes without moving files.
 .OUTPUTS
     PSCustomObject summary with MovedResources and UpdatedFiles counts.
+.EXAMPLE
+    Convert-JoplinExportForObsidian
+
 #>
 function Convert-JoplinExportForObsidian {
     [CmdletBinding(SupportsShouldProcess)]
@@ -587,6 +605,9 @@ Set-AgentModeAlias -Name 'joplin-export-to-obsidian' -Target 'Convert-JoplinExpo
     Download images and attachments when supported by the CLI.
 .OUTPUTS
     None. Writes files via the underlying CLI.
+.EXAMPLE
+    Export-NotionPageToMarkdown
+
 #>
 function Export-NotionPageToMarkdown {
     [CmdletBinding()]
@@ -719,6 +740,9 @@ Set-AgentModeAlias -Name 'notion-to-markdown' -Target 'Export-NotionPageToMarkdo
     Additional arguments forwarded to notionify-cli.
 .OUTPUTS
     CLI output from notionify-cli.
+.EXAMPLE
+    Invoke-NotionifyCli
+
 #>
 function Invoke-NotionifyCli {
     [CmdletBinding()]
@@ -764,6 +788,9 @@ Set-AgentModeAlias -Name 'notionify' -Target 'Invoke-NotionifyCli'
     Additional arguments forwarded to job.
 .OUTPUTS
     CLI output from job.
+.EXAMPLE
+    Sync-JoplinObsidianNotes
+
 #>
 function Sync-JoplinObsidianNotes {
     [CmdletBinding()]

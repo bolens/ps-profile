@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-AsciiToZ85`
+ASCII to Z85
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-AsciiToZ85` command.
+ASCII to Z85
 
 ## Alias Information
 

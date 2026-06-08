@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Pushes commits to remote repository.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Description
 
-Uploads local commits to the remote repository. Forwards all arguments to git push.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Signature
 
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gp` - Pushes commits to remote repository.
+- `gp` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git.ps1

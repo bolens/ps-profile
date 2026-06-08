@@ -35,12 +35,16 @@ Download images and attachments when supported by the CLI.
 
 ## Outputs
 
-None. Writes files via the underlying CLI.
+None. Writes files via the underlying CLI. .EXAMPLE Export-NotionPageToMarkdown
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Export-NotionPageToMarkdown
+``
 
 ## Aliases
 

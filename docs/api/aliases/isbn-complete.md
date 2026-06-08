@@ -6,7 +6,7 @@ Completes a partial ISBN by calculating the missing check digit.
 
 ## Description
 
-This is an alias that points to the `Complete-Isbn` command.
+Accepts nine ISBN-10 digits or twelve ISBN-13 digits and appends the correct check digit.
 
 ## Alias Information
 

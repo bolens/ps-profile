@@ -13,6 +13,9 @@
     One or more command names to mark as assumed available.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Add-AssumedCommand
+
 #>
 function global:Add-AssumedCommand {
     [CmdletBinding()]
@@ -52,6 +55,9 @@ function global:Add-AssumedCommand {
     One or more command names to remove from the assumed command list.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Remove-AssumedCommand
+
 #>
 function global:Remove-AssumedCommand {
     [CmdletBinding()]
@@ -86,6 +92,9 @@ function global:Remove-AssumedCommand {
 .SYNOPSIS
     Retrieves the list of assumed available commands.
 .OUTPUTS
+.DESCRIPTION
+    Retrieves the list of assumed available commands.
+    .OUTPUTS
     System.String[]
 #>
 function global:Get-AssumedCommands {

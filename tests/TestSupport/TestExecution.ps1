@@ -13,6 +13,59 @@
 .OUTPUTS
     System.Object
 #>
+<#
+.SYNOPSIS
+    Runs a script file in a child pwsh process without interactive prompts.
+.DESCRIPTION
+    Executes scripts the same way behavioral unit tests do: non-interactive child
+    process, optional per-invocation environment overrides, captured output, and
+    preserved exit codes. Never throws on non-zero exit codes.
+.PARAMETER ScriptPath
+    Path to the .ps1 script to execute.
+.PARAMETER ArgumentList
+    Arguments forwarded to the script.
+.PARAMETER EnvironmentVariables
+    Process environment variables applied only for this invocation.
+.OUTPUTS
+    PSCustomObject with ExitCode and Output properties.
+#>
+function Invoke-TestScriptFile {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ScriptPath,
+
+        [string[]]$ArgumentList = @(),
+
+        [hashtable]$EnvironmentVariables = @{}
+    )
+
+    $previousValues = [ordered]@{}
+    foreach ($key in $EnvironmentVariables.Keys) {
+        $previousValues[$key] = [Environment]::GetEnvironmentVariable($key, 'Process')
+        $value = $EnvironmentVariables[$key]
+        Set-Item -Path "Env:$key" -Value ([string]$value)
+    }
+
+    try {
+        $output = & pwsh -NoProfile -File $ScriptPath @ArgumentList 2>&1 | Out-String
+        return [pscustomobject]@{
+            ExitCode = $LASTEXITCODE
+            Output   = $output
+        }
+    }
+    finally {
+        foreach ($key in $previousValues.Keys) {
+            if ($null -eq $previousValues[$key]) {
+                Remove-Item -Path "Env:$key" -ErrorAction SilentlyContinue
+            }
+            else {
+                Set-Item -Path "Env:$key" -Value $previousValues[$key]
+            }
+        }
+    }
+}
+
 function Invoke-TestPwshScript {
     param(
         [Parameter(Mandatory)]

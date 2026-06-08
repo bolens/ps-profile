@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-HexToUtf16`
+Treat input as UTF-8 hex, decode to text, then encode as UTF-16
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-HexToUtf16` command.
+Treat input as UTF-8 hex, decode to text, then encode as UTF-16
 
 ## Alias Information
 

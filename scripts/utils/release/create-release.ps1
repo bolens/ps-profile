@@ -30,7 +30,7 @@ param(
 
 # Import shared utilities using ModuleImport pattern
 # Import ModuleImport first (bootstrap)
-$moduleImportPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'ModuleImport.psm1'
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import required modules using Import-LibModule

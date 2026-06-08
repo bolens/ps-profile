@@ -30,6 +30,9 @@ function Test-StarshipInitialized {
     The prompt function to check.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Test-PromptNeedsReplacement
+
 #>
 function Test-PromptNeedsReplacement {
     param([System.Management.Automation.FunctionInfo]$PromptCmd)
@@ -52,6 +55,9 @@ function Test-PromptNeedsReplacement {
     The exit code of the last command.
 .OUTPUTS
     System.String[]
+.EXAMPLE
+    Get-StarshipPromptArguments
+
 #>
 function Get-StarshipPromptArguments {
     param(

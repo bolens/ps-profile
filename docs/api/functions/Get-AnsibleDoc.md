@@ -6,7 +6,7 @@ Runs ansible-doc with the correct invocation strategy for the current platform.
 
 ## Description
 
-No description available.
+Runs ansible-doc with the correct invocation strategy for the current platform.
 
 ## Signature
 
@@ -23,11 +23,7 @@ Arguments to pass to ansible-doc.
 
 ## Examples
 
-### Example 1
-
-`powershell
-Get-AnsibleDoc ping
-``
+No examples provided.
 
 ## Aliases
 

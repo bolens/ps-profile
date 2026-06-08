@@ -39,6 +39,9 @@ if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
 
 .OUTPUTS
     Validation results
+.EXAMPLE
+    Test-TestResultIntegrity
+
 #>
 function Test-TestResultIntegrity {
     param(

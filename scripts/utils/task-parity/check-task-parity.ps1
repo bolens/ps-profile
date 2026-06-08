@@ -21,6 +21,18 @@
 .PARAMETER RepoRoot
     Repository root directory. Auto-detected if not specified.
 
+.PARAMETER Restore
+    Restores the latest backup for one or more task runner files from .backups/task-parity.
+
+.PARAMETER Prune
+    Prunes old task-parity backups, keeping the newest backups per -KeepCount.
+
+.PARAMETER KeepCount
+    Number of backups to retain per source file when creating or pruning backups. Defaults to 10.
+
+.PARAMETER Force
+    Overwrite existing files when restoring backups.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1
     
@@ -44,7 +56,15 @@ param(
     [ValidateSet('all', 'taskfile', 'makefile', 'package', 'justfile', 'tasksjson')]
     [string]$TargetFile = 'all',
     
-    [string]$RepoRoot = $null
+    [string]$RepoRoot = $null,
+
+    [switch]$Restore,
+
+    [switch]$Prune,
+
+    [int]$KeepCount = 10,
+
+    [switch]$Force
 )
 
 # Parse debug level once at script start
@@ -149,9 +169,10 @@ catch {
 # Import shared utilities with resilience (direct imports if ModuleImport failed)
 # Track which modules were successfully imported
 $importedModules = @{
-    ExitCodes = $false
-    Logging = $false
+    ExitCodes     = $false
+    Logging       = $false
     JsonUtilities = $false
+    FileBackup    = $false
 }
 
 # Import ExitCodes directly first (needed for Exit-WithCode)
@@ -227,6 +248,24 @@ if ($moduleImportImported -and (Get-Command Import-LibModule -ErrorAction Silent
         if ($debugLevel -ge 2) {
             Write-Host "  [task-parity] JsonUtilities module not available, will use native ConvertFrom-Json" -ForegroundColor DarkGray
         }
+    }
+}
+
+# Import FileBackup for backup, restore, and prune operations
+if ($moduleImportImported -and (Get-Command Import-LibModule -ErrorAction SilentlyContinue)) {
+    try {
+        Import-LibModule -ModuleName 'FileBackup' -ScriptPath $PSScriptRoot -DisableNameChecking -Global -ErrorAction Stop
+        $importedModules.FileBackup = $true
+    }
+    catch {
+        $errorMsg = "FileBackup module is required for backup operations: $($_.Exception.Message)"
+        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            Write-StructuredError -ErrorRecord $_ -OperationName 'task-parity.setup' -Context @{ module = 'FileBackup' }
+        }
+        else {
+            Write-Error $errorMsg
+        }
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
     }
 }
 
@@ -621,6 +660,56 @@ $taskFiles = @{
     'package' = Join-Path $RepoRoot 'package.json'
     'justfile' = Join-Path $RepoRoot 'justfile'
     'tasksjson' = Join-Path $RepoRoot '.vscode' 'tasks.json'
+}
+
+if ($Restore -or $Prune) {
+    if (-not $importedModules.FileBackup) {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'FileBackup module is required for -Restore and -Prune.'
+    }
+
+    $targetFiles = if ($TargetFile -eq 'all') {
+        $taskFiles.Values
+    }
+    else {
+        @($taskFiles[$TargetFile])
+    }
+
+    if ($Restore) {
+        foreach ($filePath in $targetFiles) {
+            if (-not $filePath -or -not (Test-Path -LiteralPath (Split-Path -Parent $filePath) -PathType Container -ErrorAction SilentlyContinue)) {
+                Write-Warning "Skipping restore for missing parent directory: $filePath"
+                continue
+            }
+
+            try {
+                $restoredPath = Restore-FileBackup -RepoRoot $RepoRoot -Category 'task-parity' -SourcePath $filePath -Latest -Force:$Force
+                Write-Host "Restored $restoredPath from latest task-parity backup" -ForegroundColor Green
+            }
+            catch {
+                Write-Warning "Could not restore backup for ${filePath}: $($_.Exception.Message)"
+            }
+        }
+
+        Exit-WithCode -ExitCode $EXIT_SUCCESS
+    }
+
+    if ($Prune) {
+        $removedTotal = 0
+        foreach ($filePath in $targetFiles) {
+            if (-not $filePath) {
+                continue
+            }
+
+            try {
+                $removedTotal += Remove-OldFileBackups -RepoRoot $RepoRoot -Category 'task-parity' -SourcePath $filePath -KeepCount $KeepCount
+            }
+            catch {
+                Write-Warning "Could not prune backups for ${filePath}: $($_.Exception.Message)"
+            }
+        }
+
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Pruned $removedTotal task-parity backup(s)"
+    }
 }
 
 # Validate repo root is accessible
@@ -1081,11 +1170,14 @@ if ($Generate) {
                     
                     # Create backup if file exists and is not empty
                     if ($fileInfo.Length -gt 0) {
-                        $backupPath = "$filePath.backup.$(Get-Date -Format 'yyyyMMddHHmmss')"
                         try {
-                            Copy-Item -LiteralPath $filePath -Destination $backupPath -ErrorAction Stop
+                            if (-not $importedModules.FileBackup) {
+                                throw 'FileBackup module is not loaded'
+                            }
+
+                            $backup = New-FileBackup -SourcePath $filePath -RepoRoot $RepoRoot -Category 'task-parity' -KeepCount $KeepCount
                             if ($debugLevel -ge 2) {
-                                Write-Host "  [task-parity] Created backup: $backupPath" -ForegroundColor DarkGray
+                                Write-Host "  [task-parity] Created backup: $($backup.BackupPath)" -ForegroundColor DarkGray
                             }
                         }
                         catch {

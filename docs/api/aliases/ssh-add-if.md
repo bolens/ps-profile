@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Add-SSHKeyIfNotLoaded`
+idempotent key loader
 
 ## Description
 
-This is an alias that points to the `Add-SSHKeyIfNotLoaded` command.
+idempotent key loader
 
 ## Alias Information
 

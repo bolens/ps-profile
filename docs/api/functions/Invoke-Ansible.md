@@ -6,7 +6,7 @@ Runs ansible with the correct invocation strategy for the current platform.
 
 ## Description
 
-No description available.
+Runs ansible with the correct invocation strategy for the current platform.
 
 ## Signature
 
@@ -23,11 +23,7 @@ Arguments to pass to ansible.
 
 ## Examples
 
-### Example 1
-
-`powershell
-Invoke-Ansible all -m ping
-``
+No examples provided.
 
 ## Aliases
 

@@ -24,6 +24,9 @@ scripts/utils/docs/modules/DocCleanup.psm1
 
 .OUTPUTS
     None. Files are removed directly.
+.EXAMPLE
+    Remove-StaleDocumentation
+
 #>
 function Remove-StaleDocumentation {
     [CmdletBinding()]

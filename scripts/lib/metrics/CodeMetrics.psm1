@@ -63,6 +63,9 @@ else {
     
 .OUTPUTS
     System.Array - Always returns a non-null array (may be empty).
+.EXAMPLE
+    ConvertTo-FileMetricsArray -InputPath ./input.file
+
 #>
 function ConvertTo-FileMetricsArray {
     param([object]$InputList)

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-UuidToHex`
+Converts a UUID to hexadecimal format (no dashes).
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-UuidToHex` command.
+Converts a UUID string to hexadecimal format without dashes.
 
 ## Alias Information
 

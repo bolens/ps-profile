@@ -57,6 +57,9 @@ catch {
 
 .OUTPUTS
     Boolean indicating success.
+.EXAMPLE
+    Install-ModuleUpdate 'package-name'
+
 #>
 function Install-ModuleUpdate {
     param(
@@ -141,6 +144,9 @@ function Install-ModuleUpdate {
 
 .OUTPUTS
     Hashtable mapping module names to success status.
+.EXAMPLE
+    Install-ModuleUpdates 'package-name'
+
 #>
 function Install-ModuleUpdates {
     param(

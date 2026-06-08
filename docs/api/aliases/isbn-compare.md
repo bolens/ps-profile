@@ -6,7 +6,7 @@ Compares two ISBN values and reports whether they refer to the same book.
 
 ## Description
 
-This is an alias that points to the `Compare-Isbn` command.
+Compares two ISBN values and reports whether they refer to the same book.
 
 ## Alias Information
 

@@ -6,7 +6,7 @@ Validates an ISMN checksum.
 
 ## Description
 
-This is an alias that points to the `Test-IsmnValid` command.
+Validates an ISMN checksum.
 
 ## Alias Information
 

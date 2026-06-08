@@ -16,11 +16,22 @@ Invoke-GumInput
 
 ## Parameters
 
-No parameters.
+### -Prompt
+
+Input prompt label.
+
+### -Placeholder
+
+Placeholder text shown in the input field.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-GumInput -Prompt 'Branch:' -Placeholder 'feature/my-change'
+``
 
 ## Aliases
 

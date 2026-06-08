@@ -251,6 +251,9 @@ except Exception as e:
     The path to the Delta Lake table directory.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-DeltaToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-DeltaToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -271,6 +274,9 @@ Set-AgentModeAlias -Name 'deltalake-to-json' -Target 'ConvertFrom-DeltaToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output Delta Lake table directory. If not specified, uses input path with .delta extension.
+.EXAMPLE
+    ConvertTo-DeltaFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-DeltaFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -290,6 +296,9 @@ Set-AgentModeAlias -Name 'json-to-deltalake' -Target 'ConvertTo-DeltaFromJson'
     The path to the Delta Lake table directory.
 .PARAMETER OutputPath
     The path for the output Parquet file. If not specified, uses input path with .parquet extension.
+.EXAMPLE
+    ConvertFrom-DeltaToParquet -InputPath ./input.file
+
 #>
 function ConvertFrom-DeltaToParquet {
     param([string]$InputPath, [string]$OutputPath)

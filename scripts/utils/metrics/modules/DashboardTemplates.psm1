@@ -32,6 +32,9 @@ scripts/utils/metrics/modules/DashboardTemplates.psm1
 
 .OUTPUTS
     Complete HTML dashboard as string.
+.EXAMPLE
+    New-DashboardHtml
+
 #>
 function New-DashboardHtml {
     param(
@@ -52,6 +55,19 @@ function New-DashboardHtml {
 
 .DESCRIPTION
     Creates the complete HTML dashboard template with all sections, CSS, and JavaScript.
+.PARAMETER CodeMetrics
+    Code metrics payload for dashboard rendering.
+.PARAMETER PerformanceMetrics
+    Performance metrics payload for dashboard rendering.
+.PARAMETER CoverageTrends
+    Coverage trend data for dashboard rendering.
+.PARAMETER HistoricalData
+    Historical metrics series for dashboard rendering.
+.PARAMETER IncludeHistorical
+    Includes historical charts when set.
+.EXAMPLE
+    Get-DashboardHtmlTemplate
+
 #>
 function Get-DashboardHtmlTemplate {
     param(

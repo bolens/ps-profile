@@ -6,7 +6,7 @@ Watches a folder for new files containing ISBN values and processes them.
 
 ## Description
 
-No description available.
+Watches a folder for new files containing ISBN values and processes them.
 
 ## Signature
 
@@ -16,7 +16,31 @@ Start-IsbnWatchFolder
 
 ## Parameters
 
-No parameters.
+### -Path
+
+Directory to watch for new files.
+
+### -OutputFormat
+
+Output format for discovered ISBN lookups.
+
+### -Provider
+
+Metadata provider used during lookup.
+
+### -OutputDirectory
+
+Directory where lookup output files are written.
+
+### -OnIsbnFound
+
+Optional script block invoked for each discovered ISBN.
+
+
+## Outputs
+
+System.IO.FileSystemWatcher
+
 
 ## Examples
 

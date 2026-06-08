@@ -27,7 +27,11 @@ The path for the output INI file. If not specified, uses input path with .ini ex
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-CfgToIni -InputPath ./input.file
+``
 
 ## Aliases
 

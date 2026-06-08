@@ -27,7 +27,11 @@ The path for the output GIF file. If not specified, uses input path with .gif ex
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-VideoToGif -InputPath ./input.file
+``
 
 ## Aliases
 

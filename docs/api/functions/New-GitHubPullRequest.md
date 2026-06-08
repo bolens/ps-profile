@@ -16,17 +16,26 @@ New-GitHubPullRequest
 
 ## Parameters
 
-No parameters.
+### -a
+
+Arguments forwarded to gh pr create.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+New-GitHubPullRequest --title 'Fix bug' --body 'Details here'
+.PARAMETER a
+    Arguments forwarded to gh pr create.
+``
 
 ## Aliases
 
 This function has the following aliases:
 
-- `prc` - Creates a GitHub pull request.
+- `prc` - GitHub PR create - create a pull request
 
 
 ## Source

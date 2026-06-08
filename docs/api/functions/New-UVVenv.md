@@ -16,11 +16,20 @@ New-UVVenv
 
 ## Parameters
 
-No parameters.
+### -Path
+
+Directory path where the virtual environment should be created.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+New-UVVenv
+.PARAMETER Path
+    Directory path where the virtual environment should be created.
+``
 
 ## Aliases
 

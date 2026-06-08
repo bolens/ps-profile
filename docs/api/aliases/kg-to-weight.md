@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-KilogramsToWeight`
+Convert from Kilograms
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-KilogramsToWeight` command.
+Convert from Kilograms
 
 ## Alias Information
 

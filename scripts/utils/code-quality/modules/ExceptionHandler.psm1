@@ -20,6 +20,9 @@ scripts/utils/code-quality/modules/ExceptionHandler.psm1
 
 .OUTPUTS
     Hashtable with Exceptions (function names) and ExceptionVerbs properties.
+.EXAMPLE
+    Get-NamingExceptions
+
 #>
 function Get-NamingExceptions {
     [CmdletBinding()]
@@ -79,6 +82,9 @@ function Get-NamingExceptions {
 
 .OUTPUTS
     System.Boolean. True if the function is an exception, false otherwise.
+.EXAMPLE
+    Test-IsException
+
 #>
 function Test-IsException {
     [CmdletBinding()]

@@ -31,12 +31,16 @@ Optional path to write transformed content.
 
 ## Outputs
 
-System.String when content is piped or -PassThru is used.
+System.String when content is piped or -PassThru is used. .EXAMPLE Convert-LogseqPropertiesToYamlFrontMatter
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Convert-LogseqPropertiesToYamlFrontMatter
+``
 
 ## Aliases
 

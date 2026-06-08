@@ -16,11 +16,20 @@ Invoke-UVTool
 
 ## Parameters
 
-No parameters.
+### -Arguments
+
+Arguments forwarded to uv tool run.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-UVTool ruff --version
+.PARAMETER Arguments
+    Arguments forwarded to uv tool run.
+``
 
 ## Aliases
 

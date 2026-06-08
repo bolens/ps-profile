@@ -27,7 +27,11 @@ The path for the output HDF5 file. If not specified, uses input path with .h5 ex
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-Hdf5FromNetCdf -InputPath ./input.file
+``
 
 ## Aliases
 

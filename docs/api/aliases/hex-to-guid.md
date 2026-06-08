@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-GuidFromHex`
+Converts a hexadecimal string to GUID format.
 
 ## Description
 
-This is an alias that points to the `ConvertTo-GuidFromHex` command.
+Converts a 32-character hexadecimal string to standard GUID format with dashes.
 
 ## Alias Information
 

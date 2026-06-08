@@ -11,6 +11,40 @@ scripts/utils/code-quality/modules/PesterCoverageConfig.psm1
 <#
 .SYNOPSIS
     Configures code coverage for Pester.
+
+.DESCRIPTION
+    Enables coverage collection, maps test paths to source files when possible,
+    and configures output format, report path, and minimum coverage targets.
+
+.PARAMETER Config
+    Pester configuration object to update.
+
+.PARAMETER Coverage
+    Enables full code coverage collection.
+
+.PARAMETER ShowCoverageSummary
+    Enables coverage summary output without full XML reporting.
+
+.PARAMETER CodeCoverageOutputFormat
+    Coverage report format (for example JaCoCo or Cobertura).
+
+.PARAMETER CoverageReportPath
+    Directory where coverage reports should be written.
+
+.PARAMETER MinimumCoverage
+    Minimum acceptable coverage percentage threshold.
+
+.PARAMETER ProfileDir
+    Profile source root used when no test-to-source mapping is found.
+
+.PARAMETER RepoRoot
+    Repository root used for default coverage output paths.
+
+.PARAMETER TestPaths
+    Test files used to infer targeted source coverage paths.
+
+.EXAMPLE
+    Set-PesterCodeCoverage -Config $config -Coverage -RepoRoot $repoRoot -ProfileDir $profileDir
 #>
 function Set-PesterCodeCoverage {
     param(

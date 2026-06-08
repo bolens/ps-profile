@@ -171,6 +171,9 @@ try {
     The path for the output Cap'n Proto file. If not specified, uses input path with .capnp extension.
 .PARAMETER SchemaPath
     The path to the Cap'n Proto schema file (.capnp extension). Required for encoding.
+.EXAMPLE
+    ConvertTo-CapnpFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-CapnpFromJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
@@ -193,6 +196,9 @@ Set-AgentModeAlias -Name 'json-to-capnproto' -Target 'ConvertTo-CapnpFromJson'
     The path for the output JSON file. If not specified, uses input path with .json extension.
 .PARAMETER SchemaPath
     The path to the Cap'n Proto schema file (.capnp extension). Required for decoding.
+.EXAMPLE
+    ConvertFrom-CapnpToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-CapnpToJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)

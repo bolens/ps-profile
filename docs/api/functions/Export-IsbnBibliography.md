@@ -6,7 +6,7 @@ Exports bibliography records for one or more ISBN values.
 
 ## Description
 
-No description available.
+Exports bibliography records for one or more ISBN values.
 
 ## Signature
 
@@ -16,7 +16,23 @@ Export-IsbnBibliography
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+ISBN to export from the pipeline.
+
+### -OutputPath
+
+Optional file path for combined export output.
+
+### -Format
+
+Bibliography format to generate.
+
+
+## Outputs
+
+System.String
+
 
 ## Examples
 

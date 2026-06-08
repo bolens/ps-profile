@@ -42,6 +42,9 @@ if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) 
 
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Test-WatcherFileMatch
+
 #>
 function Test-WatcherFileMatch {
     [CmdletBinding()]
@@ -90,6 +93,11 @@ $script:TestWatcherChangeTimer = $null
 
 .OUTPUTS
     System.IO.FileSystemWatcher
+.PARAMETER WatchPath
+    Directory path monitored for file changes.
+.EXAMPLE
+    New-RegisteredTestWatcher -WatchPath (Get-Location).Path
+
 #>
 function New-RegisteredTestWatcher {
     [CmdletBinding()]
@@ -172,7 +180,16 @@ function New-RegisteredTestWatcher {
 
 <#
 .SYNOPSIS
-    Disposes watcher resources and debounce timers.
+        Disposes watcher resources and debounce timers.
+
+.DESCRIPTION
+        Disposes watcher resources and debounce timers.
+
+.PARAMETER Watchers
+        FileSystemWatcher instances to dispose.
+
+.EXAMPLE
+    Stop-TestWatcherResources -Watchers $script:TestWatchers
 #>
 function Stop-TestWatcherResources {
     [CmdletBinding()]
@@ -230,6 +247,9 @@ function Stop-TestWatcherResources {
 
 .OUTPUTS
     None - runs until canceled or MaximumDurationSeconds elapses
+.EXAMPLE
+    Start-TestWatcher
+
 #>
 function Start-TestWatcher {
     [CmdletBinding()]

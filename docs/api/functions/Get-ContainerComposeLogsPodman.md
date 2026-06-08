@@ -16,11 +16,18 @@ Get-ContainerComposeLogsPodman
 
 ## Parameters
 
-No parameters.
+### -args
+
+Additional arguments forwarded to compose logs -f.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Get-ContainerComposeLogsPodman
+``
 
 ## Aliases
 

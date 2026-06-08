@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Compress-Xz`
+Compresses a file using XZ compression.
 
 ## Description
 
-This is an alias that points to the `Compress-Xz` command.
+Compresses a file using the XZ compression format (LZMA2 algorithm). XZ provides high compression ratios.
 
 ## Alias Information
 

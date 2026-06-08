@@ -6,7 +6,7 @@ Validates an ISMN checksum.
 
 ## Description
 
-No description available.
+Validates an ISMN checksum.
 
 ## Signature
 
@@ -16,7 +16,15 @@ Test-IsmnValid
 
 ## Parameters
 
-No parameters.
+### -Ismn
+
+ISMN value from the pipeline.
+
+
+## Outputs
+
+System.Boolean
+
 
 ## Examples
 

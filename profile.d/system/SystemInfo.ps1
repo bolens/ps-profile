@@ -9,6 +9,11 @@
     Shows information about commands.
 .DESCRIPTION
     Displays information about PowerShell commands and their locations.
+.EXAMPLE
+    Get-CommandInfo git
+.PARAMETER CommandArgs
+    Command name and optional arguments passed to Get-Command.
+
 #>
 function Get-CommandInfo {
     param([Parameter(ValueFromRemainingArguments = $true)] $CommandArgs)

@@ -11,9 +11,18 @@ scripts/utils/task-parity/modules/TaskParityUtilities.psm1
 
 function Get-TextLineEnding {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Detects the dominant line ending in text content.
-    #>
+
+.DESCRIPTION
+        Detects the dominant line ending in text content.
+
+.PARAMETER Content
+        File or help content as text.
+.EXAMPLE
+    Get-TextLineEnding
+
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -35,9 +44,18 @@ function Get-TextLineEnding {
 
 function Get-TextFileEncoding {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Returns UTF-8 encoding, preserving BOM when the file already has one.
-    #>
+
+.DESCRIPTION
+        Returns UTF-8 encoding, preserving BOM when the file already has one.
+
+.PARAMETER Path
+        File or directory path.
+.EXAMPLE
+    Get-TextFileEncoding
+
+#>
     [CmdletBinding()]
     [OutputType([System.Text.Encoding])]
     param(
@@ -77,9 +95,27 @@ function Get-TextFileEncoding {
 
 function Write-TaskParityTextFile {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Writes text using UTF-8 and a stable line ending (preserves existing when known).
-    #>
+
+.DESCRIPTION
+        Writes text using UTF-8 and a stable line ending (preserves existing when known).
+
+.PARAMETER Path
+        File or directory path.
+
+.PARAMETER Content
+        File or help content as text.
+
+.PARAMETER LineEnding
+        Line ending sequence used when writing text.
+
+.PARAMETER ExistingContent
+        Original file content used to preserve line endings.
+.EXAMPLE
+    Write-TaskParityTextFile
+
+#>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -122,9 +158,18 @@ function Write-TaskParityTextFile {
 
 function Join-TaskCommandLines {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Joins command lines and normalizes script paths for cross-platform comparison.
-    #>
+
+.DESCRIPTION
+        Joins command lines and normalizes script paths for cross-platform comparison.
+
+.PARAMETER Lines
+        Text lines to process.
+.EXAMPLE
+    Join-TaskCommandLines
+
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -148,9 +193,18 @@ function Join-TaskCommandLines {
 
 function Split-TaskCommandLines {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Splits a multiline task command using CRLF or LF line endings.
-    #>
+
+.DESCRIPTION
+        Splits a multiline task command using CRLF or LF line endings.
+
+.PARAMETER Command
+        Shell command text.
+.EXAMPLE
+    Split-TaskCommandLines
+
+#>
     [CmdletBinding()]
     [OutputType([string[]])]
     param(
@@ -172,9 +226,18 @@ function Split-TaskCommandLines {
 
 function Normalize-TaskScriptPathInText {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Normalizes scripts/ path segments to forward slashes for cross-platform commands.
-    #>
+
+.DESCRIPTION
+        Normalizes scripts/ path segments to forward slashes for cross-platform commands.
+
+.PARAMETER Text
+        Input text to normalize or inspect.
+.EXAMPLE
+    Normalize-TaskScriptPathInText
+
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -195,9 +258,18 @@ function Normalize-TaskScriptPathInText {
 
 function Test-TaskArgumentPlaceholder {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Returns true when a token is a task-runner argument placeholder.
-    #>
+
+.DESCRIPTION
+        Returns true when a token is a task-runner argument placeholder.
+
+.PARAMETER Token
+        Token text to evaluate.
+.EXAMPLE
+    Test-TaskArgumentPlaceholder
+
+#>
     [CmdletBinding()]
     [OutputType([bool])]
     param(
@@ -210,9 +282,24 @@ function Test-TaskArgumentPlaceholder {
 
 function ConvertTo-VsCodeShellTaskDefinition {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds a VS Code shell task definition from a reference task command.
-    #>
+
+.DESCRIPTION
+        Builds a VS Code shell task definition from a reference task command.
+
+.PARAMETER Label
+        Task label used in tasks.json output.
+
+.PARAMETER Command
+        Shell command text.
+
+.PARAMETER Description
+        Human-readable task description.
+.EXAMPLE
+    ConvertTo-VsCodeShellTaskDefinition -InputPath ./input.file
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -285,9 +372,18 @@ function ConvertTo-VsCodeShellTaskDefinition {
 
 function ConvertFrom-PwshInvocationCommand {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Parses a pwsh invocation into a VS Code shell command and args array.
-    #>
+
+.DESCRIPTION
+        Parses a pwsh invocation into a VS Code shell command and args array.
+
+.PARAMETER Command
+        Shell command text.
+.EXAMPLE
+    ConvertFrom-PwshInvocationCommand -InputPath ./input.file
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(

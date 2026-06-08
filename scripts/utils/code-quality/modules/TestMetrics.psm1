@@ -21,6 +21,9 @@ scripts/utils/code-quality/modules/TestMetrics.psm1
 
 .OUTPUTS
     Performance grade string
+.EXAMPLE
+    Get-PerformanceGrade
+
 #>
 function Get-PerformanceGrade {
     param($PerformanceData)
@@ -63,6 +66,9 @@ function Get-PerformanceGrade {
 
 .OUTPUTS
     Coverage score (0-100)
+.EXAMPLE
+    Calculate-TestCoverage
+
 #>
 function Calculate-TestCoverage {
     param($TestResult)
@@ -94,6 +100,9 @@ function Calculate-TestCoverage {
 
 .OUTPUTS
     Stability score (0-100)
+.EXAMPLE
+    Calculate-StabilityScore
+
 #>
 function Calculate-StabilityScore {
     param($TestResult)
@@ -123,6 +132,9 @@ function Calculate-StabilityScore {
 
 .OUTPUTS
     Performance score (0-100)
+.EXAMPLE
+    Calculate-PerformanceScore
+
 #>
 function Calculate-PerformanceScore {
     param($PerformanceData)

@@ -83,6 +83,9 @@ function script:Join-PathEnvironmentValue {
     If specified, retrieves the machine-wide value; otherwise, the user value.
 .OUTPUTS
     String. The environment variable value, or null if not found.
+.EXAMPLE
+    Get-EnvVar
+
 #>
 function Get-EnvVar {
     [CmdletBinding()]
@@ -146,6 +149,9 @@ function Get-EnvVar {
     If specified, sets the machine-wide value; otherwise, the user value.
 .OUTPUTS
     None. This function does not return a value.
+.EXAMPLE
+    Set-EnvVar
+
 #>
 function Set-EnvVar {
     [CmdletBinding()]
@@ -269,6 +275,9 @@ public static extern IntPtr SendMessageTimeout(
     The directory path to remove from PATH.
 .PARAMETER Global
     If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
+.EXAMPLE
+    Remove-Path
+
 #>
 function Remove-Path {
     param(
@@ -310,6 +319,9 @@ function Remove-Path {
     The directory path to add to PATH.
 .PARAMETER Global
     If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
+.EXAMPLE
+    Add-Path
+
 #>
 function Add-Path {
     param(

@@ -14,6 +14,9 @@
 .OUTPUTS
     System.String
     The path to the Python interpreter, or $null if not found.
+.EXAMPLE
+    Get-PythonPath
+
 #>
 function Get-PythonPath {
     param(
@@ -1221,6 +1224,27 @@ function Expand-EmbeddedPythonInstallHints {
 <#
 .SYNOPSIS
     Replaces __PYTHON_INSTALL_CMD__ in a PowerShell error message at runtime.
+.PARAMETER Message
+    Optional message written before exiting.
+.PARAMETER PackageNames
+    PackageNames parameter.
+.PARAMETER Global
+    Global parameter.
+.PARAMETER PythonCmd
+    PythonCmd parameter.
+.EXAMPLE
+.DESCRIPTION
+    Replaces __PYTHON_INSTALL_CMD__ in a PowerShell error message at runtime.
+    .PARAMETER Message
+    Optional message written before exiting.
+    .PARAMETER PackageNames
+    PackageNames parameter.
+    .PARAMETER Global
+    Global parameter.
+    .PARAMETER PythonCmd
+    PythonCmd parameter.
+    .EXAMPLE
+    Resolve-PythonInstallHintMessage
 #>
 function Resolve-PythonInstallHintMessage {
     [CmdletBinding()]

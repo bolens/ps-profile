@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Energy`
+Convert Energy
 
 ## Description
 
-This is an alias that points to the `Convert-Energy` command.
+Convert Energy
 
 ## Alias Information
 

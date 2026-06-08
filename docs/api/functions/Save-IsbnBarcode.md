@@ -6,7 +6,7 @@ Generates an EAN-13 barcode image for an ISBN.
 
 ## Description
 
-No description available.
+Generates an EAN-13 barcode image for an ISBN.
 
 ## Signature
 
@@ -16,7 +16,23 @@ Save-IsbnBarcode
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+ISBN to encode as EAN-13.
+
+### -OutputPath
+
+Destination image path.
+
+### -PassThru
+
+Returns the output path.
+
+
+## Outputs
+
+System.String
+
 
 ## Examples
 

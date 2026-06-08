@@ -6,7 +6,7 @@ Runs ansible-doc with the correct invocation strategy for the current platform.
 
 ## Description
 
-This is an alias that points to the `Get-AnsibleDoc` command.
+Runs ansible-doc with the correct invocation strategy for the current platform.
 
 ## Alias Information
 

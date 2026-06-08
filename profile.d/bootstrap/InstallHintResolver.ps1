@@ -1130,7 +1130,7 @@ function global:Get-PreferenceAwareInstallHint {
 
 function global:Invoke-MissingToolWarning {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Resolves an install hint and emits a missing-tool warning in one call.
 
     .DESCRIPTION
@@ -1158,7 +1158,10 @@ function global:Invoke-MissingToolWarning {
 
     .PARAMETER AdditionalHint
         Optional text appended to the resolved install hint when not already present.
-    #>
+.EXAMPLE
+    Invoke-MissingToolWarning
+
+#>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -1210,6 +1213,19 @@ function global:Invoke-MissingToolWarning {
 <#
 .SYNOPSIS
     Maps command names to package names used by system package managers.
+
+.DESCRIPTION
+    Normalizes executable names such as rg, magick, and psql to the package
+    names expected by Scoop, apt, pacman, and similar managers.
+
+.PARAMETER ToolName
+    Command or tool name to normalize.
+
+.OUTPUTS
+    System.String
+
+.EXAMPLE
+    Resolve-InstallPackageName -ToolName 'rg'
 #>
 function global:Resolve-InstallPackageName {
     [CmdletBinding()]
@@ -1286,7 +1302,16 @@ function global:Resolve-InstallPackageName {
 
 <#
 .SYNOPSIS
-    Infers install hint tool type from a command name.
+        Infers install hint tool type from a command name.
+
+.DESCRIPTION
+        Infers install hint tool type from a command name.
+
+.PARAMETER CommandName
+        Command name used to infer package-manager category.
+
+.OUTPUTS
+        System.String
 #>
 function global:Resolve-CommandInstallToolType {
     [CmdletBinding()]
@@ -1312,7 +1337,19 @@ function global:Resolve-CommandInstallToolType {
 
 <#
 .SYNOPSIS
-    Emits a missing-tool warning with inferred tool type for a command.
+        Emits a missing-tool warning with inferred tool type for a command.
+
+.DESCRIPTION
+        Emits a missing-tool warning with inferred tool type for a command.
+
+.PARAMETER CommandName
+        Missing command that triggered the warning.
+
+.PARAMETER Tool
+        Optional display name override.
+
+.PARAMETER DefaultInstallCommand
+        Fallback install command when preference detection is unavailable.
 #>
 function global:Invoke-CommandMissingToolWarning {
     [CmdletBinding()]
@@ -1351,7 +1388,22 @@ function global:Invoke-CommandMissingToolWarning {
 
 <#
 .SYNOPSIS
-    Gets a platform-aware install hint for a tool.
+        Gets a platform-aware install hint for a tool.
+
+.DESCRIPTION
+        Gets a platform-aware install hint for a tool.
+
+.PARAMETER ToolName
+        Tool or command name to resolve.
+
+.PARAMETER ToolType
+        Package-manager category used by preference-aware hint resolution.
+
+.PARAMETER InstallPackageName
+        Optional package name override.
+
+.OUTPUTS
+        System.String
 #>
 function global:Get-PlatformInstallHint {
     [CmdletBinding()]
@@ -1382,7 +1434,13 @@ function global:Get-PlatformInstallHint {
 
 <#
 .SYNOPSIS
-    Gets a combined install hint for Docker or Podman container engines.
+        Gets a combined install hint for Docker or Podman container engines.
+
+.DESCRIPTION
+        Gets a combined install hint for Docker or Podman container engines.
+
+.OUTPUTS
+        System.String
 #>
 function global:Get-ContainerEngineInstallHint {
     [CmdletBinding()]
@@ -1400,7 +1458,13 @@ function global:Get-ContainerEngineInstallHint {
 
 <#
 .SYNOPSIS
-    Gets a platform-aware installation command string for container engines (without "Install with:" prefix).
+        Gets a platform-aware installation command string for container engines (without "Install with:" prefix).
+
+.DESCRIPTION
+        Gets a platform-aware installation command string for container engines (without "Install with:" prefix).
+
+.OUTPUTS
+        System.String
 #>
 function global:Get-ContainerInstallationCommand {
     [CmdletBinding()]
@@ -1416,7 +1480,13 @@ function global:Get-ContainerInstallationCommand {
 
 <#
 .SYNOPSIS
-    Emits a missing container engine warning with platform-aware install hints.
+        Emits a missing container engine warning with platform-aware install hints.
+
+.DESCRIPTION
+        Emits a missing container engine warning with platform-aware install hints.
+
+.PARAMETER Tool
+        Display name used in the warning message.
 #>
 function global:Invoke-ContainerEngineMissingWarning {
     [CmdletBinding()]
@@ -1445,6 +1515,10 @@ function global:Invoke-ContainerEngineMissingWarning {
 <#
 .SYNOPSIS
     Emits a missing-tool warning for dangerzone with Docker requirement note.
+
+.DESCRIPTION
+    Writes a profile-standard missing-tool warning when dangerzone is unavailable,
+    including Docker as an installation prerequisite.
 #>
 function global:Invoke-DangerzoneMissingWarning {
     [CmdletBinding()]
@@ -1482,6 +1556,19 @@ function global:Invoke-DangerzoneMissingWarning {
 }
 
 function global:Get-ToolInstallationCommand {
+    <#
+.SYNOPSIS
+        Returns a bare install command string for a tool.
+
+.DESCRIPTION
+        Returns a bare install command string for a tool.
+
+.PARAMETER ToolName
+        Tool or package name to resolve.
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -1498,7 +1585,25 @@ function global:Get-ToolInstallationCommand {
 
 <#
 .SYNOPSIS
-    Builds a missing-tool error message for conversion CLI dependencies.
+        Builds a missing-tool error message for conversion CLI dependencies.
+
+.DESCRIPTION
+        Builds a missing-tool error message for conversion CLI dependencies.
+
+.PARAMETER ToolName
+        Missing conversion tool name.
+
+.PARAMETER InstallPackageName
+        Optional package name override.
+
+.PARAMETER Context
+        Optional subject phrase inserted before "is not available".
+
+.PARAMETER AdditionalHint
+        Optional trailing hint text.
+
+.OUTPUTS
+        System.String
 #>
 function global:Get-ConversionToolMissingMessage {
     [CmdletBinding()]
@@ -1538,6 +1643,10 @@ function global:Get-ConversionToolMissingMessage {
 <#
 .SYNOPSIS
     Builds a missing-tool error message when ImageMagick or GraphicsMagick is required.
+
+.DESCRIPTION
+    Returns a formatted error string when neither ImageMagick nor GraphicsMagick
+    is available for image conversion operations.
 #>
 function global:Get-ImageConversionToolMissingMessage {
     [CmdletBinding()]

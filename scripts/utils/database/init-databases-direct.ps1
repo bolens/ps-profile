@@ -1,7 +1,16 @@
 <#
 .SYNOPSIS
-    Directly initialize SQLite databases without loading profile.
+    Directly initialize SQLite databases without loading the PowerShell profile.
+
+.DESCRIPTION
+    Bootstraps ExitCodes and PlatformPaths, then creates or migrates SQLite
+    databases used by the profile cache. Intended for setup scripts and CI.
+
+.EXAMPLE
+    pwsh -NoProfile -File scripts/utils/database/init-databases-direct.ps1
 #>
+
+param()
 
 # Import ExitCodes for standardized exit handling
 $_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
@@ -18,7 +27,6 @@ if (Test-Path $_ewcLibPath) {
     function script:Exit-WithCode { param([object]$ExitCode, [string]$Message) if ($Message) { Write-Host $Message }; exit [int]$ExitCode }
     enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
 }
-param()
 
 $ErrorActionPreference = 'Stop'
 

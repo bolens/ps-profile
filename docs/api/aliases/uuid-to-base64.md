@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-UuidToBase64`
+Converts a UUID to Base64 format.
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-UuidToBase64` command.
+Converts a UUID string to Base64 encoded format.
 
 ## Alias Information
 

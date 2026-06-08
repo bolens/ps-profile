@@ -23,7 +23,11 @@ The path to the XML file to convert.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-XmlToJson -InputPath ./input.file
+``
 
 ## Aliases
 

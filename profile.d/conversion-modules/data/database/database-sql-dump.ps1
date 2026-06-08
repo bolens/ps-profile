@@ -326,6 +326,9 @@ function Initialize-FileConversion-DatabaseSqlDump {
     The path to the SQL dump file (.sql extension).
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-SqlDumpToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-SqlDumpToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -346,6 +349,9 @@ Set-AgentModeAlias -Name 'sql-to-json' -Target 'ConvertFrom-SqlDumpToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output SQL dump file. If not specified, uses input path with .sql extension.
+.EXAMPLE
+    ConvertTo-SqlDumpFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-SqlDumpFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -368,6 +374,9 @@ Set-AgentModeAlias -Name 'json-to-sql' -Target 'ConvertTo-SqlDumpFromJson'
     The path for the output CSV file. If not specified, uses input path with .csv extension.
 .PARAMETER TableName
     Optional. Name of the table to export. If not specified, exports the first table found.
+.EXAMPLE
+    ConvertFrom-SqlDumpToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-SqlDumpToCsv {
     param([string]$InputPath, [string]$OutputPath, [string]$TableName)

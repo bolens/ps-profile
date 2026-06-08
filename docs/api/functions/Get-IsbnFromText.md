@@ -6,7 +6,7 @@ Extracts valid ISBN values from arbitrary text.
 
 ## Description
 
-No description available.
+Extracts valid ISBN values from arbitrary text.
 
 ## Signature
 
@@ -16,7 +16,15 @@ Get-IsbnFromText
 
 ## Parameters
 
-No parameters.
+### -Text
+
+Text that may contain one or more ISBN values.
+
+
+## Outputs
+
+PSCustomObject[]
+
 
 ## Examples
 

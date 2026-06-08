@@ -11,7 +11,7 @@ Downloads changes from the remote repository and merges them into the current br
 ## Signature
 
 ```powershell
-Get-GitChanges
+Get-GitChanges [Object]$a
 ```
 
 ## Parameters
@@ -31,4 +31,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

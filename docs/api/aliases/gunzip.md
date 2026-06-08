@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Expand-Gzip`
+Decompresses a Gzip-compressed file.
 
 ## Description
 
-This is an alias that points to the `Expand-Gzip` command.
+Decompresses a file that was compressed using Gzip compression algorithm.
 
 ## Alias Information
 

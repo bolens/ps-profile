@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Creates a GitHub pull request.
+GitHub PR create - create a pull request
 
 ## Description
 
-Creates a new pull request using the GitHub CLI (gh). Forwards all arguments to gh pr create.
+GitHub PR create - create a pull request
 
 ## Alias Information
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/git-modules/integrations/git-github.ps1
+Defined in: ../profile.d/git-modules/core/git-advanced.ps1

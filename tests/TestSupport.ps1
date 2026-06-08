@@ -50,6 +50,11 @@ $env:PS_PROFILE_FORCE = '1'
 $env:PS_PROFILE_TEST_MODE = '1'
 $env:PS_PROFILE_NONINTERACTIVE = '1'
 
+# Normalize TMPDIR for Linux environments where only TEMP/TMP may be set.
+if ([string]::IsNullOrWhiteSpace($env:TMPDIR)) {
+    $env:TMPDIR = [System.IO.Path]::GetTempPath().TrimEnd([System.IO.Path]::DirectorySeparatorChar)
+}
+
 function global:Read-Host {
     <#
     .SYNOPSIS

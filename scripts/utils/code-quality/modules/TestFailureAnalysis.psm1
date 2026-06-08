@@ -27,6 +27,9 @@ if ($categorizationModulePath -and -not [string]::IsNullOrWhiteSpace($categoriza
 
 .OUTPUTS
     Failure analysis object
+.EXAMPLE
+    Get-FailureAnalysis
+
 #>
 function Get-FailureAnalysis {
     param(

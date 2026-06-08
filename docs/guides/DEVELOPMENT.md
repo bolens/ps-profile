@@ -2,6 +2,8 @@
 
 This guide provides information for developers working on the PowerShell profile codebase.
 
+> **Note:** This profile is under active development and may be unstable. See [README.md](../../README.md) for the full warning.
+
 ## Prerequisites
 
 Before starting development, ensure you have:
@@ -15,7 +17,11 @@ Before starting development, ensure you have:
 ### 1. Clone the Repository
 
 ```powershell
+# Windows (PowerShell 7+)
 git clone https://github.com/bolens/ps-profile.git $HOME\Documents\PowerShell
+
+# Linux / macOS
+git clone https://github.com/bolens/ps-profile.git ~/.config/powershell
 ```
 
 ### 2. Install Development Dependencies
@@ -384,8 +390,13 @@ Performance regression tests respect optional thresholds:
 Generate API documentation:
 
 ```powershell
-pwsh -NoProfile -File scripts\utils\generate-docs.ps1
+pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1
+task generate-docs-incremental   # faster local iteration; uses docs/api/.doc-generation-cache.json
+task check-doc-coverage          # informational coverage report for dynamic registrations
+task check-doc-freshness         # CI-style check: regen + fail when docs/api differs from git
 ```
+
+CI runs `check-doc-freshness` in the `api-docs` job (`.github/workflows/validate-profile.yml`) with a cached `.doc-generation-cache.json` for faster incremental runs.
 
 Generate fragment READMEs:
 

@@ -11,6 +11,7 @@
 
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/verify-cache-load.ps1
+
 #>
 
 [CmdletBinding()]

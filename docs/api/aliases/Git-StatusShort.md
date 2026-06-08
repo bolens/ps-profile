@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-GitStatusShort`
+Git status short - show concise status
 
 ## Description
 
-This is an alias that points to the `Get-GitStatusShort` command.
+Git status short - show concise status
 
 ## Alias Information
 

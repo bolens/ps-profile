@@ -72,6 +72,19 @@ $file = $paths.File
 Write-Host "Target config directory: $dir"
 Write-Host "Target config file: $file"
 
+if ($DryRun) {
+    Write-Host "`n[DRY RUN] Would create config file at: $file" -ForegroundColor Yellow
+    Write-Host "[DRY RUN] Would include:" -ForegroundColor Yellow
+    if ($ApiToken) {
+        Write-Host "  - API token: [REDACTED]" -ForegroundColor Yellow
+    }
+    if ($AccountId) {
+        Write-Host "  - Account ID: $AccountId" -ForegroundColor Yellow
+    }
+    Write-Host "Run without -DryRun to create the config file." -ForegroundColor Yellow
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would create config file at $file"
+}
+
 if (-not $ApiToken) {
     Write-Warning @"
 SECURITY NOTICE: This script will store your API token in plaintext in a config file.
@@ -95,19 +108,6 @@ try {
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to create directory: $($_.Exception.Message)" -ErrorRecord $_
-}
-
-if ($DryRun) {
-    Write-Host "`n[DRY RUN] Would create config file at: $file" -ForegroundColor Yellow
-    Write-Host "[DRY RUN] Would include:" -ForegroundColor Yellow
-    if ($ApiToken) {
-        Write-Host "  - API token: [REDACTED]" -ForegroundColor Yellow
-    }
-    if ($AccountId) {
-        Write-Host "  - Account ID: $AccountId" -ForegroundColor Yellow
-    }
-    Write-Host "Run without -DryRun to create the config file." -ForegroundColor Yellow
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would create config file at $file"
 }
 
 if (Test-Path -Path $file -and -not $Force) {

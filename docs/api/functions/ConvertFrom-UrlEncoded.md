@@ -16,11 +16,20 @@ ConvertFrom-UrlEncoded
 
 ## Parameters
 
-No parameters.
+### -text
+
+URL-encoded text to decode back to plain text.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-UrlEncoded -text 'hello%20world'
+.PARAMETER text
+    URL-encoded text to decode back to plain text.
+``
 
 ## Aliases
 

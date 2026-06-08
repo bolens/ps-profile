@@ -6,7 +6,7 @@ Exports bibliography records for one or more ISBN values.
 
 ## Description
 
-This is an alias that points to the `Export-IsbnBibliography` command.
+Exports bibliography records for one or more ISBN values.
 
 ## Alias Information
 

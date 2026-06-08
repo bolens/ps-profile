@@ -27,7 +27,11 @@ The path for the output CFG file. If not specified, uses input path with .cfg ex
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-CfgFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

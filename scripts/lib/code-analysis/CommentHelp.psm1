@@ -280,20 +280,16 @@ function Test-FunctionHasHelp {
         $bodyText = $Content.Substring($bodyStart, $bodyEnd - $bodyStart)
 
         # Look for comment block at the beginning of the body
-        if (-not (Get-Command Get-CommonRegexPatterns -ErrorAction SilentlyContinue)) {
-            $multilineCommentRegex = [regex]::new('^[\s]*<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Multiline -bor [System.Text.RegularExpressions.RegexOptions]::Compiled)
+        $bodyCommentRegex = if (Get-Command Get-CommonRegexPatterns -ErrorAction SilentlyContinue) {
+            (Get-CommonRegexPatterns)['CommentBlock']
         }
         else {
-            $patterns = Get-CommonRegexPatterns
-            $multilineCommentRegex = $patterns['CommentBlockMultiline']
+            [regex]::new('<#[\s\S]*?#>', [System.Text.RegularExpressions.RegexOptions]::Compiled)
         }
 
-        $bodyCommentMatches = $multilineCommentRegex.Matches($bodyText)
-        if ($bodyCommentMatches.Count -gt 0) {
-            $helpContent = $bodyCommentMatches[0].Value
-            if (Test-CommentBlockHasHelp -CommentBlock $helpContent) {
-                return $true
-            }
+        $bodyCommentMatch = $bodyCommentRegex.Match($bodyText)
+        if ($bodyCommentMatch.Success -and (Test-CommentBlockHasHelp -CommentBlock $bodyCommentMatch.Value)) {
+            return $true
         }
     }
 

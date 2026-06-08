@@ -27,12 +27,16 @@ The path to the Avro schema file (.avsc) used when reading data.
 
 ## Outputs
 
-PSCustomObject with compatibility information including: - Compatible: Overall compatibility status - ForwardCompatible: Whether reader can read writer's data - BackwardCompatible: Whether writer can read reader's data - Errors: Array of any compatibility errors
+PSCustomObject with compatibility information including: - Compatible: Overall compatibility status - ForwardCompatible: Whether reader can read writer's data - BackwardCompatible: Whether writer can read reader's data - Errors: Array of any compatibility errors .EXAMPLE Test-AvroSchemaCompatibility
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Test-AvroSchemaCompatibility
+``
 
 ## Aliases
 

@@ -143,6 +143,14 @@ function Initialize-FileConversion-CoreBasicJson {
     Pretty-prints JSON data.
 .DESCRIPTION
     Formats JSON data with proper indentation and structure.
+.PARAMETER InputObject
+    JSON object or string from the pipeline.
+.PARAMETER fileArgs
+    Optional input file path when not using the pipeline.
+.EXAMPLE
+    Get-Content ./data.json -Raw | Format-Json
+.EXAMPLE
+    Format-Json ./data.json
 #>
 function Format-Json {
     param([Parameter(ValueFromPipeline = $true)] $InputObject, [Parameter(ValueFromRemainingArguments = $true)] $fileArgs)

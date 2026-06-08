@@ -27,7 +27,11 @@ The path for the output merged PDF file.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Merge-Pdf
+``
 
 ## Aliases
 

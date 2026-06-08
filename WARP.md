@@ -138,24 +138,24 @@ Start-Sleep -Seconds 30
 
 ### Core Structure
 
-- **Microsoft.PowerShell_profile.ps1**: Main profile entrypoint. Loads fragments from `profile.d/` in sorted order with error handling. Keep this file minimal.
-- **profile.d/**: Modular fragments loaded in lexical order (00-99). Each fragment is idempotent and safe to dot-source multiple times.
+- **Microsoft.PowerShell_profile.ps1**: Main profile entrypoint. Loads fragments from `profile.d/` in dependency-aware order with error handling. Keep this file minimal.
+- **profile.d/**: 130+ modular fragments (`bootstrap.ps1`, `git.ps1`, `files.ps1`, …). Each fragment is idempotent and safe to dot-source multiple times. Load order comes from declared dependencies and tiers, not numeric filename prefixes.
 - **scripts/**: Validation, testing, and utility scripts. These run with `-NoProfile` to ensure consistent environment.
 
-### Profile Fragment Loading Order
+### Profile Fragment Loading
 
-Fragments use numeric prefixes to control load order:
+Fragments declare dependencies and optional tiers in their headers. The loader topologically sorts enabled fragments; see [ARCHITECTURE.md](ARCHITECTURE.md) and [profile.d/README.md](profile.d/README.md).
 
-- **00-09**: Core bootstrap, environment, and helpers
-- **10-19**: Terminal configuration (PSReadLine, prompts, Git)
-- **20-29**: Container engines, cloud tools
-- **30-39**: Development tools and aliases
-- **40-69**: Language-specific tools (Go, PHP, Node.js, Python, Rust)
-- **60-69**: Modern CLI tools (eza, navi, gum, pixi, uv, pnpm)
+**Typical tiers:**
+
+- **Core (Tier 0)**: Bootstrap and registration (`bootstrap.ps1`)
+- **Essential (Tier 1)**: Environment, files, utilities
+- **Standard (Tier 2)**: Git, containers, cloud CLIs, language runtimes
+- **Optional (Tier 3)**: Performance insights, system monitoring, advanced tooling
 
 ### Key Patterns
 
-#### Bootstrap Helpers (00-bootstrap.ps1)
+#### Bootstrap Helpers (`bootstrap.ps1`)
 
 Three collision-safe registration helpers are available to all fragments:
 
@@ -205,7 +205,7 @@ Set-AgentModeFunction -Name 'Enable-MyTool' -Body {
 
 ### Container Engine Support
 
-Fragments in `profile.d/22-containers.ps1` and `profile.d/24-container-utils.ps1` provide:
+Fragments in `profile.d/containers.ps1` and `profile.d/containers-enhanced.ps1` provide:
 
 - Auto-detection of Docker or Podman with compose support
 - Unified aliases (dcu, dcd, dcl, dps, dprune, etc.) that work with either engine
@@ -216,8 +216,8 @@ Fragments in `profile.d/22-containers.ps1` and `profile.d/24-container-utils.ps1
 
 Two prompt systems are supported with lazy initialization:
 
-- **oh-my-posh** (06-oh-my-posh.ps1): Use `Initialize-OhMyPosh` to activate
-- **Starship** (23-starship.ps1): Use `Initialize-Starship` to activate
+- **oh-my-posh** (`oh-my-posh.ps1`): Use `Initialize-OhMyPosh` to activate
+- **Starship** (`starship.ps1`): Use `Initialize-Starship` to activate
 
 ### PSScriptAnalyzer Configuration
 

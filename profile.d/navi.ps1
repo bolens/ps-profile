@@ -15,11 +15,16 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
 
     # Quick search
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Searches navi cheatsheets interactively.
     .DESCRIPTION
         Launches navi in interactive search mode. If a query is provided, pre-fills the search.
-    #>
+.EXAMPLE
+    Invoke-NaviSearch -Query 'docker'
+.PARAMETER Query
+    Optional search text to pre-fill the navi query prompt.
+
+#>
     function Invoke-NaviSearch {
         param([string]$Query)
         if ($Query) {
@@ -33,11 +38,16 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
 
     # Best match
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Finds the best matching command from navi cheatsheets.
     .DESCRIPTION
         Searches navi cheatsheets and returns the best matching command. If a query is provided, uses it for searching.
-    #>
+.EXAMPLE
+    Invoke-NaviBest -Query 'find files'
+.PARAMETER Query
+    Optional search text used to select the best matching cheatsheet entry.
+
+#>
     function Invoke-NaviBest {
         param([string]$Query)
         if ($Query) {
@@ -51,11 +61,16 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
 
     # Print command without executing
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Prints commands from navi cheatsheets without executing them.
     .DESCRIPTION
         Searches navi cheatsheets and prints the selected command without executing it. If a query is provided, uses it for searching.
-    #>
+.EXAMPLE
+    Invoke-NaviPrint -Query 'git rebase'
+.PARAMETER Query
+    Optional search text used when printing a cheatsheet command.
+
+#>
     function Invoke-NaviPrint {
         param([string]$Query)
         if ($Query) {

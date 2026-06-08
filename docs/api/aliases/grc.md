@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Continue-GitRebase`
+Git rebase continue - continue rebase
 
 ## Description
 
-This is an alias that points to the `Continue-GitRebase` command.
+Git rebase continue - continue rebase
 
 ## Alias Information
 

@@ -107,7 +107,7 @@ function Import-Requirements {
         }
         
         if (-not $RepoRoot) {
-            throw "Could not detect repository root. Please specify -RepoRoot parameter."
+            throw "Could not detect repository root. Please specify -Repository root used to resolve relative paths."
         }
     }
 

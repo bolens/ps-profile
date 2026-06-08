@@ -1,51 +1,111 @@
-$libPath = 'scripts\lib'
-$testPath = 'tests\unit'
+<#
+.SYNOPSIS
+    Reports library modules under scripts/lib that lack matching unit tests.
 
-$modules = Get-ChildItem $libPath\*.psm1 | ForEach-Object { $_.BaseName }
-$testFiles = Get-ChildItem $testPath\library-*.tests.ps1 | ForEach-Object { $_.BaseName }
+.DESCRIPTION
+    Scans all .psm1 files under scripts/lib recursively and compares them to
+    tests/unit/library-*.tests.ps1 naming conventions (including -extended and
+    -structure-extended suffixes).
+.PARAMETER ModuleName
+    Module name used for test discovery.
+.PARAMETER LibraryTestFiles
+    Existing library test files used for matching.
+.EXAMPLE
+    Test-HasLibraryTest
 
-# Map test file names to module names
-$testToModule = @{
-    'library-path-resolution' = 'PathResolution'
-    'library-module-import' = 'ModuleImport'
-    'library-fragment-error-handling' = 'FragmentErrorHandling'
-    'library-fragment-loading' = 'FragmentLoading'
-    'library-fragment-idempotency' = 'FragmentIdempotency'
-    'library-fragment-config' = 'FragmentConfig'
-    'library-path-validation' = 'PathValidation'
-    'library-path-utilities' = 'PathUtilities'
-    'library-file-content' = 'FileContent'
-    'library-file-filtering' = 'FileFiltering'
-    'library-json-utilities' = 'JsonUtilities'
-    'library-json-utilities-extended' = 'JsonUtilities'
-    'library-powershell-detection' = 'PowerShellDetection'
-    'library-codeanalysis' = 'CodeMetrics'  # May cover multiple code analysis modules
-    'library-performance' = 'PerformanceMeasurement'  # May cover multiple performance modules
-    'library-metrics' = 'MetricsSnapshot'  # May cover multiple metrics modules
-    'library-path' = 'PathResolution'  # May be duplicate
+#>ARAMETER TestFileBaseName
+    TestFileBase file name without extension.
+.EXAMPLE
+    Get-NormalizedLibraryTestStem
+
+#>ARAMETER ModuleName
+    Module name used for test discovery.
+.EXAMPLE
+    Get-NormalizedModuleStem
+
+#>
+
+$ErrorActionPreference = 'Stop'
+
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..')).Path
+$libPath = Join-Path $repoRoot 'scripts' 'lib'
+$testPath = Join-Path $repoRoot 'tests' 'unit'
+
+function Get-NormalizedModuleStem {
+    param([string]$ModuleName)
+
+    return ($ModuleName -replace '[^A-Za-z0-9]', '').ToLowerInvariant()
 }
 
-$testedModules = @()
-foreach ($testFile in $testFiles) {
-    $testName = $testFile -replace 'library-', '' -replace '\.tests', ''
-    if ($testToModule.ContainsKey($testName)) {
-        $testedModules += $testToModule[$testName]
-    }
-    else {
-        # Try to match by name (e.g., library-cache -> Cache)
-        $moduleName = $testName -replace '-', ''
-        $moduleName = $moduleName.Substring(0,1).ToUpper() + $moduleName.Substring(1)
-        if ($modules -contains $moduleName) {
-            $testedModules += $moduleName
+function Get-NormalizedLibraryTestStem {
+    param([string]$TestFileBaseName)
+
+    $stem = $TestFileBaseName -replace '\.tests$', ''
+    $stem = $stem -replace '^library-', ''
+    $stem = $stem -replace '-structure-extended$', ''
+    $stem = $stem -replace '-extended$', ''
+    return ($stem -replace '[^a-z0-9]', '').ToLowerInvariant()
+}
+
+function Test-HasLibraryTest {
+    param(
+        [string]$ModuleName,
+        [System.IO.FileInfo[]]$LibraryTestFiles
+    )
+
+    $moduleStem = Get-NormalizedModuleStem -ModuleName $ModuleName
+
+    foreach ($testFile in $LibraryTestFiles) {
+        $testStem = Get-NormalizedLibraryTestStem -TestFileBaseName $testFile.BaseName
+        if ($testStem -eq $moduleStem) {
+            return $true
         }
-        else {
-            # Try exact match with dashes
-            $moduleName = $testName -replace '-', '-'
-            $parts = $moduleName -split '-'
-            $moduleName = ($parts | ForEach-Object { $_.Substring(0,1).ToUpper() + $_.Substring(1) }) -join ''
-            if ($modules -contains $moduleName) {
-                $testedModules += $moduleName
+    }
+
+    return $false
+}
+
+# Modules covered by umbrella / aggregate test files rather than a 1:1 name match.
+$aggregateTestCoverage = @{
+    'CodeMetrics'             = @('library-codeanalysis')
+    'CodeSimilarityDetection' = @('library-codeanalysis')
+    'AstParsing'              = @('library-codeanalysis')
+    'CommentHelp'             = @('library-codeanalysis')
+    'TestCoverage'            = @('library-codeanalysis')
+    'PerformanceMeasurement'  = @('library-performance')
+    'PerformanceAggregation'  = @('library-performance')
+    'PerformanceRegression'     = @('library-performance')
+    'MetricsSnapshot'         = @('library-metrics')
+    'MetricsHistory'          = @('library-metrics')
+    'MetricsTrendAnalysis'    = @('library-metrics')
+    'CodeQualityScore'        = @('library-metrics')
+}
+
+$modules = @(Get-ChildItem -Path $libPath -Filter '*.psm1' -Recurse -File |
+    ForEach-Object { $_.BaseName } |
+    Sort-Object -Unique)
+
+$testFiles = @(Get-ChildItem -Path $testPath -Filter 'library-*.tests.ps1' -File)
+
+$testedModules = [System.Collections.Generic.List[string]]::new()
+foreach ($moduleName in $modules) {
+    if (Test-HasLibraryTest -ModuleName $moduleName -LibraryTestFiles $testFiles) {
+        $testedModules.Add($moduleName)
+        continue
+    }
+
+    if ($aggregateTestCoverage.ContainsKey($moduleName)) {
+        $covered = $false
+        foreach ($aggregatePrefix in $aggregateTestCoverage[$moduleName]) {
+            if ($testFiles.BaseName -contains "$aggregatePrefix.tests" -or
+                ($testFiles.BaseName | Where-Object { $_ -like "$aggregatePrefix*" }).Count -gt 0) {
+                $covered = $true
+                break
             }
+        }
+
+        if ($covered) {
+            $testedModules.Add($moduleName)
         }
     }
 }
@@ -57,4 +117,15 @@ Write-Host "Total modules: $($modules.Count)"
 Write-Host "Total test files: $($testFiles.Count)"
 Write-Host "Modules with tests: $($testedModules.Count)"
 Write-Host "`nMissing tests for:"
-$missing | Sort-Object | ForEach-Object { Write-Host "  - $_" }
+if ($missing.Count -eq 0) {
+    Write-Host '  (none)'
+}
+else {
+    $missing | Sort-Object | ForEach-Object { Write-Host "  - $_" }
+}
+
+if ($missing.Count -gt 0) {
+    exit 1
+}
+
+exit 0

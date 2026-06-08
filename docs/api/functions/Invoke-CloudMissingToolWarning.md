@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Base module providing common patterns for cloud provider CLI wrappers.
+Resolves an install hint for a cloud provider CLI.
 
 ## Description
 
-Extracts common patterns from AWS, Azure, and GCloud modules to reduce duplication. Provides abstract functions that cloud-specific modules can use or extend. Common Patterns: 1. Command execution with tool detection 2. Profile/account/configuration management 3. Resource listing with JSON parsing 4. Credential management and connection testing 5. Error handling and output formatting
+Resolves an install hint for a cloud provider CLI.
 
 ## Signature
 
@@ -16,16 +16,27 @@ Invoke-CloudMissingToolWarning
 
 ## Parameters
 
-No parameters.
+### -CommandName
+
+Cloud CLI command that is missing.
+
+### -InstallHint
+
+Explicit install hint to return when provided.
+
+### -InstallPackageName
+
+Optional package name override.
+
+
+## Outputs
+
+System.String
+
 
 ## Examples
 
 No examples provided.
-
-## Notes
-
-This is a base module. Cloud-specific modules (aws.ps1, azure.ps1, gcloud.ps1) should use these functions or extend them with provider-specific logic.
-
 
 ## Source
 

@@ -6,7 +6,7 @@ Runs ansible-playbook with the correct invocation strategy for the current platf
 
 ## Description
 
-This is an alias that points to the `Invoke-AnsiblePlaybook` command.
+Runs ansible-playbook with the correct invocation strategy for the current platform.
 
 ## Alias Information
 

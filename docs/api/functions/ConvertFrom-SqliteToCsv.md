@@ -31,7 +31,11 @@ Optional. Name of the table to export. If not specified, exports the first table
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-SqliteToCsv -InputPath ./input.file
+``
 
 ## Aliases
 

@@ -131,6 +131,9 @@ try {
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output Arrow file. If not specified, uses input path with .arrow extension.
+.EXAMPLE
+    ConvertTo-ArrowFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-ArrowFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -149,6 +152,9 @@ Set-AgentModeAlias -Name 'json-to-arrow' -Target 'ConvertTo-ArrowFromJson'
     The path to the Arrow file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-ArrowToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-ArrowToJson {
     param([string]$InputPath, [string]$OutputPath)

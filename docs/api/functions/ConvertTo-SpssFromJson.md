@@ -27,7 +27,11 @@ The path for the output SPSS file. If not specified, uses input path with .sav e
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-SpssFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

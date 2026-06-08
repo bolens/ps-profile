@@ -31,18 +31,20 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    [DatabaseAction]$Action,
-    
+    [ValidateSet('health', 'optimize', 'backup', 'repair', 'statistics')]
+    [string]$Action,
+
     [string]$Database,
-    
-    [OutputFormat]$OutputFormat = [OutputFormat]::Table
+
+    [ValidateSet('Table', 'Json', 'table', 'json')]
+    [string]$OutputFormat = 'Table'
 )
 
 # Import required modules
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
-# Import CommonEnums for DatabaseAction and OutputFormat enums
+# Import CommonEnums for DatabaseStatus and SeverityLevel enums used at runtime
 $commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'core' 'CommonEnums.psm1'
 if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
     Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
@@ -58,9 +60,11 @@ if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debu
     # Debug is enabled, $debugLevel contains the numeric level (1-3)
 }
 
-# Import SQLite utilities
+# Import SQLite utilities when the optional module is present
 $sqliteModule = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'utilities' 'SqliteDatabase.psm1'
-Import-Module $sqliteModule -DisableNameChecking -ErrorAction Stop
+if (Test-Path -LiteralPath $sqliteModule) {
+    Import-Module $sqliteModule -DisableNameChecking -ErrorAction Stop
+}
 
 # Import database modules
 $databaseModulesPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'database'
@@ -75,19 +79,44 @@ Import-Module $testCacheModule -DisableNameChecking -ErrorAction SilentlyContinu
 
 $databases = @{
     'command-history'     = @{
-        Name   = 'Command History'
-        Path   = if (Get-Command Get-CommandHistoryDbPath -ErrorAction SilentlyContinue) { Get-CommandHistoryDbPath } else { Get-DatabasePath -DatabaseName 'command-history.db' }
-        Module = $commandHistoryModule
+        Name         = 'Command History'
+        DatabaseFile = 'command-history.db'
+        Path         = $null
+        Module       = $commandHistoryModule
     }
     'performance-metrics' = @{
-        Name   = 'Performance Metrics'
-        Path   = if (Get-Command Get-PerformanceMetricsDbPath -ErrorAction SilentlyContinue) { Get-PerformanceMetricsDbPath } else { Get-DatabasePath -DatabaseName 'performance-metrics.db' }
-        Module = $performanceMetricsModule
+        Name         = 'Performance Metrics'
+        DatabaseFile = 'performance-metrics.db'
+        Path         = $null
+        Module       = $performanceMetricsModule
     }
     'test-cache'          = @{
-        Name   = 'Test Cache'
-        Path   = if (Get-Command Get-TestCacheDbPath -ErrorAction SilentlyContinue) { Get-TestCacheDbPath } else { Get-DatabasePath -DatabaseName 'test-cache.db' }
-        Module = $testCacheModule
+        Name         = 'Test Cache'
+        DatabaseFile = 'test-cache.db'
+        Path         = $null
+        Module       = $testCacheModule
+    }
+}
+
+function Resolve-MaintenanceDatabasePaths {
+    foreach ($entry in $databases.Values) {
+        if ($entry.Path) {
+            continue
+        }
+
+        $pathCommand = switch ($entry.DatabaseFile) {
+            'command-history.db' { 'Get-CommandHistoryDbPath' }
+            'performance-metrics.db' { 'Get-PerformanceMetricsDbPath' }
+            'test-cache.db' { 'Get-TestCacheDbPath' }
+            default { $null }
+        }
+
+        if ($pathCommand -and (Get-Command $pathCommand -ErrorAction SilentlyContinue)) {
+            $entry.Path = & $pathCommand
+        }
+        elseif (Get-Command Get-DatabasePath -ErrorAction SilentlyContinue) {
+            $entry.Path = Get-DatabasePath -DatabaseName $entry.DatabaseFile
+        }
     }
 }
 
@@ -148,9 +177,14 @@ try {
         Write-Verbose "[database.maintenance] Action: $Action, Database: $Database, Output format: $OutputFormat"
     }
 
-    # Convert enums to strings
-    $actionString = $Action.ToString()
-    $outputFormatString = $OutputFormat.ToString()
+    if (-not (Get-Command Test-DatabaseHealth -ErrorAction SilentlyContinue)) {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'SQLite database utilities are not available. SqliteDatabase.psm1 was not found.'
+    }
+
+    Resolve-MaintenanceDatabasePaths
+
+    $actionString = $Action
+    $outputFormatString = $OutputFormat
 
     switch ($actionString) {
         'health' {

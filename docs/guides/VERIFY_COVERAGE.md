@@ -12,7 +12,7 @@ pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path scri
 pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path scripts/lib/utilities
 
 # Profile fragment or bootstrap code
-pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap
 ```
 
 ## What to Check

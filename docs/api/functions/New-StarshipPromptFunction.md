@@ -23,7 +23,11 @@ The path to the starship executable.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+New-StarshipPromptFunction
+``
 
 ## Source
 

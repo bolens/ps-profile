@@ -352,7 +352,7 @@ Show-ToolRecommendations -MissingOnly
 ## Test Coverage Impact
 
 - **With all tools installed:** Full test coverage (599+ tests)
-- **With minimal tools (PowerShell, Pester, Git):** Core tests pass (500+ tests)
+- **With minimal tools (PowerShell, Pester, Git):** Core tests pass (1,300+ test files)
 - **With optional tools:** Additional integration tests enabled
 
 Tests gracefully skip when tools are missing, so the test suite will always run successfully regardless of which tools are installed.

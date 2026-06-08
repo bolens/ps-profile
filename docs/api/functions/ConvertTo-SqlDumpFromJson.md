@@ -27,7 +27,11 @@ The path for the output SQL dump file. If not specified, uses input path with .s
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-SqlDumpFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

@@ -31,7 +31,11 @@ The path to the Avro schema file (.avsc). Required.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-AvroFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

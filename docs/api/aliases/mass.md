@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Weight`
+Convert Weight
 
 ## Description
 
-This is an alias that points to the `Convert-Weight` command.
+Convert Weight
 
 ## Alias Information
 

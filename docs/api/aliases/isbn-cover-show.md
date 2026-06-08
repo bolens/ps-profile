@@ -6,7 +6,7 @@ Opens a book cover image for an ISBN.
 
 ## Description
 
-This is an alias that points to the `Show-IsbnCover` command.
+Opens a book cover image for an ISBN.
 
 ## Alias Information
 

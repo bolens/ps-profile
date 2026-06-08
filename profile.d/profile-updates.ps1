@@ -1,17 +1,9 @@
-<#
-
-<#
-
+# ===============================================
+# profile-updates.ps1
+# Profile update checker with changelog display
+# ===============================================
 # Tier: optional
 # Dependencies: bootstrap, env
-<#
-
-<#
-# profile-updates.ps1
-
-Profile update checker with changelog display. Runs periodically to check for
-updates and show recent changes when available.
-#>
 
 # Only run update checks in interactive sessions or test environments
 if ((-not $Host.UI -or -not $Host.UI.RawUI) -and -not $env:PS_PROFILE_TEST_MODE) { return }
@@ -26,6 +18,15 @@ if ($null -ne (Get-Variable -Name 'ProfileUpdatesLoaded' -Scope Global -ErrorAct
 .DESCRIPTION
     Checks if the profile repository has new commits and displays a summary
     of recent changes. Only shows updates once per day to avoid spam.
+.EXAMPLE
+    Test-ProfileUpdates
+.EXAMPLE
+    Test-ProfileUpdates -Force -MaxChanges 5
+.PARAMETER Force
+    Bypasses the once-per-day check and fetches updates immediately.
+.PARAMETER MaxChanges
+    Maximum number of recent commits to include in the changelog summary.
+
 #>
 function Test-ProfileUpdates {
     param(

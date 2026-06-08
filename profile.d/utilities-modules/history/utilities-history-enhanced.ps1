@@ -8,7 +8,7 @@ try {
 
     # Enhanced history search with fuzzy matching
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Performs fuzzy search on command history.
     .DESCRIPTION
         Searches through PowerShell command history using fuzzy matching.
@@ -19,7 +19,10 @@ try {
         If specified, performs case-sensitive search.
     .PARAMETER MaxResults
         Maximum number of results to return (default: 20).
-    #>
+.EXAMPLE
+    Find-HistoryFuzzy
+
+#>
     function Find-HistoryFuzzy {
         param(
             [string]$Pattern,
@@ -116,11 +119,16 @@ try {
 
     # Quick history search - optimized implementation
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Quick search in command history.
     .DESCRIPTION
         Searches command history for the specified pattern.
-    #>
+.EXAMPLE
+    Find-HistoryQuick -Pattern 'git'
+.PARAMETER Pattern
+    Text pattern to match against saved command history entries.
+
+#>
     function Find-HistoryQuick {
         param([string]$Pattern)
 
@@ -281,13 +289,16 @@ try {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Removes old commands from history.
     .DESCRIPTION
         Removes commands older than the specified number of days from PowerShell history.
     .PARAMETER Days
         Number of days of history to keep (default: 30).
-    #>
+.EXAMPLE
+    Remove-OldHistory
+
+#>
     function Remove-OldHistory {
         param([int]$Days = 30)
 
@@ -308,13 +319,16 @@ try {
 
     # Smart history recall
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Shows the last command matching a pattern.
     .DESCRIPTION
         Finds the most recent command matching the pattern and displays it for manual execution.
     .PARAMETER Pattern
         Pattern to match against command history.
-    #>
+.EXAMPLE
+    Invoke-LastCommand
+
+#>
     function Invoke-LastCommand {
         param([string]$Pattern)
 
@@ -336,13 +350,16 @@ try {
 
     # Quick access to recent commands
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Shows recent commands with quick selection.
     .DESCRIPTION
         Displays recent commands with numbers for quick execution.
     .PARAMETER Count
         Number of recent commands to show (default: 10).
-    #>
+.EXAMPLE
+    Show-RecentCommands
+
+#>
     function Show-RecentCommands {
         param([int]$Count = 10)
 
@@ -370,14 +387,17 @@ try {
 
     # Quick command recall by number
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Executes a command from recent history by number or pattern.
     .DESCRIPTION
         Executes a command from the recent history list by its number,
         or finds and executes the most recent command matching a pattern.
     .PARAMETER CommandInput
         Either a number (for recent commands) or a pattern to search for.
-    #>
+.EXAMPLE
+    r
+
+#>
     function r {
         param([string]$CommandInput)
 

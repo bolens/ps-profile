@@ -6,7 +6,7 @@ Extracts valid ISBN values from arbitrary text.
 
 ## Description
 
-This is an alias that points to the `Get-IsbnFromText` command.
+Extracts valid ISBN values from arbitrary text.
 
 ## Alias Information
 

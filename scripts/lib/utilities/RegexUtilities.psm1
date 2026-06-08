@@ -88,7 +88,14 @@ function Get-CommonRegexPatterns {
     return @{
         'FunctionDefinition'    = New-CompiledRegex -Pattern 'function\s+([A-Za-z0-9_-]+)\s*\{'
         'CommentBlock'          = New-CompiledRegex -Pattern '<#[\s\S]*?#>'
-        'CommentBlockMultiline' = New-CompiledRegex -Pattern '^[\s]*<#[\s\S]*?#>' -Options ([System.Text.RegularExpressions.RegexOptions]::Multiline)
+        'CommentBlockMultiline' = New-CompiledRegex -Pattern '^[\s]*<#
+[\s\S]*?
+.PARAMETER Text
+    Input text to normalize or inspect.
+.EXAMPLE
+    Escape-RegexLiteral
+
+#>' -Options ([System.Text.RegularExpressions.RegexOptions]::Multiline)
         'SingleLineComment'     = New-CompiledRegex -Pattern '^\s*#.*$' -Options ([System.Text.RegularExpressions.RegexOptions]::Multiline)
         'ExitCall'              = New-CompiledRegex -Pattern '\bexit\s+(\d+)\b'
         'ExitVariable'          = New-CompiledRegex -Pattern '\bexit\s+\$EXIT'
@@ -383,6 +390,22 @@ function Get-NaturalLanguageRegexCatalog {
 }
 
 function Resolve-NaturalLanguageRegexCatalogEntry {
+    <#
+    .SYNOPSIS
+        Resolves a catalog entry from a natural language phrase.
+
+    .DESCRIPTION
+        Matches catalog names and aliases after normalizing whitespace and case.
+
+    .PARAMETER Phrase
+        Natural language phrase to look up.
+
+    .OUTPUTS
+        System.Collections.Hashtable with Name, Pattern, and Notes, or null.
+
+    .EXAMPLE
+        Resolve-NaturalLanguageRegexCatalogEntry -Phrase 'email address'
+    #>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -420,6 +443,23 @@ function Resolve-NaturalLanguageRegexCatalogEntry {
 }
 
 function Resolve-NaturalLanguageRegexToken {
+    <#
+    .SYNOPSIS
+        Converts a natural language token into a regex fragment.
+
+    .DESCRIPTION
+        Checks the built-in catalog first, then applies token maps and quantity
+        phrases such as "at least 3 digits" or "starts with 'user-'".
+
+    .PARAMETER Token
+        Token or short phrase to convert.
+
+    .OUTPUTS
+        System.String. Regex fragment for the token.
+
+    .EXAMPLE
+        Resolve-NaturalLanguageRegexToken -Token 'one or more digits'
+    #>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -570,6 +610,26 @@ function Resolve-NaturalLanguageRegexToken {
 }
 
 function Resolve-NaturalLanguageRegexAlternation {
+    <#
+.SYNOPSIS
+        Builds a non-capturing alternation pattern from an either/or phrase.
+
+    .PARAMETER Phrase
+        Phrase beginning with "one of" or "either" followed by options joined by "or".
+
+    .OUTPUTS
+        System.String. Non-capturing alternation pattern, or null when parsing fails.
+
+    .EXAMPLE
+.DESCRIPTION
+    Builds a non-capturing alternation pattern from an either/or phrase.
+    .PARAMETER Phrase
+    Phrase beginning with "one of" or "either" followed by options joined by "or".
+    .OUTPUTS
+    System.String. Non-capturing alternation pattern, or null when parsing fails.
+    .EXAMPLE
+        Resolve-NaturalLanguageRegexAlternation -Phrase 'either digits or letters'
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -618,6 +678,9 @@ function Search-NaturalLanguageRegexCatalog {
 
     .OUTPUTS
         PSCustomObject[] with Name, Pattern, Aliases, and MatchType members.
+
+    .EXAMPLE
+        Search-NaturalLanguageRegexCatalog -Query 'email'
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject[]])]
@@ -681,6 +744,9 @@ function Resolve-RegexPatternFromAiResponse {
 
     .OUTPUTS
         PSCustomObject with Pattern, IsValid, and Notes members.
+
+    .EXAMPLE
+        Resolve-RegexPatternFromAiResponse -Response '```regex\n\d+\n```'
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
@@ -728,6 +794,23 @@ function Resolve-RegexPatternFromAiResponse {
 }
 
 function Test-NaturalLanguageRegexNeedsAiFallback {
+    <#
+    .SYNOPSIS
+        Determines whether a conversion result should fall back to AI assistance.
+
+    .DESCRIPTION
+        Returns true when token-based conversion only escaped the original text
+        verbatim, indicating the catalog and token rules did not understand it.
+
+    .PARAMETER Result
+        Conversion result object from ConvertTo-RegexFromNaturalLanguage.
+
+    .OUTPUTS
+        System.Boolean
+
+    .EXAMPLE
+        Test-NaturalLanguageRegexNeedsAiFallback -Result $conversion
+    #>
     [CmdletBinding()]
     [OutputType([bool])]
     param(
@@ -744,6 +827,41 @@ function Test-NaturalLanguageRegexNeedsAiFallback {
 }
 
 function Test-NaturalLanguageRegexSamples {
+    <#
+.SYNOPSIS
+        Evaluates sample strings against a regex pattern.
+
+    .PARAMETER Pattern
+        Regular expression pattern to test.
+
+    .PARAMETER IgnoreCase
+        Uses case-insensitive matching when true.
+
+    .PARAMETER SampleMatch
+        Strings expected to match the pattern.
+
+    .PARAMETER SampleNoMatch
+        Strings expected not to match the pattern.
+
+    .OUTPUTS
+        PSCustomObject[] with Input, Expected, Success, and ActualMatch members.
+
+    .EXAMPLE
+.DESCRIPTION
+    Evaluates sample strings against a regex pattern.
+    .PARAMETER Pattern
+    Regular expression pattern to test.
+    .PARAMETER IgnoreCase
+    Uses case-insensitive matching when true.
+    .PARAMETER SampleMatch
+    Strings expected to match the pattern.
+    .PARAMETER SampleNoMatch
+    Strings expected not to match the pattern.
+    .OUTPUTS
+    PSCustomObject[] with Input, Expected, Success, and ActualMatch members.
+    .EXAMPLE
+        Test-NaturalLanguageRegexSamples -Pattern '\d+' -SampleMatch '42' -SampleNoMatch 'abc'
+#>
     [CmdletBinding()]
     [OutputType([PSCustomObject[]])]
     param(
@@ -960,12 +1078,20 @@ function ConvertTo-RegexFromNaturalLanguage {
 
 function Get-NaturalLanguageRegexCatalogItems {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Returns catalog entries as pipeline-friendly objects.
 
     .OUTPUTS
         PSCustomObject[] with Name, Pattern, Aliases, AliasCount, and Notes members.
-    #>
+
+    .EXAMPLE
+.DESCRIPTION
+    Returns catalog entries as pipeline-friendly objects.
+    .OUTPUTS
+    PSCustomObject[] with Name, Pattern, Aliases, AliasCount, and Notes members.
+    .EXAMPLE
+        Get-NaturalLanguageRegexCatalogItems | Where-Object Name -eq 'email'
+#>
     [CmdletBinding()]
     [OutputType([PSCustomObject[]])]
     param()
@@ -983,6 +1109,26 @@ function Get-NaturalLanguageRegexCatalogItems {
 }
 
 function Split-RegexAlternationOptions {
+    <#
+.SYNOPSIS
+        Splits a regex alternation body on top-level pipe characters.
+
+    .PARAMETER Body
+        Inner body of a non-capturing alternation group.
+
+    .OUTPUTS
+        System.String[]
+
+    .EXAMPLE
+.DESCRIPTION
+    Splits a regex alternation body on top-level pipe characters.
+    .PARAMETER Body
+    Inner body of a non-capturing alternation group.
+    .OUTPUTS
+    System.String[]
+    .EXAMPLE
+        Split-RegexAlternationOptions -Body 'foo|bar|baz'
+#>
     [CmdletBinding()]
     [OutputType([string[]])]
     param(
@@ -1019,6 +1165,26 @@ function Split-RegexAlternationOptions {
 }
 
 function Resolve-OutermostRegexGroupBody {
+    <#
+.SYNOPSIS
+        Extracts the inner body of an outermost non-capturing group.
+
+    .PARAMETER Pattern
+        Regex pattern that may begin with (?:
+
+    .OUTPUTS
+        System.String. Group body without the wrapping (?:...), or null.
+
+    .EXAMPLE
+.DESCRIPTION
+    Extracts the inner body of an outermost non-capturing group.
+    .PARAMETER Pattern
+    Regex pattern that may begin with (?:
+    .OUTPUTS
+    System.String. Group body without the wrapping (?:...), or null.
+    .EXAMPLE
+        Resolve-OutermostRegexGroupBody -Pattern '(?:foo|bar)'
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -1056,6 +1222,26 @@ function Resolve-OutermostRegexGroupBody {
 }
 
 function Resolve-RegexCatalogEntryByPattern {
+    <#
+.SYNOPSIS
+        Finds a catalog entry that matches a regex pattern.
+
+    .PARAMETER Pattern
+        Regex pattern to reverse-map into catalog metadata.
+
+    .OUTPUTS
+        System.Collections.Hashtable with Name, Pattern, Aliases, and Notes, or null.
+
+    .EXAMPLE
+.DESCRIPTION
+    Finds a catalog entry that matches a regex pattern.
+    .PARAMETER Pattern
+    Regex pattern to reverse-map into catalog metadata.
+    .OUTPUTS
+    System.Collections.Hashtable with Name, Pattern, Aliases, and Notes, or null.
+    .EXAMPLE
+        Resolve-RegexCatalogEntryByPattern -Pattern '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -1089,6 +1275,26 @@ function Resolve-RegexCatalogEntryByPattern {
 }
 
 function Resolve-RegexPatternExplanationComponents {
+    <#
+.SYNOPSIS
+        Decomposes a regex pattern into plain-language components.
+
+    .PARAMETER Pattern
+        Regex pattern core without leading ^ or trailing $ anchors.
+
+    .OUTPUTS
+        System.String[]
+
+    .EXAMPLE
+.DESCRIPTION
+    Decomposes a regex pattern into plain-language components.
+    .PARAMETER Pattern
+    Regex pattern core without leading ^ or trailing $ anchors.
+    .OUTPUTS
+    System.String[]
+    .EXAMPLE
+        Resolve-RegexPatternExplanationComponents -Pattern '\d+'
+#>
     [CmdletBinding()]
     [OutputType([string[]])]
     param(
@@ -1187,6 +1393,9 @@ function ConvertFrom-RegexToNaturalLanguage {
     .OUTPUTS
         PSCustomObject with Pattern, Description, Components, CatalogName, Source,
         Confidence, StartsAnchored, EndsAnchored, and IsValid members.
+
+    .EXAMPLE
+        ConvertFrom-RegexToNaturalLanguage -Pattern '^\d+$' -Detailed
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
@@ -1294,6 +1503,10 @@ function Format-NaturalLanguageRegexResult {
     .SYNOPSIS
         Formats natural language regex conversion or explanation results.
 
+    .DESCRIPTION
+        Renders structured conversion or explanation objects as plain text or JSON
+        for display, logging, or export.
+
     .PARAMETER Result
         Result object from ConvertTo-RegexFromNaturalLanguage or ConvertFrom-RegexToNaturalLanguage.
 
@@ -1302,6 +1515,9 @@ function Format-NaturalLanguageRegexResult {
 
     .OUTPUTS
         PSCustomObject, System.String, or JSON text depending on -As.
+
+    .EXAMPLE
+        $result | Format-NaturalLanguageRegexResult -As Text
     #>
     [CmdletBinding()]
     param(
@@ -1394,6 +1610,26 @@ function Format-NaturalLanguageRegexResult {
 }
 
 function Normalize-NaturalLanguageRegexDescription {
+    <#
+.SYNOPSIS
+        Normalizes a natural language regex description for comparison.
+
+    .PARAMETER Text
+        Description text to normalize.
+
+    .OUTPUTS
+        System.String
+
+    .EXAMPLE
+.DESCRIPTION
+    Normalizes a natural language regex description for comparison.
+    .PARAMETER Text
+    Description text to normalize.
+    .OUTPUTS
+    System.String
+    .EXAMPLE
+        Normalize-NaturalLanguageRegexDescription -Text 'One or More Digits!'
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -1414,8 +1650,17 @@ function Measure-NaturalLanguageRegexSimilarity {
     .DESCRIPTION
         Uses token-based Jaccard similarity after normalizing descriptions.
 
+    .PARAMETER Left
+        First description to compare.
+
+    .PARAMETER Right
+        Second description to compare.
+
     .OUTPUTS
         System.Double between 0 and 1.
+
+    .EXAMPLE
+        Measure-NaturalLanguageRegexSimilarity -Left 'digits' -Right 'one or more digits'
     #>
     [CmdletBinding()]
     [OutputType([double])]
@@ -1454,7 +1699,7 @@ function Measure-NaturalLanguageRegexSimilarity {
 
 function Build-NaturalLanguageRegexDescription {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds a natural language regex description from structured segments.
 
     .PARAMETER Segments
@@ -1465,7 +1710,19 @@ function Build-NaturalLanguageRegexDescription {
 
     .OUTPUTS
         System.String description.
-    #>
+
+    .EXAMPLE
+.DESCRIPTION
+    Builds a natural language regex description from structured segments.
+    .PARAMETER Segments
+    Ordered phrase segments such as "starts with 'user-'" and "digits".
+    .PARAMETER Alternation
+    When specified, wraps segments as an either/or description.
+    .OUTPUTS
+    System.String description.
+    .EXAMPLE
+        Build-NaturalLanguageRegexDescription -Segments @('starts with user-', 'digits')
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -1515,6 +1772,9 @@ function Test-NaturalLanguageRegexRoundTrip {
 
     .OUTPUTS
         PSCustomObject with Forward, Explained, Similarity, PatternMatches, and IsConsistent.
+
+    .EXAMPLE
+        Test-NaturalLanguageRegexRoundTrip -Description 'one or more digits' -Anchored
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
@@ -1562,7 +1822,7 @@ function Test-NaturalLanguageRegexRoundTrip {
 
 function Export-NaturalLanguageRegexCatalogDocument {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Exports the natural language regex catalog as JSON or Markdown.
 
     .PARAMETER Format
@@ -1573,7 +1833,19 @@ function Export-NaturalLanguageRegexCatalogDocument {
 
     .OUTPUTS
         System.String document contents. Also writes to -Path when specified.
-    #>
+
+    .EXAMPLE
+.DESCRIPTION
+    Exports the natural language regex catalog as JSON or Markdown.
+    .PARAMETER Format
+    Output format: Json or Markdown.
+    .PARAMETER Path
+    Optional file path to write the export.
+    .OUTPUTS
+    System.String document contents. Also writes to -Path when specified.
+    .EXAMPLE
+        Export-NaturalLanguageRegexCatalogDocument -Format Markdown -Path './catalog.md'
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -1629,6 +1901,26 @@ function Export-NaturalLanguageRegexCatalogDocument {
 }
 
 function Get-NaturalLanguageRegexTestSlug {
+    <#
+.SYNOPSIS
+        Builds a filesystem-safe slug from a regex description.
+
+    .PARAMETER Description
+        Natural language description used to name generated tests.
+
+    .OUTPUTS
+        System.String
+
+    .EXAMPLE
+.DESCRIPTION
+    Builds a filesystem-safe slug from a regex description.
+    .PARAMETER Description
+    Natural language description used to name generated tests.
+    .OUTPUTS
+    System.String
+    .EXAMPLE
+        Get-NaturalLanguageRegexTestSlug -Description 'One or More Digits'
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -1648,6 +1940,43 @@ function New-NaturalLanguageRegexSession {
     <#
     .SYNOPSIS
         Creates a serializable natural language regex builder session object.
+
+    .DESCRIPTION
+        Captures description, pattern, sample inputs, and builder metadata for
+        later export or resume workflows.
+
+    .PARAMETER Description
+        Natural language description for the pattern.
+
+    .PARAMETER Pattern
+        Generated or edited regex pattern.
+
+    .PARAMETER Segments
+        Optional ordered phrase segments used to build the description.
+
+    .PARAMETER Alternation
+        True when the description represents an either/or pattern.
+
+    .PARAMETER Anchored
+        True when the pattern should be fully anchored.
+
+    .PARAMETER IgnoreCase
+        True when case-insensitive matching is enabled.
+
+    .PARAMETER SampleMatch
+        Strings that should match the pattern.
+
+    .PARAMETER SampleNoMatch
+        Strings that should not match the pattern.
+
+    .PARAMETER Notes
+        Optional free-form notes for the session.
+
+    .OUTPUTS
+        PSCustomObject
+
+    .EXAMPLE
+        New-NaturalLanguageRegexSession -Description 'digits' -Pattern '\d+'
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
@@ -1690,9 +2019,30 @@ function New-NaturalLanguageRegexSession {
 
 function Export-NaturalLanguageRegexSession {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Saves a natural language regex session to a JSON file.
-    #>
+
+    .PARAMETER Session
+        Session object from New-NaturalLanguageRegexSession or Import-NaturalLanguageRegexSession.
+
+    .PARAMETER Path
+        Destination JSON file path.
+
+    .OUTPUTS
+        PSCustomObject with Path and Session members.
+
+    .EXAMPLE
+.DESCRIPTION
+    Saves a natural language regex session to a JSON file.
+    .PARAMETER Session
+    Session object from New-NaturalLanguageRegexSession or Import-NaturalLanguageRegexSession.
+    .PARAMETER Path
+    Destination JSON file path.
+    .OUTPUTS
+    PSCustomObject with Path and Session members.
+    .EXAMPLE
+        $session | Export-NaturalLanguageRegexSession -Path './my-regex.json'
+#>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param(
@@ -1739,9 +2089,25 @@ function Export-NaturalLanguageRegexSession {
 
 function Import-NaturalLanguageRegexSession {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Loads a natural language regex session from a JSON file.
-    #>
+
+    .PARAMETER Path
+        JSON session file to import.
+
+    .OUTPUTS
+        PSCustomObject
+
+    .EXAMPLE
+.DESCRIPTION
+    Loads a natural language regex session from a JSON file.
+    .PARAMETER Path
+    JSON session file to import.
+    .OUTPUTS
+    PSCustomObject
+    .EXAMPLE
+        Import-NaturalLanguageRegexSession -Path './my-regex.json'
+#>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
     param(
@@ -1781,6 +2147,27 @@ function Compare-NaturalLanguageRegexDescriptions {
 
     .DESCRIPTION
         Computes token overlap, similarity, and optional generated pattern equivalence.
+
+    .PARAMETER Left
+        First description to compare.
+
+    .PARAMETER Right
+        Second description to compare.
+
+    .PARAMETER IncludePatterns
+        Also converts both descriptions to patterns and compares them.
+
+    .PARAMETER Anchored
+        Uses anchored conversion when -IncludePatterns is specified.
+
+    .PARAMETER IgnoreCase
+        Uses ignore-case conversion when -IncludePatterns is specified.
+
+    .OUTPUTS
+        PSCustomObject
+
+    .EXAMPLE
+        Compare-NaturalLanguageRegexDescriptions -Left 'digits' -Right 'numbers' -IncludePatterns
     #>
     [CmdletBinding()]
     [OutputType([PSCustomObject])]
@@ -1844,6 +2231,40 @@ function New-NaturalLanguageRegexPesterStub {
     <#
     .SYNOPSIS
         Generates a Pester test stub for a natural language regex description.
+
+    .DESCRIPTION
+        Converts the description to a pattern when -Pattern is omitted and emits a
+        Describe/It block with optional sample match and no-match cases.
+
+    .PARAMETER Description
+        Natural language description under test.
+
+    .PARAMETER Pattern
+        Optional explicit regex pattern to test.
+
+    .PARAMETER SampleMatch
+        Strings expected to match.
+
+    .PARAMETER SampleNoMatch
+        Strings expected not to match.
+
+    .PARAMETER Anchored
+        Converts the description with anchors when generating the pattern.
+
+    .PARAMETER IgnoreCase
+        Uses case-insensitive matching in the generated test.
+
+    .PARAMETER TestName
+        Optional override for the generated Describe slug.
+
+    .PARAMETER Path
+        Optional file path to write the generated Pester script.
+
+    .OUTPUTS
+        System.String
+
+    .EXAMPLE
+        New-NaturalLanguageRegexPesterStub -Description 'one or more digits' -SampleMatch '42'
     #>
     [CmdletBinding()]
     [OutputType([string])]

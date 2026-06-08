@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Compress-Lzma`
+Compresses a file using LZMA compression.
 
 ## Description
 
-This is an alias that points to the `Compress-Lzma` command.
+Compresses a file using the LZMA compression format. LZMA provides high compression ratios.
 
 ## Alias Information
 

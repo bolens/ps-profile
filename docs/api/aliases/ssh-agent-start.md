@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Start-SSHAgent`
+start agent if not running
 
 ## Description
 
-This is an alias that points to the `Start-SSHAgent` command.
+start agent if not running
 
 ## Alias Information
 

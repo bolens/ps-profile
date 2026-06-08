@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Undo-GitCommit`
+Git undo - soft reset last commit
 
 ## Description
 
-This is an alias that points to the `Undo-GitCommit` command.
+Git undo - soft reset last commit
 
 ## Alias Information
 

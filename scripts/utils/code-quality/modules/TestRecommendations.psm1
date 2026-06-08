@@ -21,6 +21,9 @@ scripts/utils/code-quality/modules/TestRecommendations.psm1
 
 .OUTPUTS
     Array of recommendation strings
+.EXAMPLE
+    Get-TestRecommendations
+
 #>
 function Get-TestRecommendations {
     param(

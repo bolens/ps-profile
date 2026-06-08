@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Expand-Lz4`
+Decompresses an LZ4 compressed file.
 
 ## Description
 
-This is an alias that points to the `Expand-Lz4` command.
+Decompresses a file that was compressed using LZ4 compression.
 
 ## Alias Information
 

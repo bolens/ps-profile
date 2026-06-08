@@ -299,6 +299,9 @@ tests/test-data/
 
 # Test verification reports
 docs/test-verification-reports/
+
+# Incremental API doc generation cache (local only)
+docs/api/.doc-generation-cache.json
 **/test-results/
 **/test-output/
 
@@ -378,6 +381,9 @@ scripts/**/*.csv
 # =============================================================================
 # Project-Specific Files
 # =============================================================================
+
+# Script-created file backups (see scripts/lib/file/FileBackup.psm1)
+.backups/
 
 # Local hooks enabled file
 .hooks/enable

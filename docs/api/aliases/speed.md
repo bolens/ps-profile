@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Speed`
+Convert Speed
 
 ## Description
 
-This is an alias that points to the `Convert-Speed` command.
+Convert Speed
 
 ## Alias Information
 

@@ -83,15 +83,15 @@ catch {
 $modules = @(
     @{
         ModulePath = @('container-modules', 'container-helpers.ps1')
-        Context = 'Fragment: 22-containers (container-helpers.ps1)'
+        Context = 'Fragment: containers (container-helpers.ps1)'
     },
     @{
         ModulePath = @('container-modules', 'container-compose.ps1')
-        Context = 'Fragment: 22-containers (container-compose.ps1)'
+        Context = 'Fragment: containers (container-compose.ps1)'
     },
     @{
         ModulePath = @('container-modules', 'container-compose-podman.ps1')
-        Context = 'Fragment: 22-containers (container-compose-podman.ps1)'
+        Context = 'Fragment: containers (container-compose-podman.ps1)'
     }
 )
 

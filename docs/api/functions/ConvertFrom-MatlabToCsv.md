@@ -31,7 +31,11 @@ Optional. Name of the variable to extract. If not specified, uses the first non-
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-MatlabToCsv -InputPath ./input.file
+``
 
 ## Aliases
 

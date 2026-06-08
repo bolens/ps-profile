@@ -16,11 +16,20 @@ Get-CommandInfo
 
 ## Parameters
 
-No parameters.
+### -CommandArgs
+
+Command name and optional arguments passed to Get-Command.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Get-CommandInfo git
+.PARAMETER CommandArgs
+    Command name and optional arguments passed to Get-Command.
+``
 
 ## Aliases
 

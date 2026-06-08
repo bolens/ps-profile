@@ -14,16 +14,17 @@ BeforeAll {
 
 Describe 'check-missing-tests.ps1 extended scenarios' {
     Context 'Script structure' {
-        It 'Scans scripts/lib modules against library unit tests' {
+        It 'Recursively scans scripts/lib modules against library unit tests' {
             $content = Get-Content -LiteralPath $script:CheckScript -Raw
-            $content | Should -Match "scripts\\lib"
-            $content | Should -Match "tests\\unit"
+            $content | Should -Match "scripts' 'lib"
+            $content | Should -Match "tests' 'unit"
+            $content | Should -Match '-Recurse'
         }
 
-        It 'Maintains explicit testToModule mapping entries' {
+        It 'Normalizes module and test stems for hyphenation differences' {
             $content = Get-Content -LiteralPath $script:CheckScript -Raw
-            $content | Should -Match 'testToModule'
-            $content | Should -Match "'library-path-resolution'"
+            $content | Should -Match 'Get-NormalizedModuleStem'
+            $content | Should -Match 'Get-NormalizedLibraryTestStem'
         }
 
         It 'Reports modules missing dedicated library tests' {
@@ -33,11 +34,11 @@ Describe 'check-missing-tests.ps1 extended scenarios' {
         }
     }
 
-    Context 'Name matching heuristics' {
-        It 'Attempts kebab-case to PascalCase module name conversion' {
+    Context 'Exit behavior' {
+        It 'Exits non-zero when modules are missing dedicated tests' {
             $content = Get-Content -LiteralPath $script:CheckScript -Raw
-            $content | Should -Match "replace '-', ''"
-            $content | Should -Match 'Select-Object -Unique'
+            $content | Should -Match 'exit 1'
+            $content | Should -Match 'exit 0'
         }
     }
 }

@@ -2,6 +2,8 @@
 
 Thank you for contributing to this PowerShell profile project.
 
+> **Note:** This profile is under active development and may be unstable at any time. See [README.md](README.md) for the full warning.
+
 ## Prerequisites
 
 All validation scripts automatically install required modules (PSScriptAnalyzer, PowerShell-Beautifier, Pester) to `CurrentUser` scope if missing.
@@ -84,7 +86,7 @@ Ensure-ModuleAvailable -ModuleName 'PSScriptAnalyzer'
 - `FileSystem.psm1` - File system operations (`Ensure-DirectoryExists`, `Test-PathExists`)
 - `PathUtilities.psm1` - Path manipulation utilities
 - `Platform.psm1` - Platform detection (`Get-PowerShellExecutable`)
-- And many more specialized modules (39 total modules, see `scripts/lib/` directory)
+- And many more specialized modules (68+ modules under `scripts/lib/`; see that directory)
 
 **New Helper Functions:**
 
@@ -342,7 +344,7 @@ Merge and revert commits are allowed (messages starting with "Merge " or "Revert
 ### Fragment Guidelines
 
 - **Idempotency**: Fragments must be safe to dot-source multiple times
-  - Use `Set-AgentModeFunction` / `Set-AgentModeAlias` from `00-bootstrap.ps1`
+  - Use `Set-AgentModeFunction` / `Set-AgentModeAlias` from `bootstrap.ps1`
   - Guard with `Get-Command -ErrorAction SilentlyContinue` or `Test-Path Function:\Name`
 - **No Side Effects**: Avoid expensive operations during dot-sourcing
   - Defer heavy work behind `Enable-*` functions (lazy loading pattern)
@@ -403,7 +405,7 @@ When adding functionality that belongs in a module subdirectory:
 3. **Update parent fragment** to load the module:
 
    ```powershell
-   # In the parent fragment (e.g., 02-files.ps1)
+   # In the parent fragment (e.g., files.ps1)
    $conversionModulesDir = Join-Path $PSScriptRoot 'conversion-modules'
    if (Test-Path $conversionModulesDir) {
        $dataDir = Join-Path $conversionModulesDir 'data'
@@ -600,7 +602,7 @@ Merge and revert commits are allowed (messages starting with "Merge " or "Revert
 ### Fragment Guidelines
 
 - **Idempotency**: Fragments must be safe to dot-source multiple times
-  - Use `Set-AgentModeFunction` / `Set-AgentModeAlias` from `00-bootstrap.ps1`
+  - Use `Set-AgentModeFunction` / `Set-AgentModeAlias` from `bootstrap.ps1`
   - Guard with `Get-Command -ErrorAction SilentlyContinue` or `Test-Path Function:\Name`
 - **No Side Effects**: Avoid expensive operations during dot-sourcing
   - Defer heavy work behind `Enable-*` functions (lazy loading pattern)
@@ -632,9 +634,23 @@ Use numeric prefixes to control load order:
 
 - Function/alias documentation is auto-generated from comment-based help
 - Run `task generate-docs` or `pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1` to regenerate
+- For faster local iteration, use `task generate-docs-incremental` (caches parsed sources in `docs/api/.doc-generation-cache.json`)
+- Audit parser coverage with `task check-doc-coverage` (informational; add `-Strict` to fail on parser gaps or missing markdown)
+- Before pushing doc-related changes, run `task check-doc-freshness` (regenerates incrementally and fails when `docs/api` is stale)
 - Developer guides live in [docs/guides/README.md](docs/guides/README.md)
 - After editing guides or documented source files, run `task drift-link` then `task drift-check`
 - See [PROFILE_README.md](PROFILE_README.md) — Detailed technical information
+
+### Documenting dynamic registrations
+
+API docs discover functions registered with `Set-AgentModeFunction`, `Register-LazyFunction`, and `Set-Item` / `New-Item` on `Function:` paths (including `Function:\Name`). Use one of these help patterns so `task generate-docs` can extract documentation:
+
+1. **Block help** — `<# .SYNOPSIS ... .DESCRIPTION ... #>` within three lines above the registration (preferred for full help)
+2. **Single-line caption** — `# Brief description` on the line above the registration
+3. **Inline trailing comment** — `# Brief description` at the end of the registration line
+4. **File-level block** — fragment-level `<# ... #>` with per-function bullets (`- Get-Example (alias): description`) or prose naming the function (used when several registrations share one file header)
+
+`Register-LazyFunction -Alias` aliases are included in generated alias docs. Internal lazy stubs named `__*` are intentionally excluded from API output.
 
 ### Testing documentation
 

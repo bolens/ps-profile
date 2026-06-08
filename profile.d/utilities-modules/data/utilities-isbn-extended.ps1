@@ -316,6 +316,31 @@ function script:Read-IsbnLibrary {
 <#
 .SYNOPSIS
     Searches for books by title and/or author.
+
+.DESCRIPTION
+    Queries Open Library and Google Books, returning normalized book records.
+    Use -Pick to choose a result in Out-GridView when available.
+
+.PARAMETER Title
+    Book title search text.
+
+.PARAMETER Author
+    Author name search text.
+
+.PARAMETER Limit
+    Maximum number of results per provider.
+
+.PARAMETER Provider
+    Metadata provider to query.
+
+.PARAMETER Pick
+    Prompts for a single selected result.
+
+.OUTPUTS
+    PSCustomObject[]
+
+.EXAMPLE
+    Find-Isbn -Title 'Dune' -Author 'Herbert'
 #>
 function Find-Isbn {
     [CmdletBinding()]
@@ -399,6 +424,21 @@ Set-AgentModeAlias -Name 'isbn-find' -Target 'Find-Isbn'
 <#
 .SYNOPSIS
     Lists alternate editions for a book ISBN.
+
+.DESCRIPTION
+    Resolves the Open Library work for an ISBN and returns edition metadata rows.
+
+.PARAMETER Isbn
+    ISBN used to locate the work.
+
+.PARAMETER Limit
+    Maximum number of editions to return.
+
+.OUTPUTS
+    PSCustomObject[]
+
+.EXAMPLE
+    Get-IsbnEditions -Isbn '9780441172719'
 #>
 function Get-IsbnEditions {
     [CmdletBinding()]
@@ -443,6 +483,19 @@ Set-AgentModeAlias -Name 'isbn-editions' -Target 'Get-IsbnEditions'
 <#
 .SYNOPSIS
     Completes a partial ISBN by calculating the missing check digit.
+
+.DESCRIPTION
+    Accepts nine ISBN-10 digits or twelve ISBN-13 digits and appends the
+    correct check digit.
+
+.PARAMETER Isbn
+    Partial ISBN value.
+
+.OUTPUTS
+    PSCustomObject
+
+.EXAMPLE
+    Complete-Isbn -Isbn '978030640615'
 #>
 function Complete-Isbn {
     [CmdletBinding()]
@@ -495,7 +548,19 @@ Set-AgentModeAlias -Name 'isbn-complete' -Target 'Complete-Isbn'
 
 <#
 .SYNOPSIS
-    Returns linked-data style URIs for an ISBN.
+        Returns linked-data style URIs for an ISBN.
+
+.DESCRIPTION
+        Returns linked-data style URIs for an ISBN.
+
+.PARAMETER Isbn
+        ISBN to convert into URIs.
+
+.PARAMETER Format
+        URI format to return, or All for a structured object.
+
+.OUTPUTS
+        System.String or PSCustomObject
 #>
 function Get-IsbnUri {
     [CmdletBinding()]
@@ -533,6 +598,18 @@ Set-AgentModeAlias -Name 'isbn-uri' -Target 'Get-IsbnUri'
 <#
 .SYNOPSIS
     Normalizes and deduplicates a list of ISBN values.
+
+.DESCRIPTION
+    Accepts pipeline input, normalizes each ISBN, and returns unique records.
+
+.PARAMETER Isbn
+    ISBN value from the pipeline.
+
+.OUTPUTS
+    PSCustomObject[]
+
+.EXAMPLE
+    '9780306406157', '0-306-40615-2' | ConvertTo-IsbnNormalizedList
 #>
 function ConvertTo-IsbnNormalizedList {
     [CmdletBinding()]
@@ -569,7 +646,19 @@ Set-AgentModeAlias -Name 'isbn-dedupe' -Target 'ConvertTo-IsbnNormalizedList'
 
 <#
 .SYNOPSIS
-    Compares two ISBN values and reports whether they refer to the same book.
+        Compares two ISBN values and reports whether they refer to the same book.
+
+.DESCRIPTION
+        Compares two ISBN values and reports whether they refer to the same book.
+
+.PARAMETER First
+        First ISBN to compare.
+
+.PARAMETER Second
+        Second ISBN to compare.
+
+.OUTPUTS
+        PSCustomObject
 #>
 function Compare-Isbn {
     [CmdletBinding()]
@@ -608,7 +697,22 @@ Set-AgentModeAlias -Name 'isbn-compare' -Target 'Compare-Isbn'
 
 <#
 .SYNOPSIS
-    Exports bibliography records for one or more ISBN values.
+        Exports bibliography records for one or more ISBN values.
+
+.DESCRIPTION
+        Exports bibliography records for one or more ISBN values.
+
+.PARAMETER Isbn
+        ISBN to export from the pipeline.
+
+.PARAMETER OutputPath
+        Optional file path for combined export output.
+
+.PARAMETER Format
+        Bibliography format to generate.
+
+.OUTPUTS
+        System.String
 #>
 function Export-IsbnBibliography {
     [CmdletBinding()]
@@ -655,7 +759,25 @@ Set-AgentModeAlias -Name 'isbn-export' -Target 'Export-IsbnBibliography'
 
 <#
 .SYNOPSIS
-    Adds a book to the local ISBN reading-list library.
+        Adds a book to the local ISBN reading-list library.
+
+.DESCRIPTION
+        Adds a book to the local ISBN reading-list library.
+
+.PARAMETER Isbn
+        ISBN for the book to store.
+
+.PARAMETER Notes
+        Optional reading notes.
+
+.PARAMETER Rating
+        Optional numeric rating.
+
+.PARAMETER Tags
+        Optional tag list.
+
+.OUTPUTS
+        PSCustomObject
 #>
 function Add-IsbnLibraryEntry {
     [CmdletBinding()]
@@ -709,7 +831,13 @@ Set-AgentModeAlias -Name 'isbn-library-add' -Target 'Add-IsbnLibraryEntry'
 
 <#
 .SYNOPSIS
-    Reads the local ISBN reading-list library.
+        Reads the local ISBN reading-list library.
+
+.DESCRIPTION
+        Reads the local ISBN reading-list library.
+
+.OUTPUTS
+        PSCustomObject[]
 #>
 function Get-IsbnLibrary {
     [CmdletBinding()]
@@ -723,7 +851,16 @@ Set-AgentModeAlias -Name 'isbn-library' -Target 'Get-IsbnLibrary'
 
 <#
 .SYNOPSIS
-    Validates an ISSN checksum.
+        Validates an ISSN checksum.
+
+.DESCRIPTION
+        Validates an ISSN checksum.
+
+.PARAMETER Issn
+        ISSN value from the pipeline.
+
+.OUTPUTS
+        System.Boolean
 #>
 function Test-IssnValid {
     [CmdletBinding()]
@@ -753,7 +890,19 @@ Set-AgentModeAlias -Name 'issn-validate' -Target 'Test-IssnValid'
 
 <#
 .SYNOPSIS
-    Reads an ISBN from the clipboard and optionally looks it up.
+        Reads an ISBN from the clipboard and optionally looks it up.
+
+.DESCRIPTION
+        Reads an ISBN from the clipboard and optionally looks it up.
+
+.PARAMETER Lookup
+        Performs a metadata lookup for the clipboard ISBN.
+
+.PARAMETER OutputFormat
+        Output format when -Lookup is specified.
+
+.OUTPUTS
+        PSCustomObject or formatted string
 #>
 function Get-IsbnFromClipboard {
     [CmdletBinding()]
@@ -786,7 +935,16 @@ Set-AgentModeAlias -Name 'isbn-from-clipboard' -Target 'Get-IsbnFromClipboard'
 
 <#
 .SYNOPSIS
-    Opens a book cover image for an ISBN.
+        Opens a book cover image for an ISBN.
+
+.DESCRIPTION
+        Opens a book cover image for an ISBN.
+
+.PARAMETER Isbn
+        ISBN whose cover should be displayed.
+
+.PARAMETER Refresh
+        Bypasses cached cover files.
 #>
 function Show-IsbnCover {
     [CmdletBinding()]
@@ -824,7 +982,22 @@ Set-AgentModeAlias -Name 'isbn-cover-show' -Target 'Show-IsbnCover'
 
 <#
 .SYNOPSIS
-    Generates an EAN-13 barcode image for an ISBN.
+        Generates an EAN-13 barcode image for an ISBN.
+
+.DESCRIPTION
+        Generates an EAN-13 barcode image for an ISBN.
+
+.PARAMETER Isbn
+        ISBN to encode as EAN-13.
+
+.PARAMETER OutputPath
+        Destination image path.
+
+.PARAMETER PassThru
+        Returns the output path.
+
+.OUTPUTS
+        System.String
 #>
 function Save-IsbnBarcode {
     [CmdletBinding()]
@@ -888,7 +1061,22 @@ Set-AgentModeAlias -Name 'isbn-barcode' -Target 'Save-IsbnBarcode'
 
 <#
 .SYNOPSIS
-    Generates a QR code containing ISBN metadata.
+        Generates a QR code containing ISBN metadata.
+
+.DESCRIPTION
+        Generates a QR code containing ISBN metadata.
+
+.PARAMETER Isbn
+        ISBN used to build the QR payload.
+
+.PARAMETER OutputPath
+        Destination image path.
+
+.PARAMETER PassThru
+        Returns the output path.
+
+.OUTPUTS
+        System.String
 #>
 function Save-IsbnQrCode {
     [CmdletBinding()]
@@ -930,7 +1118,16 @@ Set-AgentModeAlias -Name 'isbn-qrcode' -Target 'Save-IsbnQrCode'
 
 <#
 .SYNOPSIS
-    Searches the local Calibre library for an ISBN.
+        Searches the local Calibre library for an ISBN.
+
+.DESCRIPTION
+        Searches the local Calibre library for an ISBN.
+
+.PARAMETER Isbn
+        ISBN to search in Calibre.
+
+.OUTPUTS
+        System.String
 #>
 function Search-CalibreIsbn {
     [CmdletBinding()]
@@ -955,7 +1152,16 @@ Set-AgentModeAlias -Name 'isbn-calibre' -Target 'Search-CalibreIsbn'
 
 <#
 .SYNOPSIS
-    Validates an ISMN checksum.
+        Validates an ISMN checksum.
+
+.DESCRIPTION
+        Validates an ISMN checksum.
+
+.PARAMETER Ismn
+        ISMN value from the pipeline.
+
+.OUTPUTS
+        System.Boolean
 #>
 function Test-IsmnValid {
     [CmdletBinding()]
@@ -982,7 +1188,16 @@ Set-AgentModeAlias -Name 'ismn-validate' -Target 'Test-IsmnValid'
 
 <#
 .SYNOPSIS
-    Extracts valid ISBN values from arbitrary text.
+        Extracts valid ISBN values from arbitrary text.
+
+.DESCRIPTION
+        Extracts valid ISBN values from arbitrary text.
+
+.PARAMETER Text
+        Text that may contain one or more ISBN values.
+
+.OUTPUTS
+        PSCustomObject[]
 #>
 function Get-IsbnFromText {
     [CmdletBinding()]
@@ -1038,7 +1253,25 @@ Set-AgentModeAlias -Name 'isbn-extract' -Target 'Get-IsbnFromText'
 
 <#
 .SYNOPSIS
-    Imports ISBN values from a text file and optionally looks them up.
+        Imports ISBN values from a text file and optionally looks them up.
+
+.DESCRIPTION
+        Imports ISBN values from a text file and optionally looks them up.
+
+.PARAMETER Path
+        Text file containing ISBN values.
+
+.PARAMETER Lookup
+        Performs metadata lookups for extracted ISBN values.
+
+.PARAMETER OutputFormat
+        Output format when -Lookup is specified.
+
+.PARAMETER Provider
+        Metadata provider used during lookup.
+
+.PARAMETER OutputPath
+        Optional file path for exported lookup output.
 #>
 function Import-IsbnListFile {
     [CmdletBinding()]
@@ -1092,7 +1325,28 @@ Set-AgentModeAlias -Name 'isbn-import' -Target 'Import-IsbnListFile'
 
 <#
 .SYNOPSIS
-    Watches a folder for new files containing ISBN values and processes them.
+        Watches a folder for new files containing ISBN values and processes them.
+
+.DESCRIPTION
+        Watches a folder for new files containing ISBN values and processes them.
+
+.PARAMETER Path
+        Directory to watch for new files.
+
+.PARAMETER OutputFormat
+        Output format for discovered ISBN lookups.
+
+.PARAMETER Provider
+        Metadata provider used during lookup.
+
+.PARAMETER OutputDirectory
+        Directory where lookup output files are written.
+
+.PARAMETER OnIsbnFound
+        Optional script block invoked for each discovered ISBN.
+
+.OUTPUTS
+        System.IO.FileSystemWatcher
 #>
 function Start-IsbnWatchFolder {
     [CmdletBinding()]

@@ -24,8 +24,8 @@ The profile loader already implements several performance optimizations (lazy lo
 **Current Code:**
 
 ```powershell
-$bootstrapFragment = $allFragments | Where-Object { $_.BaseName -eq '00-bootstrap' }
-$otherFragments = $allFragments | Where-Object { $_.BaseName -ne '00-bootstrap' }
+$bootstrapFragment = $allFragments | Where-Object { $_.BaseName -eq 'bootstrap' }
+$otherFragments = $allFragments | Where-Object { $_.BaseName -ne 'bootstrap' }
 ```
 
 **Optimization:** Use a single pass to separate fragments:
@@ -34,7 +34,7 @@ $otherFragments = $allFragments | Where-Object { $_.BaseName -ne '00-bootstrap' 
 $bootstrapFragment = @()
 $otherFragments = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
 foreach ($fragment in $allFragments) {
-    if ($fragment.BaseName -eq '00-bootstrap') {
+    if ($fragment.BaseName -eq 'bootstrap') {
         $bootstrapFragment += $fragment
     } else {
         $otherFragments.Add($fragment)
@@ -111,7 +111,7 @@ if ($sortedNames.Contains($baseName)) {
 
 ```powershell
 foreach ($fragmentName in $loadOrderOverride) {
-    if ($fragmentName -eq '00-bootstrap') { continue }
+    if ($fragmentName -eq 'bootstrap') { continue }
     $fragment = $otherFragments | Where-Object { $_.BaseName -eq $fragmentName }
     if ($fragment) {
         $orderedFragments += $fragment
@@ -135,7 +135,7 @@ $orderedFragments = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
 $orderedNames = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 
 foreach ($fragmentName in $loadOrderOverride) {
-    if ($fragmentName -eq '00-bootstrap') { continue }
+    if ($fragmentName -eq 'bootstrap') { continue }
     if ($fragmentLookup.ContainsKey($fragmentName)) {
         $orderedFragments.Add($fragmentLookup[$fragmentName])
         [void]$orderedNames.Add($fragmentName)
@@ -155,7 +155,7 @@ $unorderedFragments = $unorderedFragments | Sort-Object Name
 
 ### 4. Module Import Caching (Low-Medium Impact)
 
-**Location:** Various fragments, particularly `profile.d/02-files.ps1` and module loaders
+**Location:** Various fragments, particularly `profile.d/files.ps1` and module loaders
 
 **Issue:** Multiple fragments call `Test-Path` and `Import-Module` without cross-fragment caching.
 
@@ -171,7 +171,7 @@ if (Test-Path $modulePath) {
 **Optimization:** Create a global module import cache:
 
 ```powershell
-# In 00-bootstrap.ps1 or GlobalState.ps1
+# In bootstrap.ps1 or GlobalState.ps1
 if (-not $global:PSProfileModuleCache) {
     $global:PSProfileModuleCache = @{}
 }
@@ -241,7 +241,7 @@ function Test-ScoopPath {
 
 ```powershell
 $allFragmentNames = $allFragments | ForEach-Object { $_.BaseName }
-$disabledFragments = $allFragmentNames | Where-Object { $_ -notin $enabledFragments -and $_ -ne '00-bootstrap' }
+$disabledFragments = $allFragmentNames | Where-Object { $_ -notin $enabledFragments -and $_ -ne 'bootstrap' }
 ```
 
 **Optimization:** Use HashSet for faster lookups:
@@ -255,7 +255,7 @@ foreach ($name in $enabledFragments) {
 $disabledFragments = [System.Collections.Generic.List[string]]::new()
 foreach ($fragment in $allFragments) {
     $baseName = $fragment.BaseName
-    if ($baseName -ne '00-bootstrap' -and -not $enabledSet.Contains($baseName)) {
+    if ($baseName -ne 'bootstrap' -and -not $enabledSet.Contains($baseName)) {
         $disabledFragments.Add($baseName)
     }
 }
@@ -307,7 +307,7 @@ Individual fragments can also be optimized:
 
 1. **Lazy Loading:** Ensure expensive operations are deferred behind `Enable-*` functions
 2. **Provider-First Checks:** Use `Test-Path Function:\Name` instead of `Get-Command` when checking for existing functions
-3. **Batch Module Loading:** Fragments that load many modules (e.g., `02-files.ps1`) could batch `Test-Path` checks
+3. **Batch Module Loading:** Fragments that load many modules (e.g., `files.ps1`) could batch `Test-Path` checks
 
 ### Testing Requirements
 

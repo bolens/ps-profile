@@ -27,12 +27,16 @@ Additional arguments forwarded to notionify-cli.
 
 ## Outputs
 
-CLI output from notionify-cli.
+CLI output from notionify-cli. .EXAMPLE Invoke-NotionifyCli
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-NotionifyCli
+``
 
 ## Aliases
 

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Expand-Zstd`
+Decompresses a Zstandard (zstd) compressed file.
 
 ## Description
 
-This is an alias that points to the `Expand-Zstd` command.
+Decompresses a file that was compressed using Zstandard (zstd) compression. Requires the zstd command-line tool to be installed.
 
 ## Alias Information
 

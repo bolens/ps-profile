@@ -719,10 +719,10 @@ Use `Import-FragmentModules` when loading many modules from the same fragment. S
 
 **Implementation Status**:
 
-- [x] ✅ Core implementation complete - `Import-FragmentModule`, `Import-FragmentModules`, `Test-FragmentModulePath` implemented in `profile.d/00-bootstrap/ModuleLoading.ps1`
+- [x] ✅ Core implementation complete - `Import-FragmentModule`, `Import-FragmentModules`, `Test-FragmentModulePath` implemented in `profile.d/bootstrap/ModuleLoading.ps1`
 - [x] ✅ Unit tests complete - 38 unit tests + 32 additional tests (70 total) covering all functions
 - [x] ✅ Integration tests complete - 12 integration tests verifying real fragment loading
-- [x] ✅ Fragments migrated - 6 fragments refactored: `02-files.ps1`, `22-containers.ps1`, `11-git.ps1`, `05-utilities.ps1`, `07-system.ps1`, `23-starship.ps1`
+- [x] ✅ Fragments migrated - 6 fragments refactored: `files.ps1`, `containers.ps1`, `git.ps1`, `utilities.ps1`, `system.ps1`, `starship.ps1`
 - [x] ✅ Coverage achieved - 85.2% coverage (exceeds 75% target)
 - [ ] Performance testing (baseline established, ongoing monitoring)
 - [ ] Additional fragments migration (as needed)

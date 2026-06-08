@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-AsciiToUtf32`
+ASCII to UTF-32
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-AsciiToUtf32` command.
+ASCII to UTF-32
 
 ## Alias Information
 

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Merge-GitRebase`
+Git rebase - rebase commits
 
 ## Description
 
-This is an alias that points to the `Merge-GitRebase` command.
+Git rebase - rebase commits
 
 ## Alias Information
 

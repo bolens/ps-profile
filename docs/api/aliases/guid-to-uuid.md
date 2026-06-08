@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-GuidToUuid`
+Converts a GUID to UUID format.
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-GuidToUuid` command.
+Converts a GUID string to UUID format (they're the same format, just different names).
 
 ## Alias Information
 

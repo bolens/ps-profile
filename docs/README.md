@@ -2,6 +2,8 @@
 
 Welcome to the PowerShell Profile documentation! This documentation is organized into several sections to help you find what you need.
 
+> **Note:** This profile is under active development and may be unstable. See [README.md](../README.md) for the full warning.
+
 ## Documentation Structure
 
 ### 📚 [API Reference](api/)
@@ -23,7 +25,7 @@ Documentation for each profile fragment, explaining what each fragment does and 
 
 Fragments are modular components of the profile, loaded in dependency-aware order (tier-based: core, essential, standard, optional). Many fragments use organized subdirectories for related modules:
 
-- **Main Fragments** (00-99): Core fragments that load and orchestrate modules
+- **Main Fragments**: 130+ top-level scripts in `profile.d/` (e.g. `bootstrap.ps1`, `git.ps1`, `files.ps1`) that load and orchestrate modules
 - **Module Subdirectories**: Organized modules loaded by parent fragments
   - `cli-modules/` - Modern CLI tool integrations
   - `container-modules/` - Container helper modules

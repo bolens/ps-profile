@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Commits staged changes.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Description
 
-Creates a new commit with the currently staged changes. Forwards all arguments to git commit.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Signature
 
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gc` - Commits staged changes.
+- `gc` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git.ps1

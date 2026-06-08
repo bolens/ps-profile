@@ -21,6 +21,9 @@ scripts/utils/code-quality/modules/TestPerformanceAnalysis.psm1
 
 .OUTPUTS
     Performance analysis object
+.EXAMPLE
+    Get-PerformanceAnalysis
+
 #>
 function Get-PerformanceAnalysis {
     param(

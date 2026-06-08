@@ -35,7 +35,11 @@ The desired height.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Resize-Image
+``
 
 ## Aliases
 

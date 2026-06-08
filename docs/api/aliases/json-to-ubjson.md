@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-UbjsonFromJson`
+Converts JSON file to UBJSON format.
 
 ## Description
 
-This is an alias that points to the `ConvertTo-UbjsonFromJson` command.
+Converts a JSON file to UBJSON (Universal Binary JSON) format. UBJSON is a binary encoding of JSON that is more compact and faster to parse. Requires Node.js and the ubjson package to be installed.
 
 ## Alias Information
 

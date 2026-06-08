@@ -31,7 +31,11 @@ Maximum number of results to return (default: 20).
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Find-HistoryFuzzy
+``
 
 ## Source
 

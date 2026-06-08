@@ -27,7 +27,11 @@ The path for the output SQL file. If not specified, uses input path with .sql ex
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-SqliteToSql -InputPath ./input.file
+``
 
 ## Aliases
 

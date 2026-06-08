@@ -16,11 +16,20 @@ Install-UVTool
 
 ## Parameters
 
-No parameters.
+### -Package
+
+Python package name to install as a global uv tool.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Install-UVTool 'package-name'
+.PARAMETER Package
+    Python package name to install as a global uv tool.
+``
 
 ## Aliases
 

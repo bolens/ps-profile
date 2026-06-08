@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Shows differences between commits, branches, or working tree.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Description
 
-Displays changes between the working tree and staging area, or between commits. Forwards all arguments to git diff.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Signature
 
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gd` - Shows differences between commits, branches, or working tree.
+- `gd` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git.ps1

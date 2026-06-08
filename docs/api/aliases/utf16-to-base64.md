@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-Utf16ToBase64`
+Treat input as UTF-16 hex, decode to text, then encode as UTF-8 Base64
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-Utf16ToBase64` command.
+Treat input as UTF-16 hex, decode to text, then encode as UTF-8 Base64
 
 ## Alias Information
 

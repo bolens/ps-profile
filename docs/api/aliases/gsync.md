@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Sync-GitRepository`
+Git sync - fetch and rebase
 
 ## Description
 
-This is an alias that points to the `Sync-GitRepository` command.
+Git sync - fetch and rebase
 
 ## Alias Information
 

@@ -71,6 +71,9 @@ else {
 
 .OUTPUTS
     String. The extracted purpose, or a default message if none found.
+.EXAMPLE
+    Get-FragmentPurpose
+
 #>
 function Get-FragmentPurpose {
     [CmdletBinding()]
@@ -142,6 +145,9 @@ function Get-FragmentPurpose {
 
 .OUTPUTS
     String. The extracted description, or $null if none found.
+.EXAMPLE
+    Get-FunctionDescription
+
 #>
 function Get-FunctionDescription {
     [CmdletBinding()]
@@ -233,6 +239,9 @@ function Get-FunctionDescription {
 
 .OUTPUTS
     List of PSCustomObject with Name and Short (description) properties.
+.EXAMPLE
+    Get-FragmentFunctions
+
 #>
 function Get-FragmentFunctions {
     [CmdletBinding()]
@@ -320,6 +329,9 @@ function Get-FragmentFunctions {
 
 .OUTPUTS
     Array of function names (strings).
+.EXAMPLE
+    Get-FragmentEnableHelpers
+
 #>
 function Get-FragmentEnableHelpers {
     [CmdletBinding()]

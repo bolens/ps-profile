@@ -27,7 +27,11 @@ The path for the output RST file. If not specified, uses input path with .rst ex
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-RstFromMarkdown -InputPath ./input.file
+``
 
 ## Aliases
 

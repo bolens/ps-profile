@@ -16,11 +16,18 @@ Stop-ContainerCompose
 
 ## Parameters
 
-No parameters.
+### -args
+
+Additional arguments forwarded to compose down.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Stop-ContainerCompose
+``
 
 ## Aliases
 

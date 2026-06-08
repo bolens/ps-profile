@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Save-GitCommitWithMessage`
+Commits staged changes with a message.
 
 ## Description
 
-This is an alias that points to the `Save-GitCommitWithMessage` command.
+Creates a new commit with the currently staged changes and the provided commit message. Forwards all arguments to git commit (typically used with -m flag).
 
 ## Alias Information
 

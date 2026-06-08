@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Compress-Brotli`
+Compresses a file using Brotli compression.
 
 ## Description
 
-This is an alias that points to the `Compress-Brotli` command.
+Compresses a file using the Brotli compression algorithm. Brotli is a modern compression algorithm that provides better compression ratios than Gzip.
 
 ## Alias Information
 

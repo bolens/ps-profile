@@ -154,6 +154,9 @@ try {
     The path for the output Protocol Buffers file. If not specified, uses input path with .pb extension.
 .PARAMETER SchemaPath
     The path to the Protocol Buffers schema file (.proto or JSON schema). Required.
+.EXAMPLE
+    ConvertTo-ProtobufFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-ProtobufFromJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
@@ -175,6 +178,9 @@ Set-AgentModeAlias -Name 'json-to-pb' -Target 'ConvertTo-ProtobufFromJson'
     The path for the output JSON file. If not specified, uses input path with .json extension.
 .PARAMETER SchemaPath
     The path to the Protocol Buffers schema file (.proto or JSON schema). Required.
+.EXAMPLE
+    ConvertFrom-ProtobufToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-ProtobufToJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)

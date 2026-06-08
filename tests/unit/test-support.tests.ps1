@@ -364,6 +364,57 @@ Describe 'TestSupport Modules' {
                 { Invoke-TestPwshScript -ScriptContent $scriptContent } | Should -Throw
             }
         }
+
+        Context 'Invoke-TestScriptFile' {
+            It 'Returns exit code and output without throwing on non-zero exit codes' {
+                if (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'pwsh is not available'
+                    return
+                }
+
+                $scriptPath = Join-Path (New-TestTempDirectory -Prefix 'InvokeTestScriptFile') 'exit-two.ps1'
+                Set-Content -LiteralPath $scriptPath -Value 'Write-Output "done"; exit 2' -Encoding UTF8
+
+                $result = Invoke-TestScriptFile -ScriptPath $scriptPath
+                $result.ExitCode | Should -Be 2
+                $result.Output | Should -Match 'done'
+            }
+
+            It 'Applies and restores per-invocation environment variables' {
+                if (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) {
+                    Set-ItResult -Skipped -Because 'pwsh is not available'
+                    return
+                }
+
+                $scriptPath = Join-Path (New-TestTempDirectory -Prefix 'InvokeTestScriptFileEnv') 'read-env.ps1'
+                Set-Content -LiteralPath $scriptPath -Value 'Write-Output $env:PS_PROFILE_TEST_INVOCATION_MARKER; exit 0' -Encoding UTF8
+                $previous = [Environment]::GetEnvironmentVariable('PS_PROFILE_TEST_INVOCATION_MARKER', 'Process')
+
+                try {
+                    $result = Invoke-TestScriptFile -ScriptPath $scriptPath -EnvironmentVariables @{
+                        PS_PROFILE_TEST_INVOCATION_MARKER = 'isolated-value'
+                    }
+                    $result.ExitCode | Should -Be 0
+                    $result.Output | Should -Match 'isolated-value'
+                    [Environment]::GetEnvironmentVariable('PS_PROFILE_TEST_INVOCATION_MARKER', 'Process') | Should -Be $previous
+                }
+                finally {
+                    if ($null -eq $previous) {
+                        Remove-Item -Path Env:PS_PROFILE_TEST_INVOCATION_MARKER -ErrorAction SilentlyContinue
+                    }
+                    else {
+                        Set-Item -Path Env:PS_PROFILE_TEST_INVOCATION_MARKER -Value $previous
+                    }
+                }
+            }
+        }
+
+        Context 'Non-interactive defaults' {
+            It 'Provides TMPDIR when the process environment does not define it' {
+                $env:TMPDIR | Should -Not -BeNullOrEmpty
+                Test-Path -LiteralPath $env:TMPDIR | Should -BeTrue
+            }
+        }
     }
 
     Describe 'TestNpmHelpers Module' {

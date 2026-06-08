@@ -249,7 +249,7 @@ function Import-LibModule {
         }
 
         if (-not $ScriptPath) {
-            throw "Could not auto-detect script path. Please provide -ScriptPath parameter."
+            throw "Could not auto-detect script path. Please provide -ScriptFile or directory path."
         }
     }
 
@@ -287,6 +287,7 @@ function Import-LibModule {
         'PathResolution'          = 'path'
         'PathUtilities'           = 'path'
         'PathValidation'          = 'path'
+        'FileBackup'              = 'file'
         'FileContent'             = 'file'
         'FileFiltering'           = 'file'
         'FileSystem'              = 'file'
@@ -544,7 +545,7 @@ function Import-LibModules {
         }
 
         if (-not $ScriptPath) {
-            throw "Could not auto-detect script path. Please provide -ScriptPath parameter."
+            throw "Could not auto-detect script path. Please provide -ScriptFile or directory path."
         }
     }
 
@@ -719,7 +720,7 @@ function Initialize-ScriptEnvironment {
         }
 
         if (-not $ScriptPath) {
-            $errorMessage = "Could not auto-detect script path. Please provide -ScriptPath parameter."
+            $errorMessage = "Could not auto-detect script path. Please provide -ScriptFile or directory path."
             if ($ExitOnError) {
                 if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
                     if (Get-Variable EXIT_SETUP_ERROR -ErrorAction SilentlyContinue) {

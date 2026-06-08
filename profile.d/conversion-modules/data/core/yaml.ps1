@@ -305,6 +305,10 @@ function Initialize-FileConversion-CoreBasicYaml {
     Converts YAML to JSON format.
 .DESCRIPTION
     Transforms YAML input to JSON output using yq.
+.PARAMETER fileArgs
+    Path to the YAML input file.
+.EXAMPLE
+    ConvertFrom-Yaml ./config.yaml
 #>
 function ConvertFrom-Yaml {
     param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs)
@@ -318,6 +322,10 @@ Set-AgentModeAlias -Name 'yaml-to-json' -Target 'ConvertFrom-Yaml'
     Converts JSON to YAML format.
 .DESCRIPTION
     Transforms JSON input to YAML output using yq.
+.PARAMETER fileArgs
+    Path to the JSON input file.
+.EXAMPLE
+    ConvertTo-Yaml ./config.json
 #>
 function ConvertTo-Yaml {
     param([Parameter(ValueFromRemainingArguments = $true)] $fileArgs)

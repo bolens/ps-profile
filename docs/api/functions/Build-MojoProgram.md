@@ -16,11 +16,20 @@ Build-MojoProgram
 
 ## Parameters
 
-No parameters.
+### -Files
+
+Mojo source files to compile into executables.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Build-MojoProgram ./main.mojo
+.PARAMETER Files
+    Mojo source files to compile into executables.
+``
 
 ## Aliases
 

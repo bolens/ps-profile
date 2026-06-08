@@ -1,4 +1,3 @@
-Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 <#
 .SYNOPSIS
     Adds the validate task to all task runner files using the task-parity utilities.
@@ -17,12 +16,12 @@ Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameC
 [CmdletBinding(SupportsShouldProcess)]
 param()
 
-# Import PathResolution first (required for ModuleImport to work)
+# Import shared utilities
 $scriptsDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-$pathResolutionPath = Join-Path $scriptsDir 'lib' 'path' 'PathResolution.psm1'
-if (Test-Path -LiteralPath $pathResolutionPath) {
-    Import-Module $pathResolutionPath -DisableNameChecking -ErrorAction SilentlyContinue
-}
+$moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Resolve repository root
 $repoRoot = $null

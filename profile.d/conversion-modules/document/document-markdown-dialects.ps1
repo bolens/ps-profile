@@ -15,6 +15,8 @@
     When set, returns the writer-oriented format (e.g. Obsidian export uses gfm+wikilinks).
 .OUTPUTS
     System.String
+.EXAMPLE
+    Get-MarkdownDialectPandocFormat -Dialect obsidian -ForOutput
 #>
 function Get-MarkdownDialectPandocFormat {
     [CmdletBinding()]
@@ -191,6 +193,29 @@ function Initialize-FileConversion-DocumentMarkdownDialects {
     } -Force
 }
 
+<#
+.SYNOPSIS
+    Converts markdown between dialects using pandoc.
+
+.DESCRIPTION
+    Internal dispatcher used by Convert-MarkdownDialect aliases. Loads document
+    conversion helpers when needed and forwards to _Convert-MarkdownDialect.
+
+.PARAMETER InputPath
+    Path to the input markdown file.
+
+.PARAMETER OutputPath
+    Optional output path. Defaults to the input path with .md extension.
+
+.PARAMETER From
+    Source dialect alias or pandoc reader format.
+
+.PARAMETER To
+    Target dialect alias or pandoc writer format.
+
+.EXAMPLE
+    Invoke-MarkdownDialectConversion -InputPath note.md -From obsidian -To gfm
+#>
 function Invoke-MarkdownDialectConversion {
     [CmdletBinding()]
     param(

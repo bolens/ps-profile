@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-UuidToBase32`
+Converts a UUID to Base32 format.
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-UuidToBase32` command.
+Converts a UUID string to Base32 encoded format.
 
 ## Alias Information
 

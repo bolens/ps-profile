@@ -16,11 +16,28 @@ Format-Json
 
 ## Parameters
 
-No parameters.
+### -InputObject
+
+JSON object or string from the pipeline.
+
+### -fileArgs
+
+Optional input file path when not using the pipeline.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Get-Content ./data.json -Raw | Format-Json
+``
+
+### Example 2
+
+`powershell
+Format-Json ./data.json
+``
 
 ## Aliases
 

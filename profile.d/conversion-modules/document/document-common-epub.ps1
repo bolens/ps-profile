@@ -253,6 +253,9 @@ function Initialize-FileConversion-DocumentCommonEpub {
     The path to the EPUB file.
 .PARAMETER OutputPath
     The path for the output Markdown file. If not specified, uses input path with .md extension.
+.EXAMPLE
+    ConvertFrom-EpubToMarkdown -InputPath ./input.file
+
 #>
 function ConvertFrom-EpubToMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -281,6 +284,9 @@ Set-AgentModeAlias -Name 'epub-to-markdown' -Target 'ConvertFrom-EpubToMarkdown'
     The path to the EPUB file.
 .PARAMETER OutputPath
     The path for the output HTML file. If not specified, uses input path with .html extension.
+.EXAMPLE
+    ConvertFrom-EpubToHtml -InputPath ./input.file
+
 #>
 function ConvertFrom-EpubToHtml {
     param([string]$InputPath, [string]$OutputPath)
@@ -309,6 +315,9 @@ Set-AgentModeAlias -Name 'epub-to-html' -Target 'ConvertFrom-EpubToHtml'
     The path to the EPUB file.
 .PARAMETER OutputPath
     The path for the output PDF file. If not specified, uses input path with .pdf extension.
+.EXAMPLE
+    ConvertFrom-EpubToPdf -InputPath ./input.file
+
 #>
 function ConvertFrom-EpubToPdf {
     param([string]$InputPath, [string]$OutputPath)
@@ -337,6 +346,9 @@ Set-AgentModeAlias -Name 'epub-to-pdf' -Target 'ConvertFrom-EpubToPdf'
     The path to the EPUB file.
 .PARAMETER OutputPath
     The path for the output LaTeX file. If not specified, uses input path with .tex extension.
+.EXAMPLE
+    ConvertFrom-EpubToLatex -InputPath ./input.file
+
 #>
 function ConvertFrom-EpubToLatex {
     param([string]$InputPath, [string]$OutputPath)

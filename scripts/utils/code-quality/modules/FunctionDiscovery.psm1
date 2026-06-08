@@ -24,6 +24,9 @@ scripts/utils/code-quality/modules/FunctionDiscovery.psm1
 
 .OUTPUTS
     Array of PSCustomObject with function information including Name, Verb, Noun, FilePath, etc.
+.EXAMPLE
+    Get-FunctionsFromPath
+
 #>
 function Get-FunctionsFromPath {
     [CmdletBinding()]

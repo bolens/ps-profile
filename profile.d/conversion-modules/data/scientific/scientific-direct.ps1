@@ -122,6 +122,9 @@ function Initialize-FileConversion-ScientificDirect {
     The path to the HDF5 file.
 .PARAMETER OutputPath
     The path for the output NetCDF file. If not specified, uses input path with .nc extension.
+.EXAMPLE
+    ConvertTo-NetCdfFromHdf5 -InputPath ./input.file
+
 #>
 function ConvertTo-NetCdfFromHdf5 {
     param([string]$InputPath, [string]$OutputPath)
@@ -142,6 +145,9 @@ Set-AgentModeAlias -Name 'h5-to-nc' -Target 'ConvertTo-NetCdfFromHdf5'
     The path to the NetCDF file.
 .PARAMETER OutputPath
     The path for the output HDF5 file. If not specified, uses input path with .h5 extension.
+.EXAMPLE
+    ConvertTo-Hdf5FromNetCdf -InputPath ./input.file
+
 #>
 function ConvertTo-Hdf5FromNetCdf {
     param([string]$InputPath, [string]$OutputPath)

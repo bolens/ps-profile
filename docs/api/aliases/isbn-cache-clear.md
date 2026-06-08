@@ -6,7 +6,7 @@ Clears cached ISBN lookup results.
 
 ## Description
 
-This is an alias that points to the `Clear-IsbnCache` command.
+Removes cached provider responses under the profile ISBN cache directory.
 
 ## Alias Information
 

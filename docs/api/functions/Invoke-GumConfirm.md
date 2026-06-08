@@ -16,11 +16,23 @@ Invoke-GumConfirm
 
 ## Parameters
 
-No parameters.
+### -Prompt
+
+Confirmation message shown to the user.
+
+
+## Outputs
+
+System.Boolean .EXAMPLE if (Invoke-GumConfirm -Prompt 'Delete file?') { Remove-Item ./temp.txt }
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+if (Invoke-GumConfirm -Prompt 'Delete file?') { Remove-Item ./temp.txt }
+``
 
 ## Aliases
 

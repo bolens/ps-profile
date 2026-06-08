@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Initializes text format gap conversion utility functions.
+Converts a YAML file to XML format.
 
 ## Description
 
-Sets up internal conversion functions for direct text format conversions that fill gaps in the conversion matrix: XML↔YAML, JSONL↔CSV, JSONL↔YAML. This function is called automatically by Ensure-FileConversion-Data.
+Uses yq to transform YAML input into XML output.
 
 ## Alias Information
 

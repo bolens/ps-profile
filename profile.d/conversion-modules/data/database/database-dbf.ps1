@@ -290,6 +290,9 @@ except Exception as e:
     The path to the DBF file (.dbf extension).
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-DbfToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-DbfToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -308,6 +311,9 @@ Set-AgentModeAlias -Name 'dbf-to-json' -Target 'ConvertFrom-DbfToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output DBF file. If not specified, uses input path with .dbf extension.
+.EXAMPLE
+    ConvertTo-DbfFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-DbfFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -326,6 +332,9 @@ Set-AgentModeAlias -Name 'json-to-dbf' -Target 'ConvertTo-DbfFromJson'
     The path to the DBF file (.dbf extension).
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-DbfToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-DbfToCsv {
     param([string]$InputPath, [string]$OutputPath)

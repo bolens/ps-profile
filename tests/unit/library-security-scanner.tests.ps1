@@ -1,0 +1,47 @@
+<#
+tests/unit/library-security-scanner.tests.ps1
+
+.SYNOPSIS
+    Behavioral unit tests for SecurityScanner.psm1 Invoke-SecurityScan.
+#>
+
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+
+    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:SecurityModulesDir = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'security' 'modules'
+    $script:FixturePath = Join-Path $script:TestRepoRoot 'tests' 'test-data' 'security-scan-fixture' 'insecure.ps1'
+    $script:PssaAvailable = $null -ne (Get-Module -ListAvailable -Name PSScriptAnalyzer)
+
+    Import-Module (Join-Path $script:SecurityModulesDir 'SecurityAllowlist.psm1') -Force -DisableNameChecking
+    Import-Module (Join-Path $script:SecurityModulesDir 'SecurityRules.psm1') -Force -DisableNameChecking
+    Import-Module (Join-Path $script:SecurityModulesDir 'SecurityPatterns.psm1') -Force -DisableNameChecking
+    Import-Module (Join-Path $script:SecurityModulesDir 'SecurityScanner.psm1') -Force -DisableNameChecking
+}
+
+Describe 'SecurityScanner.psm1' {
+    It 'Detects Invoke-Expression usage via PSScriptAnalyzer rules' -Skip:(-not $script:PssaAvailable) {
+        $issues = Invoke-SecurityScan `
+            -FilePath $script:FixturePath `
+            -SecurityRules (Get-SecurityRules) `
+            -ExternalCommandPatterns (Get-ExternalCommandPatterns) `
+            -SecretPatterns (Get-SecretPatterns) `
+            -FalsePositivePatterns (Get-FalsePositivePatterns) `
+            -Allowlist (Get-DefaultAllowlist)
+
+        @($issues).Count | Should -BeGreaterThan 0
+        ($issues | Where-Object { $_.Rule -eq 'PSAvoidUsingInvokeExpression' }).Count | Should -BeGreaterThan 0
+    }
+
+    It 'Does not return ScanError entries for the insecure fixture' -Skip:(-not $script:PssaAvailable) {
+        $issues = Invoke-SecurityScan `
+            -FilePath $script:FixturePath `
+            -SecurityRules (Get-SecurityRules) `
+            -ExternalCommandPatterns (Get-ExternalCommandPatterns) `
+            -SecretPatterns (Get-SecretPatterns) `
+            -FalsePositivePatterns (Get-FalsePositivePatterns) `
+            -Allowlist (Get-DefaultAllowlist)
+
+        ($issues | Where-Object { $_.Rule -eq 'ScanError' }).Count | Should -Be 0
+    }
+}

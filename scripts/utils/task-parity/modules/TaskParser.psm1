@@ -24,7 +24,7 @@ if (Test-Path -LiteralPath $utilitiesModulePath) {
 
 function Get-TasksFromFile {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Parses tasks from a task runner file.
     
     .DESCRIPTION
@@ -38,7 +38,10 @@ function Get-TasksFromFile {
     
     .OUTPUTS
         Hashtable mapping task names to their command strings.
-    #>
+.EXAMPLE
+    Get-TasksFromFile -FilePath ./Taskfile.yml -FileType taskfile
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -79,9 +82,18 @@ function Get-TasksFromFile {
 
 function Get-TasksFromTaskfile {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Parses tasks from Taskfile.yml.
-    #>
+
+.DESCRIPTION
+        Parses tasks from Taskfile.yml.
+
+.PARAMETER FilePath
+        Path to the target file.
+.EXAMPLE
+    Get-TasksFromTaskfile
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -255,9 +267,18 @@ function Get-TasksFromTaskfile {
 
 function Get-TasksFromMakefile {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Parses tasks from Makefile.
-    #>
+
+.DESCRIPTION
+        Parses tasks from Makefile.
+
+.PARAMETER FilePath
+        Path to the target file.
+.EXAMPLE
+    Get-TasksFromMakefile
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -325,9 +346,18 @@ function Get-TasksFromMakefile {
 
 function Get-TasksFromPackageJson {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Parses tasks from package.json scripts section.
-    #>
+
+.DESCRIPTION
+        Parses tasks from package.json scripts section.
+
+.PARAMETER FilePath
+        Path to the target file.
+.EXAMPLE
+    Get-TasksFromPackageJson
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -379,9 +409,18 @@ function Get-TasksFromPackageJson {
 
 function Get-TasksFromJustfile {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Parses tasks from justfile.
-    #>
+
+.DESCRIPTION
+        Parses tasks from justfile.
+
+.PARAMETER FilePath
+        Path to the target file.
+.EXAMPLE
+    Get-TasksFromJustfile
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -454,9 +493,18 @@ function Get-TasksFromJustfile {
 
 function Get-TaskCommandSignature {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds a comparable signature from a task command (script path plus key flags).
-    #>
+
+.DESCRIPTION
+        Builds a comparable signature from a task command (script path plus key flags).
+
+.PARAMETER Command
+        Shell command text.
+.EXAMPLE
+    Get-TaskCommandSignature
+
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -512,9 +560,18 @@ function Get-TaskCommandSignature {
 
 function Get-ScriptPathFromTaskCommand {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Extracts the scripts/*.ps1 path from a task command string.
-    #>
+
+.DESCRIPTION
+        Extracts the scripts/*.ps1 path from a task command string.
+
+.PARAMETER Command
+        Shell command text.
+.EXAMPLE
+    Get-ScriptPathFromTaskCommand
+
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -537,9 +594,24 @@ function Get-ScriptPathFromTaskCommand {
 
 function Resolve-CanonicalTaskNameFromVsCodeTask {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Maps a VS Code task label/command to a canonical task runner name.
-    #>
+
+.DESCRIPTION
+        Maps a VS Code task label/command to a canonical task runner name.
+
+.PARAMETER Label
+        Task label used in tasks.json output.
+
+.PARAMETER Command
+        Shell command text.
+
+.PARAMETER ReferenceTasks
+        Reference task metadata keyed by task name.
+.EXAMPLE
+    Resolve-CanonicalTaskNameFromVsCodeTask
+
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -573,9 +645,21 @@ function Resolve-CanonicalTaskNameFromVsCodeTask {
 
 function Convert-TasksJsonToCanonicalNames {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Re-keys VS Code tasks by canonical task names using reference task commands.
-    #>
+
+.DESCRIPTION
+        Re-keys VS Code tasks by canonical task names using reference task commands.
+
+.PARAMETER Tasks
+        Parsed task objects to compare or serialize.
+
+.PARAMETER ReferenceTasks
+        Reference task metadata keyed by task name.
+.EXAMPLE
+    Convert-TasksJsonToCanonicalNames
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(
@@ -602,9 +686,21 @@ function Convert-TasksJsonToCanonicalNames {
 
 function Get-TasksFromTasksJson {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Parses tasks from VS Code tasks.json file.
-    #>
+
+.DESCRIPTION
+        Parses tasks from VS Code tasks.json file.
+
+.PARAMETER FilePath
+        Path to the target file.
+
+.PARAMETER ReferenceTasks
+        Reference task metadata keyed by task name.
+.EXAMPLE
+    Get-TasksFromTasksJson
+
+#>
     [CmdletBinding()]
     [OutputType([hashtable])]
     param(

@@ -27,7 +27,11 @@ The path for the output BSON file. If not specified, uses input path with .bson 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-BsonFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

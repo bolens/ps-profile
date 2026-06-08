@@ -2,16 +2,25 @@
 
 This directory contains small, focused PowerShell scripts that are dot-sourced from `Microsoft.PowerShell_profile.ps1` during interactive session startup.
 
+> **Note:** This profile is under active development and may be unstable. See [README.md](../README.md#powershell-profile) for the full warning.
+
 ## Loading Order
 
-Files are loaded in **lexical order** (sorted by filename). Use numeric prefixes to control load order:
+Fragments use **dependency-aware loading**, not filename sorting alone. Each fragment can declare dependencies and a tier in its header; the loader resolves load order with topological sorting (see [ARCHITECTURE.md](../ARCHITECTURE.md) and [PROFILE_README.md](../PROFILE_README.md)).
 
-- **00-09**: Core bootstrap, environment, and registration helpers
-- **10-19**: Terminal configuration (PSReadLine, prompts, Git)
-- **20-29**: Container engines and cloud tools
-- **30-39**: Development tools and aliases
-- **40-69**: Language-specific tools (Go, PHP, Node.js, Python, Rust)
-- **70-79**: Advanced features (performance insights, enhanced history, system monitoring)
+```powershell
+# Dependencies: bootstrap, env
+# Tier: standard
+```
+
+**Typical tiers** (for batch loading and environment presets):
+
+- **Core (Tier 0)**: Bootstrap and registration (`bootstrap.ps1`)
+- **Essential (Tier 1)**: Environment, files, utilities (`env.ps1`, `files.ps1`, `utilities.ps1`)
+- **Standard (Tier 2)**: Common dev tools (`git.ps1`, `containers.ps1`, `aws.ps1`, …)
+- **Optional (Tier 3)**: Advanced features (`performance-insights.ps1`, `system-monitor.ps1`, …)
+
+Fragments are named by concern (e.g. `git.ps1`, `lang-python-env.ps1`), not numeric prefix. Disable fragments or choose environment presets via `.profile-fragments.json` or `$env:PS_PROFILE_ENVIRONMENT`.
 
 ## Fragment Guidelines
 

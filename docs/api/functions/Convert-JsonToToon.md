@@ -27,12 +27,16 @@ The indentation level for nested structures (internal use).
 
 ## Outputs
 
-String representing the TOON format.
+String representing the TOON format. .EXAMPLE Convert-JsonToToon
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Convert-JsonToToon
+``
 
 ## Source
 

@@ -226,6 +226,9 @@ const fs = require('fs');
     The path to the Parquet file.
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-ParquetToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-ParquetToCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -244,6 +247,9 @@ Set-AgentModeAlias -Name 'parquet-to-csv' -Target 'ConvertFrom-ParquetToCsv'
     The path to the CSV file.
 .PARAMETER OutputPath
     The path for the output Parquet file. If not specified, uses input path with .parquet extension.
+.EXAMPLE
+    ConvertTo-ParquetFromCsv -InputPath ./input.file
+
 #>
 function ConvertTo-ParquetFromCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -262,6 +268,9 @@ Set-AgentModeAlias -Name 'csv-to-parquet' -Target 'ConvertTo-ParquetFromCsv'
     The path to the Arrow file.
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-ArrowToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-ArrowToCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -280,6 +289,9 @@ Set-AgentModeAlias -Name 'arrow-to-csv' -Target 'ConvertFrom-ArrowToCsv'
     The path to the CSV file.
 .PARAMETER OutputPath
     The path for the output Arrow file. If not specified, uses input path with .arrow extension.
+.EXAMPLE
+    ConvertTo-ArrowFromCsv -InputPath ./input.file
+
 #>
 function ConvertTo-ArrowFromCsv {
     param([string]$InputPath, [string]$OutputPath)

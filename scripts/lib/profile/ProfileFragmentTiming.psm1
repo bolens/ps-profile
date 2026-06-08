@@ -43,6 +43,9 @@ function Initialize-FragmentTiming {
     The name of the fragment being measured.
 .PARAMETER Action
     The script block to execute and measure.
+.EXAMPLE
+    Measure-FragmentLoadTime
+
 #>
 function Measure-FragmentLoadTime {
     [CmdletBinding()]

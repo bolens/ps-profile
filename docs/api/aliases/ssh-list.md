@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-SSHKeys`
+list loaded keys
 
 ## Description
 
-This is an alias that points to the `Get-SSHKeys` command.
+list loaded keys
 
 ## Alias Information
 

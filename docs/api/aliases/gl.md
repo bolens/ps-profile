@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-GitLog`
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Description
 
-This is an alias that points to the `Get-GitLog` command.
+Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ## Alias Information
 

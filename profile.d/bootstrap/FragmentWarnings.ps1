@@ -1,4 +1,4 @@
-﻿# ===============================================
+# ===============================================
 # FragmentWarnings.ps1
 # Fragment warning suppression utilities
 # ===============================================
@@ -64,6 +64,9 @@ function Initialize-FragmentWarningSuppression {
 .OUTPUTS
     System.Boolean
     Returns $true if warnings should be suppressed, $false otherwise.
+.EXAMPLE
+    Test-FragmentWarningSuppressed
+
 #>
 function global:Test-FragmentWarningSuppressed {
     [CmdletBinding()]

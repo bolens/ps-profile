@@ -288,7 +288,8 @@ function New-CommentHelpBlock {
 
     # Build help block
     $helpLines = @()
-    $helpLines += "<#"
+    $helpLines += "<#
+"
     $helpLines += ".SYNOPSIS"
     $helpLines += "    $synopsis"
     $helpLines += ""
@@ -309,6 +310,9 @@ function New-CommentHelpBlock {
     $helpLines += ""
     $helpLines += ".OUTPUTS"
     $helpLines += "    $outputType"
+    $helpLines += ""
+    $helpLines += ".EXAMPLE"
+    $helpLines += "    New-CommentHelpBlock -FuncAst `$funcAst"
     $helpLines += "#>"
 
     return $helpLines -join "`n"

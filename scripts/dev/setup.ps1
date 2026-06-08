@@ -23,6 +23,7 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 # Import shared utilities using ModuleImport
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 Write-ScriptMessage -Message "Setting up development environment..." -LogLevel Info
 

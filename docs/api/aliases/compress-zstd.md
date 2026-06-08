@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Compress-Zstd`
+Compresses a file using Zstandard (zstd) compression.
 
 ## Description
 
-This is an alias that points to the `Compress-Zstd` command.
+Compresses a file using the Zstandard (zstd) compression algorithm. Zstandard provides a good balance between compression ratio and speed. Requires the zstd command-line tool to be installed.
 
 ## Alias Information
 

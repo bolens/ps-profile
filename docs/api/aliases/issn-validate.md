@@ -6,7 +6,7 @@ Validates an ISSN checksum.
 
 ## Description
 
-This is an alias that points to the `Test-IssnValid` command.
+Validates an ISSN checksum.
 
 ## Alias Information
 

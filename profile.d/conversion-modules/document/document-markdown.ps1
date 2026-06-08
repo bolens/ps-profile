@@ -200,6 +200,9 @@ function Initialize-FileConversion-DocumentMarkdown {
     The path to the Markdown file.
 .PARAMETER OutputPath
     The path for the output HTML file. If not specified, uses input path with .html extension.
+.EXAMPLE
+    ConvertTo-HtmlFromMarkdown -InputPath ./input.file
+
 #>
 function ConvertTo-HtmlFromMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -227,6 +230,9 @@ Set-AgentModeAlias -Name 'markdown-to-html' -Target 'ConvertTo-HtmlFromMarkdown'
     The path to the Markdown file.
 .PARAMETER OutputPath
     The path for the output PDF file. If not specified, uses input path with .pdf extension.
+.EXAMPLE
+    ConvertTo-PdfFromMarkdown -InputPath ./input.file
+
 #>
 function ConvertTo-PdfFromMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -254,6 +260,9 @@ Set-AgentModeAlias -Name 'markdown-to-pdf' -Target 'ConvertTo-PdfFromMarkdown'
     The path to the Markdown file.
 .PARAMETER OutputPath
     The path for the output DOCX file. If not specified, uses input path with .docx extension.
+.EXAMPLE
+    ConvertTo-DocxFromMarkdown -InputPath ./input.file
+
 #>
 function ConvertTo-DocxFromMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -281,6 +290,9 @@ Set-AgentModeAlias -Name 'markdown-to-docx' -Target 'ConvertTo-DocxFromMarkdown'
     The path to the Markdown file.
 .PARAMETER OutputPath
     The path for the output LaTeX file. If not specified, uses input path with .tex extension.
+.EXAMPLE
+    ConvertTo-LaTeXFromMarkdown -InputPath ./input.file
+
 #>
 function ConvertTo-LaTeXFromMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -308,6 +320,9 @@ Set-AgentModeAlias -Name 'markdown-to-latex' -Target 'ConvertTo-LaTeXFromMarkdow
     The path to the Markdown file.
 .PARAMETER OutputPath
     The path for the output RST file. If not specified, uses input path with .rst extension.
+.EXAMPLE
+    ConvertTo-RstFromMarkdown -InputPath ./input.file
+
 #>
 function ConvertTo-RstFromMarkdown {
     param([string]$InputPath, [string]$OutputPath)

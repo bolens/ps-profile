@@ -10,11 +10,16 @@
 
 if (Test-CachedCommand uv) {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Python package manager using uv instead of pip.
     .DESCRIPTION
         Replacement for pip that uses uv for faster Python package management.
-    #>
+.EXAMPLE
+    Invoke-Pip install requests
+.PARAMETER Arguments
+    Arguments forwarded to uv pip.
+
+#>
     function Invoke-Pip {
         [CmdletBinding()]
         param(
@@ -26,11 +31,18 @@ if (Test-CachedCommand uv) {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Runs Python commands in temporary virtual environments using uv.
     .DESCRIPTION
         Executes Python commands with their dependencies automatically managed in isolated environments.
-    #>
+.EXAMPLE
+    Invoke-UVRun -Command python -Args @('--version')
+.PARAMETER Command
+    Python module or script to run with uv run.
+.PARAMETER Args
+    Additional arguments passed after the command.
+
+#>
     function Invoke-UVRun {
         param(
             [string]$Command,
@@ -40,22 +52,32 @@ if (Test-CachedCommand uv) {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Installs Python tools globally using uv.
     .DESCRIPTION
         Installs Python applications as standalone executables using uv's tool management.
-    #>
+.EXAMPLE
+    Install-UVTool 'package-name'
+.PARAMETER Package
+    Python package name to install as a global uv tool.
+
+#>
     function Install-UVTool {
         param([string]$Package)
         uv tool install $Package
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Creates Python virtual environments using uv.
     .DESCRIPTION
         Creates virtual environments much faster than traditional venv or virtualenv.
-    #>
+.EXAMPLE
+    New-UVVenv
+.PARAMETER Path
+    Directory path where the virtual environment should be created.
+
+#>
     function New-UVVenv {
         param([string]$Path = '.venv')
         uv venv $Path
@@ -110,11 +132,16 @@ if (Test-CachedCommand uv) {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Runs tools installed with UV.
     .DESCRIPTION
         Executes tools that were installed using uv tool install.
-    #>
+.EXAMPLE
+    Invoke-UVTool ruff --version
+.PARAMETER Arguments
+    Arguments forwarded to uv tool run.
+
+#>
     function Invoke-UVTool {
         [CmdletBinding()]
         param(
@@ -126,11 +153,16 @@ if (Test-CachedCommand uv) {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Adds dependencies to UV project.
     .DESCRIPTION
         Adds packages as dependencies to the current UV project.
-    #>
+.EXAMPLE
+    Add-UVDependency
+.PARAMETER Arguments
+    Arguments forwarded to uv pip.
+
+#>
     function Add-UVDependency {
         [CmdletBinding()]
         param(
@@ -142,11 +174,16 @@ if (Test-CachedCommand uv) {
     }
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Syncs UV project dependencies.
     .DESCRIPTION
         Installs and synchronizes all project dependencies.
-    #>
+.EXAMPLE
+    Sync-UVDependencies
+.PARAMETER Arguments
+    Arguments forwarded to uv pip.
+
+#>
     function Sync-UVDependencies {
         [CmdletBinding()]
         param(

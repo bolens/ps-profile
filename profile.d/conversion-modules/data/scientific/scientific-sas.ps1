@@ -332,6 +332,9 @@ except Exception as e:
     The path to the SAS file (.sas7bdat or .xpt extension).
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-SasToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-SasToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -350,6 +353,9 @@ Set-AgentModeAlias -Name 'sas-to-json' -Target 'ConvertFrom-SasToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output SAS file. If not specified, uses input path with .sas7bdat extension.
+.EXAMPLE
+    ConvertTo-SasFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-SasFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -368,6 +374,9 @@ Set-AgentModeAlias -Name 'json-to-sas' -Target 'ConvertTo-SasFromJson'
     The path to the SAS file (.sas7bdat or .xpt extension).
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-SasToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-SasToCsv {
     param([string]$InputPath, [string]$OutputPath)

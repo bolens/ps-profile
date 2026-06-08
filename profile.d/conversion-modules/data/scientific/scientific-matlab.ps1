@@ -273,6 +273,9 @@ except Exception as e:
     The path to the MATLAB .mat file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-MatlabToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-MatlabToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -292,6 +295,9 @@ Set-AgentModeAlias -Name 'mat-to-json' -Target 'ConvertFrom-MatlabToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output MATLAB .mat file. If not specified, uses input path with .mat extension.
+.EXAMPLE
+    ConvertTo-MatlabFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-MatlabFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -314,6 +320,9 @@ Set-AgentModeAlias -Name 'json-to-mat' -Target 'ConvertTo-MatlabFromJson'
     The path for the output CSV file. If not specified, uses input path with .csv extension.
 .PARAMETER VariableName
     Optional. Name of the variable to extract. If not specified, uses the first non-metadata variable.
+.EXAMPLE
+    ConvertFrom-MatlabToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-MatlabToCsv {
     param([string]$InputPath, [string]$OutputPath, [string]$VariableName)

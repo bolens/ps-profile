@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-GitCurrentBranch`
+Git current branch - get current branch name
 
 ## Description
 
-This is an alias that points to the `Get-GitCurrentBranch` command.
+Git current branch - get current branch name
 
 ## Alias Information
 

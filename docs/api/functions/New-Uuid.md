@@ -46,8 +46,8 @@ New-Uuid -Version v1
 
 This function has the following aliases:
 
-- `guid` - Generates a UUID (Universally Unique Identifier).
-- `uuid` - Generates a UUID (Universally Unique Identifier).
+- `guid` - Generates a new UUID (GUID).
+- `uuid` - Generates a new UUID (GUID).
 
 
 ## Source

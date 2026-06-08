@@ -16,11 +16,18 @@ ConvertTo-Yaml
 
 ## Parameters
 
-No parameters.
+### -fileArgs
+
+Path to the JSON input file.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-Yaml ./config.json
+``
 
 ## Aliases
 

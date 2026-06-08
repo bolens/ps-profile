@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Temperature`
+Convert Temperature
 
 ## Description
 
-This is an alias that points to the `Convert-Temperature` command.
+Convert Temperature
 
 ## Alias Information
 

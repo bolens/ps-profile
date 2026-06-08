@@ -181,6 +181,9 @@ except Exception as e:
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output NetCDF file. If not specified, uses input path with .nc extension.
+.EXAMPLE
+    ConvertTo-NetCdfFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-NetCdfFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -200,6 +203,9 @@ Set-AgentModeAlias -Name 'json-to-nc' -Target 'ConvertTo-NetCdfFromJson'
     The path to the NetCDF file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-NetCdfToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-NetCdfToJson {
     param([string]$InputPath, [string]$OutputPath)

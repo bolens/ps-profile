@@ -114,6 +114,9 @@ function Get-TestEnvironment {
 
 .OUTPUTS
     Health check results
+.EXAMPLE
+    Test-TestEnvironmentHealth
+
 #>
 function Test-TestEnvironmentHealth {
     param(

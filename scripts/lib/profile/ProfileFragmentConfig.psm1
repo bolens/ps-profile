@@ -15,6 +15,9 @@
     Path to the FragmentConfig module.
 .OUTPUTS
     Hashtable with keys: DisabledFragments, LoadOrderOverride, EnvironmentSets, FeatureFlags, PerformanceConfig, AllFragments, ProfileDExists
+.EXAMPLE
+    Initialize-FragmentConfiguration
+
 #>
 function Initialize-FragmentConfiguration {
     [CmdletBinding()]
@@ -274,6 +277,9 @@ function Initialize-FragmentConfiguration {
               '0', 'false' (case-insensitive), empty/null -> $false
 .PARAMETER Value
     The value to normalize.
+.EXAMPLE
+    Test-EnvBool
+
 #>
 function Test-EnvBool {
     [CmdletBinding()]

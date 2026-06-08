@@ -278,7 +278,7 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Tests if a conversion tool is available.
     
     .DESCRIPTION
@@ -292,7 +292,10 @@ try {
     
     .OUTPUTS
         System.Boolean. True if tool is available, false otherwise.
-    #>
+.EXAMPLE
+    Test-ConversionToolAvailable
+
+#>
     function Test-ConversionToolAvailable {
         [CmdletBinding()]
         [OutputType([bool])]

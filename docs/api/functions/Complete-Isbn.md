@@ -6,7 +6,7 @@ Completes a partial ISBN by calculating the missing check digit.
 
 ## Description
 
-No description available.
+Accepts nine ISBN-10 digits or twelve ISBN-13 digits and appends the correct check digit.
 
 ## Signature
 
@@ -16,11 +16,23 @@ Complete-Isbn
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+Partial ISBN value.
+
+
+## Outputs
+
+PSCustomObject .EXAMPLE Complete-Isbn -Isbn '978030640615'
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Complete-Isbn -Isbn '978030640615'
+``
 
 ## Aliases
 

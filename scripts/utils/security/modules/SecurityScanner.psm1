@@ -35,6 +35,9 @@ scripts/utils/security/modules/SecurityScanner.psm1
 
 .OUTPUTS
     Array of PSCustomObject with File, Rule, Severity, Line, and Message properties.
+.EXAMPLE
+    Invoke-SecurityScan -FilePath './profile.d/bootstrap.ps1' -SecurityRules $rules -ExternalCommandPatterns $ext -SecretPatterns $secrets -FalsePositivePatterns @() -Allowlist @{}
+
 #>
 function Invoke-SecurityScan {
     [CmdletBinding()]
@@ -64,7 +67,8 @@ function Invoke-SecurityScan {
     Import-Module $allowlistModule -ErrorAction Stop
 
     # Try to import Collections and FileContent modules from scripts/lib (optional)
-    $libPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib'
+    $scriptsPath = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+    $libPath = Join-Path $scriptsPath 'lib'
     $collectionsModulePath = Join-Path $libPath 'utilities' 'Collections.psm1'
     $fileContentModulePath = Join-Path $libPath 'file' 'FileContent.psm1'
     if (Test-Path $collectionsModulePath) {
@@ -74,12 +78,7 @@ function Invoke-SecurityScan {
         Import-Module $fileContentModulePath -DisableNameChecking -ErrorAction SilentlyContinue
     }
 
-    $fileIssues = if (Get-Command New-ObjectList -ErrorAction SilentlyContinue) {
-        New-ObjectList
-    }
-    else {
-        [System.Collections.Generic.List[PSCustomObject]]::new()
-    }
+    $fileIssues = [System.Collections.Generic.List[PSCustomObject]]::new()
 
     try {
         # Run PSScriptAnalyzer

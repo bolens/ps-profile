@@ -23,7 +23,11 @@ The file path or string to encode.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-Base64 -InputPath ./input.file
+``
 
 ## Aliases
 

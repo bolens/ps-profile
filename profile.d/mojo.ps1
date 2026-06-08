@@ -12,11 +12,16 @@
 if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand mojo)) {
     # Mojo run
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Runs Mojo programs.
     .DESCRIPTION
         Executes Mojo source files.
-    #>
+.EXAMPLE
+    Invoke-MojoRun ./main.mojo
+.PARAMETER Files
+    Mojo source files to execute.
+
+#>
     function Invoke-MojoRun {
         [CmdletBinding()]
         param([string[]]$Files)
@@ -26,11 +31,16 @@ if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-Ca
     Set-AgentModeAlias -Name 'mojo-run' -Target 'Invoke-MojoRun'
     # Mojo build
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds Mojo programs.
     .DESCRIPTION
         Compiles Mojo source files into executables.
-    #>
+.EXAMPLE
+    Build-MojoProgram ./main.mojo
+.PARAMETER Files
+    Mojo source files to compile into executables.
+
+#>
     function Build-MojoProgram {
         [CmdletBinding()]
         param([string[]]$Files)

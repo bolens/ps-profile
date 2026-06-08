@@ -98,6 +98,22 @@ function global:Test-NullSafePath {
     Only active when PS_PROFILE_DEBUG_TESTPATH environment variable is set.
     Use this to trace which Test-Path calls are receiving null/empty paths.
 
+.PARAMETER Path
+    Path value passed to Test-Path.
+
+.PARAMETER LiteralPath
+    Uses literal path semantics when specified.
+
+.PARAMETER PathType
+    Optional path type constraint forwarded to Test-Path.
+
+.OUTPUTS
+    System.Boolean
+
+.EXAMPLE
+    $env:PS_PROFILE_DEBUG_TESTPATH = '1'
+    Trace-TestPath -Path $maybeNullPath
+
 .NOTES
     This is a debug utility. Set $env:PS_PROFILE_DEBUG_TESTPATH = '1' to enable basic logging,
     or 'verbose' for detailed call stack information.

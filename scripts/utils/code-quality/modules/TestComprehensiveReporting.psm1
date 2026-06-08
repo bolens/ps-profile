@@ -51,6 +51,9 @@ Import-Module (Join-Path $modulePath 'modules\TestAnalysis.psm1') -DisableNameCh
 
 .OUTPUTS
     Comprehensive test report
+.EXAMPLE
+    New-ComprehensiveTestReport
+
 #>
 function New-ComprehensiveTestReport {
     param(

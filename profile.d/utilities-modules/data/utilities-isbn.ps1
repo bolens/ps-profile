@@ -17,6 +17,12 @@ function script:Ensure-IsbnUtilitiesLoaded {
 .DESCRIPTION
     Strips common prefixes (ISBN, ISBN-10, ISBN-13), separators (hyphens, spaces,
     en/em dashes, dots), and returns uppercase alphanumeric digits only.
+.PARAMETER Isbn
+    Raw ISBN text from any supported format.
+.OUTPUTS
+    System.String
+.EXAMPLE
+    Get-IsbnDigitsFromInput -Isbn 'ISBN-13: 978-0-306-40615-7'
 #>
 function script:Get-IsbnDigitsFromInput {
     [CmdletBinding()]
@@ -40,6 +46,19 @@ function script:Get-IsbnDigitsFromInput {
 <#
 .SYNOPSIS
     Validates an ISBN-10 checksum.
+
+.DESCRIPTION
+    Expects nine data digits plus a check character (0-9 or X) and verifies the
+    modulo-11 ISBN-10 checksum.
+
+.PARAMETER Digits
+    Normalized ISBN-10 body without separators.
+
+.OUTPUTS
+    System.Boolean
+
+.EXAMPLE
+    Test-Isbn10Checksum -Digits '0306406152'
 #>
 function script:Test-Isbn10Checksum {
     [CmdletBinding()]
@@ -63,6 +82,18 @@ function script:Test-Isbn10Checksum {
 <#
 .SYNOPSIS
     Validates an ISBN-13 checksum.
+
+.DESCRIPTION
+    Verifies the EAN-13 style weighted checksum used by ISBN-13 identifiers.
+
+.PARAMETER Digits
+    Thirteen-digit ISBN-13 string without separators.
+
+.OUTPUTS
+    System.Boolean
+
+.EXAMPLE
+    Test-Isbn13Checksum -Digits '9780306406157'
 #>
 function script:Test-Isbn13Checksum {
     [CmdletBinding()]
@@ -86,8 +117,20 @@ function script:Test-Isbn13Checksum {
 }
 
 <#
-.SYNOPSIS
-    Converts a validated ISBN-10 to ISBN-13.
+    .SYNOPSIS
+        Converts a validated ISBN-10 to ISBN-13.
+
+    .DESCRIPTION
+        Prefixes the ISBN-10 body with 978 and calculates the ISBN-13 check digit.
+
+.PARAMETER Isbn10
+    Normalized ISBN-10 digits including the check character.
+
+.OUTPUTS
+    System.String
+
+.EXAMPLE
+    ConvertTo-Isbn13FromIsbn10Digits -Isbn10 '0306406152'
 #>
 function script:ConvertTo-Isbn13FromIsbn10Digits {
     [CmdletBinding()]
@@ -111,8 +154,20 @@ function script:ConvertTo-Isbn13FromIsbn10Digits {
 }
 
 <#
-.SYNOPSIS
-    Converts a validated 978-prefixed ISBN-13 to ISBN-10.
+    .SYNOPSIS
+        Converts a validated 978-prefixed ISBN-13 to ISBN-10.
+
+    .DESCRIPTION
+        Strips the 978 prefix from a valid ISBN-13 and recalculates the ISBN-10 check digit.
+
+.PARAMETER Isbn13
+    Thirteen-digit ISBN-13 beginning with 978.
+
+.OUTPUTS
+    System.String
+
+.EXAMPLE
+    ConvertTo-Isbn10FromIsbn13Digits -Isbn13 '9780306406157'
 #>
 function script:ConvertTo-Isbn10FromIsbn13Digits {
     [CmdletBinding()]
@@ -712,10 +767,21 @@ function script:Set-IsbnCachedBook {
 <#
 .SYNOPSIS
     Clears cached ISBN lookup results.
+
+.DESCRIPTION
+    Removes cached provider responses under the profile ISBN cache directory.
+
 .PARAMETER LookupIsbn
     Optional ISBN to clear. When omitted, clears the entire ISBN cache directory.
+
 .PARAMETER Provider
     Provider scope for a single ISBN cache entry. Defaults to Auto.
+
+.EXAMPLE
+    Clear-IsbnCache
+
+.EXAMPLE
+    Clear-IsbnCache -LookupIsbn '9780306406157'
 #>
 function Clear-IsbnCache {
     [CmdletBinding()]

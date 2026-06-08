@@ -11,6 +11,31 @@ scripts/utils/code-quality/modules/PesterExecutionConfig.psm1
 <#
 .SYNOPSIS
     Configures execution options for Pester.
+
+.DESCRIPTION
+    Applies parallel execution and failure-handling options to a Pester
+    configuration object.
+
+.PARAMETER Config
+    Pester configuration object to update.
+
+.PARAMETER Parallel
+    Maximum parallel thread count. Values greater than zero enable parallel runs.
+
+.PARAMETER Randomize
+    Reserved for runner-level test file shuffling.
+
+.PARAMETER Timeout
+    Optional per-test timeout in seconds.
+
+.PARAMETER FailOnWarnings
+    Reserved for runner-level warning preference handling.
+
+.PARAMETER SkipRemainingOnFailure
+    Stops remaining tests in a block after the first failure.
+
+.EXAMPLE
+    Set-PesterExecutionOptions -Config $config -Parallel 4
 #>
 function Set-PesterExecutionOptions {
     param(
@@ -54,6 +79,24 @@ function Set-PesterExecutionOptions {
 <#
 .SYNOPSIS
     Applies test filtering to Pester configuration.
+
+.DESCRIPTION
+    Configures test name and tag filters on a Pester configuration object.
+
+.PARAMETER Config
+    Pester configuration object to update.
+
+.PARAMETER TestName
+    Test name pattern or list of patterns to execute.
+
+.PARAMETER IncludeTag
+    Tags that must be present for a test to run.
+
+.PARAMETER ExcludeTag
+    Tags that exclude matching tests from execution.
+
+.EXAMPLE
+    Set-PesterTestFilters -Config $config -IncludeTag Unit
 #>
 function Set-PesterTestFilters {
     param(

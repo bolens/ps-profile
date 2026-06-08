@@ -16,11 +16,20 @@ Invoke-PnpmDevInstall
 
 ## Parameters
 
-No parameters.
+### -Packages
+
+Package names to add as development dependencies.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-PnpmDevInstall typescript eslint
+.PARAMETER Packages
+    Package names to add as development dependencies.
+``
 
 ## Aliases
 

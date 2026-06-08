@@ -187,7 +187,7 @@ Temporarily disable Starship to test if it's the cause:
 ```powershell
 # In your profile or .profile-fragments.json
 {
-  "disabled": ["23-starship"]
+  "disabled": ["starship"]
 }
 ```
 
@@ -241,7 +241,7 @@ The profile includes a `SmartPrompt` that's much faster than Starship. To use it
 ```powershell
 # Disable Starship
 {
-  "disabled": ["23-starship"]
+  "disabled": ["starship"]
 }
 
 # SmartPrompt will be used automatically as fallback
@@ -262,7 +262,7 @@ Configure in `.profile-fragments.json`:
 ```json
 {
   "environments": {
-    "minimal": ["00-bootstrap", "01-env"]
+    "minimal": ["bootstrap", "env"]
   }
 }
 ```

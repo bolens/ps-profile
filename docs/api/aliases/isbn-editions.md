@@ -6,7 +6,7 @@ Lists alternate editions for a book ISBN.
 
 ## Description
 
-This is an alias that points to the `Get-IsbnEditions` command.
+Resolves the Open Library work for an ISBN and returns edition metadata rows.
 
 ## Alias Information
 

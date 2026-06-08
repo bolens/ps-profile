@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Expand-Zlib`
+Decompresses a Zlib-compressed file.
 
 ## Description
 
-This is an alias that points to the `Expand-Zlib` command.
+Decompresses a file that was compressed using Zlib (Deflate) compression algorithm.
 
 ## Alias Information
 

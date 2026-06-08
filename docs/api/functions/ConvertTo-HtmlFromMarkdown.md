@@ -27,7 +27,11 @@ The path for the output HTML file. If not specified, uses input path with .html 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-HtmlFromMarkdown -InputPath ./input.file
+``
 
 ## Aliases
 

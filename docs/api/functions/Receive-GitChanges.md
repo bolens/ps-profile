@@ -11,7 +11,7 @@ Fetches changes from the remote repository without merging them into the current
 ## Signature
 
 ```powershell
-Receive-GitChanges
+Receive-GitChanges [Object]$a
 ```
 
 ## Parameters
@@ -31,4 +31,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

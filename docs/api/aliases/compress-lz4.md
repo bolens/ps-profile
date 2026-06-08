@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Compress-Lz4`
+Compresses a file using LZ4 compression.
 
 ## Description
 
-This is an alias that points to the `Compress-Lz4` command.
+Compresses a file using the LZ4 compression algorithm. LZ4 is a fast compression algorithm with high compression and decompression speeds.
 
 ## Alias Information
 

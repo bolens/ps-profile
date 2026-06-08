@@ -120,6 +120,12 @@ foreach ($flagName in $lazyInitializationFlags) {
     The environment variable value to convert.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Get-ProfileDebugLevel
+
+#>XAMPLE
+    Test-EnvBool
+
 #>
 function global:Test-EnvBool {
     [CmdletBinding()]

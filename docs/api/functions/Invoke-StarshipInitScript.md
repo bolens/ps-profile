@@ -23,12 +23,16 @@ The path to the starship executable.
 
 ## Outputs
 
-System.Management.Automation.FunctionInfo The created prompt function.
+System.Management.Automation.FunctionInfo The created prompt function. .EXAMPLE Invoke-StarshipInitScript
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-StarshipInitScript
+``
 
 ## Source
 

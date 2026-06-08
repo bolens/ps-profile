@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Update-GitSubmodule`
+Git submodule update - update submodules
 
 ## Description
 
-This is an alias that points to the `Update-GitSubmodule` command.
+Git submodule update - update submodules
 
 ## Alias Information
 

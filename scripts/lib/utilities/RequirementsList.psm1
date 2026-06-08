@@ -14,9 +14,23 @@ function Get-RequirementsManifestPath {
     <#
     .SYNOPSIS
         Resolves canonical paths for install manifest files.
+
+    .DESCRIPTION
+        Maps logical manifest kinds to repository-relative paths used by dependency
+        validation scripts.
+
+    .PARAMETER RepoRoot
+        Repository root directory.
+
     .PARAMETER Kind
         python - requirements.txt at repo root; scoop - requirements/scoop.txt;
         linux - requirements/linux.txt.
+
+    .OUTPUTS
+        System.String
+
+    .EXAMPLE
+        Get-RequirementsManifestPath -RepoRoot $repoRoot -Kind 'python'
     #>
     [CmdletBinding()]
     [OutputType([string])]
@@ -40,6 +54,18 @@ function Get-RequirementsListFromFile {
     <#
     .SYNOPSIS
         Reads plain package names from a requirements list file (one per line).
+
+    .DESCRIPTION
+        Skips blank lines, comments, and section header markers.
+
+    .PARAMETER Path
+        Requirements list file to parse.
+
+    .OUTPUTS
+        System.String[]
+
+    .EXAMPLE
+        Get-RequirementsListFromFile -Path $manifestPath
     #>
     [CmdletBinding()]
     [OutputType([string[]])]
@@ -69,9 +95,25 @@ function Get-RequirementsListFromFile {
 
 function Get-PythonRequirementsFromFile {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Parses package names from requirements.txt (strips version specifiers).
-    #>
+
+    .PARAMETER Path
+        requirements.txt file path.
+
+    .OUTPUTS
+        System.String[]
+
+    .EXAMPLE
+.DESCRIPTION
+    Parses package names from requirements.txt (strips version specifiers).
+    .PARAMETER Path
+    requirements.txt file path.
+    .OUTPUTS
+    System.String[]
+    .EXAMPLE
+        Get-PythonRequirementsFromFile -Path (Join-Path $repoRoot 'requirements.txt')
+#>
     [CmdletBinding()]
     [OutputType([string[]])]
     param(
@@ -99,11 +141,30 @@ function Get-PythonRequirementsFromFile {
 
 function Get-LinuxRequirementsFromFile {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Parses a distro section from requirements/linux.txt.
+
+    .PARAMETER Path
+        Path to requirements/linux.txt.
+
     .PARAMETER Section
         apt, pacman, or dnf (matches # --- section headers).
-    #>
+
+    .OUTPUTS
+        System.String[]
+
+    .EXAMPLE
+.DESCRIPTION
+    Parses a distro section from requirements/linux.txt.
+    .PARAMETER Path
+    Path to requirements/linux.txt.
+    .PARAMETER Section
+    apt, pacman, or dnf (matches # --- section headers).
+    .OUTPUTS
+    System.String[]
+    .EXAMPLE
+        Get-LinuxRequirementsFromFile -Path $linuxManifest -Section 'apt'
+#>
     [CmdletBinding()]
     [OutputType([string[]])]
     param(
@@ -146,9 +207,25 @@ function Get-LinuxRequirementsFromFile {
 
 function Get-NpmRequirementsFromPackageJson {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Returns dependency package names from package.json.
-    #>
+
+    .PARAMETER Path
+        package.json file path.
+
+    .OUTPUTS
+        System.String[]
+
+    .EXAMPLE
+.DESCRIPTION
+    Returns dependency package names from package.json.
+    .PARAMETER Path
+    package.json file path.
+    .OUTPUTS
+    System.String[]
+    .EXAMPLE
+        Get-NpmRequirementsFromPackageJson -Path (Join-Path $repoRoot 'package.json')
+#>
     [CmdletBinding()]
     [OutputType([string[]])]
     param(
@@ -174,11 +251,14 @@ function Get-NpmRequirementsFromPackageJson {
 
 function Get-SystemPackageManagerKind {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Detects the preferred system package manager for the current platform.
     .OUTPUTS
+.DESCRIPTION
+    Detects the preferred system package manager for the current platform.
+    .OUTPUTS
         scoop, apt, pacman, dnf, brew, or $null if unknown.
-    #>
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param()
@@ -241,9 +321,30 @@ function Get-SystemPackageManagerKind {
 
 function Get-SystemRequirementsPackages {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Loads system package names for the detected or specified package manager.
-    #>
+
+    .PARAMETER RepoRoot
+        Repository root containing requirements manifests.
+
+    .PARAMETER PackageManager
+        Optional package manager override (scoop, apt, pacman, dnf).
+
+    .OUTPUTS
+        System.String[]
+
+    .EXAMPLE
+.DESCRIPTION
+    Loads system package names for the detected or specified package manager.
+    .PARAMETER RepoRoot
+    Repository root containing requirements manifests.
+    .PARAMETER PackageManager
+    Optional package manager override (scoop, apt, pacman, dnf).
+    .OUTPUTS
+    System.String[]
+    .EXAMPLE
+        Get-SystemRequirementsPackages -RepoRoot $repoRoot
+#>
     [CmdletBinding()]
     [OutputType([string[]])]
     param(
@@ -272,9 +373,30 @@ function Get-SystemRequirementsPackages {
 
 function Get-SystemPackageInstallCommand {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Builds a bulk install command for missing system packages.
-    #>
+
+    .PARAMETER PackageNames
+        Package names to install.
+
+    .PARAMETER PackageManager
+        Target package manager (scoop, apt, pacman, dnf).
+
+    .OUTPUTS
+        System.String
+
+    .EXAMPLE
+.DESCRIPTION
+    Builds a bulk install command for missing system packages.
+    .PARAMETER PackageNames
+    Package names to install.
+    .PARAMETER PackageManager
+    Target package manager (scoop, apt, pacman, dnf).
+    .OUTPUTS
+    System.String
+    .EXAMPLE
+        Get-SystemPackageInstallCommand -PackageNames 'git','jq' -PackageManager 'apt'
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(

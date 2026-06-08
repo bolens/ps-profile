@@ -3,7 +3,7 @@
 This documentation provides an overview of all profile fragments. Each fragment is a modular component of the PowerShell profile.
 
 **Total Fragments:** 133
-**Generated:** 2026-06-06 15:05:45
+**Generated:** 2026-06-08 09:55:09
 
 ## Fragment Overview
 

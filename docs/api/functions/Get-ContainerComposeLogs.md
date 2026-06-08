@@ -16,11 +16,18 @@ Get-ContainerComposeLogs
 
 ## Parameters
 
-No parameters.
+### -args
+
+Additional arguments forwarded to compose logs -f.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Get-ContainerComposeLogs
+``
 
 ## Aliases
 

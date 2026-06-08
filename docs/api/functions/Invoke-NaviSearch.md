@@ -16,11 +16,20 @@ Invoke-NaviSearch
 
 ## Parameters
 
-No parameters.
+### -Query
+
+Optional search text to pre-fill the navi query prompt.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-NaviSearch -Query 'docker'
+.PARAMETER Query
+    Optional search text to pre-fill the navi query prompt.
+``
 
 ## Aliases
 

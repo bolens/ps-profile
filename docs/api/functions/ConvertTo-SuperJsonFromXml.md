@@ -27,7 +27,11 @@ The path for the output SuperJSON file. If not specified, uses input path with .
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-SuperJsonFromXml -InputPath ./input.file
+``
 
 ## Aliases
 

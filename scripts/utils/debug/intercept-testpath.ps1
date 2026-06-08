@@ -16,6 +16,15 @@ if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
 .DESCRIPTION
     This script creates a function that shadows Test-Path and logs when null/empty paths
     are detected. It should be dot-sourced before running tests.
+.PARAMETER Path
+    File or directory path.
+.PARAMETER LiteralPath
+    LiteralFile or directory path.
+.PARAMETER PathType
+    Filesystem path type filter for Test-Path.
+.EXAMPLE
+    Test-Path
+
 #>
 
 # Save the original Test-Path cmdlet

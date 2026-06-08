@@ -15,6 +15,9 @@
     The XML element to convert to a JSON object.
 .OUTPUTS
     PSCustomObject representing the XML structure in JSON-compatible format.
+.EXAMPLE
+    Convert-XmlToJsonObject
+
 #>
 function Convert-XmlToJsonObject {
     param([System.Xml.XmlElement]$Element)
@@ -70,6 +73,9 @@ function Convert-XmlToJsonObject {
     The root element name for the XML document.
 .OUTPUTS
     System.Xml.XmlDocument representing the XML structure.
+.EXAMPLE
+    Convert-JsonToXml
+
 #>
 function Convert-JsonToXml {
     param(

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-GuidFromBase64`
+Converts a Base64 string to GUID format.
 
 ## Description
 
-This is an alias that points to the `ConvertTo-GuidFromBase64` command.
+Converts a Base64 encoded string to standard GUID format.
 
 ## Alias Information
 

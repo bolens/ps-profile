@@ -13,6 +13,9 @@
     Directory containing the profile files.
 .PARAMETER ProfileVersion
     Version string for the profile (default: '1.0.0').
+.EXAMPLE
+    Initialize-ProfileVersion
+
 #>
 function Initialize-ProfileVersion {
     [CmdletBinding()]

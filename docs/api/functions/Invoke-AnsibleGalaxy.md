@@ -6,7 +6,7 @@ Runs ansible-galaxy with the correct invocation strategy for the current platfor
 
 ## Description
 
-No description available.
+Runs ansible-galaxy with the correct invocation strategy for the current platform.
 
 ## Signature
 
@@ -23,11 +23,7 @@ Arguments to pass to ansible-galaxy.
 
 ## Examples
 
-### Example 1
-
-`powershell
-Invoke-AnsibleGalaxy install geerlingguy.docker
-``
+No examples provided.
 
 ## Aliases
 

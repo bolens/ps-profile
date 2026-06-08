@@ -1,0 +1,85 @@
+<#
+tests/unit/utility-new-fragment.tests.ps1
+
+.SYNOPSIS
+    Behavioral unit tests for new-fragment.ps1 in an isolated repository fixture.
+#>
+
+function global:New-NewFragmentFixtureRepository {
+    $repo = New-TestTempDirectory -Prefix 'NewFragmentRepo'
+    $scriptsDir = Join-Path $repo 'scripts'
+    New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
+
+    $fragmentDir = Join-Path $scriptsDir 'utils' 'fragment'
+    New-Item -ItemType Directory -Path $fragmentDir -Force | Out-Null
+    Copy-Item -LiteralPath $script:NewFragmentScript -Destination (Join-Path $fragmentDir 'new-fragment.ps1') -Force
+
+    New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d') -Force | Out-Null
+    New-Item -ItemType Directory -Path (Join-Path $repo '.git') -Force | Out-Null
+
+    return $repo
+}
+
+BeforeAll {
+    . (Join-Path $PSScriptRoot '..\TestSupport.ps1')
+
+    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:NewFragmentScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'fragment' 'new-fragment.ps1'
+    $ConfirmPreference = 'None'
+}
+
+Describe 'new-fragment.ps1 execution' {
+    It 'Creates a numbered fragment and README in an isolated profile.d directory' {
+        $repo = New-NewFragmentFixtureRepository
+        $fragmentName = 'fixture-feature'
+        $fragmentNumber = 88
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1') -ArgumentList @(
+                '-Name', $fragmentName,
+                '-Number', "$fragmentNumber",
+                '-Description', 'Fixture fragment for new-fragment tests'
+            )
+
+            $result.ExitCode | Should -Be 0
+            $fragmentPath = Join-Path $repo 'profile.d' ('{0:D2}-{1}.ps1' -f $fragmentNumber, $fragmentName)
+            $readmePath = Join-Path $repo 'profile.d' ('{0:D2}-{1}.ps1.README.md' -f $fragmentNumber, $fragmentName)
+            Test-Path -LiteralPath $fragmentPath | Should -BeTrue
+            Test-Path -LiteralPath $readmePath | Should -BeTrue
+            Get-Content -LiteralPath $fragmentPath -Raw | Should -Match 'fixture-featureLoaded'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    It 'Fails when creating a fragment that already exists' {
+        $repo = New-NewFragmentFixtureRepository
+        $fragmentName = 'duplicate-feature'
+        $fragmentNumber = 77
+        $scriptPath = Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1'
+        try {
+            $first = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+                '-Name', $fragmentName,
+                '-Number', "$fragmentNumber",
+                '-Description', 'First fragment creation'
+            )
+            $first.ExitCode | Should -Be 0
+
+            $second = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+                '-Name', $fragmentName,
+                '-Number', "$fragmentNumber",
+                '-Description', 'Duplicate fragment creation'
+            )
+            $second.ExitCode | Should -BeIn @(1, 2)
+            $second.Output | Should -Match 'already exists'
+        }
+        finally {
+            if (Test-Path -LiteralPath $repo) {
+                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+    }
+}

@@ -6,7 +6,7 @@ Opens a book cover image for an ISBN.
 
 ## Description
 
-No description available.
+Opens a book cover image for an ISBN.
 
 ## Signature
 
@@ -16,7 +16,14 @@ Show-IsbnCover
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+ISBN whose cover should be displayed.
+
+### -Refresh
+
+Bypasses cached cover files.
+
 
 ## Examples
 

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Color`
+ff0000 to RGB format.
 
 ## Description
 
-This is an alias that points to the `Convert-Color` command.
+ff0000 to RGB format.
 
 ## Alias Information
 

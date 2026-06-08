@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-MetersFromLength`
+Convert to Meters
 
 ## Description
 
-This is an alias that points to the `ConvertTo-MetersFromLength` command.
+Convert to Meters
 
 ## Alias Information
 

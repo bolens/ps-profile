@@ -6,7 +6,7 @@ Generates an EAN-13 barcode image for an ISBN.
 
 ## Description
 
-This is an alias that points to the `Save-IsbnBarcode` command.
+Generates an EAN-13 barcode image for an ISBN.
 
 ## Alias Information
 

@@ -140,6 +140,9 @@ try {
     The path for the output FlatBuffers file. If not specified, uses input path with .fb extension.
 .PARAMETER SchemaPath
     The path to the compiled FlatBuffers schema. Required.
+.EXAMPLE
+    ConvertTo-FlatBuffersFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-FlatBuffersFromJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)
@@ -162,6 +165,9 @@ Set-AgentModeAlias -Name 'json-to-fb' -Target 'ConvertTo-FlatBuffersFromJson'
     The path for the output JSON file. If not specified, uses input path with .json extension.
 .PARAMETER SchemaPath
     The path to the compiled FlatBuffers schema. Required.
+.EXAMPLE
+    ConvertFrom-FlatBuffersToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-FlatBuffersToJson {
     param([string]$InputPath, [string]$OutputPath, [string]$SchemaPath)

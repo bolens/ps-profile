@@ -6,7 +6,7 @@ Generates a QR code containing ISBN metadata.
 
 ## Description
 
-No description available.
+Generates a QR code containing ISBN metadata.
 
 ## Signature
 
@@ -16,7 +16,23 @@ Save-IsbnQrCode
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+ISBN used to build the QR payload.
+
+### -OutputPath
+
+Destination image path.
+
+### -PassThru
+
+Returns the output path.
+
+
+## Outputs
+
+System.String
+
 
 ## Examples
 

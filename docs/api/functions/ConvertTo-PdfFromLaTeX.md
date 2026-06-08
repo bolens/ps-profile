@@ -27,7 +27,11 @@ The path for the output PDF file. If not specified, uses input path with .pdf ex
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-PdfFromLaTeX -InputPath ./input.file
+``
 
 ## Aliases
 

@@ -16,11 +16,13 @@ Describe 'scripts/utils/docs/modules/DocParser.psm1 structure extended scenarios
         $c = Get-Content -LiteralPath $script:Fragment -Raw
         $c | Should -Match 'DocParserRegex.psm1'
         $c | Should -Match 'DocFunctionParser.psm1'
+        $c | Should -Match 'DocAgentModeFunctionParser.psm1'
         $c | Should -Match 'DocAliasParser.psm1'
     }
     It 'Defines Get-DocumentedCommands aggregator' {
         $c = Get-Content -LiteralPath $script:Fragment -Raw
         $c | Should -Match 'Get-DocumentedCommands'
+        $c | Should -Match 'Parse-DynamicFunctionsFromFile'
         $c | Should -Match 'ProfilePath'
         $c | Should -Match 'Export-ModuleMember'
     }

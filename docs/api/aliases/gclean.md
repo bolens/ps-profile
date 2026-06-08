@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Clear-GitUntracked`
+Git clean - remove untracked files
 
 ## Description
 
-This is an alias that points to the `Clear-GitUntracked` command.
+Git clean - remove untracked files
 
 ## Alias Information
 

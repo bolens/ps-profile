@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-PascalsFromPressure`
+Convert to Pascals
 
 ## Description
 
-This is an alias that points to the `ConvertTo-PascalsFromPressure` command.
+Convert to Pascals
 
 ## Alias Information
 

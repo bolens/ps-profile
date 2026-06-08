@@ -13,6 +13,12 @@ pwsh -NoProfile -File scripts/checks/validate-profile.ps1
 check-comment-help:
 pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
 
+check-doc-coverage:
+pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 {{arguments()}}
+
+check-doc-freshness:
+pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 {{arguments()}}
+
 # Run Pester Tests
 test:
 pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{arguments()}}
@@ -72,6 +78,9 @@ pwsh -NoProfile -File scripts/utils/release/create-release.ps1 -DryRun
 # Generate API Documentation
 generate-docs:
 pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 {{arguments()}}
+
+generate-docs-incremental:
+pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1 -Incremental {{arguments()}}
 
 # Run Spellcheck
 spellcheck:

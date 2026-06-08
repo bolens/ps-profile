@@ -23,7 +23,11 @@ The path to the file to open.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Open-Editor
+``
 
 ## Aliases
 

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-BytesToDataSize`
+Convert from Bytes
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-BytesToDataSize` command.
+Convert from Bytes
 
 ## Alias Information
 

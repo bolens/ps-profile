@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-GitDefaultBranch`
+Git default branch - get default branch name
 
 ## Description
 
-This is an alias that points to the `Get-GitDefaultBranch` command.
+Git default branch - get default branch name
 
 ## Alias Information
 

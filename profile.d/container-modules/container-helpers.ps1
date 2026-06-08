@@ -292,6 +292,10 @@ function Test-ContainerEngine {
 .DESCRIPTION
     Sets the CONTAINER_ENGINE_PREFERENCE environment variable to specify whether to prefer Docker or Podman.
     This affects which container engine is used by container-related functions in the profile.
+.PARAMETER Engine
+    Preferred engine: docker or podman.
+.EXAMPLE
+    Set-ContainerEnginePreference -Engine podman
 #>
 function Set-ContainerEnginePreference {
     param(

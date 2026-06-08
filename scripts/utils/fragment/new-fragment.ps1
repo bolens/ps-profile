@@ -43,9 +43,10 @@ param(
     [string[]]$Dependencies = @('bootstrap'),
     
     [string]$Description = "Profile fragment for $Name",
-    
-    [FragmentTier]$Tier = [FragmentTier]::standard
-    
+
+    [ValidateSet('core', 'essential', 'standard', 'optional')]
+    [string]$Tier = 'standard',
+
     [string[]]$Environments = @()
 )
 
@@ -60,18 +61,11 @@ if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debu
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
-# Import CommonEnums for FragmentTier enum
-$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'core' 'CommonEnums.psm1'
-if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
-    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
-}
-
 # Import required modules using Import-LibModule
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
-# Convert enum to string
-$tierString = $Tier.ToString()
+$tierString = $Tier
 
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot

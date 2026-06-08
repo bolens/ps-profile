@@ -16,11 +16,20 @@ Add-UVDependency
 
 ## Parameters
 
-No parameters.
+### -Arguments
+
+Arguments forwarded to uv pip.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Add-UVDependency
+.PARAMETER Arguments
+    Arguments forwarded to uv pip.
+``
 
 ## Aliases
 

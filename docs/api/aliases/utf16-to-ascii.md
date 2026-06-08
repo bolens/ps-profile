@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-Utf16ToAscii`
+Remove spaces and common separators
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-Utf16ToAscii` command.
+Remove spaces and common separators
 
 ## Alias Information
 

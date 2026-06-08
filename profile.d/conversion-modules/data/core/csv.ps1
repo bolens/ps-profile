@@ -238,6 +238,9 @@ function Initialize-FileConversion-CoreBasicCsv {
     Reads a CSV file and outputs its contents as JSON.
 .PARAMETER Path
     The path to the CSV file to convert.
+.EXAMPLE
+    ConvertFrom-CsvToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-CsvToJson {
     param([string]$Path)
@@ -278,6 +281,9 @@ Set-AgentModeAlias -Name 'csv-to-json' -Target 'ConvertFrom-CsvToJson'
     Parses a JSON file containing an array of objects and converts it to CSV.
 .PARAMETER Path
     The path to the JSON file to convert.
+.EXAMPLE
+    ConvertTo-CsvFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-CsvFromJson {
     param([string]$Path)
@@ -320,6 +326,9 @@ Set-AgentModeAlias -Name 'json-to-csv' -Target 'ConvertTo-CsvFromJson'
     Reads a CSV file and outputs its contents as YAML.
 .PARAMETER Path
     The path to the CSV file to convert.
+.EXAMPLE
+    ConvertFrom-CsvToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-CsvToYaml {
     param([string]$Path)
@@ -341,6 +350,9 @@ Set-AgentModeAlias -Name 'csv-to-yaml' -Target 'ConvertFrom-CsvToYaml'
     Reads a YAML file and outputs its contents as CSV.
 .PARAMETER Path
     The path to the YAML file to convert.
+.EXAMPLE
+    ConvertFrom-YamlToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-YamlToCsv {
     param([string]$Path)

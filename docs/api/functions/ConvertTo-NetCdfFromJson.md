@@ -27,7 +27,11 @@ The path for the output NetCDF file. If not specified, uses input path with .nc 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-NetCdfFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

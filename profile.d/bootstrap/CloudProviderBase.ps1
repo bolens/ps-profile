@@ -30,6 +30,25 @@ try {
     }
 
     function Resolve-CloudInstallHint {
+        <#
+.SYNOPSIS
+        Resolves an install hint for a cloud provider CLI.
+
+.DESCRIPTION
+        Resolves an install hint for a cloud provider CLI.
+
+.PARAMETER CommandName
+        Cloud CLI command that is missing.
+
+.PARAMETER InstallHint
+        Explicit install hint to return when provided.
+
+.PARAMETER InstallPackageName
+        Optional package name override.
+
+.OUTPUTS
+        System.String
+#>
         [CmdletBinding()]
         [OutputType([string])]
         param(
@@ -66,6 +85,22 @@ try {
     }
 
     function Invoke-CloudMissingToolWarning {
+        <#
+.SYNOPSIS
+        Emits a missing-tool warning for a cloud provider CLI.
+
+.DESCRIPTION
+        Emits a missing-tool warning for a cloud provider CLI.
+
+.PARAMETER CommandName
+        Cloud CLI command that is missing.
+
+.PARAMETER InstallHint
+        Explicit install hint to display.
+
+.PARAMETER InstallPackageName
+        Optional package name override.
+#>
         [CmdletBinding()]
         param(
             [Parameter(Mandatory)]

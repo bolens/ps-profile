@@ -47,11 +47,14 @@ try {
     
     # Lazy bulk initializer for Git utility functions
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Sets up all Git utility functions when any of them is called for the first time.
         This lazy loading approach improves profile startup performance.
+.DESCRIPTION
+    Sets up all Git utility functions when any of them is called for the first time.
+    This lazy loading approach improves profile startup performance.
         Loads Git modules from the git-modules subdirectory.
-    #>
+#>
     function Ensure-Git {
         if ($global:GitInitialized) { return }
 

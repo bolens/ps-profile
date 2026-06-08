@@ -13,6 +13,13 @@ scripts/lib/core/CommonEnums.psm1
     Module Version: 2.0.0
     PowerShell Version: 3.0+
     Load Order: import this module before modules that reference these enums.
+.PARAMETER Name
+    Name parameter.
+.PARAMETER Definition
+    Definition parameter.
+.EXAMPLE
+    Add-CommonEnumType
+
 #>
 
 function Add-CommonEnumType {

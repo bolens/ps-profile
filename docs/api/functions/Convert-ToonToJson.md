@@ -23,12 +23,16 @@ The TOON format string to parse.
 
 ## Outputs
 
-PowerShell object representing the parsed TOON data.
+PowerShell object representing the parsed TOON data. .EXAMPLE Convert-ToonToJson
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Convert-ToonToJson
+``
 
 ## Source
 

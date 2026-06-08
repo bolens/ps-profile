@@ -76,31 +76,23 @@ The profile loader implements several performance optimizations to minimize star
 
 ### Fragment Loading Process
 
-Fragments are loaded in sorted order (00-99 prefix) with optional batch optimization:
+Fragments are loaded in **dependency-aware order** (topological sort from header declarations), with optional batch optimization by tier:
 
-**Default Mode (Sequential):**
+**Default mode:**
 
-```powershell
-# All fragments loaded sequentially in lexical order
-Get-ChildItem -Path $profileD -File -Filter '*.ps1' |
-    Sort-Object Name |
-    ForEach-Object {
-        try {
-            $null = . $_.FullName
-        }
-        catch {
-            # Report error but continue loading other fragments
-        }
-    }
-```
+1. Discover enabled fragments in `profile.d/*.ps1`
+2. Parse `# Dependencies:` / `#Requires -Fragment` headers (cached by file mtime)
+3. Topologically sort fragments; warn on cycles
+4. Dot-source each fragment in order inside try/catch so one failure does not stop the rest
+5. Fall back to lexical order by filename only if dependency resolution fails
 
-**Batch-Optimized Mode (Optional):**
-Enable with `$env:PS_PROFILE_BATCH_LOAD=1`:
+**Batch-optimized mode (optional):**
+Enable with `$env:PS_PROFILE_BATCH_LOAD=1` or `"batchLoad": true` in `.profile-fragments.json`:
 
-- **Tier 0 (Core)**: Critical bootstrap fragments (e.g., `bootstrap.ps1`) - loaded sequentially first
-- **Tier 1 (Essential)**: Core functionality fragments (e.g., `env.ps1`, `files.ps1`, `utilities.ps1`) - loaded sequentially after tier 0
-- **Tier 2 (Standard)**: Common development tools (e.g., `git.ps1`, `containers.ps1`, `aws.ps1`) - loaded sequentially after tier 1
-- **Tier 3 (Optional)**: Advanced features (e.g., `performance-insights.ps1`, `system-monitor.ps1`) - loaded sequentially after tier 2
+- **Tier 0 (Core)**: Critical bootstrap fragments (e.g., `bootstrap.ps1`) — loaded first
+- **Tier 1 (Essential)**: Core functionality (e.g., `env.ps1`, `files.ps1`, `utilities.ps1`)
+- **Tier 2 (Standard)**: Common development tools (e.g., `git.ps1`, `containers.ps1`, `aws.ps1`)
+- **Tier 3 (Optional)**: Advanced features (e.g., `performance-insights.ps1`, `system-monitor.ps1`)
 
 **Key characteristics:**
 
@@ -186,7 +178,7 @@ Many fragments have been refactored to use a modular subdirectory structure. Mai
 Main fragments dot-source modules from their respective subdirectories:
 
 ```powershell
-# Example from 02-files.ps1
+# Example from files.ps1
 $conversionModulesDir = Join-Path $PSScriptRoot 'conversion-modules'
 if (Test-Path $conversionModulesDir) {
     # Load helper modules first
@@ -260,30 +252,30 @@ catch {
 
 Several fragments have been refactored into modular subdirectories for better organization and maintainability:
 
-### 00-bootstrap.ps1
+### bootstrap.ps1
 
 The bootstrap fragment has been refactored into focused modules:
 
 ```
-00-bootstrap.ps1 (thin loader, ~50 lines)
-00-bootstrap/
+bootstrap.ps1 (thin loader)
+bootstrap/
 ├── GlobalState.ps1           # Global variable initialization
-├── TestHasCommand.ps1        # Test-HasCommand (core command detection)
-├── CommandCache.ps1         # Test-CachedCommand, cache management
+├── CommandCache.ps1          # Test-CachedCommand, cache management
 ├── AssumedCommands.ps1       # Add-AssumedCommand, Remove-AssumedCommand, Get-AssumedCommands
-├── MissingToolWarnings.ps1 # Write-MissingToolWarning, Clear-MissingToolWarnings
+├── MissingToolWarnings.ps1   # Write-MissingToolWarning, Clear-MissingToolWarnings
 ├── FragmentWarnings.ps1      # Initialize-FragmentWarningSuppression, Test-FragmentWarningSuppressed
-├── FunctionRegistration.ps1 # Set-AgentModeFunction, Set-AgentModeAlias, Register-LazyFunction
-└── UserHome.ps1             # Get-UserHome
+├── FunctionRegistration.ps1  # Set-AgentModeFunction, Set-AgentModeAlias, Register-LazyFunction
+├── ModuleLoading.ps1         # Import-FragmentModule, Import-FragmentModules
+└── UserHome.ps1              # Get-UserHome
 ```
 
-### 23-starship.ps1
+### starship.ps1
 
 The Starship prompt fragment has been refactored into focused modules:
 
 ```
-23-starship.ps1 (main initialization, ~226 lines)
-23-starship/
+starship.ps1 (main initialization)
+starship/
 ├── StarshipHelpers.ps1       # Test-StarshipInitialized, Test-PromptNeedsReplacement, Get-StarshipPromptArguments
 ├── StarshipPrompt.ps1        # New-StarshipPromptFunction
 ├── StarshipModule.ps1        # Initialize-StarshipModule
@@ -292,13 +284,13 @@ The Starship prompt fragment has been refactored into focused modules:
 └── SmartPrompt.ps1           # Initialize-SmartPrompt (complete fallback prompt)
 ```
 
-### 07-system.ps1
+### system.ps1
 
 The system utilities fragment has been refactored into category-based modules:
 
 ```
-07-system.ps1 (thin loader, ~60 lines)
-07-system/
+system.ps1 (thin loader)
+system/
 ├── FileOperations.ps1    # touch, mkdir, rm, cp, mv, find (search)
 ├── SystemInfo.ps1        # df, htop, which
 ├── NetworkOperations.ps1 # ptest, dns, rest, web, ports
@@ -307,14 +299,14 @@ The system utilities fragment has been refactored into category-based modules:
 └── TextSearch.ps1        # grep (Find-String, pgrep)
 ```
 
-### 02-files.ps1
+### files.ps1
 
-The files fragment includes extracted modules:
+The files fragment includes extracted modules and loads conversion subsystems:
 
 ```
-02-files.ps1 (main loader, ~425 lines - mostly module loading)
-02-files/
-└── LaTeXDetection.ps1    # Test-DocumentLatexEngineAvailable, Ensure-DocumentLatexEngine
+files.ps1 (main loader — module orchestration)
+files/                      # Fragment-specific helpers (when present)
+conversion-modules/         # Data, document, and media conversions (loaded from files.ps1)
 ```
 
 ### conversion-modules/data/core/core-encoding.ps1
@@ -344,7 +336,7 @@ core/
 
 ## Bootstrap Helpers
 
-`00-bootstrap.ps1` (now a thin loader) provides essential helpers available to all fragments through its sub-modules:
+`bootstrap.ps1` (thin loader plus `bootstrap/` modules) provides essential helpers available to all fragments:
 
 ### Set-AgentModeFunction
 
@@ -563,8 +555,8 @@ $configDir = Join-Path $homeDir '.config' 'myapp'
 ### Adding New Fragments
 
 1. Use `scripts/utils/fragment/new-fragment.ps1` to create template
-2. Choose appropriate number prefix (00-99)
-3. Follow fragment structure template
+2. Choose a descriptive fragment name (e.g. `my-tool.ps1`)
+3. Declare `# Dependencies:` and `# Tier:` in the fragment header
 4. Document functions in fragment README
 5. Test idempotency (safe to reload)
 
@@ -574,7 +566,7 @@ When adding functionality that belongs in a module subdirectory:
 
 1. **Identify the appropriate subdirectory** (or create new one if needed)
 2. **Create module file** in the subdirectory (e.g., `profile.d/conversion-modules/data/core-basic.ps1`)
-3. **Update parent fragment** to load the module (e.g., `02-files.ps1` for conversion modules)
+3. **Update parent fragment** to load the module (e.g., `files.ps1` for conversion modules)
 4. **Follow module conventions**:
    - Use `Set-AgentModeFunction` for function registration
    - Guard external tool calls with `Test-CachedCommand`
@@ -584,7 +576,7 @@ When adding functionality that belongs in a module subdirectory:
 
 ### Adding New Helpers
 
-1. Add to `00-bootstrap.ps1` if used by multiple fragments
+1. Add to `bootstrap.ps1` / `bootstrap/` if used by multiple fragments
 2. Add to specific fragment if fragment-specific
 3. Use collision-safe registration (`Set-AgentModeFunction`)
 4. Document with comment-based help
@@ -604,11 +596,11 @@ The `.profile-fragments.json` file supports advanced configuration:
 
 ```json
 {
-  "disabled": ["11-git"],
-  "loadOrder": ["00-bootstrap", "01-env", "05-utilities"],
+  "disabled": ["git"],
+  "loadOrder": ["bootstrap", "env", "utilities"],
   "environments": {
-    "minimal": ["00-bootstrap", "01-env"],
-    "development": ["00-bootstrap", "01-env", "11-git", "30-dev-tools"]
+    "minimal": ["bootstrap", "env"],
+    "development": ["bootstrap", "env", "git", "dev"]
   },
   "featureFlags": {
     "enableAdvancedFeatures": true
@@ -636,14 +628,14 @@ Fragments can declare explicit dependencies, which are automatically resolved du
 Fragments can declare dependencies in their header comments using either format:
 
 ```powershell
-#Requires -Fragment '00-bootstrap'
-#Requires -Fragment '01-env'
+#Requires -Fragment 'bootstrap'
+#Requires -Fragment 'env'
 ```
 
 Or using a comment line:
 
 ```powershell
-# Dependencies: 00-bootstrap, 01-env
+# Dependencies: bootstrap, env
 ```
 
 ### Dependency Management Functions
@@ -677,7 +669,7 @@ Load order can be overridden via `.profile-fragments.json`:
 
 ```json
 {
-  "loadOrder": ["00-bootstrap", "01-env", "05-utilities"]
+  "loadOrder": ["bootstrap", "env", "utilities"]
 }
 ```
 

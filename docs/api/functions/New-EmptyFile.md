@@ -16,11 +16,32 @@ New-EmptyFile
 
 ## Parameters
 
-No parameters.
+### -Path
+
+One or more file paths to create or touch.
+
+### -LiteralPath
+
+Literal file paths to create or touch without wildcard expansion.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+New-EmptyFile ./notes.txt
+``
+
+### Example 2
+
+`powershell
+New-EmptyFile -LiteralPath 'C:\temp\marker.txt'
+.PARAMETER Path
+    One or more file paths to create or touch.
+.PARAMETER LiteralPath
+    Literal file paths to create or touch without wildcard expansion.
+``
 
 ## Aliases
 

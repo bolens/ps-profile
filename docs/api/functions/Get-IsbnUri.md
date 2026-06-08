@@ -6,7 +6,7 @@ Returns linked-data style URIs for an ISBN.
 
 ## Description
 
-No description available.
+Returns linked-data style URIs for an ISBN.
 
 ## Signature
 
@@ -16,7 +16,19 @@ Get-IsbnUri
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+ISBN to convert into URIs.
+
+### -Format
+
+URI format to return, or All for a structured object.
+
+
+## Outputs
+
+System.String or PSCustomObject
+
 
 ## Examples
 

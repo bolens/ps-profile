@@ -6,7 +6,7 @@ Lists alternate editions for a book ISBN.
 
 ## Description
 
-No description available.
+Resolves the Open Library work for an ISBN and returns edition metadata rows.
 
 ## Signature
 
@@ -16,11 +16,27 @@ Get-IsbnEditions
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+ISBN used to locate the work.
+
+### -Limit
+
+Maximum number of editions to return.
+
+
+## Outputs
+
+PSCustomObject[] .EXAMPLE Get-IsbnEditions -Isbn '9780441172719'
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Get-IsbnEditions -Isbn '9780441172719'
+``
 
 ## Aliases
 

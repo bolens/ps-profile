@@ -6,7 +6,7 @@ Reads the local ISBN reading-list library.
 
 ## Description
 
-No description available.
+Reads the local ISBN reading-list library.
 
 ## Signature
 
@@ -17,6 +17,11 @@ Get-IsbnLibrary
 ## Parameters
 
 No parameters.
+
+## Outputs
+
+PSCustomObject[]
+
 
 ## Examples
 

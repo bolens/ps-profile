@@ -16,11 +16,18 @@ Start-ContainerComposePodman
 
 ## Parameters
 
-No parameters.
+### -args
+
+Additional arguments forwarded to compose up -d.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Start-ContainerComposePodman
+``
 
 ## Aliases
 

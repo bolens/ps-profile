@@ -23,12 +23,16 @@ The TOON value string to parse.
 
 ## Outputs
 
-The parsed value as a PowerShell object (string, int, double, bool, or null).
+The parsed value as a PowerShell object (string, int, double, bool, or null). .EXAMPLE Parse-ToonValue
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Parse-ToonValue
+``
 
 ## Source
 

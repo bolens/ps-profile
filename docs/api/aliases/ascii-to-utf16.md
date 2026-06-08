@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-AsciiToUtf16`
+ASCII to UTF-16
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-AsciiToUtf16` command.
+ASCII to UTF-16
 
 ## Alias Information
 

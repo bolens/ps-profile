@@ -38,6 +38,18 @@ if (-not (Get-Variable -Name 'PSProfileModuleFileTimes' -Scope Global -ErrorActi
 
 .OUTPUTS
     System.Boolean. True if module was reloaded, False otherwise.
+.EXAMPLE
+    Initialize-FragmentLoading
+
+#>XAMPLE
+    Write-BatchProgressRow
+
+#>XAMPLE
+    Write-BatchProgressTableHeader
+
+#>XAMPLE
+    Test-AndReloadModuleIfChanged
+
 #>
 function Test-AndReloadModuleIfChanged {
     [CmdletBinding()]

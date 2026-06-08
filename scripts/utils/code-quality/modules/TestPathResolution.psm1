@@ -79,6 +79,9 @@ else {
 
 .OUTPUTS
     System.String[]
+.EXAMPLE
+    Get-TestPaths -Suite Unit -RepoRoot $repoRoot
+
 #>
 function Get-TestPaths {
     param(
@@ -107,6 +110,15 @@ function Get-TestPaths {
 .DESCRIPTION
     Returns the appropriate directory paths for the specified test suite,
     filtering to only existing directories.
+.PARAMETER Suite
+    Test suite name (Unit, Integration, Performance, or All).
+
+.PARAMETER RepoRoot
+    Repository root used to resolve suite directories.
+
+.EXAMPLE
+    Get-TestSuitePaths -Suite Unit -RepoRoot $repoRoot
+
 #>
 function Get-TestSuitePaths {
     param(
@@ -159,6 +171,18 @@ function Get-TestSuitePaths {
     Handles resolution of user-specified test files or directories,
     including recursive discovery of .tests.ps1 files in directories.
     Supports multiple test files or directories.
+.PARAMETER TestFile
+    Specific test files or directories requested by the caller.
+
+.PARAMETER Suite
+    Active suite name used for fallback resolution.
+
+.PARAMETER RepoRoot
+    Repository root used to resolve relative test paths.
+
+.EXAMPLE
+    Get-SpecificTestPaths -TestFile ./tests/unit/foo.tests.ps1 -RepoRoot $repoRoot
+
 #>
 function Get-SpecificTestPaths {
     param(
@@ -218,6 +242,12 @@ function Get-SpecificTestPaths {
 .DESCRIPTION
     Searches for .tests.ps1 files in the specified directory and subdirectories,
     returning their full paths sorted by name.
+.PARAMETER Directory
+    Directory to search recursively for *.tests.ps1 files.
+
+.EXAMPLE
+    Get-TestFilesFromDirectory -Directory ./tests/unit
+
 #>
 function Get-TestFilesFromDirectory {
     param(

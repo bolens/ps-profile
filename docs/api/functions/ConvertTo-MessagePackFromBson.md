@@ -27,7 +27,11 @@ The path for the output MessagePack file. If not specified, uses input path with
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-MessagePackFromBson -InputPath ./input.file
+``
 
 ## Aliases
 

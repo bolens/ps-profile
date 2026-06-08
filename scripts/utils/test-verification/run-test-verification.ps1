@@ -33,9 +33,11 @@
 #>
 [CmdletBinding()]
 param(
-    [TestPhase]$Phase = [TestPhase]::All,
+    [ValidateSet('All', 'Phase1', 'Phase2', 'Phase3', 'Phase4', 'Phase5', 'Phase6')]
+    [string]$Phase = 'All',
 
-    [TestSuite]$Suite = [TestSuite]::All,
+    [ValidateSet('All', 'Unit', 'Integration', 'Performance')]
+    [string]$Suite = 'All',
 
     [string]$Category,
 
@@ -43,23 +45,16 @@ param(
 )
 
 # Import required modules
-$moduleImportPath = Join-Path (Split-Path $PSScriptRoot -Parent -Parent) 'lib' 'ModuleImport.psm1'
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
-
-# Import CommonEnums for TestPhase and TestSuite enums
-$commonEnumsPath = Join-Path (Split-Path $PSScriptRoot -Parent -Parent) 'lib' 'core' 'CommonEnums.psm1'
-if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
-    Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
-}
 
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Locale' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
-# Convert enums to strings
-$phaseString = $Phase.ToString()
-$suiteString = $Suite.ToString()
+$phaseString = $Phase
+$suiteString = $Suite
 
 $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 $runPesterPath = Join-Path $repoRoot 'scripts/utils/code-quality/run-pester.ps1'

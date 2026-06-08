@@ -27,7 +27,11 @@ The path for the output LaTeX file. If not specified, uses input path with .tex 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-LaTeXFromHtml -InputPath ./input.file
+``
 
 ## Aliases
 

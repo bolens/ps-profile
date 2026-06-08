@@ -11,6 +11,10 @@ if (-not (Test-Path Function:Start-ContainerComposePodman)) {
     .DESCRIPTION
         Runs 'compose up -d' using the available container engine, preferring Podman over Docker.
         Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
+    .PARAMETER args
+        Additional arguments forwarded to compose up -d.
+    .EXAMPLE
+        Start-ContainerComposePodman
     #>
     function Start-ContainerComposePodman {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
@@ -41,6 +45,10 @@ if (-not (Test-Path Function:Stop-ContainerComposePodman)) {
     .DESCRIPTION
         Runs 'compose down' using the available container engine, preferring Podman over Docker.
         Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
+    .PARAMETER args
+        Additional arguments forwarded to compose down.
+    .EXAMPLE
+        Stop-ContainerComposePodman
     #>
     function Stop-ContainerComposePodman {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
@@ -71,6 +79,10 @@ if (-not (Test-Path Function:Get-ContainerComposeLogsPodman)) {
     .DESCRIPTION
         Runs 'compose logs -f' using the available container engine, preferring Podman over Docker.
         Automatically detects and uses podman compose, podman-compose, docker compose, or docker-compose.
+    .PARAMETER args
+        Additional arguments forwarded to compose logs -f.
+    .EXAMPLE
+        Get-ContainerComposeLogsPodman
     #>
     function Get-ContainerComposeLogsPodman {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
@@ -101,6 +113,10 @@ if (-not (Test-Path Function:Clear-ContainerSystemPodman)) {
     .DESCRIPTION
         Runs 'system prune -f' using the available container engine, preferring Podman over Docker.
         Removes unused containers, networks, images, and build cache.
+    .PARAMETER args
+        Additional arguments forwarded to system prune -f.
+    .EXAMPLE
+        Clear-ContainerSystemPodman
     #>
     function Clear-ContainerSystemPodman {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)

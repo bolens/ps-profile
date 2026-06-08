@@ -6,6 +6,68 @@
     Resolves source files for *.tests.ps1 files and runs `drift link` so test
     bindings are recorded in drift.lock. Skips tests whose source cannot be
     resolved confidently.
+.PARAMETER TestFile
+    Specific test file or directory path.
+.EXAMPLE
+    Get-SourcePathsForTestFile
+
+#>ARAMETER BaseName
+    Base file name without extension.
+.EXAMPLE
+    Resolve-IntegrationToolPaths
+
+#>ARAMETER BaseName
+    Base file name without extension.
+.EXAMPLE
+    Resolve-ProfileFragmentPaths
+
+#>ARAMETER BaseName
+    Base file name without extension.
+.EXAMPLE
+    Resolve-TestSupportPaths
+
+#>ARAMETER BaseName
+    Base file name without extension.
+.EXAMPLE
+    Resolve-TestRunnerPaths
+
+#>ARAMETER BaseName
+    Base file name without extension.
+.EXAMPLE
+    Resolve-LibraryModulePaths
+
+#>ARAMETER BaseName
+    Base file name without extension.
+.EXAMPLE
+    Resolve-ValidationScriptPaths
+
+#>ARAMETER BaseName
+    Base file name without extension.
+.EXAMPLE
+    Resolve-UtilityScriptPaths
+
+#>ARAMETER BaseName
+    Base file name without extension.
+.EXAMPLE
+    Resolve-ProfileExtendedPaths
+
+#>ARAMETER TestRelativePath
+    TestRelativeFile or directory path.
+.EXAMPLE
+    Resolve-ConversionModulePaths
+
+#>ARAMETER Content
+    File or help content as text.
+.PARAMETER RepoRoot
+    Repository root used to resolve relative paths.
+.EXAMPLE
+    Resolve-SourcePathsFromContent
+
+#>ARAMETER KebabName
+    Kebab-case name derived from a source file.
+.EXAMPLE
+    ConvertTo-PascalCase
+
 #>
 
 param(

@@ -39,7 +39,7 @@ param(
 
 # Import shared utilities directly (no barrel files)
 # Import ModuleImport first (bootstrap)
-$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))) 'lib' 'ModuleImport.psm1'
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Parse debug level once at script start
@@ -53,6 +53,7 @@ Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameC
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'MetricsSnapshot' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root
 try {

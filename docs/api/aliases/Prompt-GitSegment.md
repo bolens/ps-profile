@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Format-PromptGitSegment`
+Git prompt segment - show current branch in prompt
 
 ## Description
 
-This is an alias that points to the `Format-PromptGitSegment` command.
+Git prompt segment - show current branch in prompt
 
 ## Alias Information
 

@@ -27,12 +27,16 @@ If specified, retrieves the machine-wide value; otherwise, the user value.
 
 ## Outputs
 
-String. The environment variable value, or null if not found.
+String. The environment variable value, or null if not found. .EXAMPLE Get-EnvVar
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Get-EnvVar
+``
 
 ## Source
 

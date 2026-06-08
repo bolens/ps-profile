@@ -16,11 +16,18 @@ ConvertFrom-Yaml
 
 ## Parameters
 
-No parameters.
+### -fileArgs
+
+Path to the YAML input file.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-Yaml ./config.yaml
+``
 
 ## Aliases
 

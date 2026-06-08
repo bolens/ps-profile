@@ -202,6 +202,9 @@ except Exception as e:
     The path to the Iceberg table directory or metadata file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-IcebergToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-IcebergToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -221,6 +224,9 @@ Set-AgentModeAlias -Name 'iceberg-to-json' -Target 'ConvertFrom-IcebergToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output Iceberg table directory. If not specified, uses input path with .iceberg extension.
+.EXAMPLE
+    ConvertTo-IcebergFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-IcebergFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -240,6 +246,9 @@ Set-AgentModeAlias -Name 'json-to-iceberg' -Target 'ConvertTo-IcebergFromJson'
     The path to the Iceberg table directory or metadata file.
 .PARAMETER OutputPath
     The path for the output Parquet file. If not specified, uses input path with .parquet extension.
+.EXAMPLE
+    ConvertFrom-IcebergToParquet -InputPath ./input.file
+
 #>
 function ConvertFrom-IcebergToParquet {
     param([string]$InputPath, [string]$OutputPath)

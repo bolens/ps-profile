@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-DataSize`
+Convert Data Size
 
 ## Description
 
-This is an alias that points to the `Convert-DataSize` command.
+Convert Data Size
 
 ## Alias Information
 

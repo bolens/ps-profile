@@ -6,7 +6,7 @@ Imports ISBN values from a text file and optionally looks them up.
 
 ## Description
 
-No description available.
+Imports ISBN values from a text file and optionally looks them up.
 
 ## Signature
 
@@ -16,7 +16,26 @@ Import-IsbnListFile
 
 ## Parameters
 
-No parameters.
+### -Path
+
+Text file containing ISBN values.
+
+### -Lookup
+
+Performs metadata lookups for extracted ISBN values.
+
+### -OutputFormat
+
+Output format when -Lookup is specified.
+
+### -Provider
+
+Metadata provider used during lookup.
+
+### -OutputPath
+
+Optional file path for exported lookup output.
+
 
 ## Examples
 

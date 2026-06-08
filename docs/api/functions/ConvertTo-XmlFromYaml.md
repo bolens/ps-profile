@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Initializes text format gap conversion utility functions.
+Converts a YAML file to XML format.
 
 ## Description
 
-Sets up internal conversion functions for direct text format conversions that fill gaps in the conversion matrix: XML↔YAML, JSONL↔CSV, JSONL↔YAML. This function is called automatically by Ensure-FileConversion-Data.
+Uses yq to transform YAML input into XML output.
 
 ## Signature
 
@@ -16,22 +16,28 @@ ConvertTo-XmlFromYaml
 
 ## Parameters
 
-No parameters.
+### -InputPath
+
+Path to the YAML source file.
+
+### -OutputPath
+
+Optional destination XML path.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
 
-## Notes
-
-This is an internal initialization function and should not be called directly. Requires yq for XML↔YAML conversions.
-
+`powershell
+ConvertTo-XmlFromYaml -InputPath ./config.yaml
+``
 
 ## Aliases
 
 This function has the following aliases:
 
-- `yaml-to-xml` - Initializes text format gap conversion utility functions.
+- `yaml-to-xml` - Converts a YAML file to XML format.
 
 
 ## Source

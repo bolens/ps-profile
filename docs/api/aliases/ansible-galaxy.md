@@ -6,7 +6,7 @@ Runs ansible-galaxy with the correct invocation strategy for the current platfor
 
 ## Description
 
-This is an alias that points to the `Invoke-AnsibleGalaxy` command.
+Runs ansible-galaxy with the correct invocation strategy for the current platform.
 
 ## Alias Information
 

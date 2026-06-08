@@ -6,7 +6,7 @@ Generates a QR code containing ISBN metadata.
 
 ## Description
 
-This is an alias that points to the `Save-IsbnQrCode` command.
+Generates a QR code containing ISBN metadata.
 
 ## Alias Information
 

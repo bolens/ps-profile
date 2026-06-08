@@ -30,6 +30,9 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 
 .OUTPUTS
     Recovery action result or $null if no recovery possible
+.EXAMPLE
+    Invoke-TestExecutionRecovery -Exception $err -Context @{ TestFile = 'foo.tests.ps1' }
+
 #>
 function Invoke-TestExecutionRecovery {
     param(

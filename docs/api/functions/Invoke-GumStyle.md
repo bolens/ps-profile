@@ -16,11 +16,26 @@ Invoke-GumStyle
 
 ## Parameters
 
-No parameters.
+### -Text
+
+Text to style.
+
+### -Foreground
+
+Foreground color name.
+
+### -Background
+
+Background color name.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-GumStyle -Text 'Success' -Foreground '212'
+``
 
 ## Aliases
 

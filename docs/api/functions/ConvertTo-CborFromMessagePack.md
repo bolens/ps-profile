@@ -27,7 +27,11 @@ The path for the output CBOR file. If not specified, uses input path with .cbor 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-CborFromMessagePack -InputPath ./input.file
+``
 
 ## Aliases
 

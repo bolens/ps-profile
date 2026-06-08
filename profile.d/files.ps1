@@ -387,6 +387,9 @@ function Ensure-FileConversion-Specialized {
 .SYNOPSIS
     Sets up all file utility functions when any of them is called for the first time.
     This lazy loading approach improves profile startup performance.
+.DESCRIPTION
+    Sets up all file utility functions when any of them is called for the first time.
+    This lazy loading approach improves profile startup performance.
     Loads file utility modules from the files-modules subdirectory.
 #>
 function Ensure-FileUtilities {

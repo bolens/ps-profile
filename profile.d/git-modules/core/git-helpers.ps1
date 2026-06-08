@@ -13,6 +13,9 @@
     Friendly name for the caller, used in verbose skip messaging.
 .OUTPUTS
     System.Boolean. Returns $true when the repository context is valid.
+.EXAMPLE
+    Test-GitRepositoryContext
+
 #>
 function Test-GitRepositoryContext {
     param([string]$CommandName = 'git command')
@@ -42,6 +45,9 @@ function Test-GitRepositoryContext {
     Friendly name for the caller, used in verbose skip messaging.
 .OUTPUTS
     System.Boolean. Returns $true when the repository contains commits.
+.EXAMPLE
+    Test-GitRepositoryHasCommits
+
 #>
 function Test-GitRepositoryHasCommits {
     param([string]$CommandName = 'git command')

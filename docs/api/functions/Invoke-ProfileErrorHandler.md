@@ -23,7 +23,11 @@ The error record to handle.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-ProfileErrorHandler
+``
 
 ## Source
 

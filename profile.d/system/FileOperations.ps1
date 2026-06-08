@@ -10,6 +10,15 @@
 .DESCRIPTION
     Creates new empty files at the specified paths, or updates the last write time
     of existing files (Unix touch behavior).
+.EXAMPLE
+    New-EmptyFile ./notes.txt
+.EXAMPLE
+    New-EmptyFile -LiteralPath 'C:\temp\marker.txt'
+.PARAMETER Path
+    One or more file paths to create or touch.
+.PARAMETER LiteralPath
+    Literal file paths to create or touch without wildcard expansion.
+
 #>
 function New-EmptyFile {
     [CmdletBinding(DefaultParameterSetName = 'Path')]
@@ -318,6 +327,11 @@ function Move-ItemCustom { Move-Item @args }
     Searches for files recursively.
 .DESCRIPTION
     Finds files by name pattern in the current directory and subdirectories.
+.EXAMPLE
+    Find-File *.ps1
+.PARAMETER FilterArgs
+    Name filter arguments forwarded to Get-ChildItem -Recurse -Filter.
+
 #>
 function Find-File {
     param([Parameter(ValueFromRemainingArguments = $true)] $FilterArgs)

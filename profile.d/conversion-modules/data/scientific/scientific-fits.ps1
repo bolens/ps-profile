@@ -293,6 +293,9 @@ except Exception as e:
     The path to the FITS file (.fits or .fit extension).
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-FitsToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-FitsToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -312,6 +315,9 @@ Set-AgentModeAlias -Name 'fit-to-json' -Target 'ConvertFrom-FitsToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output FITS file. If not specified, uses input path with .fits extension.
+.EXAMPLE
+    ConvertTo-FitsFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-FitsFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -332,6 +338,9 @@ Set-AgentModeAlias -Name 'json-to-fit' -Target 'ConvertTo-FitsFromJson'
     The path to the FITS file (.fits or .fit extension).
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-FitsToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-FitsToCsv {
     param([string]$InputPath, [string]$OutputPath)

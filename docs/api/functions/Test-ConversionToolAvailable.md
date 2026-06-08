@@ -27,12 +27,16 @@ Installation hint to display if tool is missing.
 
 ## Outputs
 
-System.Boolean. True if tool is available, false otherwise.
+System.Boolean. True if tool is available, false otherwise. .EXAMPLE Test-ConversionToolAvailable
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Test-ConversionToolAvailable
+``
 
 ## Source
 

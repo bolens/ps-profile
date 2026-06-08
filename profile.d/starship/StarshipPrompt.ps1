@@ -11,6 +11,9 @@
     This ensures the prompt continues working even if the Starship module is unloaded.
 .PARAMETER StarshipCommandPath
     The path to the starship executable.
+.EXAMPLE
+    New-StarshipPromptFunction
+
 #>
 function New-StarshipPromptFunction {
     param([string]$StarshipCommandPath)

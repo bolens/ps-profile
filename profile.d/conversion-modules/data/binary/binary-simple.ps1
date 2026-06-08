@@ -311,6 +311,9 @@ try {
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output BSON file. If not specified, uses input path with .bson extension.
+.EXAMPLE
+    ConvertTo-BsonFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-BsonFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -329,6 +332,9 @@ Set-AgentModeAlias -Name 'json-to-bson' -Target 'ConvertTo-BsonFromJson'
     The path to the BSON file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-BsonToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-BsonToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -347,6 +353,9 @@ Set-AgentModeAlias -Name 'bson-to-json' -Target 'ConvertFrom-BsonToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output MessagePack file. If not specified, uses input path with .msgpack extension.
+.EXAMPLE
+    ConvertTo-MessagePackFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-MessagePackFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -366,6 +375,9 @@ Set-AgentModeAlias -Name 'json-to-messagepack' -Target 'ConvertTo-MessagePackFro
     The path to the MessagePack file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-MessagePackToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-MessagePackToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -385,6 +397,9 @@ Set-AgentModeAlias -Name 'messagepack-to-json' -Target 'ConvertFrom-MessagePackT
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output CBOR file. If not specified, uses input path with .cbor extension.
+.EXAMPLE
+    ConvertTo-CborFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-CborFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -403,6 +418,9 @@ Set-AgentModeAlias -Name 'json-to-cbor' -Target 'ConvertTo-CborFromJson'
     The path to the CBOR file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-CborToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-CborToJson {
     param([string]$InputPath, [string]$OutputPath)

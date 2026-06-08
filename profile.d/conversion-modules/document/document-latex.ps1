@@ -200,6 +200,9 @@ function Initialize-FileConversion-DocumentLaTeX {
     The path to the LaTeX file.
 .PARAMETER OutputPath
     The path for the output Markdown file. If not specified, uses input path with .md extension.
+.EXAMPLE
+    ConvertFrom-LaTeXToMarkdown -InputPath ./input.file
+
 #>
 function ConvertFrom-LaTeXToMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -227,6 +230,9 @@ Set-AgentModeAlias -Name 'latex-to-markdown' -Target 'ConvertFrom-LaTeXToMarkdow
     The path to the LaTeX file.
 .PARAMETER OutputPath
     The path for the output HTML file. If not specified, uses input path with .html extension.
+.EXAMPLE
+    ConvertTo-HtmlFromLaTeX -InputPath ./input.file
+
 #>
 function ConvertTo-HtmlFromLaTeX {
     param([string]$InputPath, [string]$OutputPath)
@@ -254,6 +260,9 @@ Set-AgentModeAlias -Name 'latex-to-html' -Target 'ConvertTo-HtmlFromLaTeX'
     The path to the LaTeX file.
 .PARAMETER OutputPath
     The path for the output PDF file. If not specified, uses input path with .pdf extension.
+.EXAMPLE
+    ConvertTo-PdfFromLaTeX -InputPath ./input.file
+
 #>
 function ConvertTo-PdfFromLaTeX {
     param([string]$InputPath, [string]$OutputPath)
@@ -281,6 +290,9 @@ Set-AgentModeAlias -Name 'latex-to-pdf' -Target 'ConvertTo-PdfFromLaTeX'
     The path to the LaTeX file.
 .PARAMETER OutputPath
     The path for the output DOCX file. If not specified, uses input path with .docx extension.
+.EXAMPLE
+    ConvertTo-DocxFromLaTeX -InputPath ./input.file
+
 #>
 function ConvertTo-DocxFromLaTeX {
     param([string]$InputPath, [string]$OutputPath)
@@ -308,6 +320,9 @@ Set-AgentModeAlias -Name 'latex-to-docx' -Target 'ConvertTo-DocxFromLaTeX'
     The path to the LaTeX file.
 .PARAMETER OutputPath
     The path for the output RST file. If not specified, uses input path with .rst extension.
+.EXAMPLE
+    ConvertTo-RstFromLaTeX -InputPath ./input.file
+
 #>
 function ConvertTo-RstFromLaTeX {
     param([string]$InputPath, [string]$OutputPath)

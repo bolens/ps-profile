@@ -27,7 +27,11 @@ The path for the output image file with desired format.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Convert-Image
+``
 
 ## Aliases
 

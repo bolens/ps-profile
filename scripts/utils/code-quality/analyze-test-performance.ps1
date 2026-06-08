@@ -25,7 +25,8 @@ scripts/utils/code-quality/analyze-test-performance.ps1
 #>
 
 param(
-    [TestSuite]$Suite = [TestSuite]::All,
+    [ValidateSet('All', 'Unit', 'Integration', 'Performance')]
+    [string]$Suite = 'All',
 
     [ValidateRange(1, 1000)]
     [int]$TopN = 20,

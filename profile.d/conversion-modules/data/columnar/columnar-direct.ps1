@@ -147,6 +147,9 @@ try {
     The path to the Parquet file.
 .PARAMETER OutputPath
     The path for the output Arrow file. If not specified, uses input path with .arrow extension.
+.EXAMPLE
+    ConvertTo-ArrowFromParquet -InputPath ./input.file
+
 #>
 function ConvertTo-ArrowFromParquet {
     param([string]$InputPath, [string]$OutputPath)
@@ -166,6 +169,9 @@ Set-AgentModeAlias -Name 'parquet-to-arrow' -Target 'ConvertTo-ArrowFromParquet'
     The path to the Arrow file.
 .PARAMETER OutputPath
     The path for the output Parquet file. If not specified, uses input path with .parquet extension.
+.EXAMPLE
+    ConvertTo-ParquetFromArrow -InputPath ./input.file
+
 #>
 function ConvertTo-ParquetFromArrow {
     param([string]$InputPath, [string]$OutputPath)

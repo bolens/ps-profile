@@ -57,6 +57,9 @@ catch {
 
 .OUTPUTS
     Array of PSCustomObject with Name, Version, Path, and Source properties.
+.EXAMPLE
+    Get-LocalModules
+
 #>
 function Get-LocalModules {
     param(
@@ -104,6 +107,9 @@ function Get-LocalModules {
 
 .OUTPUTS
     PSCustomObject with Name, CurrentVersion, LatestVersion, and Source properties if update available, otherwise null.
+.EXAMPLE
+    Test-ModuleUpdate
+
 #>
 function Test-ModuleUpdate {
     param(
@@ -239,6 +245,9 @@ function Test-ModuleUpdate {
 
 .OUTPUTS
     List of PSCustomObject with update information.
+.EXAMPLE
+    Get-ModuleUpdates
+
 #>
 function Get-ModuleUpdates {
     param(

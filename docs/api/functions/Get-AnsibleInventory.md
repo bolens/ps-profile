@@ -6,7 +6,7 @@ Runs ansible-inventory with the correct invocation strategy for the current plat
 
 ## Description
 
-No description available.
+Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 ## Signature
 
@@ -23,11 +23,7 @@ Arguments to pass to ansible-inventory.
 
 ## Examples
 
-### Example 1
-
-`powershell
-Get-AnsibleInventory --list
-``
+No examples provided.
 
 ## Aliases
 

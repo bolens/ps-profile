@@ -11,7 +11,7 @@ Creates a new commit with the currently staged changes and the provided commit m
 ## Signature
 
 ```powershell
-Save-GitCommitWithMessage
+Save-GitCommitWithMessage [Object]$a
 ```
 
 ## Parameters
@@ -31,4 +31,4 @@ This function has the following aliases:
 
 ## Source
 
-Defined in: ../profile.d/11-git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

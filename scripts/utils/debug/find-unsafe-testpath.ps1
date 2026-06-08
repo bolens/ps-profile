@@ -12,7 +12,12 @@
     Focuses on calls that use variables directly without null checks.
 #>
 
-$repoRoot = if ($PSScriptRoot) { Split-Path -Parent (Split-Path -Parent $PSScriptRoot) } else { Get-Location }
+$repoRoot = if ($PSScriptRoot) {
+    Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+}
+else {
+    Get-Location
+}
 
 Write-Host "🔍 Searching for potentially unsafe Test-Path calls..." -ForegroundColor Cyan
 Write-Host ""

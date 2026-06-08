@@ -17,6 +17,10 @@ scripts/utils/generate-docs.ps1
 .PARAMETER DryRun
     If specified, shows what documentation would be generated without actually creating files.
 
+.PARAMETER Incremental
+    Uses a cache file under the output directory to parse and regenerate only changed profile
+    sources (and aliases that inherit help from changed functions).
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\generate-docs.ps1
 
@@ -37,7 +41,8 @@ scripts/utils/generate-docs.ps1
 param(
     [string]$OutputPath = "docs/api",
     [string]$ProfilePath,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$Incremental
 )
 
 # Import ModuleImport first (bootstrap)
@@ -62,11 +67,12 @@ Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableName
 # Import documentation modules
 $modulesPath = Join-Path $PSScriptRoot 'modules'
 # Remove modules first to ensure fresh import
-Remove-Module DocParser, DocGenerator, DocIndexGenerator, DocCleanup -ErrorAction SilentlyContinue
+Remove-Module DocParser, DocGenerator, DocIndexGenerator, DocCleanup, DocIncremental -ErrorAction SilentlyContinue
 Import-Module (Join-Path $modulesPath 'DocParser.psm1') -ErrorAction Stop -Force
 Import-Module (Join-Path $modulesPath 'DocGenerator.psm1') -ErrorAction Stop -Force
 Import-Module (Join-Path $modulesPath 'DocIndexGenerator.psm1') -ErrorAction Stop -Force
 Import-Module (Join-Path $modulesPath 'DocCleanup.psm1') -ErrorAction Stop -Force
+Import-Module (Join-Path $modulesPath 'DocIncremental.psm1') -ErrorAction Stop -Force
 
 <#
 .SYNOPSIS
@@ -99,6 +105,9 @@ function Test-DocsDebugEnabled {
     Text to display.
 .PARAMETER ForegroundColor
     Optional color for distinguishing message categories.
+.EXAMPLE
+    Write-DocsDebugMessage
+
 #>
 function Write-DocsDebugMessage {
     param(
@@ -192,7 +201,20 @@ if ($debugLevel -ge 1) {
 
 # Parse functions and aliases from profile files
 $parseStartTime = Get-Date
-$parsedData = Get-DocumentedCommands -ProfilePath $profilePath
+$cachePath = Join-Path $docsPath '.doc-generation-cache.json'
+$onlyNames = $null
+if ($Incremental) {
+    $parsedData = Get-DocumentedCommandsIncremental -ProfilePath $profilePath -CachePath $cachePath
+    if ($parsedData.ParseMode -eq 'Incremental') {
+        $onlyNames = $parsedData.ChangedCommandNames
+        if (-not $onlyNames) {
+            $onlyNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+        }
+    }
+}
+else {
+    $parsedData = Get-DocumentedCommands -ProfilePath $profilePath
+}
 $parseDuration = ((Get-Date) - $parseStartTime).TotalMilliseconds
 
 # Level 2: Command parsing timing
@@ -220,6 +242,10 @@ if ($functions.Count -eq 0 -and $aliases.Count -eq 0) {
 }
 
 Write-ScriptMessage -Message "Found $($functions.Count) functions and $($aliases.Count) aliases with documentation."
+if ($Incremental) {
+    $changedCount = if ($parsedData.ParseMode -eq 'Incremental') { $onlyNames.Count } else { $functions.Count + $aliases.Count }
+    Write-ScriptMessage -Message "Incremental mode ($($parsedData.ParseMode)): $($parsedData.ParsedFileCount) source file(s) parsed; $changedCount command doc(s) to refresh."
+}
 Write-DocsDebugMessage -Message "Functions path: $functionsPath" -ForegroundColor Cyan
 Write-DocsDebugMessage -Message "Aliases path: $aliasesPath" -ForegroundColor Cyan
 Write-DocsDebugMessage -Message "Functions count: $($functions.Count)" -ForegroundColor Cyan
@@ -238,96 +264,121 @@ else {
         Index     = $false
         Cleanup   = $false
     }
-    
-    # Level 1: Function documentation generation start
-    if ($debugLevel -ge 1) {
-        Write-Verbose "[docs.generate] Generating function documentation"
-    }
-    
-    # Generate markdown documentation for functions
-    $functionsStartTime = Get-Date
-    try {
-        Write-FunctionDocumentation -Functions $functions -Aliases $aliases -DocsPath $functionsPath -DocumentedCommandNames $documentedCommandNames -ErrorAction Stop
-        $functionsDuration = ((Get-Date) - $functionsStartTime).TotalMilliseconds
-        
-        # Level 2: Function documentation timing
-        if ($debugLevel -ge 2) {
-            Write-Verbose "[docs.generate] Function documentation generated in ${functionsDuration}ms"
+    $functionsDuration = 0
+    $aliasesDuration = 0
+    $indexDuration = 0
+    $cleanupDuration = 0
+
+    $skipDocWrites = $Incremental -and $parsedData.ParseMode -eq 'Incremental' -and $onlyNames -and $onlyNames.Count -eq 0
+
+    if ($skipDocWrites) {
+        foreach ($function in $functions) {
+            if ($function.Name) {
+                [void]$documentedCommandNames.Add($function.Name)
+            }
         }
-        
+        foreach ($alias in $aliases) {
+            if ($alias.Name) {
+                [void]$documentedCommandNames.Add($alias.Name)
+            }
+        }
+
+        Write-ScriptMessage -Message 'No documentation changes detected; skipping markdown and index regeneration.'
         $generationSuccess.Functions = $true
-    }
-    catch {
-        $generationErrors.Add("Function documentation: $($_.Exception.Message)")
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord $_ -OperationName 'docs.generate.functions' -Context @{
-                functions_path = $functionsPath
-                function_count = $functions.Count
-            }
-        }
-        else {
-            Write-ScriptMessage -Message "Failed to generate function documentation: $($_.Exception.Message)" -IsWarning
-        }
-    }
-    
-    # Level 1: Alias documentation generation start
-    if ($debugLevel -ge 1) {
-        Write-Verbose "[docs.generate] Generating alias documentation"
-    }
-    
-    # Generate markdown documentation for aliases
-    $aliasesStartTime = Get-Date
-    try {
-        Write-AliasDocumentation -Aliases $aliases -DocsPath $aliasesPath -DocumentedCommandNames $documentedCommandNames -ErrorAction Stop
-        $aliasesDuration = ((Get-Date) - $aliasesStartTime).TotalMilliseconds
-        
-        # Level 2: Alias documentation timing
-        if ($debugLevel -ge 2) {
-            Write-Verbose "[docs.generate] Alias documentation generated in ${aliasesDuration}ms"
-        }
-        
         $generationSuccess.Aliases = $true
-    }
-    catch {
-        $generationErrors.Add("Alias documentation: $($_.Exception.Message)")
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord $_ -OperationName 'docs.generate.aliases' -Context @{
-                aliases_path = $aliasesPath
-                alias_count  = $aliases.Count
-            }
-        }
-        else {
-            Write-ScriptMessage -Message "Failed to generate alias documentation: $($_.Exception.Message)" -IsWarning
-        }
-    }
-    
-    # Level 1: Index generation start
-    if ($debugLevel -ge 1) {
-        Write-Verbose "[docs.generate] Generating documentation index"
-    }
-    
-    # Generate index file
-    $indexStartTime = Get-Date
-    try {
-        Write-DocumentationIndex -Functions $functions -Aliases $aliases -DocsPath $docsPath -ErrorAction Stop
-        $indexDuration = ((Get-Date) - $indexStartTime).TotalMilliseconds
-        
-        # Level 2: Index generation timing
-        if ($debugLevel -ge 2) {
-            Write-Verbose "[docs.generate] Documentation index generated in ${indexDuration}ms"
-        }
-        
         $generationSuccess.Index = $true
     }
-    catch {
-        $generationErrors.Add("Index generation: $($_.Exception.Message)")
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord $_ -OperationName 'docs.generate.index' -Context @{
-                docs_path = $docsPath
+    else {
+        # Level 1: Function documentation generation start
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[docs.generate] Generating function documentation"
+        }
+
+        # Generate markdown documentation for functions
+        $functionsStartTime = Get-Date
+        try {
+            Write-FunctionDocumentation -Functions $functions -Aliases $aliases -DocsPath $functionsPath -DocumentedCommandNames $documentedCommandNames -OnlyNames $onlyNames -ErrorAction Stop
+            $functionsDuration = ((Get-Date) - $functionsStartTime).TotalMilliseconds
+
+            # Level 2: Function documentation timing
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[docs.generate] Function documentation generated in ${functionsDuration}ms"
+            }
+
+            $generationSuccess.Functions = $true
+        }
+        catch {
+            $generationErrors.Add("Function documentation: $($_.Exception.Message)")
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'docs.generate.functions' -Context @{
+                    functions_path = $functionsPath
+                    function_count = $functions.Count
+                }
+            }
+            else {
+                Write-ScriptMessage -Message "Failed to generate function documentation: $($_.Exception.Message)" -IsWarning
             }
         }
-        else {
-            Write-ScriptMessage -Message "Failed to generate index: $($_.Exception.Message)" -IsWarning
+
+        # Level 1: Alias documentation generation start
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[docs.generate] Generating alias documentation"
+        }
+
+        # Generate markdown documentation for aliases
+        $aliasesStartTime = Get-Date
+        try {
+            Write-AliasDocumentation -Aliases $aliases -DocsPath $aliasesPath -DocumentedCommandNames $documentedCommandNames -OnlyNames $onlyNames -ErrorAction Stop
+            $aliasesDuration = ((Get-Date) - $aliasesStartTime).TotalMilliseconds
+
+            # Level 2: Alias documentation timing
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[docs.generate] Alias documentation generated in ${aliasesDuration}ms"
+            }
+
+            $generationSuccess.Aliases = $true
+        }
+        catch {
+            $generationErrors.Add("Alias documentation: $($_.Exception.Message)")
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'docs.generate.aliases' -Context @{
+                    aliases_path = $aliasesPath
+                    alias_count  = $aliases.Count
+                }
+            }
+            else {
+                Write-ScriptMessage -Message "Failed to generate alias documentation: $($_.Exception.Message)" -IsWarning
+            }
+        }
+
+        # Level 1: Index generation start
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[docs.generate] Generating documentation index"
+        }
+
+        # Generate index file
+        $indexStartTime = Get-Date
+        try {
+            Write-DocumentationIndex -Functions $functions -Aliases $aliases -DocsPath $docsPath -ErrorAction Stop
+            $indexDuration = ((Get-Date) - $indexStartTime).TotalMilliseconds
+
+            # Level 2: Index generation timing
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[docs.generate] Documentation index generated in ${indexDuration}ms"
+            }
+
+            $generationSuccess.Index = $true
+        }
+        catch {
+            $generationErrors.Add("Index generation: $($_.Exception.Message)")
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'docs.generate.index' -Context @{
+                    docs_path = $docsPath
+                }
+            }
+            else {
+                Write-ScriptMessage -Message "Failed to generate index: $($_.Exception.Message)" -IsWarning
+            }
         }
     }
     

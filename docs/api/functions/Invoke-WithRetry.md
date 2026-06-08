@@ -39,7 +39,11 @@ Delay between retries in seconds. Default is 2.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-WithRetry
+``
 
 ## Source
 

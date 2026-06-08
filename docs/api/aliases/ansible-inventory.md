@@ -6,7 +6,7 @@ Runs ansible-inventory with the correct invocation strategy for the current plat
 
 ## Description
 
-This is an alias that points to the `Get-AnsibleInventory` command.
+Runs ansible-inventory with the correct invocation strategy for the current platform.
 
 ## Alias Information
 

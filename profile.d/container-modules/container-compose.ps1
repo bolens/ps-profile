@@ -11,6 +11,10 @@ if (-not (Test-Path Function:Start-ContainerCompose)) {
     .DESCRIPTION
         Runs 'compose up -d' using the available container engine, preferring Docker over Podman.
         Automatically detects and uses docker compose, docker-compose, podman compose, or podman-compose.
+    .PARAMETER args
+        Additional arguments forwarded to compose up -d.
+    .EXAMPLE
+        Start-ContainerCompose
     #>
     function Start-ContainerCompose {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
@@ -42,6 +46,10 @@ if (-not (Test-Path Function:Stop-ContainerCompose)) {
     .DESCRIPTION
         Runs 'compose down' using the available container engine, preferring Docker over Podman.
         Automatically detects and uses docker compose, docker-compose, podman compose, or podman-compose.
+    .PARAMETER args
+        Additional arguments forwarded to compose down.
+    .EXAMPLE
+        Stop-ContainerCompose
     #>
     function Stop-ContainerCompose {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
@@ -73,6 +81,10 @@ if (-not (Test-Path Function:Get-ContainerComposeLogs)) {
     .DESCRIPTION
         Runs 'compose logs -f' using the available container engine, preferring Docker over Podman.
         Automatically detects and uses docker compose, docker-compose, podman compose, or podman-compose.
+    .PARAMETER args
+        Additional arguments forwarded to compose logs -f.
+    .EXAMPLE
+        Get-ContainerComposeLogs
     #>
     function Get-ContainerComposeLogs {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)
@@ -104,6 +116,10 @@ if (-not (Test-Path Function:Clear-ContainerSystem)) {
     .DESCRIPTION
         Runs 'system prune -f' using the available container engine, preferring Docker over Podman.
         Removes unused containers, networks, images, and build cache.
+    .PARAMETER args
+        Additional arguments forwarded to system prune -f.
+    .EXAMPLE
+        Clear-ContainerSystem
     #>
     function Clear-ContainerSystem {
         param([Parameter(ValueFromRemainingArguments = $true)] $args)

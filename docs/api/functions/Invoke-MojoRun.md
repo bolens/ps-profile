@@ -16,11 +16,20 @@ Invoke-MojoRun
 
 ## Parameters
 
-No parameters.
+### -Files
+
+Mojo source files to execute.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-MojoRun ./main.mojo
+.PARAMETER Files
+    Mojo source files to execute.
+``
 
 ## Aliases
 

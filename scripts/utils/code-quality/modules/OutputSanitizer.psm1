@@ -28,6 +28,9 @@ if ($pathUtilsModulePath -and -not [string]::IsNullOrWhiteSpace($pathUtilsModule
 
 .OUTPUTS
     System.String
+.EXAMPLE
+    Convert-TestOutputLine
+
 #>
 function Convert-TestOutputLine {
     param([string]$Text)

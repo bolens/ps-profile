@@ -23,12 +23,16 @@ Friendly name for the caller, used in verbose skip messaging.
 
 ## Outputs
 
-System.Boolean. Returns $true when the repository context is valid.
+System.Boolean. Returns $true when the repository context is valid. .EXAMPLE Test-GitRepositoryContext
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Test-GitRepositoryContext
+``
 
 ## Source
 

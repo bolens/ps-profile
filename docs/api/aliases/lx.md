@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Get-ChildItemVisible`
+Listing helpers (prefer eza when available)
 
 ## Description
 
-This is an alias that points to the `Get-ChildItemVisible` command.
+Listing helpers (prefer eza when available)
 
 ## Alias Information
 

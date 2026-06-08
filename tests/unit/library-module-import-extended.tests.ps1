@@ -36,6 +36,7 @@ AfterAll {
     Remove-Module Cache -ErrorAction SilentlyContinue -Force
     Remove-Module Logging -ErrorAction SilentlyContinue -Force
     Remove-Module FileFiltering -ErrorAction SilentlyContinue -Force
+    Remove-Module FileBackup -ErrorAction SilentlyContinue -Force
 }
 
 Describe 'ModuleImport extended scenarios' {
@@ -55,6 +56,17 @@ Describe 'ModuleImport extended scenarios' {
             $module | Should -Not -BeNullOrEmpty
             ($module.Path -replace '\\', '/') | Should -Match '/file/FileFiltering\.psm1'
             $module.ExportedFunctions.Keys | Should -Contain 'Filter-Files'
+        }
+
+        It 'Resolves FileBackup from the file subdirectory' {
+            Remove-Module FileBackup -ErrorAction SilentlyContinue -Force
+
+            $module = Import-LibModule -ModuleName 'FileBackup' -ScriptPath $script:TestScriptPath -Global -ErrorAction Stop
+
+            $module | Should -Not -BeNullOrEmpty
+            ($module.Path -replace '\\', '/') | Should -Match '/file/FileBackup\.psm1'
+            $module.ExportedFunctions.Keys | Should -Contain 'New-FileBackup'
+            $module.ExportedFunctions.Keys | Should -Contain 'Restore-FileBackup'
         }
     }
 

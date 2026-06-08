@@ -6,7 +6,7 @@ Searches the local Calibre library for an ISBN.
 
 ## Description
 
-No description available.
+Searches the local Calibre library for an ISBN.
 
 ## Signature
 
@@ -16,7 +16,15 @@ Search-CalibreIsbn
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+ISBN to search in Calibre.
+
+
+## Outputs
+
+System.String
+
 
 ## Examples
 

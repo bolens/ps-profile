@@ -33,6 +33,9 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 
 .OUTPUTS
     Performance metrics object
+.EXAMPLE
+    Measure-TestPerformance
+
 #>
 function Measure-TestPerformance {
     param(
@@ -250,6 +253,9 @@ function Measure-TestPerformance {
 
 .OUTPUTS
     Test result with optional performance data
+.EXAMPLE
+    Invoke-TestExecutionWithPerformance -ExecutionScriptBlock $sb -Config $config -TrackMemory
+
 #>
 function Invoke-TestExecutionWithPerformance {
     param(

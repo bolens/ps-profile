@@ -15,7 +15,8 @@ scripts/utils/security/modules/SecurityReporter.psm1
 #>
 
 # Import CommonEnums for SeverityLevel enum
-$commonEnumsPath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'CommonEnums.psm1'
+$scriptsPath = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$commonEnumsPath = Join-Path $scriptsPath 'lib' 'core' 'CommonEnums.psm1'
 if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
     Import-Module $commonEnumsPath -DisableNameChecking -ErrorAction SilentlyContinue
 }
@@ -32,6 +33,9 @@ if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
 
 .OUTPUTS
     Hashtable with BlockingIssues, WarningIssues, and ScanErrors properties.
+.EXAMPLE
+    Get-SecurityScanResults
+
 #>
 function Get-SecurityScanResults {
     [CmdletBinding()]
@@ -90,6 +94,9 @@ function Get-SecurityScanResults {
 
 .OUTPUTS
     None. Outputs to console.
+.EXAMPLE
+    Write-SecurityReport
+
 #>
 function Write-SecurityReport {
     [CmdletBinding()]

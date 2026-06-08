@@ -315,10 +315,24 @@ if ($PSCmdlet.ShouldProcess('Fragment discovery', 'Discover fragment files')) {
     }
 }
 else {
+    if ($FragmentPath) {
+        $profileDPath = $FragmentPath
+    }
+    else {
+        $repoRoot = Split-Path -Parent $scriptsDir
+        $profileDPath = Join-Path $repoRoot 'profile.d'
+    }
+
     Write-Host "  [WhatIf] Would discover fragment files from: $profileDPath" -ForegroundColor Cyan
+
+    if (Test-Path -LiteralPath $profileDPath) {
+        $fragmentFiles = @(Get-ChildItem -Path $profileDPath -File -Filter '*.ps1' -ErrorAction SilentlyContinue |
+            Where-Object { $_.BaseName -notmatch '-test-' })
+        $stats.FragmentsDiscovered = $fragmentFiles.Count
+    }
 }
 
-if ($fragmentFiles.Count -eq 0) {
+if ($fragmentFiles.Count -eq 0 -and -not $WhatIfPreference) {
     Write-CacheOperationWarning -Message "No fragment files found to build cache" -Context @{
         profile_d_path = $profileDPath
     }

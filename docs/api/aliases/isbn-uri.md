@@ -6,7 +6,7 @@ Returns linked-data style URIs for an ISBN.
 
 ## Description
 
-This is an alias that points to the `Get-IsbnUri` command.
+Returns linked-data style URIs for an ISBN.
 
 ## Alias Information
 

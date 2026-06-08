@@ -134,6 +134,9 @@ function Initialize-FileConversion-DocumentCommonHtml {
     The path to the HTML file.
 .PARAMETER OutputPath
     The path for the output Markdown file. If not specified, uses input path with .md extension.
+.EXAMPLE
+    ConvertFrom-HtmlToMarkdown -InputPath ./input.file
+
 #>
 function ConvertFrom-HtmlToMarkdown {
     param([string]$InputPath, [string]$OutputPath)
@@ -162,6 +165,9 @@ Set-AgentModeAlias -Name 'html-to-markdown' -Target 'ConvertFrom-HtmlToMarkdown'
     The path to the HTML file.
 .PARAMETER OutputPath
     The path for the output PDF file. If not specified, uses input path with .pdf extension.
+.EXAMPLE
+    ConvertTo-PdfFromHtml -InputPath ./input.file
+
 #>
 function ConvertTo-PdfFromHtml {
     param([string]$InputPath, [string]$OutputPath)
@@ -190,6 +196,9 @@ Set-AgentModeAlias -Name 'html-to-pdf' -Target 'ConvertTo-PdfFromHtml'
     The path to the HTML file.
 .PARAMETER OutputPath
     The path for the output LaTeX file. If not specified, uses input path with .tex extension.
+.EXAMPLE
+    ConvertTo-LaTeXFromHtml -InputPath ./input.file
+
 #>
 function ConvertTo-LaTeXFromHtml {
     param([string]$InputPath, [string]$OutputPath)

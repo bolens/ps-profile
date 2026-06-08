@@ -27,7 +27,11 @@ The path for the output TOML file. If not specified, uses input path with .toml 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-TomlFromYaml -InputPath ./input.file
+``
 
 ## Aliases
 

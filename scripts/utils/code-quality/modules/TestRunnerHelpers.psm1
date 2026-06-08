@@ -31,6 +31,9 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 
 .OUTPUTS
     None
+.EXAMPLE
+    Invoke-TestDryRun -Config $config -TestPaths 'tests/unit'
+
 #>
 function Invoke-TestDryRun {
     param(

@@ -58,6 +58,9 @@ if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) 
 
 .OUTPUTS
     Report content as string
+.EXAMPLE
+    New-CustomTestReport
+
 #>
 function New-CustomTestReport {
     param(
@@ -144,6 +147,9 @@ function New-CustomTestReport {
 
 .OUTPUTS
     HTML content as string
+.EXAMPLE
+    ConvertTo-HtmlReport
+
 #>
 function ConvertTo-HtmlReport {
     param(
@@ -217,6 +223,9 @@ function ConvertTo-HtmlReport {
 
 .OUTPUTS
     Markdown content as string
+.EXAMPLE
+    ConvertTo-MarkdownReport
+
 #>
 function ConvertTo-MarkdownReport {
     param(

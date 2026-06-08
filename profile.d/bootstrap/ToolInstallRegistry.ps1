@@ -1996,6 +1996,9 @@ function global:Get-ToolInstallMethodRegistry {
     Preferred installation method (scoop, npm, pip, etc.). If not specified, uses preferences.
 .OUTPUTS
     System.String
+.EXAMPLE
+    Get-ToolSpecificInstallMethod
+
 #>
 function global:Get-ToolSpecificInstallMethod {
     [CmdletBinding()]
@@ -2138,6 +2141,9 @@ function global:Get-ToolSpecificInstallMethod {
     Name of the command to check.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Test-CommandAvailable
+
 #>
 function global:Test-CommandAvailable {
     [CmdletBinding()]
@@ -2190,6 +2196,9 @@ function global:Test-CommandAvailable {
     Maximum number of fallback options to show (default: 3).
 .OUTPUTS
     System.String
+.EXAMPLE
+    Get-InstallMethodFallbackChain
+
 #>
 function global:Get-InstallMethodFallbackChain {
     [CmdletBinding()]
@@ -2252,6 +2261,9 @@ function global:Get-InstallMethodFallbackChain {
     Preferred package manager name (scoop, winget, etc.).
 .OUTPUTS
     System.Collections.Hashtable
+.EXAMPLE
+    Get-SystemPackageManagerFallbackChain
+
 #>
 function global:Get-SystemPackageManagerFallbackChain {
     [CmdletBinding()]
@@ -2356,6 +2368,9 @@ function global:Get-SystemPackageManagerFallbackChain {
     If not specified, validates all preferences.
 .OUTPUTS
     System.Collections.Hashtable
+.EXAMPLE
+    Test-PreferenceAwareInstallPreferences
+
 #>
 function global:Test-PreferenceAwareInstallPreferences {
     [CmdletBinding()]
@@ -2488,6 +2503,9 @@ function global:Test-PreferenceAwareInstallPreferences {
     If specified, skips interactive prompts and uses defaults.
 .OUTPUTS
     System.Collections.Hashtable
+.EXAMPLE
+    Set-PreferenceAwareInstallPreferences
+
 #>
 function global:Set-PreferenceAwareInstallPreferences {
     [CmdletBinding()]

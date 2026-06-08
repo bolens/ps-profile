@@ -16,11 +16,20 @@ ConvertTo-UrlEncoded
 
 ## Parameters
 
-No parameters.
+### -text
+
+Plain text to encode for use in a URL query or path segment.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-UrlEncoded -text 'hello world'
+.PARAMETER text
+    Plain text to encode for use in a URL query or path segment.
+``
 
 ## Aliases
 

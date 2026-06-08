@@ -23,7 +23,11 @@ The path to the CSV file to convert.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-CsvToYaml -InputPath ./input.file
+``
 
 ## Aliases
 

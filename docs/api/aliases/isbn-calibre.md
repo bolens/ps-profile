@@ -6,7 +6,7 @@ Searches the local Calibre library for an ISBN.
 
 ## Description
 
-This is an alias that points to the `Search-CalibreIsbn` command.
+Searches the local Calibre library for an ISBN.
 
 ## Alias Information
 

@@ -178,6 +178,9 @@ except Exception as e:
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output HDF5 file. If not specified, uses input path with .h5 extension.
+.EXAMPLE
+    ConvertTo-Hdf5FromJson -InputPath ./input.file
+
 #>
 function ConvertTo-Hdf5FromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -197,6 +200,9 @@ Set-AgentModeAlias -Name 'json-to-h5' -Target 'ConvertTo-Hdf5FromJson'
     The path to the HDF5 file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-Hdf5ToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-Hdf5ToJson {
     param([string]$InputPath, [string]$OutputPath)

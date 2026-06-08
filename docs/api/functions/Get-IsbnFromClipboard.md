@@ -6,7 +6,7 @@ Reads an ISBN from the clipboard and optionally looks it up.
 
 ## Description
 
-No description available.
+Reads an ISBN from the clipboard and optionally looks it up.
 
 ## Signature
 
@@ -16,7 +16,19 @@ Get-IsbnFromClipboard
 
 ## Parameters
 
-No parameters.
+### -Lookup
+
+Performs a metadata lookup for the clipboard ISBN.
+
+### -OutputFormat
+
+Output format when -Lookup is specified.
+
+
+## Outputs
+
+PSCustomObject or formatted string
+
 
 ## Examples
 

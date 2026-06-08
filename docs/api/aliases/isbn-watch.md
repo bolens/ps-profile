@@ -6,7 +6,7 @@ Watches a folder for new files containing ISBN values and processes them.
 
 ## Description
 
-This is an alias that points to the `Start-IsbnWatchFolder` command.
+Watches a folder for new files containing ISBN values and processes them.
 
 ## Alias Information
 

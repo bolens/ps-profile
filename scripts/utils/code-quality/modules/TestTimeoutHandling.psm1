@@ -46,6 +46,9 @@ if ($jsonUtilitiesModulePath -and -not [string]::IsNullOrWhiteSpace($jsonUtiliti
 
 .OUTPUTS
     Pester test result object
+.EXAMPLE
+    Invoke-PesterWithTimeout -Config $config -TestPaths 'tests/unit' -Timeout 300
+
 #>
 function Invoke-PesterWithTimeout {
     param(

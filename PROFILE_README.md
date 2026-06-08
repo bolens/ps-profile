@@ -2,6 +2,8 @@
 
 This document provides detailed technical information about the profile architecture, internals, and advanced usage. For quick start and general information, see [README.md](README.md).
 
+> **Note:** This profile is under active development and may be unstable. See [README.md](README.md) for the full warning.
+
 ## Architecture Overview
 
 ### Profile Loader

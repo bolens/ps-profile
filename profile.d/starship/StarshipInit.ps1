@@ -14,6 +14,9 @@
 .OUTPUTS
     System.Management.Automation.FunctionInfo
     The created prompt function.
+.EXAMPLE
+    Invoke-StarshipInitScript
+
 #>
 function Invoke-StarshipInitScript {
     param([string]$StarshipCommandPath)

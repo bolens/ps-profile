@@ -43,6 +43,9 @@ if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath
 
 .OUTPUTS
     Test execution result object
+.EXAMPLE
+    Invoke-TestWithRetry -ScriptBlock { Invoke-Pester -Path 'tests/unit' } -MaxRetries 2
+
 #>
 function Invoke-TestWithRetry {
     param(

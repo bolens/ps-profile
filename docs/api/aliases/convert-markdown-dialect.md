@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Initializes markdown dialect conversion utility functions.
+Converts markdown between dialects using pandoc.
 
 ## Description
 
-Sets up internal conversion functions for markdown dialect and wiki markup conversions via pandoc. Called automatically by Ensure-FileConversion-Documents.
+Internal dispatcher used by Convert-MarkdownDialect aliases. Loads document conversion helpers when needed and forwards to _Convert-MarkdownDialect.
 
 ## Alias Information
 

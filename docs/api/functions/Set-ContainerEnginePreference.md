@@ -16,11 +16,18 @@ Set-ContainerEnginePreference
 
 ## Parameters
 
-No parameters.
+### -Engine
+
+Preferred engine: docker or podman.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Set-ContainerEnginePreference -Engine podman
+``
 
 ## Source
 

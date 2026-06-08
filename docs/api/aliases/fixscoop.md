@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Repair-ScoopBuckets`
+Remove read-only attribute if present
 
 ## Description
 
-This is an alias that points to the `Repair-ScoopBuckets` command.
+Remove read-only attribute if present
 
 ## Alias Information
 

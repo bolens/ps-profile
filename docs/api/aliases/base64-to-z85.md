@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-Base64ToZ85`
+Base64 to Z85
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-Base64ToZ85` command.
+Base64 to Z85
 
 ## Alias Information
 

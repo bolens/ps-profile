@@ -98,7 +98,331 @@ function Test-Synopsis { }
         }
     }
 
+    Context 'Set-AgentModeFunction parsing' {
+        It 'extracts documentation from Set-AgentModeFunction registrations' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'agent_mode_function.ps1'
+            $testContent = @'
+<#
+.SYNOPSIS
+    Shows commit history.
+.DESCRIPTION
+    Displays the commit log for the repository.
+#>
+Set-AgentModeFunction -Name 'Get-GitLog' -Body {
+    param([Parameter(ValueFromRemainingArguments = $true)] $RemainingArgs)
+    git log @RemainingArgs
+} | Out-Null
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $testDir = Split-Path -Parent $testFile
+            $parsed = Get-DocumentedCommands -ProfilePath $testDir
+            $function = $parsed.Functions | Where-Object { $_.Name -eq 'Get-GitLog' } | Select-Object -First 1
+
+            $function | Should -Not -BeNullOrEmpty
+            $function.Synopsis | Should -Match 'commit history'
+            $function.Description | Should -Match 'commit log'
+            $function.File | Should -Be $testFile
+            $function.Signature | Should -Match 'Get-GitLog'
+            $function.Signature | Should -Match '\$RemainingArgs'
+        }
+
+        It 'prefers AST function definitions over Set-AgentModeFunction duplicates' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'agent_mode_duplicate.ps1'
+            $testContent = @'
+<#
+.SYNOPSIS
+    AST-defined synopsis.
+.DESCRIPTION
+    AST-defined description.
+#>
+function Get-DuplicateSample {
+    [CmdletBinding()]
+    param()
+}
+
+<#
+.SYNOPSIS
+    Agent-mode synopsis.
+.DESCRIPTION
+    Agent-mode description.
+#>
+Set-AgentModeFunction -Name 'Get-DuplicateSample' -Body { 'agent' }
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $testDir = Split-Path -Parent $testFile
+            $parsed = Get-DocumentedCommands -ProfilePath $testDir
+            @($parsed.Functions | Where-Object { $_.Name -eq 'Get-DuplicateSample' }).Count | Should -Be 1
+            ($parsed.Functions | Where-Object { $_.Name -eq 'Get-DuplicateSample' }).Synopsis | Should -Match 'AST-defined synopsis'
+        }
+
+        It 'generates markdown for Set-AgentModeFunction registrations' {
+            $tempDir = Join-Path $script:TestTempRoot 'docs_agent_mode'
+            New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
+
+            $testProfileDir = Join-Path $tempDir 'profile.d'
+            New-Item -ItemType Directory -Path $testProfileDir -Force | Out-Null
+
+            $testFileContent = @'
+<#
+.SYNOPSIS
+    Shows commit history.
+.DESCRIPTION
+    Displays the commit log for the repository.
+#>
+Set-AgentModeFunction -Name 'Get-GitLog' -Body {
+    param([Parameter(ValueFromRemainingArguments = $true)] $RemainingArgs)
+    git log @RemainingArgs
+} | Out-Null
+'@
+            $testFile = Join-Path $testProfileDir 'git-basic.ps1'
+            Set-Content -Path $testFile -Value $testFileContent -Encoding UTF8
+
+            $scriptPath = Join-Path $script:ScriptsUtilsDocsPath 'generate-docs.ps1'
+            $outputPath = Join-Path $tempDir 'api'
+            & $scriptPath -OutputPath $outputPath -ProfilePath $testProfileDir 2>&1 | Out-Null
+
+            $functionDocPath = Join-Path $outputPath 'functions' 'Get-GitLog.md'
+            Test-Path $functionDocPath | Should -Be $true
+
+            $content = Get-Content $functionDocPath -Raw
+            $content | Should -Match 'Get-GitLog'
+            $content | Should -Match 'Shows commit history'
+            $content | Should -Match 'git-basic.ps1'
+        }
+
+        It 'extracts documentation from Register-LazyFunction single-line comments' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'register_lazy_function.ps1'
+            $testContent = @'
+# Git clone - clone a repository
+Register-LazyFunction -Name 'Invoke-GitClone' -Initializer { $null } -Alias 'gcl'
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $parsed = Get-DocumentedCommands -ProfilePath (Split-Path -Parent $testFile)
+            $function = $parsed.Functions | Where-Object { $_.Name -eq 'Invoke-GitClone' } | Select-Object -First 1
+
+            $function | Should -Not -BeNullOrEmpty
+            $function.Synopsis | Should -Match 'Git clone'
+        }
+
+        It 'extracts documentation from inline trailing comments on Set-AgentModeFunction' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'inline_agent_mode_function.ps1'
+            $testContent = @'
+function Ensure-ExampleHelper {
+    $null = Set-AgentModeFunction -Name 'Invoke-GitClone' -Body { git clone @args } # Git clone - clone a repository
+}
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $parsed = Get-DocumentedCommands -ProfilePath (Split-Path -Parent $testFile)
+            $function = $parsed.Functions | Where-Object { $_.Name -eq 'Invoke-GitClone' } | Select-Object -First 1
+
+            $function | Should -Not -BeNullOrEmpty
+            $function.Synopsis | Should -Match 'Git clone'
+        }
+
+        It 'extracts documentation from Set-Item Function: registrations with single-line comments' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'set_item_function.ps1'
+            $testContent = @'
+# Git stash - stash changes
+if (-not (Test-Path Function:Save-GitStash)) {
+    Set-Item -Path Function:Save-GitStash -Value { git stash @args } -Force | Out-Null
+}
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $parsed = Get-DocumentedCommands -ProfilePath (Split-Path -Parent $testFile)
+            $function = $parsed.Functions | Where-Object { $_.Name -eq 'Save-GitStash' } | Select-Object -First 1
+
+            $function | Should -Not -BeNullOrEmpty
+            $function.Synopsis | Should -Match 'Git stash'
+        }
+
+        It 'resolves help from file-level block comments for grouped New-Item registrations' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testProfileDir = Join-Path $script:TestTempRoot 'file_level_help_profile'
+            New-Item -ItemType Directory -Path $testProfileDir -Force | Out-Null
+            $testFile = Join-Path $testProfileDir 'ssh.ps1'
+            $testContent = @'
+<#
+.SYNOPSIS
+    SSH agent and key management helpers.
+.DESCRIPTION
+    Provides functions and aliases for SSH key management:
+    - Get-SSHKeys (ssh-list): list loaded keys
+    - Add-SSHKeyIfNotLoaded (ssh-add-if): idempotent key loader
+    - Start-SSHAgent (ssh-agent-start): start agent if not running
+#>
+if (-not (Test-Path Function:\Get-SSHKeys)) {
+    New-Item -Path Function:\Get-SSHKeys -Value { ssh-add -l } -Force | Out-Null
+}
+if (-not (Test-Path Function:\Start-SSHAgent)) {
+    New-Item -Path Function:\Start-SSHAgent -Value { $null } -Force | Out-Null
+}
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $parsed = Get-DocumentedCommands -ProfilePath $testProfileDir
+            $keys = $parsed.Functions | Where-Object { $_.Name -eq 'Get-SSHKeys' } | Select-Object -First 1
+            $agent = $parsed.Functions | Where-Object { $_.Name -eq 'Start-SSHAgent' } | Select-Object -First 1
+
+            $keys | Should -Not -BeNullOrEmpty
+            $keys.Synopsis | Should -Match 'list loaded keys'
+            $agent | Should -Not -BeNullOrEmpty
+            $agent.Synopsis | Should -Match 'start agent'
+        }
+
+        It 'resolves help from unstructured file-level comments mentioning the function' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testProfileDir = Join-Path $script:TestTempRoot 'file_level_unstructured_profile'
+            New-Item -ItemType Directory -Path $testProfileDir -Force | Out-Null
+            $testFile = Join-Path $testProfileDir 'scoop.ps1'
+            $testContent = @'
+<#
+Idempotent lazy-loading setup for Scoop tab completion.
+Creates an Enable-ScoopCompletion function that can be called on-demand to enable completion.
+#>
+if (-not (Test-Path Function:\Enable-ScoopCompletion)) {
+    New-Item -Path Function:\Enable-ScoopCompletion -Value { $null } -Force | Out-Null
+}
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $parsed = Get-DocumentedCommands -ProfilePath $testProfileDir
+            $function = $parsed.Functions | Where-Object { $_.Name -eq 'Enable-ScoopCompletion' } | Select-Object -First 1
+
+            $function | Should -Not -BeNullOrEmpty
+            $function.Synopsis | Should -Match 'on-demand'
+            $function.Description | Should -Match 'on-demand'
+        }
+
+        It 'promotes synopsis to description for single-line dynamic registrations' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'synopsis_promotion.ps1'
+            $testContent = @'
+# Git clone - clone a repository
+Register-LazyFunction -Name 'Invoke-GitClone' -Initializer { $null } -Alias 'gcl'
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $parsed = Get-DocumentedCommands -ProfilePath (Split-Path -Parent $testFile)
+            $function = $parsed.Functions | Where-Object { $_.Name -eq 'Invoke-GitClone' } | Select-Object -First 1
+
+            $function.Description | Should -Match 'Git clone'
+        }
+
+        It 'reuses pre-parsed content and ast when supplied to dynamic parsers' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocAgentModeFunctionParser.psm1') -DisableNameChecking -Force
+            Import-Module (Join-Path $docsModulesPath 'DocAliasParser.psm1') -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'parser_reuse.ps1'
+            $testContent = @'
+# Git clone - clone a repository
+Register-LazyFunction -Name 'Invoke-GitClone' -Initializer { $null } -Alias 'gcl'
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $content = Get-Content -LiteralPath $testFile -Raw
+            $fileLines = [string[]]@($content -split "\r?\n")
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile($testFile, [ref]$null, [ref]$null)
+
+            $dynamic = Parse-DynamicFunctionsFromFile -File $testFile -Content $content -FileLines $fileLines -Ast $ast
+            $aliases = Parse-AliasesFromFile -File $testFile -Functions $dynamic -Content $content -Ast $ast
+
+            ($dynamic | Where-Object { $_.Name -eq 'Invoke-GitClone' }).Count | Should -Be 1
+            ($aliases | Where-Object { $_.Name -eq 'gcl' }).Count | Should -Be 1
+        }
+
+        It 'binds help content from real profile files without parameter errors' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocAliasParser.psm1') -DisableNameChecking -Force
+            Import-Module (Join-Path $docsModulesPath 'DocHelpParser.psm1') -DisableNameChecking -Force
+
+            $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+            $file = Join-Path $repoRoot 'profile.d/git-modules/core/git-advanced.ps1'
+            $fileLines = [string[]]@(Get-Content -LiteralPath $file)
+            $content = $fileLines -join "`n"
+            $ast = [System.Management.Automation.Language.Parser]::ParseFile($file, [ref]$null, [ref]$null)
+            $cmd = $ast.FindAll({
+                    param($node)
+                    $node -is [System.Management.Automation.Language.CommandAst] -and $node.GetCommandName() -ieq 'Register-LazyFunction'
+                }, $true) | Where-Object {
+                    (Get-CommandParameterValue -CommandAst $_ -ParameterName 'Name') -eq 'Invoke-GitClone'
+                } | Select-Object -First 1
+
+            { Get-RegistrationHelpContent -FileContent $content -SourceFileLines $fileLines -RegistrationCommandAst $cmd -FunctionName 'Invoke-GitClone' } |
+                Should -Not -Throw
+        }
+
+        It 'uses single-line caption comments above block help when both are present' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'caption_and_block_help.ps1'
+            $testContent = @'
+# Git log - show commit log
+<#
+.SYNOPSIS
+    Shows commit history.
+.DESCRIPTION
+    Displays the commit log for the repository.
+#>
+Set-AgentModeFunction -Name 'Get-GitLog' -Body { git log @args } | Out-Null
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $parsed = Get-DocumentedCommands -ProfilePath (Split-Path -Parent $testFile)
+            $function = $parsed.Functions | Where-Object { $_.Name -eq 'Get-GitLog' } | Select-Object -First 1
+
+            $function.Synopsis | Should -Match 'Shows commit history'
+            $function.Synopsis | Should -Not -Match 'Git log - show commit log'
+        }
+    }
+
     Context 'Alias parsing' {
+        It 'extracts aliases from Register-LazyFunction -Alias registrations' {
+            $aliasParserPath = Join-Path $script:ScriptsUtilsDocsPath 'modules' 'DocAliasParser.psm1'
+            Import-Module $aliasParserPath -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'register_lazy_alias.ps1'
+            $testContent = @'
+# Git clone - clone a repository
+Register-LazyFunction -Name 'Invoke-GitClone' -Initializer { $null } -Alias 'gcl'
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $aliases = Parse-AliasesFromFile -File $testFile -Functions @()
+            $alias = $aliases | Where-Object { $_.Name -eq 'gcl' } | Select-Object -First 1
+
+            $alias | Should -Not -BeNullOrEmpty
+            $alias.Target | Should -Be 'Invoke-GitClone'
+            ($aliases | Where-Object { $_.Name -eq 'gcl' }).Count | Should -Be 1
+        }
+
         It 'uses target function help when aliases are grouped at end of fragment' {
             $aliasParserPath = Join-Path $script:ScriptsUtilsDocsPath 'modules' 'DocAliasParser.psm1'
             $functionParserPath = Join-Path $script:ScriptsUtilsDocsPath 'modules' 'DocFunctionParser.psm1'
@@ -275,9 +599,24 @@ Set-Alias -Name test-alias -Value Test-TargetFunction
             $tempDir = Join-Path $script:TestTempRoot 'docs_index'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
+            $testProfileDir = Join-Path $tempDir 'profile.d'
+            New-Item -ItemType Directory -Path $testProfileDir -Force | Out-Null
+            $testFileContent = @'
+<#
+.SYNOPSIS
+    Sample function.
+.DESCRIPTION
+    Used for index generation tests.
+#>
+function Test-IndexFunction { }
+
+Set-Alias -Name test-index-alias -Value Test-IndexFunction
+'@
+            Set-Content -Path (Join-Path $testProfileDir 'test.ps1') -Value $testFileContent -Encoding UTF8
+
             $scriptPath = Join-Path $script:ScriptsUtilsDocsPath 'generate-docs.ps1'
             $outputPath = Join-Path $tempDir 'api'
-            & $scriptPath -OutputPath $outputPath 2>&1 | Out-Null
+            & $scriptPath -OutputPath $outputPath -ProfilePath $testProfileDir 2>&1 | Out-Null
 
             $readmePath = Join-Path $outputPath 'README.md'
             if (Test-Path $readmePath) {
@@ -295,9 +634,20 @@ Set-Alias -Name test-alias -Value Test-TargetFunction
             $tempDir = Join-Path $script:TestTempRoot 'docs_structure'
             New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
 
+            $testProfileDir = Join-Path $tempDir 'profile.d'
+            New-Item -ItemType Directory -Path $testProfileDir -Force | Out-Null
+            $testFileContent = @'
+<#
+.SYNOPSIS
+    Sample function.
+#>
+function Test-StructureFunction { }
+'@
+            Set-Content -Path (Join-Path $testProfileDir 'test.ps1') -Value $testFileContent -Encoding UTF8
+
             $scriptPath = Join-Path $script:ScriptsUtilsDocsPath 'generate-docs.ps1'
             $outputPath = Join-Path $tempDir 'api'
-            & $scriptPath -OutputPath $outputPath 2>&1 | Out-Null
+            & $scriptPath -OutputPath $outputPath -ProfilePath $testProfileDir 2>&1 | Out-Null
 
             # Verify directory structure
             $functionsPath = Join-Path $outputPath 'functions'

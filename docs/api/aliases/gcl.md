@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Invoke-GitClone`
+Git clone - clone a repository
 
 ## Description
 
-This is an alias that points to the `Invoke-GitClone` command.
+Git clone - clone a repository
 
 ## Alias Information
 

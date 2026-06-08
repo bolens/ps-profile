@@ -31,12 +31,16 @@ Optional path to write transformed content.
 
 ## Outputs
 
-System.String when content is piped or -PassThru is used.
+System.String when content is piped or -PassThru is used. .EXAMPLE ConvertTo-MarkdownLinksFromWikilinks -InputPath ./input.file
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-MarkdownLinksFromWikilinks -InputPath ./input.file
+``
 
 ## Aliases
 

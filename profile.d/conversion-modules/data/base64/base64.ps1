@@ -142,6 +142,9 @@ function Initialize-FileConversion-CoreBasicBase64 {
     Converts file contents or string input to base64 encoded string.
 .PARAMETER InputObject
     The file path or string to encode.
+.EXAMPLE
+    ConvertTo-Base64 -InputPath ./input.file
+
 #>
 function ConvertTo-Base64 {
     param([Parameter(ValueFromPipeline = $true)] $InputObject)
@@ -164,6 +167,9 @@ Set-Alias -Name to-base64 -Value ConvertTo-Base64 -Scope Global -ErrorAction Sil
     Converts base64 encoded string back to readable text.
 .PARAMETER InputObject
     The base64 string to decode.
+.EXAMPLE
+    ConvertFrom-Base64 -InputPath ./input.file
+
 #>
 function ConvertFrom-Base64 {
     param([Parameter(ValueFromPipeline = $true)] $InputObject)

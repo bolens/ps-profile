@@ -17,6 +17,9 @@
     Returns the created script block instead of $true/$false.
 .OUTPUTS
     System.Boolean or System.Management.Automation.ScriptBlock
+.EXAMPLE
+    Set-AgentModeFunction
+
 #>
 function global:Set-AgentModeFunction {
     [CmdletBinding()]
@@ -106,6 +109,9 @@ function global:Set-AgentModeFunction {
     Returns the alias definition instead of $true/$false.
 .OUTPUTS
     System.Boolean or System.String
+.EXAMPLE
+    Set-AgentModeAlias
+
 #>
 function global:Set-AgentModeAlias {
     [CmdletBinding()]
@@ -180,6 +186,9 @@ function global:Set-AgentModeAlias {
     Optional alias name for the lazy-loaded function.
 .OUTPUTS
     System.Boolean
+.EXAMPLE
+    Register-LazyFunction
+
 #>
 function global:Register-LazyFunction {
     [CmdletBinding()]

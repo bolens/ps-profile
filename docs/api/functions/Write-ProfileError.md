@@ -31,7 +31,11 @@ Error category for better organization.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Write-ProfileError
+``
 
 ## Source
 

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Length`
+Convert Length
 
 ## Description
 
-This is an alias that points to the `Convert-Length` command.
+Convert Length
 
 ## Alias Information
 

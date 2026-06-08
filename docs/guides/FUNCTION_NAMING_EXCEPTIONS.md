@@ -14,7 +14,7 @@ While most functions follow PowerShell's approved verb naming conventions, some 
 
 ## Exception Categories
 
-### Bootstrap Functions (00-bootstrap.ps1)
+### Bootstrap Functions (`bootstrap.ps1`)
 
 These functions define the infrastructure and cannot use `Set-AgentModeFunction` themselves:
 
@@ -104,6 +104,10 @@ This pattern allows expensive initialization to be deferred until the function i
 2. **New lazy-loading helpers** may use `Ensure-` prefix (documented exception)
 3. **Bootstrap functions** must be defined directly (cannot use `Set-AgentModeFunction`)
 4. **Test functions** may use any naming convention
+
+## API documentation for dynamic registrations
+
+`task generate-docs` discovers `Set-AgentModeFunction`, `Register-LazyFunction`, and `Set-Item` / `New-Item` on `Function:` paths. Pair registrations with comment-based help (block, single-line caption, inline trailing `#`, or file-level bullets). See [CONTRIBUTING.md](../../CONTRIBUTING.md#documentation) for the supported patterns.
 
 ## Validation
 

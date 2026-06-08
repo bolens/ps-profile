@@ -37,6 +37,9 @@ if ($performanceModulePath -and -not [string]::IsNullOrWhiteSpace($performanceMo
 
 .OUTPUTS
     Enhanced performance metrics
+.EXAMPLE
+    Measure-EnhancedPerformance
+
 #>
 function Measure-EnhancedPerformance {
     param(

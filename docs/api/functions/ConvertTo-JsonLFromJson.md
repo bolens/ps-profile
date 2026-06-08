@@ -27,7 +27,11 @@ The path for the output JSONL file. If not specified, uses input path with .json
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-JsonLFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

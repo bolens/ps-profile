@@ -20,6 +20,9 @@ scripts/utils/dependencies/modules/ModuleUpdateHistory.psm1
 
 .PARAMETER RepoRoot
     Repository root directory path.
+.EXAMPLE
+    Save-UpdateHistory
+
 #>
 function Save-UpdateHistory {
     [CmdletBinding()]

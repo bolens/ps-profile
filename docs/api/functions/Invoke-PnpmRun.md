@@ -16,11 +16,26 @@ Invoke-PnpmRun
 
 ## Parameters
 
-No parameters.
+### -Script
+
+package.json script name to execute.
+
+### -Args
+
+Additional arguments forwarded to the script command.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-PnpmRun -Script build -Args @('--watch')
+.PARAMETER Script
+    package.json script name to execute.
+.PARAMETER Args
+    Additional arguments forwarded to the script command.
+``
 
 ## Aliases
 

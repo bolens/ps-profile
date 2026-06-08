@@ -27,12 +27,16 @@ The exit code of the last command.
 
 ## Outputs
 
-System.String[]
+System.String[] .EXAMPLE Get-StarshipPromptArguments
 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Get-StarshipPromptArguments
+``
 
 ## Source
 

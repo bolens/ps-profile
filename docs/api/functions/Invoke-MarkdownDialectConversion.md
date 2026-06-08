@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Initializes markdown dialect conversion utility functions.
+Converts markdown between dialects using pandoc.
 
 ## Description
 
-Sets up internal conversion functions for markdown dialect and wiki markup conversions via pandoc. Called automatically by Ensure-FileConversion-Documents.
+Internal dispatcher used by Convert-MarkdownDialect aliases. Loads document conversion helpers when needed and forwards to _Convert-MarkdownDialect.
 
 ## Signature
 
@@ -16,22 +16,36 @@ Invoke-MarkdownDialectConversion
 
 ## Parameters
 
-No parameters.
+### -InputPath
+
+Path to the input markdown file.
+
+### -OutputPath
+
+Optional output path. Defaults to the input path with .md extension.
+
+### -From
+
+Source dialect alias or pandoc reader format.
+
+### -To
+
+Target dialect alias or pandoc writer format.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
 
-## Notes
-
-Internal initialization function; do not call directly.
-
+`powershell
+Invoke-MarkdownDialectConversion -InputPath note.md -From obsidian -To gfm
+``
 
 ## Aliases
 
 This function has the following aliases:
 
-- `convert-markdown-dialect` - Initializes markdown dialect conversion utility functions.
+- `convert-markdown-dialect` - Converts markdown between dialects using pandoc.
 
 
 ## Source

@@ -3,29 +3,64 @@
 [![Validate PowerShell Profile](https://github.com/bolens/ps-profile/actions/workflows/validate-profile.yml/badge.svg)](https://github.com/bolens/ps-profile/actions/workflows/validate-profile.yml)
 [![Commit message check](https://github.com/bolens/ps-profile/actions/workflows/commit-message-check.yml/badge.svg)](https://github.com/bolens/ps-profile/actions/workflows/commit-message-check.yml)
 
-> **⚠️ WARNING: This project is unstable and may not be working at any given time.**
+> **⚠️ WARNING: This project is under active development and may be unstable at any time.**
 >
-> This repository is under active development and may contain breaking changes, incomplete features, or bugs that prevent normal operation. Use at your own risk.
+> Breaking changes, incomplete features, and bugs that prevent normal operation can occur without notice. Use at your own risk. Pin a commit if you rely on it, and expect to tune fragments for your environment.
 
-A modular, performance-optimized PowerShell profile with lazy loading, container helpers, prompt frameworks, and comprehensive validation.
+A modular, cross-platform PowerShell profile that turns your shell into a lazy-loaded toolkit for daily development work. Functionality lives in **130+ fragments** under `profile.d/`—each focused on one concern (Git, containers, a language runtime, a cloud CLI, a conversion pipeline, and so on)—and loads only when you need it.
+
+## What This Project Does
+
+This is not a minimal prompt-and-alias dotfile. It is a **maintainable profile framework** built around three ideas:
+
+1. **Modular fragments** — Each feature area is a small, idempotent script in `profile.d/` with explicit dependencies, environment presets, and optional disable flags via `.profile-fragments.json`.
+2. **Fast startup** — Expensive work is deferred behind `Enable-*` helpers, command-existence caches, and optional batch/parallel loading so interactive sessions stay responsive.
+3. **On-demand command access** — Functions and aliases register in a fragment command registry so commands can load their fragment automatically (including from `-NoProfile` sessions and generated standalone wrappers). See [docs/guides/FRAGMENT_COMMAND_ACCESS.md](docs/guides/FRAGMENT_COMMAND_ACCESS.md).
+
+In practice the profile bundles helpers for:
+
+- **Development workflows** — Git, modern CLI tools, language runtimes (Go, Rust, Python, Java, Node, and more), build/test runners, and editor integrations
+- **Cloud and infrastructure** — AWS, Azure, GCP, Kubernetes, Terraform, Ansible, and related tooling
+- **Containers** — Docker/Podman helpers with auto-detection
+- **Data and document conversion** — JSON/YAML/CSV/XML, columnar and binary formats, Markdown/LaTeX notes, media transforms, ISBN/bibliography utilities, QR codes, and related pipelines under `profile.d/conversion-modules/`
+- **Shell quality of life** — PSReadLine, oh-my-posh/Starship prompts, history, diagnostics, and system monitoring
+
+The repo also ships the **tooling that keeps the profile maintainable**: Pester unit/integration/performance tests, PSScriptAnalyzer linting, startup benchmarks, auto-generated API docs (`docs/api/`), and 48+ quality tasks via Task/Just/Make/npm.
+
+**Current scale:** see [docs/api/README.md](docs/api/README.md) for live function and alias counts (currently ~1,500 of each).
 
 ## Quick Start
 
+Clone this repository to your PowerShell profile path, then reload:
+
 ```powershell
-# Clone to PowerShell profile location
+# Windows (PowerShell 7+)
 git clone https://github.com/bolens/ps-profile.git $HOME\Documents\PowerShell
+
+# Linux / macOS
+git clone https://github.com/bolens/ps-profile.git ~/.config/powershell
 
 # Reload profile
 . $PROFILE
 ```
 
+Optional: load a slimmer preset before sourcing (see [PROFILE_README.md](PROFILE_README.md#fragment-configuration)):
+
+```powershell
+$env:PS_PROFILE_ENVIRONMENT = 'minimal'   # or development, cloud, ci, …
+. $PROFILE
+```
+
 ## Features
 
-- **Modular Design**: Small, maintainable fragments in `profile.d/` with organized sub-modules, loaded in dependency-aware order
-- **Performance Optimized**: Lazy loading and deferred initialization for fast startup
-- **Container Support**: Docker/Podman helpers with auto-detection (`dcu`, `dcd`, `dcl`, etc.)
-- **Prompt Frameworks**: oh-my-posh and Starship with lazy initialization
-- **Comprehensive Tooling**: 500+ functions, 700+ aliases, validation scripts, benchmarks (see `docs/api/README.md` for current counts)
+- **Modular fragments** — 130+ focused scripts in `profile.d/` with dependency-aware load order and organized sub-modules
+- **Performance optimized** — Lazy loading, deferred initialization, fragment caching, and startup benchmarks
+- **On-demand commands** — Fragment command registry, auto-loading dispatcher, and optional standalone wrappers
+- **Cross-platform** — Windows, Linux, and macOS with platform-aware tool detection
+- **Data & document tooling** — Broad conversion helpers under `conversion-modules/` (data, document, media, dev-tools)
+- **Cloud & containers** — AWS/Azure/GCP/Kubernetes/Terraform helpers plus Docker/Podman integrations
+- **Developer shell** — Git workflows, modern CLI aliases, language-specific fragments, prompts (oh-my-posh/Starship)
+- **Tested & documented** — Pester suites, CI validation, auto-generated API reference, and contributor guides
 
 ## Quick Reference
 
@@ -168,8 +203,7 @@ Performance test thresholds can be tuned with environment variables:
 │   │   ├── crypto/                    # Cryptographic utilities
 │   │   ├── data/                      # Data manipulation tools
 │   │   ├── encoding/                  # Encoding utilities
-│   │   └── format/                    # Formatting tools
-│   │   └── qrcode/                    # QR code generation utilities
+│   │   └── format/                    # Formatting tools (including qrcode/)
 │   ├── diagnostics-modules/           # Diagnostic and monitoring modules
 │   │   ├── core/                      # Core diagnostics
 │   │   └── monitoring/                # System monitoring
@@ -187,7 +221,7 @@ Performance test thresholds can be tuned with environment variables:
 │       └── system/                    # System utilities
 ├── scripts/                           # Validation & utilities
 │   ├── checks/                        # Validation scripts
-│   ├── lib/                           # Shared script modules (39 modules, modular library)
+│   ├── lib/                           # Shared script modules (68+ modules, modular library)
 │   │   ├── ModuleImport.psm1          # Module import helper
 │   │   ├── ExitCodes.psm1             # Exit code constants
 │   │   ├── PathResolution.psm1        # Path resolution utilities

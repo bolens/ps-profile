@@ -16,11 +16,26 @@ Invoke-UVRun
 
 ## Parameters
 
-No parameters.
+### -Command
+
+Python module or script to run with uv run.
+
+### -Args
+
+Additional arguments passed after the command.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-UVRun -Command python -Args @('--version')
+.PARAMETER Command
+    Python module or script to run with uv run.
+.PARAMETER Args
+    Additional arguments passed after the command.
+``
 
 ## Aliases
 

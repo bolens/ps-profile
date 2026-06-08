@@ -16,11 +16,20 @@ Invoke-NaviPrint
 
 ## Parameters
 
-No parameters.
+### -Query
+
+Optional search text used when printing a cheatsheet command.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-NaviPrint -Query 'git rebase'
+.PARAMETER Query
+    Optional search text used when printing a cheatsheet command.
+``
 
 ## Aliases
 

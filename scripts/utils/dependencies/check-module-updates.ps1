@@ -126,7 +126,8 @@ param(
 
     [switch]$Schedule,
 
-    [UpdateFrequency]$ScheduleFrequency
+    [ValidateSet('Daily', 'Weekly', 'Monthly')]
+    [string]$ScheduleFrequency,
 
     [string]$ScheduleTime = "02:00",
 
@@ -151,7 +152,7 @@ param(
     [switch]$TrackHistory
 )
 
-C# Parse debug level once at script start
+# Parse debug level once at script start
 $debugLevel = 0
 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
     # Debug is enabled, $debugLevel contains the numeric level (1-3)

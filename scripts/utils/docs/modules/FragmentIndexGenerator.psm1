@@ -24,6 +24,9 @@ scripts/utils/docs/modules/FragmentIndexGenerator.psm1
 
 .OUTPUTS
     None. File is written directly to disk.
+.EXAMPLE
+    Write-FragmentIndex
+
 #>
 function Write-FragmentIndex {
     [CmdletBinding()]

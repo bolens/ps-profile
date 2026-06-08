@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Expand-Xz`
+Decompresses an XZ compressed file.
 
 ## Description
 
-This is an alias that points to the `Expand-Xz` command.
+Decompresses a file that was compressed using XZ compression.
 
 ## Alias Information
 

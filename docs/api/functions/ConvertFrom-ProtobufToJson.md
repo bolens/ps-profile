@@ -31,7 +31,11 @@ The path to the Protocol Buffers schema file (.proto or JSON schema). Required.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-ProtobufToJson -InputPath ./input.file
+``
 
 ## Aliases
 

@@ -36,6 +36,9 @@ if ($jsonUtilitiesPath -and -not [string]::IsNullOrWhiteSpace($jsonUtilitiesPath
 
 .OUTPUTS
     None
+.EXAMPLE
+    Save-TestConfig
+
 #>
 function Save-TestConfig {
     [CmdletBinding()]
@@ -111,6 +114,9 @@ function Save-TestConfig {
 
 .OUTPUTS
     Hashtable - Parameter names and values
+.EXAMPLE
+    Load-TestConfig
+
 #>
 function Load-TestConfig {
     [CmdletBinding()]
@@ -162,6 +168,11 @@ function Load-TestConfig {
 
 .DESCRIPTION
     Recursively converts a PSCustomObject (from ConvertFrom-Json) to a Hashtable.
+.PARAMETER InputObject
+    Object to serialize or inspect.
+.EXAMPLE
+    ConvertTo-Hashtable
+
 #>
 function ConvertTo-Hashtable {
     param(

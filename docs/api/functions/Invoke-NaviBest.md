@@ -16,11 +16,20 @@ Invoke-NaviBest
 
 ## Parameters
 
-No parameters.
+### -Query
+
+Optional search text used to select the best matching cheatsheet entry.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-NaviBest -Query 'find files'
+.PARAMETER Query
+    Optional search text used to select the best matching cheatsheet entry.
+``
 
 ## Aliases
 

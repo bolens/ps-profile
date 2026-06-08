@@ -241,7 +241,7 @@ try {
     # ===============================================
 
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Tests if a prompt framework command is available.
     
     .DESCRIPTION
@@ -255,7 +255,10 @@ try {
     
     .OUTPUTS
         System.Boolean. True if command is available, false otherwise.
-    #>
+.EXAMPLE
+    Test-PromptCommandAvailable
+
+#>
     function Test-PromptCommandAvailable {
         [CmdletBinding()]
         [OutputType([bool])]

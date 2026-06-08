@@ -325,6 +325,18 @@ function Initialize-FileConversion-CoreTextGaps {
     } -Force
 }
 
+<#
+.SYNOPSIS
+    Converts a YAML file to XML format.
+.DESCRIPTION
+    Uses yq to transform YAML input into XML output.
+.PARAMETER InputPath
+    Path to the YAML source file.
+.PARAMETER OutputPath
+    Optional destination XML path.
+.EXAMPLE
+    ConvertTo-XmlFromYaml -InputPath ./config.yaml
+#>
 function ConvertTo-XmlFromYaml {
     param([string]$InputPath, [string]$OutputPath)
     if (-not $global:FileConversionDataInitialized) { Ensure-FileConversion-Data }
@@ -348,6 +360,9 @@ Set-AgentModeAlias -Name 'yaml-to-xml' -Target 'ConvertTo-XmlFromYaml'
     The path to the JSONL file.
 .PARAMETER OutputPath
     The path for the output CSV file. If not specified, uses input path with .csv extension.
+.EXAMPLE
+    ConvertFrom-JsonLToCsv -InputPath ./input.file
+
 #>
 function ConvertFrom-JsonLToCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -372,6 +387,9 @@ Set-AgentModeAlias -Name 'jsonl-to-csv' -Target 'ConvertFrom-JsonLToCsv'
     The path to the CSV file.
 .PARAMETER OutputPath
     The path for the output JSONL file. If not specified, uses input path with .jsonl extension.
+.EXAMPLE
+    ConvertTo-JsonLFromCsv -InputPath ./input.file
+
 #>
 function ConvertTo-JsonLFromCsv {
     param([string]$InputPath, [string]$OutputPath)
@@ -396,6 +414,9 @@ Set-AgentModeAlias -Name 'csv-to-jsonl' -Target 'ConvertTo-JsonLFromCsv'
     The path to the JSONL file.
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-JsonLToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-JsonLToYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -420,6 +441,9 @@ Set-AgentModeAlias -Name 'jsonl-to-yaml' -Target 'ConvertFrom-JsonLToYaml'
     The path to the YAML file.
 .PARAMETER OutputPath
     The path for the output JSONL file. If not specified, uses input path with .jsonl extension.
+.EXAMPLE
+    ConvertTo-JsonLFromYaml -InputPath ./input.file
+
 #>
 function ConvertTo-JsonLFromYaml {
     param([string]$InputPath, [string]$OutputPath)

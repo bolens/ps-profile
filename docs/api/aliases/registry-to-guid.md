@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-GuidFromRegistryFormat`
+Converts a Windows registry format GUID to standard format.
 
 ## Description
 
-This is an alias that points to the `ConvertTo-GuidFromRegistryFormat` command.
+Converts a GUID in Windows registry format (with braces) to standard format.
 
 ## Alias Information
 

@@ -617,10 +617,10 @@ coverage gaps:
 pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1
 
 # Analyze specific source paths
-pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/00-bootstrap
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap
 
 # Multiple paths
-pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/11-git.ps1,profile.d/02-files.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/git.ps1,profile.d/files.ps1
 
 # Custom report output directory
 pwsh -NoProfile -File scripts/utils/code-quality/analyze-coverage.ps1 -Path profile.d/bootstrap -OutputPath scripts/data/coverage

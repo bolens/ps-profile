@@ -37,7 +37,8 @@ scripts/utils/export-metrics.ps1
 #>
 
 param(
-    [object]$OutputFormat = [OutputFormat]::Json,  # Accepts OutputFormat enum or string for backward compatibility
+    [ValidateSet('Table', 'Json', 'Csv', 'table', 'json', 'csv')]
+    [string]$OutputFormat = 'Json',
 
     [ValidateNotNullOrEmpty()]
     [string]$OutputPath = $null,

@@ -6,7 +6,7 @@ Adds a book to the local ISBN reading-list library.
 
 ## Description
 
-No description available.
+Adds a book to the local ISBN reading-list library.
 
 ## Signature
 
@@ -16,7 +16,27 @@ Add-IsbnLibraryEntry
 
 ## Parameters
 
-No parameters.
+### -Isbn
+
+ISBN for the book to store.
+
+### -Notes
+
+Optional reading notes.
+
+### -Rating
+
+Optional numeric rating.
+
+### -Tags
+
+Optional tag list.
+
+
+## Outputs
+
+PSCustomObject
+
 
 ## Examples
 

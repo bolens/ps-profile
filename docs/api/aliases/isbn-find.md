@@ -6,7 +6,7 @@ Searches for books by title and/or author.
 
 ## Description
 
-This is an alias that points to the `Find-Isbn` command.
+Queries Open Library and Google Books, returning normalized book records. Use -Pick to choose a result in Out-GridView when available.
 
 ## Alias Information
 

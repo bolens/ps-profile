@@ -10,6 +10,9 @@ BeforeAll {
 
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:TaskParityScript = Join-Path $script:TestRepoRoot 'scripts/utils/task-parity/check-task-parity.ps1'
+    $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module (Join-Path $libPath 'file' 'FileBackup.psm1') -DisableNameChecking -ErrorAction Stop
+    $ConfirmPreference = 'None'
 }
 
 Describe 'check-task-parity.ps1 extended scenarios' {
@@ -38,6 +41,51 @@ Describe 'check-task-parity.ps1 extended scenarios' {
         It 'Imports TaskParityUtilities module helpers' {
             $content = Get-Content -LiteralPath $script:TaskParityScript -Raw
             $content | Should -Match 'TaskParityUtilities'
+        }
+    }
+
+    Context 'Backup integration' {
+        It 'Documents restore, prune, and FileBackup parameters' {
+            $content = Get-Content -LiteralPath $script:TaskParityScript -Raw
+            $content | Should -Match '\.PARAMETER Restore'
+            $content | Should -Match '\.PARAMETER Prune'
+            $content | Should -Match 'FileBackup'
+            $content | Should -Match 'task-parity'
+        }
+
+        It 'Uses New-FileBackup instead of writing backups beside task files' {
+            $content = Get-Content -LiteralPath $script:TaskParityScript -Raw
+            $content | Should -Match 'New-FileBackup'
+            $content | Should -Not -Match '\$filePath\.backup\.'
+        }
+
+        It 'Restores the latest task-parity backup for a selected task file' {
+            $repo = New-TestTempDirectory -Prefix 'TaskParityRestore'
+            $taskFile = Join-Path $repo 'Taskfile.yml'
+            Set-Content -LiteralPath $taskFile -Value 'version: "3"' -NoNewline
+            New-FileBackup -SourcePath $taskFile -RepoRoot $repo -Category 'task-parity' -SkipPrune | Out-Null
+            Set-Content -LiteralPath $taskFile -Value 'version: "9"' -NoNewline
+
+            & pwsh -NoProfile -File $script:TaskParityScript -Restore -TargetFile 'taskfile' -RepoRoot $repo -Force 2>&1 | Out-Null
+            $LASTEXITCODE | Should -Be 0
+            Get-Content -LiteralPath $taskFile -Raw | Should -Be 'version: "3"'
+        }
+
+        It 'Prunes older task-parity backups for a selected task file' {
+            $repo = New-TestTempDirectory -Prefix 'TaskParityPrune'
+            $taskFile = Join-Path $repo 'Makefile'
+
+            1..3 | ForEach-Object {
+                Set-Content -LiteralPath $taskFile -Value "target-$_" -NoNewline
+                New-FileBackup -SourcePath $taskFile -RepoRoot $repo -Category 'task-parity' -SkipPrune | Out-Null
+                Start-Sleep -Milliseconds 20
+            }
+
+            & pwsh -NoProfile -File $script:TaskParityScript -Prune -TargetFile 'makefile' -RepoRoot $repo -KeepCount 1 2>&1 | Out-Null
+            $LASTEXITCODE | Should -Be 0
+
+            $remaining = @(Get-FileBackups -RepoRoot $repo -Category 'task-parity' -SourcePath $taskFile)
+            $remaining.Count | Should -Be 1
         }
     }
 }

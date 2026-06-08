@@ -8,9 +8,27 @@
 <#
 .SYNOPSIS
     Helpers for resolving install hints embedded in conversion scripts and messages.
+
+.DESCRIPTION
+    Builds platform-aware npm, pip, and uv install commands and substitutes
+    __NODE_INSTALL_CMD__ and __PYTHON_INSTALL_CMD__ placeholders in scripts and
+    user-facing warnings.
 #>
 
 function global:Get-EmbeddedInstallCommandFromHint {
+    <#
+.SYNOPSIS
+        Extracts the install command from a formatted install hint string.
+
+.DESCRIPTION
+        Extracts the install command from a formatted install hint string.
+
+.PARAMETER Hint
+        Hint text such as "Install with: npm install foo".
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -30,6 +48,22 @@ function global:Get-EmbeddedInstallCommandFromHint {
 }
 
 function global:Get-NodePackageInstallCommandCore {
+    <#
+.SYNOPSIS
+        Builds an install command for one or more Node.js packages.
+
+.DESCRIPTION
+        Builds an install command for one or more Node.js packages.
+
+.PARAMETER PackageNames
+        Package names to install.
+
+.PARAMETER Global
+        Uses a global install command when preference detection falls back to npm.
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -70,6 +104,25 @@ function global:Get-NodePackageInstallCommandCore {
 }
 
 function global:Get-PythonPackageInstallCommandCore {
+    <#
+.SYNOPSIS
+        Builds an install command for one or more Python packages.
+
+.DESCRIPTION
+        Builds an install command for one or more Python packages.
+
+.PARAMETER PackageNames
+        Package names to install.
+
+.PARAMETER Global
+        Prefers uv pip install when uv is available.
+
+.PARAMETER PythonCmd
+        Python executable used for pip fallback commands.
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -125,9 +178,24 @@ function global:Get-PythonPackageInstallCommandCore {
 
 function global:Get-NodePackageInstallRecommendation {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets a platform-aware install command for one or more Node.js packages.
-    #>
+
+.DESCRIPTION
+        Gets a platform-aware install command for one or more Node.js packages.
+
+.PARAMETER PackageNames
+        Package names to install.
+
+.PARAMETER PackageName
+        Single package alias for PackageNames.
+
+.PARAMETER Global
+        Requests a global install command.
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -153,9 +221,27 @@ function global:Get-NodePackageInstallRecommendation {
 
 function global:Get-PythonPackageInstallRecommendation {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Gets a platform-aware install command for one or more Python packages.
-    #>
+
+.DESCRIPTION
+        Gets a platform-aware install command for one or more Python packages.
+
+.PARAMETER PackageNames
+        Package names to install.
+
+.PARAMETER PackageName
+        Single package alias for PackageNames.
+
+.PARAMETER Global
+        Requests a global install command.
+
+.PARAMETER PythonCmd
+        Python executable used for pip fallback commands.
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -183,9 +269,24 @@ function global:Get-PythonPackageInstallRecommendation {
 
 function global:Expand-EmbeddedNodeInstallHints {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Replaces __NODE_INSTALL_CMD__ placeholders in an embedded Node.js script.
-    #>
+
+.DESCRIPTION
+        Replaces __NODE_INSTALL_CMD__ placeholders in an embedded Node.js script.
+
+.PARAMETER Script
+        Script text containing placeholders.
+
+.PARAMETER PackageNames
+        Node package names used to build the install command.
+
+.PARAMETER Global
+        Uses a global install command when building the replacement.
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -208,9 +309,27 @@ function global:Expand-EmbeddedNodeInstallHints {
 
 function global:Expand-EmbeddedPythonInstallHints {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Replaces __PYTHON_INSTALL_CMD__ placeholders in an embedded Python script.
-    #>
+
+.DESCRIPTION
+        Replaces __PYTHON_INSTALL_CMD__ placeholders in an embedded Python script.
+
+.PARAMETER Script
+        Script text containing placeholders.
+
+.PARAMETER PackageNames
+        Python package names used to build the install command.
+
+.PARAMETER Global
+        Uses a global install command when building the replacement.
+
+.PARAMETER PythonCmd
+        Python executable used for pip fallback commands.
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -235,9 +354,24 @@ function global:Expand-EmbeddedPythonInstallHints {
 
 function global:Resolve-NodeInstallHintMessage {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Replaces __NODE_INSTALL_CMD__ placeholders in a user-facing message.
-    #>
+
+.DESCRIPTION
+        Replaces __NODE_INSTALL_CMD__ placeholders in a user-facing message.
+
+.PARAMETER Message
+        Message text containing placeholders.
+
+.PARAMETER PackageNames
+        Node package names used to build the install command.
+
+.PARAMETER Global
+        Uses a global install command when building the replacement.
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(
@@ -260,9 +394,27 @@ function global:Resolve-NodeInstallHintMessage {
 
 function global:Resolve-PythonInstallHintMessage {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Replaces __PYTHON_INSTALL_CMD__ placeholders in a user-facing message.
-    #>
+
+.DESCRIPTION
+        Replaces __PYTHON_INSTALL_CMD__ placeholders in a user-facing message.
+
+.PARAMETER Message
+        Message text containing placeholders.
+
+.PARAMETER PackageNames
+        Python package names used to build the install command.
+
+.PARAMETER Global
+        Uses a global install command when building the replacement.
+
+.PARAMETER PythonCmd
+        Python executable used for pip fallback commands.
+
+.OUTPUTS
+        System.String
+#>
     [CmdletBinding()]
     [OutputType([string])]
     param(

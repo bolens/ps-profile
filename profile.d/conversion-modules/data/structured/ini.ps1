@@ -715,6 +715,9 @@ function Initialize-FileConversion-Ini {
     The path to the INI file.
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-IniToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-IniToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -732,6 +735,9 @@ Set-AgentModeAlias -Name 'ini-to-json' -Target 'ConvertFrom-IniToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output INI file. If not specified, uses input path with .ini extension.
+.EXAMPLE
+    ConvertTo-IniFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-IniFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -749,6 +755,9 @@ Set-AgentModeAlias -Name 'json-to-ini' -Target 'ConvertTo-IniFromJson'
     The path to the INI file.
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-IniToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-IniToYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -766,6 +775,9 @@ Set-AgentModeAlias -Name 'ini-to-yaml' -Target 'ConvertFrom-IniToYaml'
     The path to the YAML file.
 .PARAMETER OutputPath
     The path for the output INI file. If not specified, uses input path with .ini extension.
+.EXAMPLE
+    ConvertTo-IniFromYaml -InputPath ./input.file
+
 #>
 function ConvertTo-IniFromYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -783,6 +795,9 @@ Set-AgentModeAlias -Name 'yaml-to-ini' -Target 'ConvertTo-IniFromYaml'
     The path to the INI file.
 .PARAMETER OutputPath
     The path for the output XML file. If not specified, uses input path with .xml extension.
+.EXAMPLE
+    ConvertFrom-IniToXml -InputPath ./input.file
+
 #>
 function ConvertFrom-IniToXml {
     param([string]$InputPath, [string]$OutputPath)
@@ -800,6 +815,9 @@ Set-AgentModeAlias -Name 'ini-to-xml' -Target 'ConvertFrom-IniToXml'
     The path to the XML file.
 .PARAMETER OutputPath
     The path for the output INI file. If not specified, uses input path with .ini extension.
+.EXAMPLE
+    ConvertTo-IniFromXml -InputPath ./input.file
+
 #>
 function ConvertTo-IniFromXml {
     param([string]$InputPath, [string]$OutputPath)
@@ -817,6 +835,9 @@ Set-AgentModeAlias -Name 'xml-to-ini' -Target 'ConvertTo-IniFromXml'
     The path to the INI file.
 .PARAMETER OutputPath
     The path for the output TOML file. If not specified, uses input path with .toml extension.
+.EXAMPLE
+    ConvertFrom-IniToToml -InputPath ./input.file
+
 #>
 function ConvertFrom-IniToToml {
     param([string]$InputPath, [string]$OutputPath)
@@ -834,6 +855,9 @@ Set-AgentModeAlias -Name 'ini-to-toml' -Target 'ConvertFrom-IniToToml'
     The path to the TOML file.
 .PARAMETER OutputPath
     The path for the output INI file. If not specified, uses input path with .ini extension.
+.EXAMPLE
+    ConvertTo-IniFromToml -InputPath ./input.file
+
 #>
 function ConvertTo-IniFromToml {
     param([string]$InputPath, [string]$OutputPath)

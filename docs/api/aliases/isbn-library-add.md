@@ -6,7 +6,7 @@ Adds a book to the local ISBN reading-list library.
 
 ## Description
 
-This is an alias that points to the `Add-IsbnLibraryEntry` command.
+Adds a book to the local ISBN reading-list library.
 
 ## Alias Information
 

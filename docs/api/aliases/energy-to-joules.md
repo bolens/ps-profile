@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertTo-JoulesFromEnergy`
+Convert to Joules
 
 ## Description
 
-This is an alias that points to the `ConvertTo-JoulesFromEnergy` command.
+Convert to Joules
 
 ## Alias Information
 

@@ -651,6 +651,9 @@ except Exception as e:
     The path to the CFG file (.cfg, .conf, or .config extension).
 .PARAMETER OutputPath
     The path for the output JSON file. If not specified, uses input path with .json extension.
+.EXAMPLE
+    ConvertFrom-CfgToJson -InputPath ./input.file
+
 #>
 function ConvertFrom-CfgToJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -670,6 +673,9 @@ Set-AgentModeAlias -Name 'configparser-to-json' -Target 'ConvertFrom-CfgToJson'
     The path to the JSON file.
 .PARAMETER OutputPath
     The path for the output CFG file. If not specified, uses input path with .cfg extension.
+.EXAMPLE
+    ConvertTo-CfgFromJson -InputPath ./input.file
+
 #>
 function ConvertTo-CfgFromJson {
     param([string]$InputPath, [string]$OutputPath)
@@ -689,6 +695,9 @@ Set-AgentModeAlias -Name 'json-to-configparser' -Target 'ConvertTo-CfgFromJson'
     The path to the CFG file (.cfg, .conf, or .config extension).
 .PARAMETER OutputPath
     The path for the output YAML file. If not specified, uses input path with .yaml extension.
+.EXAMPLE
+    ConvertFrom-CfgToYaml -InputPath ./input.file
+
 #>
 function ConvertFrom-CfgToYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -707,6 +716,9 @@ Set-AgentModeAlias -Name 'cfg-to-yaml' -Target 'ConvertFrom-CfgToYaml'
     The path to the YAML file.
 .PARAMETER OutputPath
     The path for the output CFG file. If not specified, uses input path with .cfg extension.
+.EXAMPLE
+    ConvertTo-CfgFromYaml -InputPath ./input.file
+
 #>
 function ConvertTo-CfgFromYaml {
     param([string]$InputPath, [string]$OutputPath)
@@ -726,6 +738,9 @@ Set-AgentModeAlias -Name 'yaml-to-cfg' -Target 'ConvertTo-CfgFromYaml'
     The path to the CFG file (.cfg, .conf, or .config extension).
 .PARAMETER OutputPath
     The path for the output INI file. If not specified, uses input path with .ini extension.
+.EXAMPLE
+    ConvertFrom-CfgToIni -InputPath ./input.file
+
 #>
 function ConvertFrom-CfgToIni {
     param([string]$InputPath, [string]$OutputPath)
@@ -745,6 +760,9 @@ Set-AgentModeAlias -Name 'cfg-to-ini' -Target 'ConvertFrom-CfgToIni'
     The path to the INI file.
 .PARAMETER OutputPath
     The path for the output CFG file. If not specified, uses input path with .cfg extension.
+.EXAMPLE
+    ConvertTo-CfgFromIni -InputPath ./input.file
+
 #>
 function ConvertTo-CfgFromIni {
     param([string]$InputPath, [string]$OutputPath)

@@ -6,7 +6,7 @@ Runs ansible with the correct invocation strategy for the current platform.
 
 ## Description
 
-This is an alias that points to the `Invoke-Ansible` command.
+Runs ansible with the correct invocation strategy for the current platform.
 
 ## Alias Information
 

@@ -36,6 +36,9 @@ if ($localeModulePath -and -not [string]::IsNullOrWhiteSpace($localeModulePath) 
 
 .OUTPUTS
     Hashtable with SelectedTests (array) and SelectedFiles (array)
+.EXAMPLE
+    Select-TestsInteractively
+
 #>
 function Select-TestsInteractively {
     [CmdletBinding()]

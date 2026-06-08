@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Expand-Brotli`
+Decompresses a Brotli compressed file.
 
 ## Description
 
-This is an alias that points to the `Expand-Brotli` command.
+Decompresses a file that was compressed using Brotli compression.
 
 ## Alias Information
 

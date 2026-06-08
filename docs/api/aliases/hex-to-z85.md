@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-HexToZ85`
+Hex to Z85
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-HexToZ85` command.
+Hex to Z85
 
 ## Alias Information
 

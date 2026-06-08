@@ -27,7 +27,11 @@ If specified, modifies the system-wide PATH; otherwise, modifies user PATH.
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Add-Path
+``
 
 ## Source
 

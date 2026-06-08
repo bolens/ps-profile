@@ -16,17 +16,26 @@ Show-GitHubPullRequest
 
 ## Parameters
 
-No parameters.
+### -a
+
+Arguments forwarded to gh pr view --web.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Show-GitHubPullRequest 42
+.PARAMETER a
+    Arguments forwarded to gh pr view --web.
+``
 
 ## Aliases
 
 This function has the following aliases:
 
-- `prv` - Views a GitHub pull request in the browser.
+- `prv` - GitHub PR view - view pull request in browser
 
 
 ## Source

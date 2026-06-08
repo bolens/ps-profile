@@ -16,11 +16,26 @@ Find-String
 
 ## Parameters
 
-No parameters.
+### -Pattern
+
+Text or regex pattern to search for.
+
+### -Path
+
+File or directory path to search. Defaults to the current directory when omitted.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Find-String -Pattern 'TODO' -Path ./src
+.PARAMETER Pattern
+    Text or regex pattern to search for.
+.PARAMETER Path
+    File or directory path to search. Defaults to the current directory when omitted.
+``
 
 ## Aliases
 

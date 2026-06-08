@@ -6,7 +6,7 @@ Runs ansible-vault with the correct invocation strategy for the current platform
 
 ## Description
 
-No description available.
+Runs ansible-vault with the correct invocation strategy for the current platform.
 
 ## Signature
 
@@ -23,11 +23,7 @@ Arguments to pass to ansible-vault.
 
 ## Examples
 
-### Example 1
-
-`powershell
-Invoke-AnsibleVault encrypt secrets.yml
-``
+No examples provided.
 
 ## Aliases
 

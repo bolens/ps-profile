@@ -27,7 +27,11 @@ The path for the output Stata file. If not specified, uses input path with .dta 
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertTo-StataFromJson -InputPath ./input.file
+``
 
 ## Aliases
 

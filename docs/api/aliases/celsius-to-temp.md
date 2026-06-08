@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `ConvertFrom-CelsiusToTemperature`
+Convert from Celsius
 
 ## Description
 
-This is an alias that points to the `ConvertFrom-CelsiusToTemperature` command.
+Convert from Celsius
 
 ## Alias Information
 

@@ -16,11 +16,26 @@ Invoke-PixiRun
 
 ## Parameters
 
-No parameters.
+### -Command
+
+Command to run inside the pixi environment.
+
+### -Args
+
+Additional arguments forwarded to the command.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Invoke-PixiRun -Command python -Args @('script.py')
+.PARAMETER Command
+    Command to run inside the pixi environment.
+.PARAMETER Args
+    Additional arguments forwarded to the command.
+``
 
 ## Aliases
 

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Volume`
+Convert Volume
 
 ## Description
 
-This is an alias that points to the `Convert-Volume` command.
+Convert Volume
 
 ## Alias Information
 

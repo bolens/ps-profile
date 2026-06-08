@@ -36,6 +36,9 @@ function Initialize-FileConversion-MediaVideo {
     The path to the video file.
 .PARAMETER OutputPath
     The path for the output GIF file. If not specified, uses input path with .gif extension.
+.EXAMPLE
+    ConvertFrom-VideoToGif -InputPath ./input.file
+
 #>
 function ConvertFrom-VideoToGif {
     param([string]$InputPath, [string]$OutputPath)

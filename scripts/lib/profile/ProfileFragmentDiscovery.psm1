@@ -9,7 +9,7 @@
 
 function Initialize-FragmentDiscovery {
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Discovers and orders fragments for loading.
 
     .DESCRIPTION
@@ -43,7 +43,10 @@ function Initialize-FragmentDiscovery {
         - FragmentsToLoad: Final list of fragments to load
         - DisabledSet: HashSet of disabled fragment names
         - NonBootstrapFragments: Non-bootstrap fragments in order
-    #>
+.EXAMPLE
+    Initialize-FragmentDiscovery
+
+#>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]

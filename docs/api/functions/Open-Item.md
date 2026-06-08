@@ -16,11 +16,26 @@ Open-Item
 
 ## Parameters
 
-No parameters.
+### -p
+
+File path, directory, or URL to open with the system default handler.
+
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+Open-Item ./README.md
+``
+
+### Example 2
+
+`powershell
+Open-Item https://example.com
+.PARAMETER p
+    File path, directory, or URL to open with the system default handler.
+``
 
 ## Aliases
 

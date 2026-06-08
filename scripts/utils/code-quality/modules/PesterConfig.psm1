@@ -108,6 +108,9 @@ if ($executionConfigPath -and -not [string]::IsNullOrWhiteSpace($executionConfig
 
 .OUTPUTS
     PesterConfiguration
+.EXAMPLE
+    New-PesterTestConfiguration
+
 #>
 function New-PesterTestConfiguration {
     param(

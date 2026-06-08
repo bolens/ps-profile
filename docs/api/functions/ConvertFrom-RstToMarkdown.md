@@ -27,7 +27,11 @@ The path for the output Markdown file. If not specified, uses input path with .m
 
 ## Examples
 
-No examples provided.
+### Example 1
+
+`powershell
+ConvertFrom-RstToMarkdown -InputPath ./input.file
+``
 
 ## Aliases
 

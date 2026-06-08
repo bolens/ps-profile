@@ -19,7 +19,7 @@ try {
 
     # Enhanced error logging function
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Logs errors with enhanced context and formatting.
     .DESCRIPTION
         Provides comprehensive error logging with timestamps, context, and suggestions.
@@ -30,7 +30,10 @@ try {
         Additional context about where the error occurred.
     .PARAMETER Category
         Error category for better organization.
-    #>
+.EXAMPLE
+    Write-ProfileError
+
+#>
     function Write-ProfileError {
         param(
             [Parameter(Mandatory)] [System.Management.Automation.ErrorRecord]$ErrorRecord,
@@ -153,14 +156,17 @@ Message: $errorMessage
 
     # Global error handler with recovery suggestions
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Enhanced global error handler with recovery suggestions.
     .DESCRIPTION
         Provides intelligent error handling with suggestions for common issues.
         Attempts recovery where possible and provides helpful guidance.
     .PARAMETER ErrorRecord
         The error record to handle.
-    #>
+.EXAMPLE
+    Invoke-ProfileErrorHandler
+
+#>
     function Invoke-ProfileErrorHandler {
         param([System.Management.Automation.ErrorRecord]$ErrorRecord)
 
@@ -210,7 +216,7 @@ Message: $errorMessage
 
     # Enhanced fragment loading with retry logic
     <#
-    .SYNOPSIS
+.SYNOPSIS
         Loads profile fragments with enhanced error handling and retry logic.
     .DESCRIPTION
         Wraps fragment loading with retry mechanisms and better error reporting.
@@ -221,7 +227,10 @@ Message: $errorMessage
         Name of the fragment for logging.
     .PARAMETER MaxRetries
         Maximum number of retry attempts.
-    #>
+.EXAMPLE
+    Invoke-SafeFragmentLoad
+
+#>
     function Invoke-SafeFragmentLoad {
         param(
             [Parameter(Mandatory)] [string]$FragmentPath,

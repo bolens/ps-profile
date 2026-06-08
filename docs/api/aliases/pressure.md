@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Convert-Pressure`
+Convert Pressure
 
 ## Description
 
-This is an alias that points to the `Convert-Pressure` command.
+Convert Pressure
 
 ## Alias Information
 

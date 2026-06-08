@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Alias for `Switch-GitPreviousBranch`
+Git checkout previous - switch to previous branch
 
 ## Description
 
-This is an alias that points to the `Switch-GitPreviousBranch` command.
+Git checkout previous - switch to previous branch
 
 ## Alias Information
 
