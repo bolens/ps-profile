@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/bolens/ps-profile/compare/v1.9.0...v1.10.0) (2026-06-08)
+
+
+### Features
+
+* **conversion:** add extended unit converters and doc tooling ([d054ac0](https://github.com/bolens/ps-profile/commit/d054ac0f81d2d69ce0257855f342c6a7e2d9dc8e))
+
 ## [unreleased]
 
 ### 🚀 Features
