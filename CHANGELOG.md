@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/bolens/ps-profile/compare/v1.8.0...v1.9.0) (2026-06-08)
+
+
+### Features
+
+* add bootstrap modules, doc tooling, compression/conversion utilities ([249083c](https://github.com/bolens/ps-profile/commit/249083c79de6fe9a587231fbf55d03df2e8a1cc3))
+
 # [1.8.0](https://github.com/bolens/ps-profile/compare/v1.7.0...v1.8.0) (2026-06-08)
 
 
