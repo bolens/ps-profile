@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-main-loader-scoop-extended.tests.ps1
-#>
+# ===============================================
+# profile-main-loader-scoop-extended.tests.ps1
+# Execution tests for Microsoft.PowerShell_profile.ps1 Scoop integration
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,35 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+    $script:ProfileScoopModule = Join-Path $script:TestRepoRoot 'scripts/lib/profile/ProfileScoop.psm1'
 }
+
 Describe 'Microsoft.PowerShell_profile.ps1 Scoop integration extended scenarios' {
-    It 'Documents Scoop package manager integration' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'SCOOP INTEGRATION'
-        $c | Should -Match 'ProfileScoop.psm1'
-        $c | Should -Match 'Initialize-ProfileScoop'
+    It 'ProfileScoop module exists at the expected repository path' {
+        Test-Path -LiteralPath $script:ProfileScoopModule | Should -Be $true
     }
-    It 'Initializes Scoop when profile module is available' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'Import-Module .+profileScoopModule'
-        $c | Should -Match 'Initialize-ProfileScoop -ProfileDir'
+
+    It 'Initialize-ProfileScoop is available after profile load' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if (Get-Command Initialize-ProfileScoop -ErrorAction SilentlyContinue) { 'SCOOP_CMD_OK' }
+"@
+
+        $result | Should -Match 'SCOOP_CMD_OK'
     }
-    It 'Warns on Scoop module load failure when debug enabled' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'Failed to load ProfileScoop module'
-        $c | Should -Match 'PS_PROFILE_DEBUG'
+
+    It 'Profile load completes after Scoop bootstrap section runs' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Select-String -Path `$log -Pattern 'Before fragment loading section' -Quiet) { 'SCOOP_LOAD_OK' }
+"@
+
+        $result | Should -Match 'SCOOP_LOAD_OK'
     }
 }

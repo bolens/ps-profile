@@ -19,9 +19,34 @@ scripts/lib/FileContent.psm1
 # Enable strict mode for enhanced error checking
 Set-StrictMode -Version Latest
 
+function Test-FileContentTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-FileContentUseValidation {
+    if (Test-FileContentTestEnvFlag -Name 'PS_PROFILE_FILECONTENT_SKIP_VALIDATION') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Test-ValidPath -ErrorAction SilentlyContinue)
+}
+
 # Import ErrorHandling module if available for consistent error action preference handling
 $errorHandlingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'core' 'ErrorHandling.psm1'
-if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+$forceManualModuleImport = Test-FileContentTestEnvFlag -Name 'PS_PROFILE_FILECONTENT_FORCE_MANUAL_IMPORT'
+if (-not $forceManualModuleImport -and (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue)) {
     Import-ModuleSafely -ModulePath $errorHandlingModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 else {
@@ -77,7 +102,7 @@ function Read-FileContent {
     }
 
     # Use Validation module if available
-    if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
+    if (Test-FileContentUseValidation) {
         if (-not (Test-ValidPath -Path $Path -PathType File)) {
             if ($errorActionPreference -eq 'Stop') {
                 throw "File not found: $Path"

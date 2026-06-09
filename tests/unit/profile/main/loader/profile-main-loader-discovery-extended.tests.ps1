@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-main-loader-discovery-extended.tests.ps1
-#>
+# ===============================================
+# profile-main-loader-discovery-extended.tests.ps1
+# Execution tests for Microsoft.PowerShell_profile.ps1 fragment discovery
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,35 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+    $script:DiscoveryModule = Join-Path $script:TestRepoRoot 'scripts/lib/profile/ProfileFragmentDiscovery.psm1'
 }
+
 Describe 'Microsoft.PowerShell_profile.ps1 fragment discovery extended scenarios' {
-    It 'Uses ProfileFragmentDiscovery for load ordering' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'ProfileFragmentDiscovery.psm1'
-        $c | Should -Match 'Initialize-FragmentDiscovery'
-        $c | Should -Match 'FragmentsToLoad'
+    It 'ProfileFragmentDiscovery module exists at the expected repository path' {
+        Test-Path -LiteralPath $script:DiscoveryModule | Should -Be $true
     }
-    It 'Supports parallel loading via environment flag' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'PS_PROFILE_PARALLEL_LOADING'
-        $c | Should -Match 'Test-EnvBool'
-        $c | Should -Match 'EnableParallelLoading'
+
+    It 'Profile load reaches fragment loading via Initialize-FragmentLoading' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Select-String -Path `$log -Pattern 'Initialize-FragmentLoading completed' -Quiet) { 'DISCOVERY_LOAD_OK' }
+"@
+
+        $result | Should -Match 'DISCOVERY_LOAD_OK'
     }
-    It 'Falls back to alphabetical ordering when discovery fails' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'Fallback: use simple alphabetical ordering'
-        $c | Should -Match 'Sort-Object Name'
+
+    It 'Loads profile fragments from profile.d after discovery completes' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) { 'FRAGMENTS_READY_OK' }
+"@
+
+        $result | Should -Match 'FRAGMENTS_READY_OK'
     }
 }

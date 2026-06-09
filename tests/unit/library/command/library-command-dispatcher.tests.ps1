@@ -3,17 +3,17 @@
 # Unit tests for CommandDispatcher.psm1
 # ===============================================
 
-$current = Get-Item $PSScriptRoot
-while ($null -ne $current) {
-    $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
-    if (Test-Path -LiteralPath $testSupportPath) {
-        . $testSupportPath
-        break
-    }
-    if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
-    $current = $current.Parent
-}
 BeforeAll {
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
+            . $testSupportPath
+            break
+        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
+    }
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:FragmentLibDir = Join-Path $script:RepoRoot 'scripts' 'lib' 'fragment'
     $script:DispatcherModulePath = Join-Path $script:FragmentLibDir 'CommandDispatcher.psm1'
@@ -129,15 +129,15 @@ Describe 'CommandDispatcher.psm1' {
     
     It 'Returns false when registry is not available' {
         if (Get-Command Register-CommandDispatcher -ErrorAction SilentlyContinue) {
-            # Temporarily remove registry
             $originalRegistry = $global:FragmentCommandRegistry
-            Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
-            
-                        $result = Register-CommandDispatcher
-            $result | Should -Be $false
-        }
-        finally {
-            $global:FragmentCommandRegistry = $originalRegistry
+            try {
+                Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
+                $result = Register-CommandDispatcher
+                $result | Should -Be $false
+            }
+            finally {
+                $global:FragmentCommandRegistry = $originalRegistry
+            }
         }
     }
     
@@ -320,16 +320,16 @@ Describe 'CommandDispatcher.psm1' {
     Describe 'Register-CommandDispatcher error handling' {
     It 'Handles chaining with existing CommandNotFoundAction' {
         if (Get-Command Register-CommandDispatcher -ErrorAction SilentlyContinue) {
-            # Set up an existing handler
             $originalHandler = $ExecutionContext.InvokeCommand.CommandNotFoundAction
             $testHandler = { param($cmd, $args) }
-            $ExecutionContext.InvokeCommand.CommandNotFoundAction = $testHandler
-            
-                        $result = Register-CommandDispatcher
-            $result | Should -Be $true
-        }
-        finally {
-            $ExecutionContext.InvokeCommand.CommandNotFoundAction = $originalHandler
+            try {
+                $ExecutionContext.InvokeCommand.CommandNotFoundAction = $testHandler
+                $result = Register-CommandDispatcher
+                $result | Should -Be $true
+            }
+            finally {
+                $ExecutionContext.InvokeCommand.CommandNotFoundAction = $originalHandler
+            }
         }
     }
     
@@ -344,14 +344,14 @@ Describe 'CommandDispatcher.psm1' {
     Describe 'Test-CommandInRegistry error handling' {
     It 'Handles missing registry module gracefully' {
         if (Get-Command Test-CommandInRegistry -ErrorAction SilentlyContinue) {
-            # Temporarily remove registry
             $originalRegistry = $global:FragmentCommandRegistry
-            Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
-            
-                        Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
-        }
-        finally {
-            $global:FragmentCommandRegistry = $originalRegistry
+            try {
+                Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
+                Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
+            }
+            finally {
+                $global:FragmentCommandRegistry = $originalRegistry
+            }
         }
     }
     

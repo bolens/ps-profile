@@ -19,6 +19,30 @@ scripts/lib/PathUtilities.psm1
 # Enable strict mode for enhanced error checking
 Set-StrictMode -Version Latest
 
+function Test-PathUtilitiesTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-PathUtilitiesUseValidation {
+    if (Test-PathUtilitiesTestEnvFlag -Name 'PS_PROFILE_PATH_UTILITIES_SKIP_VALIDATION') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Test-ValidPath -ErrorAction SilentlyContinue)
+}
+
 <#
 .SYNOPSIS
     Calculates a relative path from one path to another.
@@ -64,7 +88,7 @@ function Get-RelativePath {
 
     # Try to resolve paths if they exist
     # Use Validation module if available
-    $useValidation = Get-Command Test-ValidPath -ErrorAction SilentlyContinue
+    $useValidation = Test-PathUtilitiesUseValidation
     
     try {
         if ($useValidation) {
@@ -90,7 +114,8 @@ function Get-RelativePath {
     }
 
     # Use .NET Core 2.0+ Path.GetRelativePath if available
-    if ([System.IO.Path].GetMethods() | Where-Object { $_.Name -eq 'GetRelativePath' }) {
+    $forceUriFallback = Test-PathUtilitiesTestEnvFlag -Name 'PS_PROFILE_PATH_UTILITIES_FORCE_URI_FALLBACK'
+    if (-not $forceUriFallback -and ([System.IO.Path].GetMethods() | Where-Object { $_.Name -eq 'GetRelativePath' })) {
         try {
             $relative = [System.IO.Path]::GetRelativePath($fromPath, $toPath)
             return $relative
@@ -173,10 +198,14 @@ function ConvertTo-RepoRelativePath {
 
     # Try to resolve the path
     # Use Validation module if available
-    $useValidation = Get-Command Test-ValidPath -ErrorAction SilentlyContinue
+    $useValidation = Test-PathUtilitiesUseValidation
     
     $resolvedPath = $Path
     try {
+        if (Test-PathUtilitiesTestEnvFlag -Name 'PS_PROFILE_PATH_UTILITIES_FORCE_RESOLVE_ERROR') {
+            throw [System.InvalidOperationException]::new('path utilities resolve probe')
+        }
+
         if ($useValidation) {
             if (Test-ValidPath -Path $Path) {
                 $resolvedPath = (Resolve-Path $Path).ProviderPath
@@ -246,7 +275,7 @@ function Normalize-Path {
     }
 
     # Use Validation module if available
-    $useValidation = Get-Command Test-ValidPath -ErrorAction SilentlyContinue
+    $useValidation = Test-PathUtilitiesUseValidation
     
     # If RepoRoot is provided, convert to repository-relative
     $repoRootValid = if ($useValidation) {

@@ -78,5 +78,169 @@ Describe 'Locale extended scenarios' {
             $output.Number | Should -Not -BeNullOrEmpty
             $output.Currency | Should -Not -BeNullOrEmpty
         }
+
+        It 'Formats dates and numbers without explicit format strings' {
+            $sampleDate = Get-Date '2024-03-10T12:00:00'
+            Format-LocaleDate -Date $sampleDate | Should -Not -BeNullOrEmpty
+            Format-LocaleNumber -Number 9876.5 | Should -Match '\d'
+        }
+
+        It 'Builds partial locale output when only some values are supplied' {
+            $sampleDate = Get-Date '2024-05-01T09:00:00'
+            $dateOnly = Format-LocaleOutput -Date $sampleDate -DateFormat 'yyyy-MM-dd'
+            $numberOnly = Format-LocaleOutput -Number 42.25 -NumberFormat 'N2'
+            $currencyOnly = Format-LocaleOutput -Currency 9.99
+
+            $dateOnly.Date | Should -Be '2024-05-01'
+            $dateOnly.PSObject.Properties.Name | Should -Not -Contain 'Number'
+            $numberOnly.Number | Should -Not -BeNullOrEmpty
+            $currencyOnly.Currency | Should -Match '\d'
+        }
+    }
+
+    Context 'Locale detection helpers' {
+        It 'Exposes UK and US English helper functions' {
+            { Test-IsUKEnglish } | Should -Not -Throw
+            { Test-IsUSEnglish } | Should -Not -Throw
+            $ukResult = Test-IsUKEnglish
+            $usResult = Test-IsUSEnglish
+            $ukResult.GetType() | Should -Be ([bool])
+            $usResult.GetType() | Should -Be ([bool])
+        }
+
+        It 'Detects UK English when culture is en-GB' {
+            $originalCulture = [System.Threading.Thread]::CurrentThread.CurrentCulture
+            $originalUiCulture = [System.Threading.Thread]::CurrentThread.CurrentUICulture
+            $ukCulture = [System.Globalization.CultureInfo]::GetCultureInfo('en-GB')
+
+            try {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $ukCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $ukCulture
+
+                $locale = Get-UserLocale
+                $locale.IsUKEnglish | Should -Be $true
+                $locale.EnglishVariant | Should -Be 'UK'
+                Test-IsUKEnglish | Should -Be $true
+                Get-LocalizedMessage -USMessage 'Color' -UKMessage 'Colour' | Should -Be 'Colour'
+            }
+            finally {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $originalCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $originalUiCulture
+            }
+        }
+
+        It 'Detects US English when culture is en-US' {
+            $originalCulture = [System.Threading.Thread]::CurrentThread.CurrentCulture
+            $originalUiCulture = [System.Threading.Thread]::CurrentThread.CurrentUICulture
+            $usCulture = [System.Globalization.CultureInfo]::GetCultureInfo('en-US')
+
+            try {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $usCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $usCulture
+
+                $locale = Get-UserLocale
+                $locale.IsUSEnglish | Should -Be $true
+                $locale.EnglishVariant | Should -Be 'US'
+                Test-IsUSEnglish | Should -Be $true
+                Get-LocalizedMessage -USMessage 'Color' -UKMessage 'Colour' | Should -Be 'Color'
+            }
+            finally {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $originalCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $originalUiCulture
+            }
+        }
+
+        It 'Uses US fallback for other English locales without DefaultMessage' {
+            $originalCulture = [System.Threading.Thread]::CurrentThread.CurrentCulture
+            $originalUiCulture = [System.Threading.Thread]::CurrentThread.CurrentUICulture
+            $auCulture = [System.Globalization.CultureInfo]::GetCultureInfo('en-AU')
+
+            try {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $auCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $auCulture
+
+                $locale = Get-UserLocale
+                $locale.IsEnglish | Should -Be $true
+                $locale.EnglishVariant | Should -Be 'Other'
+                Get-LocalizedMessage -USMessage 'Color' -UKMessage 'Colour' | Should -Be 'Color'
+            }
+            finally {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $originalCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $originalUiCulture
+            }
+        }
+
+        It 'Falls back to USMessage for UK English when UKMessage is omitted' {
+            $originalCulture = [System.Threading.Thread]::CurrentThread.CurrentCulture
+            $originalUiCulture = [System.Threading.Thread]::CurrentThread.CurrentUICulture
+            $ukCulture = [System.Globalization.CultureInfo]::GetCultureInfo('en-GB')
+
+            try {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $ukCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $ukCulture
+
+                Get-LocalizedMessage -USMessage 'Color' | Should -Be 'Color'
+            }
+            finally {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $originalCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $originalUiCulture
+            }
+        }
+
+        It 'Uses DefaultMessage for non-English locales when provided' {
+            $originalCulture = [System.Threading.Thread]::CurrentThread.CurrentCulture
+            $originalUiCulture = [System.Threading.Thread]::CurrentThread.CurrentUICulture
+            $deCulture = [System.Globalization.CultureInfo]::GetCultureInfo('de-DE')
+
+            try {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $deCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $deCulture
+
+                $locale = Get-UserLocale
+                $locale.IsEnglish | Should -Be $false
+                $locale.EnglishVariant | Should -BeNullOrEmpty
+                Get-LocalizedMessage -USMessage 'US' -UKMessage 'UK' -DefaultMessage 'Neutral' | Should -Be 'Neutral'
+            }
+            finally {
+                [System.Threading.Thread]::CurrentThread.CurrentCulture = $originalCulture
+                [System.Threading.Thread]::CurrentThread.CurrentUICulture = $originalUiCulture
+            }
+        }
+
+        It 'Emits debug output when PS_PROFILE_DEBUG is enabled' {
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                $locale = Get-UserLocale
+                $locale.Name | Should -Not -BeNullOrEmpty
+                Format-LocaleOutput -Date (Get-Date) -Number 1.5 -Currency 2.5 | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Emits level 2 locale detection debug output' {
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '2'
+
+            try {
+                Get-UserLocale | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
     }
 }

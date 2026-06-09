@@ -16,9 +16,9 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-    Import-Module (Join-Path $libPath 'file' 'FileContent.psm1') -DisableNameChecking -Force
-    Import-Module (Join-Path $libPath 'code-analysis' 'AstParsing.psm1') -DisableNameChecking -Force
+    $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module (Join-Path $script:LibPath 'file' 'FileContent.psm1') -DisableNameChecking -Force
+    Import-Module (Join-Path $script:LibPath 'code-analysis' 'AstParsing.psm1') -DisableNameChecking -Force
 
     $script:TempDir = New-TestTempDirectory -Prefix 'AstParsingExtended'
     $script:HelpScript = Join-Path $script:TempDir 'help-before.ps1'
@@ -99,6 +99,113 @@ filter global:Test-Filter {
             $functions = @(Get-FunctionsFromAst -Ast $ast)
 
             $functions.Count | Should -Be 0
+        }
+    }
+
+    Context 'Get-FunctionBody' {
+        It 'Returns function body text from the AST extent' {
+            $ast = Get-PowerShellAst -Path $script:HelpScript
+            $func = @(Get-FunctionsFromAst -Ast $ast)[0]
+
+            $body = Get-FunctionBody -FuncAst $func
+
+            $body | Should -Match "return 'ok'"
+        }
+
+    }
+
+    Context 'Get-AstComplexity' {
+        It 'Counts control-flow statements in a script AST' {
+            $scriptPath = Join-Path $script:TempDir 'complexity.ps1'
+            @'
+if ($true) { Write-Output 1 }
+foreach ($item in 1..2) { if ($item -eq 1) { Write-Output $item } }
+try { Write-Output 3 } catch { Write-Output 4 }
+'@ | Set-Content -LiteralPath $scriptPath -Encoding UTF8
+
+            $ast = Get-PowerShellAst -Path $scriptPath
+            $complexity = Get-AstComplexity -Ast $ast
+
+            $complexity | Should -BeGreaterThan 2
+        }
+    }
+
+    Context 'AstParsing test environment hooks' {
+        It 'Throws for missing files when Validation is available' {
+            Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+            $missing = Join-Path $script:TempDir 'validation-missing.ps1'
+
+            { Get-PowerShellAst -Path $missing } | Should -Throw '*not found*'
+        }
+
+        It 'Falls back to Get-Content when Read-FileContent throws' {
+            $scriptPath = Join-Path $script:TempDir 'fallback-read.ps1'
+            Set-Content -LiteralPath $scriptPath -Value 'function Get-Fallback { 1 }' -Encoding UTF8
+
+            function global:Read-FileContent {
+                param([string]$Path)
+                throw 'ast parsing read fallback probe'
+            }
+
+            try {
+                $ast = Get-PowerShellAst -Path $scriptPath
+                $ast | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                Remove-Item -Path Function:Read-FileContent -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'file' 'FileContent.psm1') -DisableNameChecking -Force
+            }
+        }
+
+        It 'Summarizes syntax errors with truncated and counted messages' {
+            $scriptPath = Join-Path $script:TempDir 'syntax-errors.ps1'
+            @'
+function Broken-One {
+function Broken-Two {
+function Broken-Three {
+function Broken-Four {
+function Broken-Five {
+function Broken-Six {
+'@ | Set-Content -LiteralPath $scriptPath -Encoding UTF8
+
+            { Get-PowerShellAst -Path $scriptPath } | Should -Throw '*syntax errors*'
+        }
+
+        It 'Includes typed parameter names in function signatures' {
+            $scriptPath = Join-Path $script:TempDir 'typed-params.ps1'
+            @'
+function Get-TypedValue {
+    param(
+        [int]$Count,
+        [string]$Name
+    )
+}
+'@ | Set-Content -LiteralPath $scriptPath -Encoding UTF8
+
+            $ast = Get-PowerShellAst -Path $scriptPath
+            $func = @(Get-FunctionsFromAst -Ast $ast)[0]
+            $signature = Get-FunctionSignature -FuncAst $func
+
+            $signature | Should -Match '\[Int32\]\$Count'
+            $signature | Should -Match '\[String\]\$Name'
+        }
+
+        It 'Uses manual validation when PS_PROFILE_AST_PARSING_SKIP_VALIDATION is enabled' {
+            $missing = Join-Path $script:TempDir 'manual-validation-missing.ps1'
+            $originalFlag = $env:PS_PROFILE_AST_PARSING_SKIP_VALIDATION
+            $env:PS_PROFILE_AST_PARSING_SKIP_VALIDATION = '1'
+
+            try {
+                { Get-PowerShellAst -Path $missing } | Should -Throw '*not found*'
+            }
+            finally {
+                if ($null -eq $originalFlag) {
+                    Remove-Item Env:PS_PROFILE_AST_PARSING_SKIP_VALIDATION -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_AST_PARSING_SKIP_VALIDATION = $originalFlag
+                }
+            }
         }
     }
 }

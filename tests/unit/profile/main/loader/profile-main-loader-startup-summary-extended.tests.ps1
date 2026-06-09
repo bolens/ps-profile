@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-main-loader-startup-summary-extended.tests.ps1
-#>
+# ===============================================
+# profile-main-loader-startup-summary-extended.tests.ps1
+# Execution tests for Microsoft.PowerShell_profile.ps1 startup summary display
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,40 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
 }
+
 Describe 'Microsoft.PowerShell_profile.ps1 startup summary extended scenarios' {
-    It 'Documents batch loading summary display section' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'DISPLAY BATCH LOADING SUMMARY'
-        $c | Should -Match 'Show-BatchLoadingSummary'
+    It 'Show-BatchLoadingSummary is available after profile load' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if (Get-Command Show-BatchLoadingSummary -ErrorAction SilentlyContinue) { 'BATCH_SUMMARY_CMD_OK' }
+"@
+
+        $result | Should -Match 'BATCH_SUMMARY_CMD_OK'
     }
-    It 'Documents missing tool warnings table section' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'DISPLAY MISSING TOOL WARNINGS'
-        $c | Should -Match 'Show-MissingToolWarningsTable'
+
+    It 'Show-MissingToolWarningsTable is available after profile load' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if (Get-Command Show-MissingToolWarningsTable -ErrorAction SilentlyContinue) { 'MISSING_TOOLS_CMD_OK' }
+"@
+
+        $result | Should -Match 'MISSING_TOOLS_CMD_OK'
     }
-    It 'Handles summary display errors when debug enabled' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'Failed to display batch loading summary'
-        $c | Should -Match 'Failed to display missing tool warnings table'
-        $c | Should -Match 'PS_PROFILE_DEBUG'
+
+    It 'Profile load reaches fragment initialization before summary display' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Select-String -Path `$log -Pattern 'Initialize-FragmentLoading completed' -Quiet) { 'STARTUP_SUMMARY_LOAD_OK' }
+"@
+
+        $result | Should -Match 'STARTUP_SUMMARY_LOAD_OK'
     }
 }

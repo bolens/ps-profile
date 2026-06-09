@@ -14,6 +14,38 @@ scripts/lib/Collections.psm1
     PowerShell Version: 3.0+
 #>
 
+function Test-CollectionsTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-CollectionsStructuredWarningAvailable {
+    if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_DISABLE_STRUCTURED_WARNING') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
+function Test-CollectionsStructuredErrorAvailable {
+    if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_DISABLE_STRUCTURED_ERROR') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredError -ErrorAction SilentlyContinue)
+}
+
 <#
 .SYNOPSIS
     Creates a new generic List of PSCustomObject.
@@ -42,6 +74,10 @@ function New-ObjectList {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
             Write-Verbose "[collections.object-list] Starting list creation"
+        }
+
+        if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_FORCE_OBJECT_LIST_ERROR') {
+            throw [System.InvalidOperationException]::new('forced object list error')
         }
         
         # Use wrapper function if available (for testing), otherwise use direct call
@@ -92,11 +128,15 @@ function New-ObjectList {
         if (-not $useWrapper) {
             $listType = [System.Collections.Generic.List`1].MakeGenericType([object])
         }
+
+        if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_FORCE_MAKE_GENERIC_NULL') {
+            $listType = $null
+        }
         
         if ($null -eq $listType) {
             $errorMsg = "New-ObjectList: MakeGenericType returned null for List[object]"
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Failed to create generic list type" -OperationName 'collections.object-list' -Context @{
+            if (Test-CollectionsStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Failed to create generic list type" -OperationName 'collections.object-list' -Context @{
                     error_message = $errorMsg
                 } -Code 'MakeGenericTypeFailed'
             }
@@ -163,11 +203,15 @@ function New-ObjectList {
         else {
             $list = [System.Activator]::CreateInstance($listType)
         }
+
+        if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_FORCE_CREATE_INSTANCE_NULL') {
+            $list = $null
+        }
         
         if ($null -eq $list) {
             $errorMsg = "New-ObjectList: CreateInstance returned null for type $($listType.FullName)"
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Failed to create list instance" -OperationName 'collections.object-list' -Context @{
+            if (Test-CollectionsStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Failed to create list instance" -OperationName 'collections.object-list' -Context @{
                     type_name     = $listType.FullName
                     error_message = $errorMsg
                 } -Code 'CreateInstanceFailed'
@@ -191,8 +235,8 @@ function New-ObjectList {
     }
     catch {
         $errorMsg = "New-ObjectList: Exception occurred: $($_.Exception.Message) | Type: $($_.Exception.GetType().FullName) | StackTrace: $($_.ScriptStackTrace)"
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord $_ -OperationName 'collections.object-list' -Context @{
+        if (Test-CollectionsStructuredErrorAvailable) {
+            $null = Write-StructuredError -ErrorRecord $_ -OperationName 'collections.object-list' -Context @{
                 error_message = $errorMsg
             }
         }
@@ -232,6 +276,10 @@ function New-StringList {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
             Write-Verbose "[collections.string-list] Starting list creation"
+        }
+
+        if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_FORCE_STRING_LIST_ERROR') {
+            throw [System.InvalidOperationException]::new('forced string list error')
         }
         
         # Use wrapper function if available (for testing), otherwise use direct call
@@ -284,11 +332,15 @@ function New-StringList {
         else {
             $list = [System.Collections.Generic.List[string]]::new()
         }
+
+        if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_FORCE_STRING_LIST_NULL') {
+            $list = $null
+        }
         
         if ($null -eq $list) {
             $errorMsg = "New-StringList: Constructor returned null"
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Failed to create string list instance" -OperationName 'collections.string-list' -Context @{
+            if (Test-CollectionsStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Failed to create string list instance" -OperationName 'collections.string-list' -Context @{
                     error_message = $errorMsg
                 } -Code 'ConstructorFailed'
             }
@@ -311,8 +363,8 @@ function New-StringList {
     }
     catch {
         $errorMsg = "New-StringList: Exception occurred: $($_.Exception.Message) | Type: $($_.Exception.GetType().FullName) | StackTrace: $($_.ScriptStackTrace)"
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord $_ -OperationName 'collections.string-list' -Context @{
+        if (Test-CollectionsStructuredErrorAvailable) {
+            $null = Write-StructuredError -ErrorRecord $_ -OperationName 'collections.string-list' -Context @{
                 error_message = $errorMsg
             }
         }
@@ -362,12 +414,16 @@ function New-TypedList {
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
             Write-Verbose "[collections.typed-list] Starting list creation for type: $Type"
         }
+
+        if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_FORCE_TYPED_LIST_ERROR') {
+            throw [System.InvalidOperationException]::new('forced typed list error')
+        }
         
         # Handle null, empty, or whitespace-only strings
         if ($null -eq $Type -or ($Type -is [string] -and [string]::IsNullOrWhiteSpace($Type))) {
             $errorMsg = "New-TypedList: Type cannot be null, empty, or whitespace"
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Invalid type parameter" -OperationName 'collections.typed-list' -Context @{
+            if (Test-CollectionsStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Invalid type parameter" -OperationName 'collections.typed-list' -Context @{
                     type_value    = $Type
                     error_message = $errorMsg
                 } -Code 'InvalidTypeParameter'
@@ -394,8 +450,8 @@ function New-TypedList {
         catch {
             # Type conversion failed (invalid type name, etc.)
             $errorMsg = "New-TypedList: Failed to convert '$Type' to Type object: $($_.Exception.Message)"
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Failed to convert type" -OperationName 'collections.typed-list' -Context @{
+            if (Test-CollectionsStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Failed to convert type" -OperationName 'collections.typed-list' -Context @{
                     type_value    = $Type
                     error_message = $_.Exception.Message
                 } -Code 'TypeConversionFailed'
@@ -408,11 +464,15 @@ function New-TypedList {
             }
             return
         }
+
+        if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_FORCE_TYPE_OBJ_NULL') {
+            $typeObj = $null
+        }
         
         if ($null -eq $typeObj) {
             $errorMsg = "New-TypedList: Failed to convert '$Type' to Type object"
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Type conversion returned null" -OperationName 'collections.typed-list' -Context @{
+            if (Test-CollectionsStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Type conversion returned null" -OperationName 'collections.typed-list' -Context @{
                     type_value    = $Type
                     error_message = $errorMsg
                 } -Code 'TypeConversionNull'
@@ -479,11 +539,15 @@ function New-TypedList {
         if (-not $useWrapper) {
             $listType = [System.Collections.Generic.List`1].MakeGenericType($typeObj)
         }
+
+        if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_FORCE_TYPED_MAKE_GENERIC_NULL') {
+            $listType = $null
+        }
         
         if ($null -eq $listType) {
             $errorMsg = "New-TypedList: MakeGenericType returned null for type $($typeObj.FullName)"
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Failed to create generic list type" -OperationName 'collections.typed-list' -Context @{
+            if (Test-CollectionsStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Failed to create generic list type" -OperationName 'collections.typed-list' -Context @{
                     type_name     = $typeObj.FullName
                     error_message = $errorMsg
                 } -Code 'MakeGenericTypeFailed'
@@ -551,10 +615,15 @@ function New-TypedList {
         else {
             $list = [System.Activator]::CreateInstance($listType)
         }
+
+        if (Test-CollectionsTestEnvFlag -Name 'PS_PROFILE_COLLECTIONS_FORCE_TYPED_CREATE_INSTANCE_NULL') {
+            $list = $null
+        }
+
         if ($null -eq $list) {
             $errorMsg = "New-TypedList: CreateInstance returned null for type $($listType.FullName)"
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Failed to create list instance" -OperationName 'collections.typed-list' -Context @{
+            if (Test-CollectionsStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Failed to create list instance" -OperationName 'collections.typed-list' -Context @{
                     type_name     = $listType.FullName
                     error_message = $errorMsg
                 } -Code 'CreateInstanceFailed'
@@ -578,8 +647,8 @@ function New-TypedList {
     }
     catch {
         $errorMsg = "New-TypedList: Exception occurred: $($_.Exception.Message) | Type: $($_.Exception.GetType().FullName) | StackTrace: $($_.ScriptStackTrace)"
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord $_ -OperationName 'collections.typed-list' -Context @{
+        if (Test-CollectionsStructuredErrorAvailable) {
+            $null = Write-StructuredError -ErrorRecord $_ -OperationName 'collections.typed-list' -Context @{
                 type_value    = $Type
                 error_message = $errorMsg
             }

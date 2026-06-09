@@ -20,6 +20,30 @@ scripts/lib/Logging.psm1
 # Enable strict mode for enhanced error checking
 Set-StrictMode -Version Latest
 
+function Test-LoggingTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-LoggingStructuredWarningAvailable {
+    if (Test-LoggingTestEnvFlag -Name 'PS_PROFILE_LOGGING_DISABLE_STRUCTURED_WARNING') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
 # Import CommonEnums so LogLevel (and ExitCode) are available as global .NET types
 $commonEnumsPath = Join-Path $PSScriptRoot 'CommonEnums.psm1'
 if (Test-Path -LiteralPath $commonEnumsPath) {
@@ -180,6 +204,10 @@ function Write-ScriptMessage {
     # Write to log file if specified
     if ($LogFile -and $logEntry) {
         try {
+            if (Test-LoggingTestEnvFlag -Name 'PS_PROFILE_LOGGING_FORCE_LOG_WRITE_ERROR') {
+                throw [System.IO.IOException]::new('log write failure probe')
+            }
+
             $logDir = Split-Path -Path $LogFile -Parent
             if ($logDir -and -not (Test-Path -Path $logDir)) {
                 New-Item -ItemType Directory -Path $logDir -Force | Out-Null
@@ -234,7 +262,7 @@ function Write-ScriptMessage {
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                 if ($debugLevel -ge 1) {
-                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    if (Test-LoggingStructuredWarningAvailable) {
                         Write-StructuredWarning -Message "Failed to write to log file" -OperationName 'logging.write-log-file' -Context @{
                             # Technical context
                             log_file             = $LogFile
@@ -261,7 +289,7 @@ function Write-ScriptMessage {
             }
             else {
                 # Always log warnings even if debug is off
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                if (Test-LoggingStructuredWarningAvailable) {
                     Write-StructuredWarning -Message "Failed to write to log file" -OperationName 'logging.write-log-file' -Context @{
                         log_file             = $LogFile
                         log_dir              = if ($LogFile) { Split-Path -Parent $LogFile } else { $null }

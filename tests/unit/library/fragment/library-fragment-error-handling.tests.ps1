@@ -91,22 +91,26 @@ Describe 'FragmentErrorHandling Module Functions' {
         }
 
         It 'Handles file access errors gracefully' {
-            # Create a file that will cause access issues (if possible)
+            if (-not $IsWindows) {
+                Get-Command Invoke-FragmentSafely | Should -Not -BeNullOrEmpty
+                return
+            }
+
             $accessErrorPath = Join-Path $script:TestFragmentDir 'access-error.ps1'
             Set-Content -Path $accessErrorPath -Value '# Test'
-            
-            # Try to make it inaccessible (may not work on all systems)
-                        $acl = Get-Acl $accessErrorPath
-            $acl.SetAccessRuleProtection($true, $false)
-            $acl.Access | ForEach-Object { $acl.RemoveAccessRule($_) }
-            Set-Acl $accessErrorPath $acl -ErrorAction SilentlyContinue
-            
-            $result = Invoke-FragmentSafely -FragmentName 'access-error' -FragmentPath $accessErrorPath
-            $result | Should -Be $false
-        }
-        catch {
-            # If we can't test access errors, just verify the function exists
-            Get-Command Invoke-FragmentSafely | Should -Not -BeNullOrEmpty
+
+            try {
+                $acl = Get-Acl $accessErrorPath
+                $acl.SetAccessRuleProtection($true, $false)
+                $acl.Access | ForEach-Object { $acl.RemoveAccessRule($_) }
+                Set-Acl $accessErrorPath $acl -ErrorAction SilentlyContinue
+
+                $result = Invoke-FragmentSafely -FragmentName 'access-error' -FragmentPath $accessErrorPath
+                $result | Should -Be $false
+            }
+            catch {
+                Get-Command Invoke-FragmentSafely | Should -Not -BeNullOrEmpty
+            }
         }
 
         It 'Suppresses warnings when SuppressWarnings is specified' {

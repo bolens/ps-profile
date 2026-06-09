@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-main-loader-fragment-timing-extended.tests.ps1
-#>
+# ===============================================
+# profile-main-loader-fragment-timing-extended.tests.ps1
+# Execution tests for Microsoft.PowerShell_profile.ps1 fragment timing bootstrap
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,35 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+    $script:ProfileFragmentTimingModule = Join-Path $script:TestRepoRoot 'scripts/lib/profile/ProfileFragmentTiming.psm1'
 }
+
 Describe 'Microsoft.PowerShell_profile.ps1 fragment timing extended scenarios' {
-    It 'Documents fragment loading helper timing section' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'FRAGMENT LOADING HELPERS'
-        $c | Should -Match 'ProfileFragmentTiming.psm1'
-        $c | Should -Match 'performance profiling'
+    It 'ProfileFragmentTiming module exists at the expected repository path' {
+        Test-Path -LiteralPath $script:ProfileFragmentTimingModule | Should -Be $true
     }
-    It 'Initializes fragment timing when module is available' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'Initialize-FragmentTiming'
-        $c | Should -Match 'Import-Module .+profileFragmentTimingModule'
+
+    It 'Initialize-FragmentTiming is available after profile load' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if (Get-Command Initialize-FragmentTiming -ErrorAction SilentlyContinue) { 'FRAGMENT_TIMING_CMD_OK' }
+"@
+
+        $result | Should -Match 'FRAGMENT_TIMING_CMD_OK'
     }
-    It 'Warns on timing module load failure when debug enabled' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'Failed to load ProfileFragmentTiming module'
-        $c | Should -Match 'PS_PROFILE_DEBUG'
+
+    It 'Initializes fragment timing tracking when debug mode is enabled' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+`$env:PS_PROFILE_DEBUG = '2'
+. '$escapedProfile'
+if (Get-Variable -Name PSProfileFragmentTimes -Scope Global -ErrorAction SilentlyContinue) { 'FRAGMENT_TIMING_INIT_OK' }
+"@
+
+        $result | Should -Match 'FRAGMENT_TIMING_INIT_OK'
     }
 }

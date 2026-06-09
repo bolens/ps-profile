@@ -9,6 +9,50 @@ scripts/lib/PerformanceMeasurement.psm1
     Can optionally record metrics to SQLite database for persistent storage.
 #>
 
+function Test-PerformanceMeasurementTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-PerformanceMeasurementStructuredWarningAvailable {
+    if (Test-PerformanceMeasurementTestEnvFlag -Name 'PS_PROFILE_PERFORMANCE_MEASUREMENT_DISABLE_STRUCTURED_WARNING') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
+function Test-PerformanceMeasurementStructuredErrorAvailable {
+    if (Test-PerformanceMeasurementTestEnvFlag -Name 'PS_PROFILE_PERFORMANCE_MEASUREMENT_DISABLE_STRUCTURED_ERROR') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredError -ErrorAction SilentlyContinue)
+}
+
+function Test-PerformanceMeasurementShouldRecordToDb {
+    if ($script:UsePerformanceMetricsDb) {
+        return $true
+    }
+
+    if (-not (Test-PerformanceMeasurementTestEnvFlag -Name 'PS_PROFILE_PERFORMANCE_MEASUREMENT_FORCE_DB_RECORD')) {
+        return $false
+    }
+
+    return $null -ne (Get-Command Add-PerformanceMetric -ErrorAction SilentlyContinue)
+}
+
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
 $safeImportModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'SafeImport.psm1'
@@ -101,8 +145,8 @@ function Measure-Operation {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
             if ($debugLevel -ge 1) {
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Operation failed during measurement" -OperationName 'performance-measurement.measure' -Context @{
+                if (Test-PerformanceMeasurementStructuredWarningAvailable) {
+                    $null = Write-StructuredWarning -Message "Operation failed during measurement" -OperationName 'performance-measurement.measure' -Context @{
                         # Technical context
                         OperationName = $OperationName
                         # Error context
@@ -123,8 +167,8 @@ function Measure-Operation {
         }
         else {
             # Always log warnings even if debug is off
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Operation failed during measurement" -OperationName 'performance-measurement.measure' -Context @{
+            if (Test-PerformanceMeasurementStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Operation failed during measurement" -OperationName 'performance-measurement.measure' -Context @{
                     OperationName = $OperationName
                     ErrorMessage  = $errorMessage
                     ErrorType     = $_.Exception.GetType().FullName
@@ -164,12 +208,12 @@ function Measure-Operation {
         if ($LogMetrics) {
             if (Get-Command Write-ScriptMessage -ErrorAction SilentlyContinue) {
                 $metricsJson = $metrics | ConvertTo-Json -Compress
-                Write-ScriptMessage -Message "PerformanceMetrics: $metricsJson" -LogLevel Info -StructuredOutput
+                $null = Write-ScriptMessage -Message "PerformanceMetrics: $metricsJson" -LogLevel Info -StructuredOutput
             }
         }
         
         # Record to persistent database if available
-        if ($script:UsePerformanceMetricsDb) {
+        if (Test-PerformanceMeasurementShouldRecordToDb) {
             try {
                 # Determine environment
                 $environment = if ($env:CI) { 'CI' } elseif ($env:PS_PROFILE_ENVIRONMENT) { $env:PS_PROFILE_ENVIRONMENT } else { 'local' }
@@ -185,8 +229,8 @@ function Measure-Operation {
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                     if ($debugLevel -ge 1) {
-                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                            Write-StructuredError -ErrorRecord $_ -OperationName 'performance-measurement.record' -Context @{
+                        if (Test-PerformanceMeasurementStructuredErrorAvailable) {
+                            $null = Write-StructuredError -ErrorRecord $_ -OperationName 'performance-measurement.record' -Context @{
                                 operation_name = $OperationName
                                 metric_type    = 'operation'
                             }

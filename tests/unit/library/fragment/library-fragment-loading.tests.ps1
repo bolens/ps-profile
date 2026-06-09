@@ -30,17 +30,18 @@ BeforeAll {
 
     # Import the FragmentLoading module
     $fragmentLoadingPath = Get-TestPath -RelativePath 'scripts\lib\fragment\FragmentLoading.psm1' -StartPath $PSScriptRoot -EnsureExists
-    if ($fragmentLoadingPath -and (Test-Path -LiteralPath $fragmentLoadingPath)) {
-                Import-Module $fragmentLoadingPath -DisableNameChecking -ErrorAction Stop -Force
+    try {
+        if ($fragmentLoadingPath -and (Test-Path -LiteralPath $fragmentLoadingPath)) {
+            Import-Module $fragmentLoadingPath -DisableNameChecking -ErrorAction Stop -Force
+        }
+        else {
+            throw "FragmentLoading module not found at: $fragmentLoadingPath"
+        }
     }
     catch {
-        # If import fails, try to get more details
         Write-Warning "Failed to import FragmentLoading module: $($_.Exception.Message)"
         Write-Warning "Error details: $($_.Exception.GetType().FullName)"
         throw
-    }
-    else {
-        throw "FragmentLoading module not found at: $fragmentLoadingPath"
     }
 
     # Verify required functions are available

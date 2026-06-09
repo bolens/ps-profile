@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-main-loader-fragment-config-extended.tests.ps1
-#>
+# ===============================================
+# profile-main-loader-fragment-config-extended.tests.ps1
+# Execution tests for Microsoft.PowerShell_profile.ps1 fragment configuration
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,37 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+    $script:ProfileFragmentConfigModule = Join-Path $script:TestRepoRoot 'scripts/lib/profile/ProfileFragmentConfig.psm1'
+    $script:FragmentErrorHandlingModule = Join-Path $script:TestRepoRoot 'scripts/lib/fragment/FragmentErrorHandling.psm1'
 }
+
 Describe 'Microsoft.PowerShell_profile.ps1 fragment configuration extended scenarios' {
-    It 'Loads ProfileFragmentConfig for fragment settings' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'ProfileFragmentConfig.psm1'
-        $c | Should -Match 'Initialize-FragmentConfiguration'
-        $c | Should -Match 'FragmentConfig.psm1'
+    It 'Profile and fragment configuration modules exist at expected paths' {
+        Test-Path -LiteralPath $script:ProfileFragmentConfigModule | Should -Be $true
+        Test-Path -LiteralPath $script:FragmentErrorHandlingModule | Should -Be $true
     }
-    It 'Exposes environment sets and feature flags from config' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'environmentSets'
-        $c | Should -Match 'featureFlags'
-        $c | Should -Match 'loadOrderOverride'
+
+    It 'Initialize-FragmentConfiguration is available after profile load' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if (Get-Command Initialize-FragmentConfiguration -ErrorAction SilentlyContinue) { 'FRAGMENT_CONFIG_CMD_OK' }
+"@
+
+        $result | Should -Match 'FRAGMENT_CONFIG_CMD_OK'
     }
-    It 'Wires fragment error handling module path' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'FragmentErrorHandling.psm1'
-        $c | Should -Match 'fragmentErrorHandlingModule'
-        $c | Should -Match 'FragmentErrorHandlingModuleExists'
+
+    It 'Profile load reaches fragment loader initialization after configuration' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Select-String -Path `$log -Pattern 'Calling Initialize-FragmentLoading' -Quiet) { 'FRAGMENT_CONFIG_LOAD_OK' }
+"@
+
+        $result | Should -Match 'FRAGMENT_CONFIG_LOAD_OK'
     }
 }

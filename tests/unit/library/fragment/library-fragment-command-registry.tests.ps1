@@ -3,17 +3,17 @@
 # Unit tests for FragmentCommandRegistry.psm1
 # ===============================================
 
-$current = Get-Item $PSScriptRoot
-while ($null -ne $current) {
-    $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
-    if (Test-Path -LiteralPath $testSupportPath) {
-        . $testSupportPath
-        break
-    }
-    if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
-    $current = $current.Parent
-}
 BeforeAll {
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
+            . $testSupportPath
+            break
+        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
+    }
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:FragmentLibDir = Join-Path $script:RepoRoot 'scripts' 'lib' 'fragment'
     $script:RegistryModulePath = Join-Path $script:FragmentLibDir 'FragmentCommandRegistry.psm1'
@@ -177,14 +177,14 @@ Describe 'FragmentCommandRegistry.psm1' {
     
     It 'Returns false when registry does not exist' {
         if (Get-Command Test-CommandInRegistry -ErrorAction SilentlyContinue) {
-            # Temporarily remove registry
             $originalRegistry = $global:FragmentCommandRegistry
-            Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
-            
-                        Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
-        }
-        finally {
-            $global:FragmentCommandRegistry = $originalRegistry
+            try {
+                Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
+                Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
+            }
+            finally {
+                $global:FragmentCommandRegistry = $originalRegistry
+            }
         }
     }
 }
@@ -216,14 +216,14 @@ Describe 'FragmentCommandRegistry.psm1' {
     
     It 'Returns empty array when registry does not exist' {
         if (Get-Command Get-CommandsForFragment -ErrorAction SilentlyContinue) {
-            # Temporarily remove registry
             $originalRegistry = $global:FragmentCommandRegistry
-            Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
-            
-                        (Get-CommandsForFragment -FragmentName 'fragment-a').Count | Should -Be 0
-        }
-        finally {
-            $global:FragmentCommandRegistry = $originalRegistry
+            try {
+                Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
+                (Get-CommandsForFragment -FragmentName 'fragment-a').Count | Should -Be 0
+            }
+            finally {
+                $global:FragmentCommandRegistry = $originalRegistry
+            }
         }
     }
     
@@ -275,16 +275,16 @@ Describe 'FragmentCommandRegistry.psm1' {
     
     It 'Exports empty registry when registry does not exist' {
         if (Get-Command Export-CommandRegistry -ErrorAction SilentlyContinue) {
-            # Temporarily remove registry
             $originalRegistry = $global:FragmentCommandRegistry
-            Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
-            
-                        $json = Export-CommandRegistry
-            $json | Should -Not -BeNullOrEmpty
-            $json | Should -Match '^\s*\{\s*\}\s*$'
-        }
-        finally {
-            $global:FragmentCommandRegistry = $originalRegistry
+            try {
+                Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
+                $json = Export-CommandRegistry
+                $json | Should -Not -BeNullOrEmpty
+                $json | Should -Match '^\s*\{\s*\}\s*$'
+            }
+            finally {
+                $global:FragmentCommandRegistry = $originalRegistry
+            }
         }
     }
     
@@ -433,19 +433,19 @@ Describe 'FragmentCommandRegistry.psm1' {
     
     It 'Returns empty stats when registry does not exist' {
         if (Get-Command Get-CommandRegistryStats -ErrorAction SilentlyContinue) {
-            # Temporarily remove registry
             $originalRegistry = $global:FragmentCommandRegistry
-            Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
-            
-                        $stats = Get-CommandRegistryStats
-            $stats | Should -Not -BeNullOrEmpty
-            $stats.TotalCommands | Should -Be 0
-            $stats.Fragments | Should -Be 0
-            $stats.CommandsByType | Should -Not -Be $null
-            $stats.CommandsByFragment | Should -Not -Be $null
-        }
-        finally {
-            $global:FragmentCommandRegistry = $originalRegistry
+            try {
+                Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
+                $stats = Get-CommandRegistryStats
+                $stats | Should -Not -BeNullOrEmpty
+                $stats.TotalCommands | Should -Be 0
+                $stats.Fragments | Should -Be 0
+                $stats.CommandsByType | Should -Not -Be $null
+                $stats.CommandsByFragment | Should -Not -Be $null
+            }
+            finally {
+                $global:FragmentCommandRegistry = $originalRegistry
+            }
         }
     }
     

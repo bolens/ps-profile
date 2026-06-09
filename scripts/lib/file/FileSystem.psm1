@@ -20,6 +20,38 @@ scripts/lib/FileSystem.psm1
 # Enable strict mode for enhanced error checking
 Set-StrictMode -Version Latest
 
+function Test-FileSystemTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-FileSystemStructuredErrorAvailable {
+    if (Test-FileSystemTestEnvFlag -Name 'PS_PROFILE_FILESYSTEM_DISABLE_STRUCTURED_ERROR') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredError -ErrorAction SilentlyContinue)
+}
+
+function Test-FileSystemStructuredWarningAvailable {
+    if (Test-FileSystemTestEnvFlag -Name 'PS_PROFILE_FILESYSTEM_DISABLE_STRUCTURED_WARNING') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
 # Import CommonEnums for FileSystemPathType enum
 $commonEnumsPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'CommonEnums.psm1'
 if ($commonEnumsPath -and (Test-Path -LiteralPath $commonEnumsPath)) {
@@ -57,6 +89,10 @@ function Ensure-DirectoryExists {
 
     if (-not (Test-Path -Path $Path)) {
         try {
+            if (Test-FileSystemTestEnvFlag -Name 'PS_PROFILE_FILESYSTEM_FORCE_MKDIR_ERROR') {
+                throw [System.IO.IOException]::new('mkdir failure probe')
+            }
+
             New-Item -ItemType Directory -Path $Path -Force | Out-Null
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
@@ -70,7 +106,7 @@ function Ensure-DirectoryExists {
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                 if ($debugLevel -ge 1) {
-                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    if (Test-FileSystemStructuredErrorAvailable) {
                         Write-StructuredError -ErrorRecord $_ -OperationName 'filesystem.directory' -Context @{
                             Path         = $Path
                             ErrorMessage = $ErrorMessage
@@ -87,7 +123,7 @@ function Ensure-DirectoryExists {
             }
             else {
                 # Always log critical errors even if debug is off
-                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                if (Test-FileSystemStructuredErrorAvailable) {
                     Write-StructuredError -ErrorRecord $_ -OperationName 'filesystem.directory' -Context @{
                         Path         = $Path
                         ErrorMessage = $ErrorMessage
@@ -162,13 +198,21 @@ function Get-PowerShellScripts {
     }
 
     try {
+        if (Test-FileSystemTestEnvFlag -Name 'PS_PROFILE_FILESYSTEM_FORCE_GET_CHILD_ERROR') {
+            throw [System.IO.IOException]::new('get-child failure probe')
+        }
+
+        if (Test-FileSystemTestEnvFlag -Name 'PS_PROFILE_FILESYSTEM_FORCE_UNAUTHORIZED_ACCESS') {
+            throw [System.UnauthorizedAccessException]::new('access denied probe')
+        }
+
         $scripts = Get-ChildItem @params -ErrorAction Stop
     }
     catch [System.UnauthorizedAccessException] {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
             if ($debugLevel -ge 1) {
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                if (Test-FileSystemStructuredWarningAvailable) {
                     Write-StructuredWarning -Message "Access denied to some directories" -OperationName 'filesystem.get-scripts' -Context @{
                         path = $Path
                     } -Code 'AccessDenied'
@@ -184,7 +228,7 @@ function Get-PowerShellScripts {
         }
         else {
             # Always log warnings even if debug is off
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            if (Test-FileSystemStructuredWarningAvailable) {
                 Write-StructuredWarning -Message "Access denied to some directories" -OperationName 'filesystem.get-scripts' -Context @{
                     path = $Path
                 } -Code 'AccessDenied'
@@ -201,7 +245,7 @@ function Get-PowerShellScripts {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
             if ($debugLevel -ge 1) {
-                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                if (Test-FileSystemStructuredErrorAvailable) {
                     Write-StructuredError -ErrorRecord $_ -OperationName 'filesystem.get-scripts' -Context @{
                         Path         = $Path
                         Recurse      = $Recurse
@@ -219,7 +263,7 @@ function Get-PowerShellScripts {
         }
         else {
             # Always log critical errors even if debug is off
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            if (Test-FileSystemStructuredErrorAvailable) {
                 Write-StructuredError -ErrorRecord $_ -OperationName 'filesystem.get-scripts' -Context @{
                     Path         = $Path
                     Recurse      = $Recurse

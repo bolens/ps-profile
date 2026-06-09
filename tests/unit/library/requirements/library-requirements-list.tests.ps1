@@ -9,9 +9,8 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:RepoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
-    $script:LibPath = Join-Path $script:RepoRoot 'scripts' 'lib'
-    $script:RequirementsListPath = Join-Path $script:LibPath 'utilities' 'RequirementsList.psm1'
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:RequirementsListPath = Get-TestPath -RelativePath 'scripts\lib\utilities\RequirementsList.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $script:RequirementsListPath -DisableNameChecking -ErrorAction Stop -Force
     $script:TestTempRoot = New-TestTempDirectory -Prefix 'RequirementsListTests'
 }

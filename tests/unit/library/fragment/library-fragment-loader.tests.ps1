@@ -3,17 +3,17 @@
 # Unit tests for FragmentLoader.psm1
 # ===============================================
 
-$current = Get-Item $PSScriptRoot
-while ($null -ne $current) {
-    $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
-    if (Test-Path -LiteralPath $testSupportPath) {
-        . $testSupportPath
-        break
-    }
-    if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
-    $current = $current.Parent
-}
 BeforeAll {
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
+            . $testSupportPath
+            break
+        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
+    }
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:FragmentLibDir = Join-Path $script:RepoRoot 'scripts' 'lib' 'fragment'
     $script:LoaderModulePath = Join-Path $script:FragmentLibDir 'FragmentLoader.psm1'
@@ -165,14 +165,14 @@ Describe 'FragmentLoader.psm1 - Load-FragmentForCommand' {
 
     It 'Handles missing registry gracefully' {
         if (Get-Command Load-FragmentForCommand -ErrorAction SilentlyContinue) {
-            # Temporarily remove registry
             $originalRegistry = $global:FragmentCommandRegistry
-            Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
-            
-                        { Load-FragmentForCommand -CommandName 'Test-Command' } | Should -Not -Throw
-        }
-        finally {
-            $global:FragmentCommandRegistry = $originalRegistry
+            try {
+                Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
+                { Load-FragmentForCommand -CommandName 'Test-Command' } | Should -Not -Throw
+            }
+            finally {
+                $global:FragmentCommandRegistry = $originalRegistry
+            }
         }
     }
     

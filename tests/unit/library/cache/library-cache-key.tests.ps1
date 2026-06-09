@@ -18,7 +18,7 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $modulePath = Join-Path $PSScriptRoot '..' '..' 'scripts' 'lib' 'utilities' 'CacheKey.psm1'
+    $modulePath = Get-TestPath -RelativePath 'scripts\lib\utilities\CacheKey.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $modulePath -Force -ErrorAction Stop
     $script:TestTempRoot = New-TestTempDirectory -Prefix 'CacheKeyTests'
 }

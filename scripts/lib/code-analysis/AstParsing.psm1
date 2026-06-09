@@ -14,6 +14,30 @@ scripts/lib/AstParsing.psm1
     PowerShell Version: 3.0+
 #>
 
+function Test-AstParsingTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-AstParsingUseValidation {
+    if (Test-AstParsingTestEnvFlag -Name 'PS_PROFILE_AST_PARSING_SKIP_VALIDATION') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Test-ValidPath -ErrorAction SilentlyContinue)
+}
+
 <#
 .SYNOPSIS
     Parses a PowerShell file and returns its AST.
@@ -42,7 +66,7 @@ function Get-PowerShellAst {
     )
 
     # Use Validation module if available
-    if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
+    if (Test-AstParsingUseValidation) {
         if (-not (Test-ValidPath -Path $Path -PathType File)) {
             throw "File not found: $Path"
         }

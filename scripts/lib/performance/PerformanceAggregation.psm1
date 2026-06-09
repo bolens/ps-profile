@@ -8,6 +8,30 @@ scripts/lib/PerformanceAggregation.psm1
     Provides functions for aggregating and reporting performance metrics from multiple operations.
 #>
 
+function Test-PerformanceAggregationTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-PerformanceAggregationStructuredWarningAvailable {
+    if (Test-PerformanceAggregationTestEnvFlag -Name 'PS_PROFILE_PERFORMANCE_AGGREGATION_DISABLE_STRUCTURED_WARNING') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
 <#
 .SYNOPSIS
     Aggregates and reports performance metrics from multiple operations.
@@ -56,8 +80,8 @@ function Get-AggregatedMetrics {
 
     foreach ($metric in $Metrics) {
         if ($null -eq $metric) {
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Metrics array contains null value" -OperationName 'performance-aggregation.aggregate' -Context @{
+            if (Test-PerformanceAggregationStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Metrics array contains null value" -OperationName 'performance-aggregation.aggregate' -Context @{
                     operation_name = $OperationName
                     metrics_count = $Metrics.Count
                 } -Code 'NullMetricValue'
@@ -75,8 +99,8 @@ function Get-AggregatedMetrics {
                 }
                 else {
                     # Always log warnings even if debug is off
-                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "Metrics array contains null value" -OperationName 'performance-aggregation.aggregate' -Context @{
+                    if (Test-PerformanceAggregationStructuredWarningAvailable) {
+                        $null = Write-StructuredWarning -Message "Metrics array contains null value" -OperationName 'performance-aggregation.aggregate' -Context @{
                             # Technical context
                             operation_name = $OperationName
                             metrics_count = $Metrics.Count
@@ -103,8 +127,8 @@ function Get-AggregatedMetrics {
         }
 
         if (-not $hasDuration) {
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Metric object missing DurationMs property" -OperationName 'performance-aggregation.aggregate' -Context @{
+            if (Test-PerformanceAggregationStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "Metric object missing DurationMs property" -OperationName 'performance-aggregation.aggregate' -Context @{
                     operation_name = $OperationName
                     metric_type = $metric.GetType().Name
                 } -Code 'MissingDurationProperty'
@@ -122,8 +146,8 @@ function Get-AggregatedMetrics {
                 }
                 else {
                     # Always log warnings even if debug is off
-                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "Metric object missing DurationMs property" -OperationName 'performance-aggregation.aggregate' -Context @{
+                    if (Test-PerformanceAggregationStructuredWarningAvailable) {
+                        $null = Write-StructuredWarning -Message "Metric object missing DurationMs property" -OperationName 'performance-aggregation.aggregate' -Context @{
                             # Technical context
                             operation_name = $OperationName
                             metric_type = $metric.GetType().Name
@@ -146,8 +170,8 @@ function Get-AggregatedMetrics {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
             if ($debugLevel -ge 1) {
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "No valid metrics found for operation" -OperationName 'performance-aggregation.aggregate' -Context @{
+                if (Test-PerformanceAggregationStructuredWarningAvailable) {
+                    $null = Write-StructuredWarning -Message "No valid metrics found for operation" -OperationName 'performance-aggregation.aggregate' -Context @{
                         # Technical context
                         operation_name = $OperationName
                         metrics_count = $Metrics.Count
@@ -167,8 +191,8 @@ function Get-AggregatedMetrics {
         }
         else {
             # Always log warnings even if debug is off
-            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "No valid metrics found for operation" -OperationName 'performance-aggregation.aggregate' -Context @{
+            if (Test-PerformanceAggregationStructuredWarningAvailable) {
+                $null = Write-StructuredWarning -Message "No valid metrics found for operation" -OperationName 'performance-aggregation.aggregate' -Context @{
                     operation_name = $OperationName
                     metrics_count = $Metrics.Count
                     validated_count = $validatedMetrics.Count

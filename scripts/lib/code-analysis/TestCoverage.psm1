@@ -8,6 +8,30 @@ scripts/lib/TestCoverage.psm1
     Provides functions for parsing Pester coverage XML files and extracting coverage metrics.
 #>
 
+function Test-TestCoverageTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-TestCoverageStructuredWarningAvailable {
+    if (Test-TestCoverageTestEnvFlag -Name 'PS_PROFILE_TEST_COVERAGE_DISABLE_STRUCTURED_WARNING') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
 <#
 .SYNOPSIS
     Parses Pester coverage XML file and extracts test coverage metrics.
@@ -40,8 +64,8 @@ function Get-TestCoverage {
     )
 
     if (-not (Test-Path -Path $CoverageXmlPath)) {
-        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-            Write-StructuredWarning -Message "Coverage file not found" -OperationName 'test-coverage.parse' -Context @{
+        if (Test-TestCoverageStructuredWarningAvailable) {
+            $null = Write-StructuredWarning -Message "Coverage file not found" -OperationName 'test-coverage.parse' -Context @{
                 coverage_xml_path = $CoverageXmlPath
             } -Code 'CoverageFileNotFound'
         }
@@ -58,8 +82,8 @@ function Get-TestCoverage {
             }
             else {
                 # Always log warnings even if debug is off
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Coverage file not found" -OperationName 'test-coverage.parse' -Context @{
+                if (Test-TestCoverageStructuredWarningAvailable) {
+                    $null = Write-StructuredWarning -Message "Coverage file not found" -OperationName 'test-coverage.parse' -Context @{
                         # Technical context
                         coverage_xml_path = $CoverageXmlPath
                         file_exists       = $false
@@ -84,6 +108,10 @@ function Get-TestCoverage {
     }
 
     try {
+        if (Test-TestCoverageTestEnvFlag -Name 'PS_PROFILE_TEST_COVERAGE_FORCE_PARSE_ERROR') {
+            throw [System.IO.IOException]::new('coverage parse failure probe')
+        }
+
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
             Write-Host "  [test-coverage.parse] Parsing coverage XML file: $CoverageXmlPath" -ForegroundColor DarkGray
@@ -166,8 +194,8 @@ function Get-TestCoverage {
         }
     }
     catch {
-        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-            Write-StructuredWarning -Message "Failed to parse coverage XML" -OperationName 'test-coverage.parse' -Context @{
+        if (Test-TestCoverageStructuredWarningAvailable) {
+            $null = Write-StructuredWarning -Message "Failed to parse coverage XML" -OperationName 'test-coverage.parse' -Context @{
                 coverage_xml_path = $CoverageXmlPath
                 error_message     = $_.Exception.Message
             } -Code 'CoverageParseFailed'
@@ -185,8 +213,8 @@ function Get-TestCoverage {
             }
             else {
                 # Always log warnings even if debug is off
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Failed to parse coverage XML" -OperationName 'test-coverage.parse' -Context @{
+                if (Test-TestCoverageStructuredWarningAvailable) {
+                    $null = Write-StructuredWarning -Message "Failed to parse coverage XML" -OperationName 'test-coverage.parse' -Context @{
                         # Technical context
                         coverage_xml_path = $CoverageXmlPath
                         # Error context

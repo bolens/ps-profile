@@ -9,47 +9,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
+    try {
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-    if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
-        throw "Get-TestPath returned null or empty value for LibPath"
+        $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+        if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
+            throw "Get-TestPath returned null or empty value for LibPath"
+        }
+        if (-not (Test-Path -LiteralPath $script:LibPath)) {
+            throw "Library path not found at: $script:LibPath"
+        }
+
+        $script:CollectionsPath = Join-Path $script:LibPath 'utilities' 'Collections.psm1'
+        if ($null -eq $script:CollectionsPath -or [string]::IsNullOrWhiteSpace($script:CollectionsPath)) {
+            throw "CollectionsPath is null or empty"
+        }
+        if (-not (Test-Path -LiteralPath $script:CollectionsPath)) {
+            throw "Collections module not found at: $script:CollectionsPath"
+        }
+
+        Remove-Module Collections -ErrorAction SilentlyContinue -Force
+        Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
+
+        $funcs = Get-Command -Module Collections -ErrorAction SilentlyContinue
+        if (-not $funcs -or $funcs.Count -eq 0) {
+            throw "No functions exported from Collections module. Path: $script:CollectionsPath"
+        }
+
+        $newObjectListCmd = Get-Command New-ObjectList -ErrorAction SilentlyContinue
+        if (-not $newObjectListCmd) {
+            throw "New-ObjectList function not found after module import"
+        }
     }
-    if (-not (Test-Path -LiteralPath $script:LibPath)) {
-        throw "Library path not found at: $script:LibPath"
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize Collections tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
-    
-    $script:CollectionsPath = Join-Path $script:LibPath 'utilities' 'Collections.psm1'
-    if ($null -eq $script:CollectionsPath -or [string]::IsNullOrWhiteSpace($script:CollectionsPath)) {
-        throw "CollectionsPath is null or empty"
-    }
-    if (-not (Test-Path -LiteralPath $script:CollectionsPath)) {
-        throw "Collections module not found at: $script:CollectionsPath"
-    }
-    
-    # Import the module under test (remove first to ensure clean import)
-    Remove-Module Collections -ErrorAction SilentlyContinue -Force
-    Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-    
-    # Verify functions are exported and available
-    $funcs = Get-Command -Module Collections -ErrorAction SilentlyContinue
-    if (-not $funcs -or $funcs.Count -eq 0) {
-        throw "No functions exported from Collections module. Path: $script:CollectionsPath"
-    }
-    
-    # Verify New-ObjectList is available
-    $newObjectListCmd = Get-Command New-ObjectList -ErrorAction SilentlyContinue
-    if (-not $newObjectListCmd) {
-        throw "New-ObjectList function not found after module import"
-    }
-}
-catch {
-    $errorDetails = @{
-        Message  = $_.Exception.Message
-        Type     = $_.Exception.GetType().FullName
-        Location = $_.InvocationInfo.ScriptLineNumber
-    }
-    Write-Error "Failed to initialize Collections tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-    throw
 }
 
 AfterAll {
@@ -63,15 +62,16 @@ function global:Reset-TestCollectionsModule {
 
 Describe 'Collections Module Functions' {
     BeforeAll {
-        # Verify wrapper functions from TestSupport are available
-                $testListType = [System.Collections.Generic.List`1].MakeGenericType([object])
-        $testResult = Invoke-CreateInstanceWrapper -Type $testListType
-        if ($null -eq $testResult) {
-            Write-Warning "Invoke-CreateInstanceWrapper returned null during test setup - wrapper functions may not be working correctly"
+        try {
+            $testListType = [System.Collections.Generic.List`1].MakeGenericType([object])
+            $testResult = Invoke-CreateInstanceWrapper -Type $testListType
+            if ($null -eq $testResult) {
+                Write-Warning "Invoke-CreateInstanceWrapper returned null during test setup - wrapper functions may not be working correctly"
+            }
         }
-    }
-    catch {
-        Write-Warning "Error testing wrapper functions during setup: $($_.Exception.Message)"
+        catch {
+            Write-Warning "Error testing wrapper functions during setup: $($_.Exception.Message)"
+        }
     }
 
     BeforeEach {
@@ -190,18 +190,17 @@ Describe 'Collections Module Functions' {
         }
 
         It 'Creates a List using Type object' {
-            # Test the if branch on line 214 when Type is already a [type] object
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            $list = New-TypedList -Type ([int]) -Verbose
-            # Access Count directly like the passing test - this confirms the list exists
-            $list.Count | Should -Be 0 -Because "New-TypedList should return an empty list"
-            # Compare types directly - get the type and compare without piping
-            $genericArg = $list.GetType().GetGenericArguments()[0]
-            $genericArg | Should -Be ([int])
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                $list = New-TypedList -Type ([int]) -Verbose
+                $list.Count | Should -Be 0 -Because "New-TypedList should return an empty list"
+                $genericArg = $list.GetType().GetGenericArguments()[0]
+                $genericArg | Should -Be ([int])
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
         It 'Allows adding items of the specified type' {
@@ -258,42 +257,39 @@ Describe 'Collections Module Functions' {
         }
 
         It 'Handles invalid type string gracefully' {
-            # Test the null type conversion path - this covers the else branch [type]$Type and null check
-            # This tests lines 148 (else branch) and 151-154 (null check with Write-Verbose)
-            # Set VerbosePreference to Continue to ensure Write-Verbose in error path is executed
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            $result = New-TypedList -Type 'InvalidTypeNameThatDoesNotExist12345' -Verbose
-            $result | Should -BeNullOrEmpty -Because "Invalid type should return null"
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                $result = New-TypedList -Type 'InvalidTypeNameThatDoesNotExist12345' -Verbose
+                $result | Should -BeNullOrEmpty -Because "Invalid type should return null"
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
         It 'Handles empty type string gracefully' {
-            # Test the null type conversion path with empty string
-            # This tests lines 148 (else branch) and 151-154 (null check with Write-Verbose)
-            # Set VerbosePreference to Continue to ensure Write-Verbose in error path is executed
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            $result = New-TypedList -Type '' -Verbose
-            $result | Should -BeNullOrEmpty -Because "Empty type should return null"
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                $result = New-TypedList -Type '' -Verbose
+                $result | Should -BeNullOrEmpty -Because "Empty type should return null"
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
         It 'Handles whitespace-only type string gracefully' {
-            # Test the null type conversion path with whitespace
-            # This tests lines 148 (else branch) and 151-154 (null check with Write-Verbose)
-            # Set VerbosePreference to Continue to ensure Write-Verbose in error path is executed
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            $result = New-TypedList -Type '   ' -Verbose
-            $result | Should -BeNullOrEmpty -Because "Whitespace-only type should return null"
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                $result = New-TypedList -Type '   ' -Verbose
+                $result | Should -BeNullOrEmpty -Because "Whitespace-only type should return null"
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
     }
@@ -398,61 +394,51 @@ Describe 'Collections Module Functions' {
         }
 
         It 'New-ObjectList verbose messages are executed' {
-            # Test that verbose messages are written (coverage for Write-Verbose statements)
-            # Set VerbosePreference to Continue to ensure Write-Verbose statements are executed
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            # Call function with -Verbose to ensure verbose output is written
-            # This covers Write-Verbose on lines 42, 74
-            $list = New-ObjectList -Verbose
-            # Verify function still works
-            $list.Count | Should -Be 0
+            try {
+                $VerbosePreference = 'Continue'
+                $list = New-ObjectList -Verbose
+                $list.Count | Should -Be 0
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
-        }
-
 
         It 'New-StringList verbose messages are executed' {
-            # Test that verbose messages are written (coverage for Write-Verbose statements)
-            # Set VerbosePreference to Continue to ensure Write-Verbose statements are executed
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            # Call function with -Verbose to ensure verbose output is written
-            # This covers Write-Verbose on line 93
-            $list = New-StringList -Verbose
-            # Verify function still works
-            $list.Count | Should -Be 0
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                $list = New-StringList -Verbose
+                $list.Count | Should -Be 0
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
         It 'New-TypedList verbose messages are executed' {
-            # Test that verbose messages are written (coverage for Write-Verbose statements)
-            # Set VerbosePreference to Continue to ensure Write-Verbose statements are executed
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            # Call function with -Verbose to ensure verbose output is written
-            # This covers Write-Verbose on lines 142, 157, 166
-            $list = New-TypedList -Type 'int' -Verbose
-            # Verify function still works
-            $list.Count | Should -Be 0
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                $list = New-TypedList -Type 'int' -Verbose
+                $list.Count | Should -Be 0
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
         It 'New-TypedList verbose messages executed for Type object' {
-            # Test verbose output when Type is already a [type] object
-            # This covers Write-Verbose on lines 142, 157, 166 for the if branch
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            $list = New-TypedList -Type ([System.Collections.Generic.List[int]]) -Verbose
-            $list.Count | Should -Be 0
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                $list = New-TypedList -Type ([System.Collections.Generic.List[int]]) -Verbose
+                $list.Count | Should -Be 0
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
     }
 
