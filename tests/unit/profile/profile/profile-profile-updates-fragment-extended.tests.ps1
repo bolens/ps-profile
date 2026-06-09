@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-profile-updates-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-profile-updates-fragment-extended.tests.ps1
+# Execution tests for profile-updates.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/profile-updates.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
+function script:Reset-ProfileUpdatesFragmentState {
+    Remove-Variable -Name 'ProfileUpdatesLoaded' -Scope Global -Force -ErrorAction SilentlyContinue
+    Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+}
+
 Describe 'profile.d/profile-updates.ps1 extended scenarios' {
-    It 'Declares optional tier for profile update checking' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: optional'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    BeforeEach {
+        Reset-ProfileUpdatesFragmentState
+        $env:PS_PROFILE_TEST_MODE = '1'
     }
-    It 'Defines Test-ProfileUpdates with git fetch and changelog logic' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Test-ProfileUpdates'
-        $c | Should -Match 'git fetch origin'
-        $c | Should -Match '.profile-last-update-check'
+
+    AfterAll {
+        Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
     }
-    It 'Sets ProfileUpdatesLoaded global after initialization' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "ProfileUpdatesLoaded"
-        $c | Should -Match "Set-Variable -Name 'ProfileUpdatesLoaded'"
+
+    It 'Registers Test-ProfileUpdates and sets ProfileUpdatesLoaded' {
+        . (Join-Path $script:ProfileDir 'profile-updates.ps1')
+
+        Get-Command Test-ProfileUpdates -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        $global:ProfileUpdatesLoaded | Should -Be $true
+    }
+
+    It 'Test-ProfileUpdates runs without error when forced' {
+        . (Join-Path $script:ProfileDir 'profile-updates.ps1')
+
+        { Test-ProfileUpdates -Force -MaxChanges 1 } | Should -Not -Throw
+    }
+
+    It 'Preserves existing update checker bodies on repeated fragment loads' {
+        . (Join-Path $script:ProfileDir 'profile-updates.ps1')
+        $firstUpdates = Get-Command Test-ProfileUpdates -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'profile-updates.ps1')
+
+        (Get-Command Test-ProfileUpdates -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstUpdates.ScriptBlock.ToString()
     }
 }

@@ -154,13 +154,11 @@ key2 = value2
             Get-Command ConvertFrom-IniToToml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if PSToml module not available - check if module can be imported
             $pstomlAvailable = $false
-            try {
-                $null = Import-Module PSToml -ErrorAction Stop -PassThru
-                $pstomlAvailable = $true
-            }
-            catch {
-                # Module not available
-            }
+                        $null = Import-Module PSToml -ErrorAction Stop -PassThru
+            $pstomlAvailable = $true
+        }
+        catch {
+            # Module not available
             
             if (-not $pstomlAvailable) {
                 Set-ItResult -Skipped -Because "PSToml module not available"
@@ -178,13 +176,11 @@ key2 = value2
             Get-Command ConvertTo-IniFromToml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if PSToml module not available - check if module can be imported
             $pstomlAvailable = $false
-            try {
-                $null = Import-Module PSToml -ErrorAction Stop -PassThru
-                $pstomlAvailable = $true
-            }
-            catch {
-                # Module not available
-            }
+                        $null = Import-Module PSToml -ErrorAction Stop -PassThru
+            $pstomlAvailable = $true
+        }
+        catch {
+            # Module not available
             
             if (-not $pstomlAvailable) {
                 Set-ItResult -Skipped -Because "PSToml module not available"
@@ -529,13 +525,11 @@ key1 = value1
             # This might succeed or fail depending on implementation
             # If it fails, error should be caught
             $errorCaught = $false
-            try {
-                ConvertFrom-IniToJson -InputPath $tempFile -ErrorAction Stop
-            }
-            catch {
-                $errorCaught = $true
-                $_.Exception.Message | Should -Match "Failed to convert INI to JSON"
-            }
+                        ConvertFrom-IniToJson -InputPath $tempFile -ErrorAction Stop
+        }
+        catch {
+            $errorCaught = $true
+            $_.Exception.Message | Should -Match "Failed to convert INI to JSON"
             # Test passes whether it succeeds or fails (both paths are valid)
             # The important thing is that if it fails, the error is caught
             if ($errorCaught) {

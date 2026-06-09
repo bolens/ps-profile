@@ -444,17 +444,15 @@ Describe 'Alias helper' {
             # Execute the wrapper - should show custom warning
             $warningPreference = $WarningPreference
             $WarningPreference = 'Continue'
-            try {
-                $output = & $funcName 3>&1 2>&1
-                # Check if output contains the custom warning
-                $hasWarning = $output | Where-Object { 
-                    $_.ToString() -match [regex]::Escape($customWarning)
-                }
-                $hasWarning | Should -Not -BeNullOrEmpty
+                        $output = & $funcName 3>&1 2>&1
+            # Check if output contains the custom warning
+            $hasWarning = $output | Where-Object { 
+                $_.ToString() -match [regex]::Escape($customWarning)
             }
-            finally {
-                $WarningPreference = $warningPreference
-            }
+            $hasWarning | Should -Not -BeNullOrEmpty
+        }
+        finally {
+            $WarningPreference = $warningPreference
             
             # Cleanup
             Remove-Item "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
@@ -482,15 +480,13 @@ Describe 'Alias helper' {
             if ($hasWarning.Count -eq 0) {
                 $warningPreference = $WarningPreference
                 $WarningPreference = 'Continue'
-                try {
-                    $output = & $funcName 3>&1 2>&1
-                    $hasWarning = @($output | Where-Object {
-                            $_.ToString() -match [regex]::Escape($nonexistentCmd)
-                        })
-                }
-                finally {
-                    $WarningPreference = $warningPreference
-                }
+                                $output = & $funcName 3>&1 2>&1
+                $hasWarning = @($output | Where-Object {
+                        $_.ToString() -match [regex]::Escape($nonexistentCmd)
+                    })
+            }
+            finally {
+                $WarningPreference = $warningPreference
             }
 
             $hasWarning | Should -Not -BeNullOrEmpty

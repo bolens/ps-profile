@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-utilities-env-extended.tests.ps1
-#>
+# ===============================================
+# profile-utilities-env-extended.tests.ps1
+# Execution tests for utilities-modules/system/utilities-env.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,45 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/utilities-modules/system/utilities-env.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'utilities.ps1')
+    Ensure-Utilities
 }
+
 Describe 'profile.d/utilities-modules/system/utilities-env.ps1 extended scenarios' {
-    It 'Documents cross-platform environment variable management' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Environment variable management functions'
-        $c | Should -Match 'Cross-platform persistent and session env var'
+    It 'Registers environment variable helpers through Ensure-Utilities' {
+        Get-Command Get-EnvVar -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Set-EnvVar -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Add-Path -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Remove-Path -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Get-EnvVar, Set-EnvVar, and Publish-EnvVar helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Get-EnvVar'
-        $c | Should -Match 'Set-EnvVar'
-        $c | Should -Match 'Publish-EnvVar'
-        $c | Should -Match 'Platform.psm1'
+
+    It 'Get-EnvVar reads process-scoped environment values' {
+        $name = "PS_PROFILE_TEST_ENV_$([Guid]::NewGuid().ToString('N'))"
+        Set-Item -Path "Env:$name" -Value 'profile-test-value' -Force
+
+        try {
+            Get-EnvVar -Name $name | Should -Be 'profile-test-value'
+        }
+        finally {
+            Remove-Item -Path "Env:$name" -ErrorAction SilentlyContinue
+        }
     }
-    It 'Provides Add-Path and Remove-Path PATH manipulation helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Add-Path'
-        $c | Should -Match 'Remove-Path'
-        $c | Should -Match 'Split-PathEnvironmentValue'
+
+    It 'Add-Path and Remove-Path manipulate PATH entries without throwing' {
+        $entry = New-TestTempDirectory -Prefix 'UtilitiesEnvPath'
+        try {
+            { Add-Path -Path $entry | Out-Null } | Should -Not -Throw
+            $env:PATH -split [System.IO.Path]::PathSeparator | Should -Contain $entry
+            { Remove-Path -Path $entry | Out-Null } | Should -Not -Throw
+        }
+        finally {
+            if ($env:PATH -and $env:PATH.Contains($entry)) {
+                Remove-Path -Path $entry -ErrorAction SilentlyContinue | Out-Null
+            }
+        }
     }
 }

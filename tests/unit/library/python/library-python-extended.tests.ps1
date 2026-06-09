@@ -37,13 +37,11 @@ Describe 'Python extended scenarios' {
             Set-Content -LiteralPath $fakePython -Value '#!/bin/sh'
 
             $original = $env:PYTHON
-            try {
-                $env:PYTHON = $fakePython
-                Get-PythonPath | Should -Be $fakePython
-            }
-            finally {
-                $env:PYTHON = $original
-            }
+                        $env:PYTHON = $fakePython
+            Get-PythonPath | Should -Be $fakePython
+        }
+        finally {
+            $env:PYTHON = $original
         }
 
         It 'Uses CONDA_PREFIX when bin/python exists beneath it' {
@@ -54,13 +52,11 @@ Describe 'Python extended scenarios' {
             Set-Content -LiteralPath $fakePython -Value '#!/bin/sh'
 
             $original = $env:CONDA_PREFIX
-            try {
-                $env:CONDA_PREFIX = $condaRoot
-                Get-PythonPath | Should -Be $fakePython
-            }
-            finally {
-                $env:CONDA_PREFIX = $original
-            }
+                        $env:CONDA_PREFIX = $condaRoot
+            Get-PythonPath | Should -Be $fakePython
+        }
+        finally {
+            $env:CONDA_PREFIX = $original
         }
     }
 

@@ -64,7 +64,6 @@ function Get-DocCoverageStrictFixture {
 }
 '@ -Encoding UTF8
 
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:CheckDocCoverageScript -ArgumentList @(
                 '-ProfilePath', $profilePath,
                 '-DocsPath', $docsPath,
@@ -73,11 +72,5 @@ function Get-DocCoverageStrictFixture {
 
             $result.ExitCode | Should -Be 1
             $result.Output | Should -Match 'Missing markdown|blocking issue|Documentation coverage check failed'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixtureRoot) {
-                Remove-Item -LiteralPath $fixtureRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

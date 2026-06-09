@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-scoop-completion-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-scoop-completion-fragment-extended.tests.ps1
+# Execution tests for scoop-completion.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,61 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/scoop-completion.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
+function script:Reset-ScoopCompletionFragmentState {
+    Remove-Variable -Name 'ScoopCompletionLoaded' -Scope Global -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path Function:\Enable-ScoopCompletion -Force -ErrorAction SilentlyContinue
+    $env:SCOOP = $null
+    $env:SCOOP_GLOBAL = $null
+}
+
 Describe 'profile.d/scoop-completion.ps1 extended scenarios' {
-    It 'Declares essential tier for lazy Scoop tab completion' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: essential'
-        $c | Should -Match 'Dependencies: bootstrap, env'
+    BeforeEach {
+        Reset-ScoopCompletionFragmentState
     }
-    It 'Uses Get-ScoopCompletionPath and Enable-ScoopCompletion lazy loader' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Get-ScoopCompletionPath'
-        $c | Should -Match 'Enable-ScoopCompletion'
-        $c | Should -Match 'ScoopCompletionLoaded'
+
+    It 'Loads without setting ScoopCompletionLoaded until completion is enabled' {
+        $isolatedHome = New-TestTempDirectory -Prefix 'ScoopExtendedNone'
+        $originalHome = $env:HOME
+        $originalUserProfile = $env:USERPROFILE
+        try {
+            $env:HOME = $isolatedHome
+            $env:USERPROFILE = $isolatedHome
+
+            . (Join-Path $script:ProfileDir 'scoop-completion.ps1')
+
+            Get-Variable -Name 'ScoopCompletionLoaded' -Scope Global -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+        finally {
+            $env:HOME = $originalHome
+            $env:USERPROFILE = $originalUserProfile
+        }
     }
-    It 'Guards idempotency with global ScoopCompletionLoaded variable' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Get-Variable -Name 'ScoopCompletionLoaded'"
-        $c | Should -Match 'Scoop-Completion.psd1'
+
+    It 'Registers Enable-ScoopCompletion when a Scoop completion module is discovered' {
+        $testScoopDir = New-TestTempDirectory -Prefix 'ScoopExtended'
+        $completionPath = Join-Path $testScoopDir 'apps' 'scoop' 'current' 'supporting' 'completion' 'Scoop-Completion.psd1'
+        New-Item -ItemType Directory -Path (Split-Path $completionPath -Parent) -Force | Out-Null
+        New-Item -ItemType File -Path $completionPath -Force | Out-Null
+
+        $env:SCOOP = $testScoopDir
+        . (Join-Path $script:ProfileDir 'scoop-completion.ps1')
+
+        Get-Command Enable-ScoopCompletion -CommandType Function -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Skips re-initialization when ScoopCompletionLoaded is already set' {
+        Set-Variable -Name 'ScoopCompletionLoaded' -Value $true -Scope Global -Force
+        New-Item -Path Function:\Enable-ScoopCompletion -Value { 'existing' } -Force | Out-Null
+        $firstEnable = Get-Command Enable-ScoopCompletion -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'scoop-completion.ps1')
+
+        (Get-Command Enable-ScoopCompletion -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstEnable.ScriptBlock.ToString()
     }
 }

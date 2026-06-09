@@ -13,35 +13,33 @@
 
 Describe 'HTML Document Conversion Tests' {
     BeforeAll {
-        try {
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            Initialize-ConversionIntegration -ProfileDir $script:ProfileDir -ModuleType 'Documents' -SelectiveModules @(
-                'document-common-html.ps1'
-                'document-markdown.ps1'
-                'document-office-odt.ps1'
-                'document-office-ods.ps1'
-                'document-office-odp.ps1'
-                'document-office-rtf.ps1'
-                'document-common-epub.ps1'
-                'document-ebook-mobi.ps1'
-                'document-office-plaintext.ps1'
-                'document-office-orgmode.ps1'
-                'document-office-asciidoc.ps1'
-                'document-textile.ps1'
-                'document-fb2.ps1'
-                'document-latex.ps1'
-            ) -EnsureDocuments
+                $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        Initialize-ConversionIntegration -ProfileDir $script:ProfileDir -ModuleType 'Documents' -SelectiveModules @(
+            'document-common-html.ps1'
+            'document-markdown.ps1'
+            'document-office-odt.ps1'
+            'document-office-ods.ps1'
+            'document-office-odp.ps1'
+            'document-office-rtf.ps1'
+            'document-common-epub.ps1'
+            'document-ebook-mobi.ps1'
+            'document-office-plaintext.ps1'
+            'document-office-orgmode.ps1'
+            'document-office-asciidoc.ps1'
+            'document-textile.ps1'
+            'document-fb2.ps1'
+            'document-latex.ps1'
+        ) -EnsureDocuments
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+            Category = 'BeforeAll'
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-                Category = 'BeforeAll'
-            }
-            Write-Error "Failed to initialize HTML document conversion tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
-        }
+        Write-Error "Failed to initialize HTML document conversion tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
 
     Context 'HTML conversion utilities' {

@@ -41,14 +41,13 @@ AfterAll {
     Remove-Module PathResolution -ErrorAction SilentlyContinue -Force
     Remove-Module FileSystem -ErrorAction SilentlyContinue -Force
     Remove-Module JsonUtilities -ErrorAction SilentlyContinue -Force
-    
-    # Clean up test files
-    if ($script:TestDir -and (Test-Path $script:TestDir)) {
-        Remove-Item -Path $script:TestDir -Recurse -Force -ErrorAction SilentlyContinue
-    }
 }
 
 Describe 'MetricsSnapshot Module Functions' {
+    BeforeEach {
+        Register-TestCleanupPath -Path $script:TestDir
+    }
+
     Context 'Save-MetricsSnapshot' {
         It 'Saves metrics snapshot to specified path' {
             $snapshotPath = Save-MetricsSnapshot -OutputPath $script:TestDir
@@ -88,7 +87,7 @@ Describe 'MetricsSnapshot Module Functions' {
                 TotalFunctions = 50
             } | ConvertTo-Json
             Set-Content -Path $codeMetricsFile -Value $codeMetrics -Encoding UTF8
-            
+
             try {
                 $snapshotPath = Save-MetricsSnapshot -OutputPath $script:TestDir -IncludeCodeMetrics -RepoRoot $script:RepoRoot
                 $snapshotContent = Get-Content -Path $snapshotPath -Raw | ConvertFrom-Json
@@ -112,7 +111,7 @@ Describe 'MetricsSnapshot Module Functions' {
                 FullStartupMean = 1000
             } | ConvertTo-Json
             Set-Content -Path $performanceFile -Value $performance -Encoding UTF8
-            
+
             try {
                 $snapshotPath = Save-MetricsSnapshot -OutputPath $script:TestDir -IncludePerformanceMetrics -RepoRoot $script:RepoRoot
                 $snapshotContent = Get-Content -Path $snapshotPath -Raw | ConvertFrom-Json

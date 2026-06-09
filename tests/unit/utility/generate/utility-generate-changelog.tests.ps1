@@ -40,20 +40,12 @@ Describe 'generate-changelog.ps1 execution' {
         }
 
         $repo = New-GenerateChangelogTestRepository
-        try {
-            $scriptPath = Join-Path $repo 'scripts' 'utils' 'docs' 'generate-changelog.ps1'
-            $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
-                '-OutputFile', 'CHANGELOG-test.md'
-            )
-
-            $result.ExitCode | Should -Be 2
-            $result.Output | Should -Match 'git-cliff|required'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $scriptPath = Join-Path $repo 'scripts' 'utils' 'docs' 'generate-changelog.ps1'
+        $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+            '-OutputFile', 'CHANGELOG-test.md'
+        )
+                $result.ExitCode | Should -Be 2
+        $result.Output | Should -Match 'git-cliff|required'
     }
 
     It 'Runs git-cliff without a cliff.toml config file in an isolated repository' {
@@ -64,35 +56,25 @@ Describe 'generate-changelog.ps1 execution' {
 
         $repo = New-TestTempDirectory -Prefix 'GenerateChangelogNoCliff'
         $docsDir = Join-Path $repo 'scripts' 'utils' 'docs'
+        New-Item -ItemType Directory -Path $docsDir -Force | Out-Null
+        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+        Copy-Item -LiteralPath $script:GenerateChangelogScript -Destination (Join-Path $docsDir 'generate-changelog.ps1') -Force
+                Push-Location $repo
         try {
-            New-Item -ItemType Directory -Path $docsDir -Force | Out-Null
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-            Copy-Item -LiteralPath $script:GenerateChangelogScript -Destination (Join-Path $docsDir 'generate-changelog.ps1') -Force
-
-            Push-Location $repo
-            try {
-                & git init -q 2>$null
-                & git config user.email 'test@example.com' 2>$null
-                & git config user.name 'Test User' 2>$null
-                & git commit --allow-empty -m 'feat(init): seed repository' -q 2>$null
-            }
-            finally {
-                Pop-Location
-            }
-
-            $scriptPath = Join-Path $docsDir 'generate-changelog.ps1'
-            $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
-                '-OutputFile', 'CHANGELOG-missing-cliff.md'
-            )
-
-            Test-Path -LiteralPath (Join-Path $repo 'cliff.toml') | Should -Be $false
-            $result.ExitCode | Should -BeIn @(0, 1, 2)
-            $result.Output | Should -Match 'git-cliff|changelog|Changelog'
+            & git init -q 2>$null
+            & git config user.email 'test@example.com' 2>$null
+            & git config user.name 'Test User' 2>$null
+            & git commit --allow-empty -m 'feat(init): seed repository' -q 2>$null
         }
         finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
         }
+                $scriptPath = Join-Path $docsDir 'generate-changelog.ps1'
+        $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+            '-OutputFile', 'CHANGELOG-missing-cliff.md'
+        )
+                Test-Path -LiteralPath (Join-Path $repo 'cliff.toml') | Should -Be $false
+        $result.ExitCode | Should -BeIn @(0, 1, 2)
+        $result.Output | Should -Match 'git-cliff|changelog|Changelog'
     }
 }

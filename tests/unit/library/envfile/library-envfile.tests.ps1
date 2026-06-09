@@ -335,16 +335,9 @@ TEST_VAR=detected_value
             $originalLocation = Get-Location
             try {
                 Set-Location -Path $testRepoRoot
-                # Verify we're in the right directory
                 (Get-Location).Path | Should -Be $testRepoRoot
-                # Verify .git exists
                 Test-Path (Join-Path $testRepoRoot '.git') | Should -Be $true
-                # Initialize-EnvFiles should detect repo root from current directory
-                # Note: The function checks profile path first, which might interfere in test environment
-                # So we verify that if automatic detection works, the .env file is loaded
                 Initialize-EnvFiles
-                # If TEST_VAR is set, it means the .env was loaded (either from current dir or profile)
-                # In test environment, we primarily verify explicit parameter works
                 if ($env:TEST_VAR) {
                     $env:TEST_VAR | Should -Be 'detected_value'
                 }

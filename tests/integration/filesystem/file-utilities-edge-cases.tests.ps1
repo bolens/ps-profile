@@ -89,13 +89,11 @@ Describe 'File Utility Functions Edge Cases' {
             $invalidJson = '{"invalid": json}'
             {
                 $originalWarningPreference = $WarningPreference
-                try {
-                    $WarningPreference = 'SilentlyContinue'
-                    Format-Json -InputObject $invalidJson | Out-Null
-                }
-                finally {
-                    $WarningPreference = $originalWarningPreference
-                }
+                                $WarningPreference = 'SilentlyContinue'
+                Format-Json -InputObject $invalidJson | Out-Null
+            }
+            finally {
+                $WarningPreference = $originalWarningPreference
             } | Should -Not -Throw
         }
 
@@ -129,13 +127,11 @@ Describe 'File Utility Functions Edge Cases' {
             $nonExistent = Join-Path $TestDrive 'non_existent.txt'
             {
                 $originalWarningPreference = $WarningPreference
-                try {
-                    $WarningPreference = 'SilentlyContinue'
-                    Get-FileHashValue -Path $nonExistent | Out-Null
-                }
-                finally {
-                    $WarningPreference = $originalWarningPreference
-                }
+                                $WarningPreference = 'SilentlyContinue'
+                Get-FileHashValue -Path $nonExistent | Out-Null
+            }
+            finally {
+                $WarningPreference = $originalWarningPreference
             } | Should -Not -Throw
         }
 

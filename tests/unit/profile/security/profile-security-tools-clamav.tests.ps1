@@ -98,12 +98,10 @@ Describe 'security-tools.ps1 - Invoke-ClamAVScan' {
             Set-TestCommandThrowingMock -CommandName 'clamscan' -Message 'Execution failed'
 
             $result = $null
-            try {
-                $result = Invoke-ClamAVScan -Path $script:TestRepoPath -ErrorAction SilentlyContinue
-            }
-            catch {
-                $result = $null
-            }
+                        $result = Invoke-ClamAVScan -Path $script:TestRepoPath -ErrorAction SilentlyContinue
+        }
+        catch {
+            $result = $null
 
             $result | Should -BeNullOrEmpty
         }

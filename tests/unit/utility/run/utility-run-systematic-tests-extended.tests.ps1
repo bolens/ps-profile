@@ -49,5 +49,12 @@ Describe 'run-systematic-tests.ps1 extended scenarios' {
             $content = Get-Content -LiteralPath $script:SystematicScript -Raw
             $content | Should -Match 'ValidateRange\(1, 6\)'
         }
+
+        It 'Invokes per-file batch runners for Tools and Unit categories' {
+            $content = Get-Content -LiteralPath $script:SystematicScript -Raw
+            $content | Should -Match 'run-tools-integration-batch\.ps1'
+            $content | Should -Match 'run-unit-batch\.ps1'
+            $content | Should -Match 'UsePerFileBatch'
+        }
     }
 }

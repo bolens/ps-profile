@@ -35,7 +35,6 @@ Describe 'collect-code-metrics.ps1 execution' {
     It 'Collects metrics for a narrow fixture path and writes JSON output' {
         $fixtureDir = New-CodeMetricsFixtureDirectory
         $outputFile = Join-Path $fixtureDir 'metrics.json'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:CollectMetricsScript -ArgumentList @(
                 '-Path', $fixtureDir,
                 '-OutputPath', $outputFile
@@ -45,12 +44,6 @@ Describe 'collect-code-metrics.ps1 execution' {
             Test-Path -LiteralPath $outputFile | Should -BeTrue
             $json = Get-Content -LiteralPath $outputFile -Raw | ConvertFrom-Json
             $json.Timestamp | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixtureDir) {
-                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Includes test coverage metrics when a coverage XML path is provided' {
@@ -69,7 +62,6 @@ Describe 'collect-code-metrics.ps1 execution' {
 </Coverage>
 '@ | Set-Content -LiteralPath $coverageXml -Encoding UTF8
 
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:CollectMetricsScript -ArgumentList @(
                 '-Path', $fixtureDir,
                 '-OutputPath', $outputFile,
@@ -82,18 +74,11 @@ Describe 'collect-code-metrics.ps1 execution' {
             $json = Get-Content -LiteralPath $outputFile -Raw | ConvertFrom-Json
             $json.PSObject.Properties.Name | Should -Contain 'TestCoverage'
             $json.TestCoverage.CoveragePercent | Should -BeGreaterOrEqual 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixtureDir) {
-                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Warns and continues when a requested analysis path does not exist' {
         $missingPath = Join-Path (New-TestTempDirectory -Prefix 'CodeMetricsMissingPath') 'does-not-exist'
         $outputFile = Join-Path (Split-Path -Parent $missingPath) 'metrics-missing-path.json'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:CollectMetricsScript -ArgumentList @(
                 '-Path', $missingPath,
                 '-OutputPath', $outputFile
@@ -101,12 +86,5 @@ Describe 'collect-code-metrics.ps1 execution' {
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Failed to collect metrics|Warning'
-        }
-        finally {
-            $parent = Split-Path -Parent $missingPath
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

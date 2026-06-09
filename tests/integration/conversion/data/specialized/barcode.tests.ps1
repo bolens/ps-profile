@@ -53,13 +53,11 @@ Describe 'Barcode Conversion Tests' {
             Set-Content -Path $tempFile -Value $testText -NoNewline
 
             # Should accept valid formats (may fail if jsbarcode/canvas npm packages are missing)
-            try {
-                ConvertTo-BarcodeFromText -InputPath $tempFile -Format CODE128 -ErrorAction Stop
-            }
-            catch {
-                if ($_.Exception.Message -notmatch 'jsbarcode|canvas|MODULE_NOT_FOUND|Node\.js') {
-                    throw
-                }
+                        ConvertTo-BarcodeFromText -InputPath $tempFile -Format CODE128 -ErrorAction Stop
+        }
+        catch {
+            if ($_.Exception.Message -notmatch 'jsbarcode|canvas|MODULE_NOT_FOUND|Node\.js') {
+                throw
             }
         }
 

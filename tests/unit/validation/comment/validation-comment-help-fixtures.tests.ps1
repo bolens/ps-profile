@@ -71,25 +71,11 @@ BeforeAll {
 Describe 'check-comment-help.ps1 fixture execution' {
     It 'Passes when all fixture functions have comment-based help' {
         $repo = New-CommentHelpFixtureRepository
-        try {
-            Invoke-CommentHelpCheck -RepositoryRoot $repo | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                Invoke-CommentHelpCheck -RepositoryRoot $repo | Should -Be 0
     }
 
     It 'Fails when a fixture function is missing comment-based help' {
         $repo = New-CommentHelpFixtureRepository -IncludeUndocumentedFunction
-        try {
-            Invoke-CommentHelpCheck -RepositoryRoot $repo | Should -BeIn @(1, 2)
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                Invoke-CommentHelpCheck -RepositoryRoot $repo | Should -BeIn @(1, 2)
     }
 }

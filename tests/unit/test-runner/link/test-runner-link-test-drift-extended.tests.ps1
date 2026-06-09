@@ -33,5 +33,16 @@ Describe 'scripts/utils/code-quality/link-test-drift.ps1 extended scenarios' {
         $c | Should -Match 'profileRoot'
         $c | Should -Match 'scriptsLibRoot'
     }
+    It 'Removes orphaned drift.lock test bindings during Refresh' {
+        $c = Get-Content -LiteralPath $script:Fragment -Raw
+        $c | Should -Match 'removedOrphans'
+        $c | Should -Match 'drift unlink'
+        $c | Should -Match 'orphaned test binding'
+    }
+    It 'Runs orphan cleanup only when Refresh is specified' {
+        $c = Get-Content -LiteralPath $script:Fragment -Raw
+        $c | Should -Match 'if \(\$Refresh\) \{'
+        ($c -split 'if \(\$Refresh\) \{')[1] | Should -Match 'removedOrphans'
+    }
 }
 

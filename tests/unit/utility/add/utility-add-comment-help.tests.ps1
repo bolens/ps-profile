@@ -34,7 +34,6 @@ BeforeAll {
 Describe 'add-comment-help.ps1 execution' {
     It 'DryRun previews help additions without modifying fixture files' {
         $fixtureDir = New-CommentHelpFixtureDirectory
-        try {
             $fixtureFile = Join-Path $fixtureDir 'needs-help.ps1'
             $before = Get-Content -LiteralPath $fixtureFile -Raw
 
@@ -46,17 +45,10 @@ Describe 'add-comment-help.ps1 execution' {
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'DryRun|would add|Get-CommentHelpFixtureOk'
             (Get-Content -LiteralPath $fixtureFile -Raw) | Should -Be $before
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixtureDir) {
-                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Adds comment-based help to fixture functions when not in DryRun mode' {
         $fixtureDir = New-CommentHelpFixtureDirectory
-        try {
             $fixtureFile = Join-Path $fixtureDir 'needs-help.ps1'
 
             $result = Invoke-TestScriptFile -ScriptPath $script:AddCommentHelpScript -ArgumentList @(
@@ -68,29 +60,15 @@ Describe 'add-comment-help.ps1 execution' {
             $updated = Get-Content -LiteralPath $fixtureFile -Raw
             $updated | Should -Match '\.SYNOPSIS'
             $updated | Should -Match 'Get-CommentHelpFixtureOk'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixtureDir) {
-                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Fails when the requested analysis path does not exist' {
         $missingPath = Join-Path (New-TestTempDirectory -Prefix 'CommentHelpMissing') 'does-not-exist'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:AddCommentHelpScript -ArgumentList @(
                 '-Path', $missingPath
             )
 
             $result.ExitCode | Should -Not -Be 0
             $result.Output | Should -Match 'Path|not found|does not exist|does-not-exist'
-        }
-        finally {
-            $parent = Split-Path -Parent $missingPath
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

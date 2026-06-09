@@ -2,15 +2,15 @@
 
 ## Synopsis
 
-Converts ASCII text to URL/percent encoded representation.
+URL-encodes a string.
 
 ## Description
 
-Converts ASCII text to URL/percent encoded string representation following RFC 3986 specification.
+Encodes special characters in a string for use in URLs.
 
 ## Alias Information
 
-**Alias for:** `ConvertFrom-AsciiToUrl`
+**Alias for:** `ConvertTo-UrlEncoded`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/conversion-modules/data/encoding/ascii.ps1
+Defined in: ../profile.d/utilities-modules/data/utilities-encoding.ps1

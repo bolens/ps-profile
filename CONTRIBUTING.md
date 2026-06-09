@@ -290,7 +290,7 @@ task spellcheck               # Spellcheck
 task markdownlint             # Markdownlint
 task validate-function-naming # Validate function naming conventions
 task pre-commit-checks        # Run pre-commit checks manually
-task drift-link               # Refresh drift.lock after doc or test binding changes
+task drift-link               # Refresh drift.lock after doc, test, or API doc binding changes
 task drift-check              # Verify doc anchors and markdown links (included in quality-check)
 ```
 
@@ -548,7 +548,7 @@ task spellcheck               # Spellcheck
 task markdownlint             # Markdownlint
 task validate-function-naming # Validate function naming conventions
 task pre-commit-checks        # Run pre-commit checks manually
-task drift-link               # Refresh drift.lock after doc or test binding changes
+task drift-link               # Refresh drift.lock after doc, test, or API doc binding changes
 task drift-check              # Verify doc anchors and markdown links (included in quality-check)
 ```
 
@@ -638,7 +638,7 @@ Use numeric prefixes to control load order:
 - Audit parser coverage with `task check-doc-coverage` (informational; add `-Strict` to fail on parser gaps or missing markdown)
 - Before pushing doc-related changes, run `task check-doc-freshness` (regenerates incrementally and fails when `docs/api` is stale)
 - Developer guides live in [docs/guides/README.md](docs/guides/README.md)
-- After editing guides or documented source files, run `task drift-link` then `task drift-check`
+- After editing guides, tests, API docs, or documented source files, run `task drift-link` then `task drift-check` (run `task drift-link` again after `generate-docs`)
 - See [PROFILE_README.md](PROFILE_README.md) — Detailed technical information
 
 ### Documenting dynamic registrations

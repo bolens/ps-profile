@@ -38,11 +38,9 @@ Describe 'Profile fragments' {
             $scriptBlock.GetType().Name | Should -Be 'ScriptBlock'
 
             $result = $null
-            try {
-                $result = (& test_agent_fn)
-            }
-            catch {
-            }
+                        $result = (& test_agent_fn)
+        }
+        catch {
             $result | Should -Be 'ok'
 
             $aliasName = "test_alias_{0}" -f (Get-Random)
@@ -50,11 +48,9 @@ Describe 'Profile fragments' {
             $aliasCreated | Should -Be $true
 
             $aliasOutput = $null
-            try {
-                $aliasOutput = & $aliasName 'ping'
-            }
-            catch {
-            }
+                        $aliasOutput = & $aliasName 'ping'
+        }
+        catch {
             $aliasOutput | Should -Be 'ping'
         }
     }

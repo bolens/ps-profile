@@ -56,12 +56,10 @@ Describe 'SafeTestPath extended scenarios' {
         It 'Returns false and logs when the path is whitespace' {
             $env:PS_PROFILE_DEBUG_TESTPATH = '1'
 
-            try {
-                Trace-TestPath -Path '   ' | Should -Be $false
-            }
-            finally {
-                Remove-Item Env:\PS_PROFILE_DEBUG_TESTPATH -ErrorAction SilentlyContinue
-            }
+                        Trace-TestPath -Path '   ' | Should -Be $false
+        }
+        finally {
+            Remove-Item Env:\PS_PROFILE_DEBUG_TESTPATH -ErrorAction SilentlyContinue
         }
 
         It 'Delegates to Test-Path for valid existing paths' {

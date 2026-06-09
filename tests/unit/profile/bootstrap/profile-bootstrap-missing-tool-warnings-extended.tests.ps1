@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-bootstrap-missing-tool-warnings-extended.tests.ps1
-#>
+# ===============================================
+# profile-bootstrap-missing-tool-warnings-extended.tests.ps1
+# Execution tests for bootstrap/MissingToolWarnings.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,31 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/bootstrap/MissingToolWarnings.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:BootstrapDir = Join-Path $script:ProfileDir 'bootstrap'
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/bootstrap/MissingToolWarnings.ps1 extended scenarios' {
-    It 'Documents core missing tool warning utilities' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Core missing tool warning utilities'
-        $c | Should -Match 'InstallHintResolver.ps1'
+    It 'Registers missing tool warning helpers' {
+        Get-Command Get-PlatformSpecificTools -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Test-ToolAvailableOnPlatform -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Write-MissingToolWarning -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Get-PlatformSpecificTools with platform mappings' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Get-PlatformSpecificTools'
-        $c | Should -Match 'Test-ToolAvailableOnPlatform'
-        $c | Should -Match 'winget'
+
+    It 'Get-PlatformSpecificTools maps winget to Windows only' {
+        $tools = Get-PlatformSpecificTools
+        $tools.ContainsKey('winget') | Should -Be $true
+        $tools['winget'] | Should -Contain 'Windows'
     }
-    It 'Defines Write-MissingToolWarning and Clear-MissingToolWarnings' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Write-MissingToolWarning'
-        $c | Should -Match 'Clear-MissingToolWarnings'
+
+    It 'Preserves missing tool warning helper bodies on repeated module loads' {
+        $firstWrite = Get-Command Write-MissingToolWarning -ErrorAction Stop
+
+        . (Join-Path $script:BootstrapDir 'MissingToolWarnings.ps1')
+
+        (Get-Command Write-MissingToolWarning -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstWrite.ScriptBlock.ToString()
     }
 }

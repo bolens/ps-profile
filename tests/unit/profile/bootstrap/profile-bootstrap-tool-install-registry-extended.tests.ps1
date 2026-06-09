@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-bootstrap-tool-install-registry-extended.tests.ps1
-#>
+# ===============================================
+# profile-bootstrap-tool-install-registry-extended.tests.ps1
+# Execution tests for bootstrap/ToolInstallRegistry.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,30 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/bootstrap/ToolInstallRegistry.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:BootstrapDir = Join-Path $script:ProfileDir 'bootstrap'
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/bootstrap/ToolInstallRegistry.ps1 extended scenarios' {
-    It 'Documents tool install method registry for missing tool hints' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tool installation method registry'
-        $c | Should -Match 'Get-ToolInstallMethodRegistry'
+    It 'Registers tool install registry helpers' {
+        Get-Command Get-ToolInstallMethodRegistry -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-InstallMethodFallbackChain -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-ToolSpecificInstallMethod -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Get-ToolSpecificInstallMethod and Get-InstallMethodFallbackChain' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Get-ToolSpecificInstallMethod'
-        $c | Should -Match 'Get-InstallMethodFallbackChain'
-        $c | Should -Match 'Test-CommandAvailable'
+
+    It 'Get-ToolInstallMethodRegistry returns install metadata entries' {
+        $registry = Get-ToolInstallMethodRegistry
+        @($registry).Count | Should -BeGreaterThan 0
     }
-    It 'Defines preference-aware install preference helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Test-PreferenceAwareInstallPreferences'
-        $c | Should -Match 'Set-PreferenceAwareInstallPreferences'
-        $c | Should -Match 'Show-MissingToolWarningsTable'
+
+    It 'Preserves tool install registry helper bodies on repeated module loads' {
+        $firstRegistry = Get-Command Get-ToolInstallMethodRegistry -ErrorAction Stop
+
+        . (Join-Path $script:BootstrapDir 'ToolInstallRegistry.ps1')
+
+        (Get-Command Get-ToolInstallMethodRegistry -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstRegistry.ScriptBlock.ToString()
     }
 }

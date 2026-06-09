@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-game-emulators-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-game-emulators-fragment-extended.tests.ps1
+# Execution tests for game-emulators.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,54 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/game-emulators.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts/lib/fragment/FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module $fragmentIdempotencyPath -DisableNameChecking -ErrorAction Stop -Force
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
+function script:Reset-GameEmulatorsFragmentState {
+    Clear-FragmentLoaded -FragmentName 'game-emulators' -ErrorAction SilentlyContinue
+}
+
 Describe 'profile.d/game-emulators.ps1 extended scenarios' {
-    It 'Declares optional tier covering multi-system emulator launchers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: optional'
-        $c | Should -Match 'Dolphin'
-        $c | Should -Match 'RetroArch'
+    BeforeEach {
+        Reset-GameEmulatorsFragmentState
     }
-    It 'Defines Start-Dolphin with ROM extension routing table' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Start-Dolphin'
-        $c | Should -Match '\.gcm''  = ''Start-Dolphin'''
+
+    It 'Registers emulator launch helpers and marks the fragment loaded' {
+        . (Join-Path $script:ProfileDir 'game-emulators.ps1')
+
+        Get-Command Start-Dolphin -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Start-RetroArch -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Test-FragmentLoaded -FragmentName 'game-emulators' | Should -Be $true
     }
-    It 'Marks game-emulators fragment loaded after helper registration' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "FragmentName 'game-emulators'"
-        $c | Should -Match "Set-FragmentLoaded -FragmentName 'game-emulators'"
+
+    It 'Start-Dolphin warns when dolphin variants are unavailable' {
+        . (Join-Path $script:ProfileDir 'game-emulators.ps1')
+
+        foreach ($cmd in @('dolphin-dev', 'dolphin-nightly', 'dolphin')) {
+            Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
+        }
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('dolphin-dev', [ref]$null)
+        }
+
+        $output = & { Start-Dolphin } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'dolphin-dev not found'
+    }
+
+    It 'Skips re-initialization when game-emulators is already loaded' {
+        . (Join-Path $script:ProfileDir 'game-emulators.ps1')
+        $firstDolphin = Get-Command Start-Dolphin -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'game-emulators.ps1')
+
+        (Get-Command Start-Dolphin -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstDolphin.ScriptBlock.ToString()
     }
 }

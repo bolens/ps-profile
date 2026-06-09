@@ -52,13 +52,11 @@ Describe 'profile.d/error-handling.ps1 extended scenarios' {
         try {
             . (Join-Path $script:ProfileDir 'error-handling.ps1')
 
-            try {
-                throw 'error-handling fragment test failure'
-            }
-            catch {
-                { Write-ProfileError -ErrorRecord $_ -Context 'Fragment test' -Category 'Fragment' } |
-                    Should -Not -Throw
-            }
+                        throw 'error-handling fragment test failure'
+        }
+        catch {
+            { Write-ProfileError -ErrorRecord $_ -Context 'Fragment test' -Category 'Fragment' } |
+                Should -Not -Throw
         }
         finally {
             $env:PS_PROFILE_DEBUG = $null

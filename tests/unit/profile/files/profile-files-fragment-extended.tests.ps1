@@ -73,12 +73,10 @@ Describe 'profile.d/files.ps1 extended scenarios' {
                 }
             } -Force
 
-            try {
-                throw 'files fragment submodule failure'
-            }
-            catch {
-                Write-SubModuleError -ErrorRecord $_ -ModuleName 'test-module.ps1'
-            }
+                        throw 'files fragment submodule failure'
+        }
+        catch {
+            Write-SubModuleError -ErrorRecord $_ -ModuleName 'test-module.ps1'
 
             $script:capturedErrors.Count | Should -Be 1
             $script:capturedErrors[0].Exception.Message | Should -Be 'files fragment submodule failure'

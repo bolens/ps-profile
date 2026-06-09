@@ -9,37 +9,35 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    try {
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-        $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-        if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
-            throw "Get-TestPath returned null or empty value for LibPath"
-        }
-        if (-not (Test-Path -LiteralPath $script:LibPath)) {
-            throw "Library path not found at: $script:LibPath"
-        }
-        
-        $script:ExitCodesPath = Join-Path $script:LibPath 'core' 'ExitCodes.psm1'
-        if ($null -eq $script:ExitCodesPath -or [string]::IsNullOrWhiteSpace($script:ExitCodesPath)) {
-            throw "ExitCodesPath is null or empty"
-        }
-        if (-not (Test-Path -LiteralPath $script:ExitCodesPath)) {
-            throw "ExitCodes module not found at: $script:ExitCodesPath"
-        }
-        
-        # Import the module under test
-        Import-Module $script:ExitCodesPath -DisableNameChecking -ErrorAction Stop -Force
-        $script:TestTempRoot = New-TestTempDirectory -Prefix 'ExitCodesTests'
+    $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
+        throw "Get-TestPath returned null or empty value for LibPath"
     }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
-        }
-        Write-Error "Failed to initialize ExitCodes tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+    if (-not (Test-Path -LiteralPath $script:LibPath)) {
+        throw "Library path not found at: $script:LibPath"
     }
+    
+    $script:ExitCodesPath = Join-Path $script:LibPath 'core' 'ExitCodes.psm1'
+    if ($null -eq $script:ExitCodesPath -or [string]::IsNullOrWhiteSpace($script:ExitCodesPath)) {
+        throw "ExitCodesPath is null or empty"
+    }
+    if (-not (Test-Path -LiteralPath $script:ExitCodesPath)) {
+        throw "ExitCodes module not found at: $script:ExitCodesPath"
+    }
+    
+    # Import the module under test
+    Import-Module $script:ExitCodesPath -DisableNameChecking -ErrorAction Stop -Force
+    $script:TestTempRoot = New-TestTempDirectory -Prefix 'ExitCodesTests'
+}
+catch {
+    $errorDetails = @{
+        Message  = $_.Exception.Message
+        Type     = $_.Exception.GetType().FullName
+        Location = $_.InvocationInfo.ScriptLineNumber
+    }
+    Write-Error "Failed to initialize ExitCodes tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+    throw
 }
 
 AfterAll {
@@ -50,19 +48,17 @@ Describe 'ExitCodes Module Functions' {
 
     Context 'Exit Code Constants' {
         It 'Defines EXIT_SUCCESS constant' {
-            try {
-                Get-Variable EXIT_SUCCESS -ErrorAction Stop | Should -Not -BeNullOrEmpty -Because "EXIT_SUCCESS constant should be defined"
-                $EXIT_SUCCESS | Should -Be 0 -Because "EXIT_SUCCESS should equal 0"
+                        Get-Variable EXIT_SUCCESS -ErrorAction Stop | Should -Not -BeNullOrEmpty -Because "EXIT_SUCCESS constant should be defined"
+            $EXIT_SUCCESS | Should -Be 0 -Because "EXIT_SUCCESS should equal 0"
+        }
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Constant = 'EXIT_SUCCESS'
+                Category = $_.CategoryInfo.Category
             }
-            catch {
-                $errorDetails = @{
-                    Message  = $_.Exception.Message
-                    Constant = 'EXIT_SUCCESS'
-                    Category = $_.CategoryInfo.Category
-                }
-                Write-Error "EXIT_SUCCESS constant test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
-            }
+            Write-Error "EXIT_SUCCESS constant test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
         }
 
         It 'Defines EXIT_VALIDATION_FAILURE constant' {

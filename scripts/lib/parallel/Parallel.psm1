@@ -109,9 +109,22 @@ function Invoke-Parallel {
             $runspacePool = [runspacefactory]::CreateRunspacePool(1, $ThrottleLimit)
             $runspacePool.Open()
 
+            # Test-only setup failure hook for outer catch coverage
+            if ($env:PS_PROFILE_PARALLEL_FORCE_SETUP_ERROR -and (
+                    $env:PS_PROFILE_PARALLEL_FORCE_SETUP_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                    $env:PS_PROFILE_PARALLEL_FORCE_SETUP_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                throw [System.InvalidOperationException]::new('parallel setup error probe')
+            }
+
             # Create scriptblock wrapper that handles parameter detection
             $wrapperScriptBlock = {
                 param($Item, $ScriptBlock)
+
+                # Test-only stall hook for runspace timeout coverage (interruptible via PowerShell.Stop)
+                $testDelayMs = 0
+                if ($env:PS_PROFILE_PARALLEL_TEST_DELAY_MS -and [int]::TryParse($env:PS_PROFILE_PARALLEL_TEST_DELAY_MS, [ref]$testDelayMs) -and $testDelayMs -gt 0) {
+                    Start-Sleep -Milliseconds $testDelayMs
+                }
 
                 if ($ScriptBlock -isnot [scriptblock]) {
                     $ScriptBlock = [scriptblock]::Create([string]$ScriptBlock)
@@ -137,6 +150,28 @@ function Invoke-Parallel {
                 else {
                     $Item | ForEach-Object -Process { & $ScriptBlock }
                 }
+            }
+
+            # Test-only: invoke wrapper in current runspace for code-coverage attribution
+            $useDirectWrapper = $false
+            if ($env:PS_PROFILE_PARALLEL_DIRECT_SCRIPTBLOCK -and (
+                    $env:PS_PROFILE_PARALLEL_DIRECT_SCRIPTBLOCK.Trim().ToLowerInvariant() -eq '1' -or
+                    $env:PS_PROFILE_PARALLEL_DIRECT_SCRIPTBLOCK.Trim().ToLowerInvariant() -eq 'true')) {
+                $useDirectWrapper = $true
+            }
+
+            if ($useDirectWrapper) {
+                foreach ($item in $itemList) {
+                    $directResult = & $wrapperScriptBlock $item $ScriptBlock
+                    foreach ($resultItem in @($directResult)) {
+                        if ($null -ne $resultItem) {
+                            $results += $resultItem
+                        }
+                    }
+                }
+
+                Write-Output -InputObject @($results) -NoEnumerate
+                return
             }
 
             # Start all items in parallel
@@ -165,6 +200,11 @@ function Invoke-Parallel {
             # Wait for all to complete using polling (STA-compatible)
             $pollIntervalMs = 50  # Check every 50ms
             $timeoutMs = $TimeoutSeconds * 1000
+            $overrideTimeoutMs = 0
+            if ($env:PS_PROFILE_PARALLEL_TIMEOUT_MS -and [int]::TryParse($env:PS_PROFILE_PARALLEL_TIMEOUT_MS, [ref]$overrideTimeoutMs) -and $overrideTimeoutMs -gt 0) {
+                $timeoutMs = $overrideTimeoutMs
+            }
+
             $elapsedMs = 0
             $allCompleted = $false
 
@@ -235,6 +275,22 @@ function Invoke-Parallel {
                 }
             }
 
+            if (-not $allCompleted) {
+                foreach ($stalledRunspace in $runspaces) {
+                    if ($stalledRunspace.Handle -and -not $stalledRunspace.Handle.IsCompleted -and $stalledRunspace.PowerShell) {
+                        try {
+                            $stalledRunspace.PowerShell.Stop()
+                        }
+                        catch {
+                            $debugLevel = 0
+                            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                                Write-Verbose "[parallel.execute] Stop stalled runspace failed: $($_.Exception.Message)"
+                            }
+                        }
+                    }
+                }
+            }
+
             # Collect results
             foreach ($rs in $runspaces) {
                 try {
@@ -253,6 +309,18 @@ function Invoke-Parallel {
                         }
                     }
                     else {
+                        if ($rs.PowerShell -and $rs.Handle -and -not $rs.Handle.IsCompleted) {
+                            try {
+                                $rs.PowerShell.Stop()
+                            }
+                            catch {
+                                $debugLevel = 0
+                                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                                    Write-Verbose "[parallel.execute] Stop timed-out runspace failed: $($_.Exception.Message)"
+                                }
+                            }
+                        }
+
                         $debugLevel = 0
                         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                             if ($debugLevel -ge 1) {
@@ -355,6 +423,13 @@ function Invoke-Parallel {
                 }
                 finally {
                     if ($rs.PowerShell) {
+                        if ($rs.Handle -and -not $rs.Handle.IsCompleted) {
+                            try {
+                                $rs.PowerShell.Stop()
+                            }
+                            catch { }
+                        }
+
                         $rs.PowerShell.Dispose()
                     }
                 }
@@ -406,8 +481,28 @@ function Invoke-Parallel {
         finally {
             # Cleanup runspace pool
             if ($runspacePool) {
-                $runspacePool.Close()
-                $runspacePool.Dispose()
+                foreach ($rs in $runspaces) {
+                    if ($null -eq $rs -or $null -eq $rs.PowerShell) {
+                        continue
+                    }
+
+                    try {
+                        if ($rs.Handle -and -not $rs.Handle.IsCompleted) {
+                            $rs.PowerShell.Stop()
+                        }
+                    }
+                    catch { }
+                }
+
+                try {
+                    $runspacePool.Close()
+                }
+                catch { }
+
+                try {
+                    $runspacePool.Dispose()
+                }
+                catch { }
             }
         }
 

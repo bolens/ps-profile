@@ -9,40 +9,38 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    try {
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-        $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-        if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
-            throw "Get-TestPath returned null or empty value for LibPath"
-        }
-        if (-not (Test-Path -LiteralPath $script:LibPath)) {
-            throw "Library path not found at: $script:LibPath"
-        }
-        
-        $script:LoggingPath = Join-Path $script:LibPath 'core' 'Logging.psm1'
-        if ($null -eq $script:LoggingPath -or [string]::IsNullOrWhiteSpace($script:LoggingPath)) {
-            throw "LoggingPath is null or empty"
-        }
-        if (-not (Test-Path -LiteralPath $script:LoggingPath)) {
-            throw "Logging module not found at: $script:LoggingPath"
-        }
-        
-        # Import the module under test
-        Import-Module $script:LoggingPath -DisableNameChecking -ErrorAction Stop -Force
-        
-        # Create temporary directory for test log files
-        $script:TestLogDir = New-TestTempDirectory -Prefix 'LoggingTests'
-        New-Item -ItemType Directory -Path $script:TestLogDir -Force | Out-Null
+    $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
+        throw "Get-TestPath returned null or empty value for LibPath"
     }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
-        }
-        Write-Error "Failed to initialize Logging tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+    if (-not (Test-Path -LiteralPath $script:LibPath)) {
+        throw "Library path not found at: $script:LibPath"
     }
+    
+    $script:LoggingPath = Join-Path $script:LibPath 'core' 'Logging.psm1'
+    if ($null -eq $script:LoggingPath -or [string]::IsNullOrWhiteSpace($script:LoggingPath)) {
+        throw "LoggingPath is null or empty"
+    }
+    if (-not (Test-Path -LiteralPath $script:LoggingPath)) {
+        throw "Logging module not found at: $script:LoggingPath"
+    }
+    
+    # Import the module under test
+    Import-Module $script:LoggingPath -DisableNameChecking -ErrorAction Stop -Force
+    
+    # Create temporary directory for test log files
+    $script:TestLogDir = New-TestTempDirectory -Prefix 'LoggingTests'
+    New-Item -ItemType Directory -Path $script:TestLogDir -Force | Out-Null
+}
+catch {
+    $errorDetails = @{
+        Message  = $_.Exception.Message
+        Type     = $_.Exception.GetType().FullName
+        Location = $_.InvocationInfo.ScriptLineNumber
+    }
+    Write-Error "Failed to initialize Logging tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+    throw
 }
 
 AfterAll {
@@ -77,13 +75,11 @@ Describe 'Logging Module Functions' {
 
         It 'Writes debug message' {
             $originalPreference = $DebugPreference
-            try {
-                $DebugPreference = 'Continue'
-                { Write-ScriptMessage -Message 'Debug message' -LogLevel Debug } | Should -Not -Throw
-            }
-            finally {
-                $DebugPreference = $originalPreference
-            }
+                        $DebugPreference = 'Continue'
+            { Write-ScriptMessage -Message 'Debug message' -LogLevel Debug } | Should -Not -Throw
+        }
+        finally {
+            $DebugPreference = $originalPreference
         }
 
         It 'Uses LogLevel parameter to override IsWarning/IsError' {
@@ -223,44 +219,38 @@ Describe 'Logging Module Functions' {
             $output | Should -Not -BeNullOrEmpty
             
             # Try to parse as JSON
-            try {
-                $json = $output | ConvertFrom-Json
-                $json | Should -Not -BeNullOrEmpty
-                $json.Message | Should -Be 'Structured message'
-                $json.Level | Should -Not -BeNullOrEmpty
-                $json.Timestamp | Should -Not -BeNullOrEmpty
-            }
-            catch {
-                # If JSON parsing fails, at least verify output contains expected fields
-                $output | Should -Match 'Message'
-                $output | Should -Match 'Level'
-                $output | Should -Match 'Timestamp'
-            }
+                        $json = $output | ConvertFrom-Json
+            $json | Should -Not -BeNullOrEmpty
+            $json.Message | Should -Be 'Structured message'
+            $json.Level | Should -Not -BeNullOrEmpty
+            $json.Timestamp | Should -Not -BeNullOrEmpty
+        }
+        catch {
+            # If JSON parsing fails, at least verify output contains expected fields
+            $output | Should -Match 'Message'
+            $output | Should -Match 'Level'
+            $output | Should -Match 'Timestamp'
         }
 
         It 'Includes correct log level in structured output' {
             $output = Write-ScriptMessage -Message 'Error message' -LogLevel Error -StructuredOutput 6>&1
-            try {
-                $json = $output | ConvertFrom-Json
-                $json.Level | Should -Be 'Error'
-            }
-            catch {
-                $output | Should -Match '"Level"\s*:\s*"Error"'
-            }
+                        $json = $output | ConvertFrom-Json
+            $json.Level | Should -Be 'Error'
+        }
+        catch {
+            $output | Should -Match '"Level"\s*:\s*"Error"'
         }
 
         It 'Includes UTC timestamp in structured output' {
             $output = Write-ScriptMessage -Message 'Timestamped message' -StructuredOutput 6>&1
-            try {
-                $json = $output | ConvertFrom-Json
-                $json.Timestamp | Should -Not -BeNullOrEmpty
-                # Verify it's a valid ISO 8601 timestamp
-                [DateTime]::Parse($json.Timestamp) | Should -Not -BeNullOrEmpty
-            }
-            catch {
-                # Fallback: just verify timestamp field exists
-                $output | Should -Match 'Timestamp'
-            }
+                        $json = $output | ConvertFrom-Json
+            $json.Timestamp | Should -Not -BeNullOrEmpty
+            # Verify it's a valid ISO 8601 timestamp
+            [DateTime]::Parse($json.Timestamp) | Should -Not -BeNullOrEmpty
+        }
+        catch {
+            # Fallback: just verify timestamp field exists
+            $output | Should -Match 'Timestamp'
         }
     }
 

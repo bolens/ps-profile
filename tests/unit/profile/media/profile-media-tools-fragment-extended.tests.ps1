@@ -56,13 +56,11 @@ Describe 'profile.d/media-tools.ps1 extended scenarios' {
 
         $testInput = New-TestTempFile -Prefix 'media-tools-input' -Extension '.mp4' -Content 'not-a-video'
         $testOutput = New-TestTempFile -Prefix 'media-tools-output' -Extension '.mkv'
-        try {
-            $output = Convert-Video -InputPath $testInput -OutputPath $testOutput 2>&1 3>&1 | Out-String
-            $output | Should -Match 'ffmpeg|handbrake|not found'
-        }
-        finally {
-            Remove-TestArtifacts
-        }
+                $output = Convert-Video -InputPath $testInput -OutputPath $testOutput 2>&1 3>&1 | Out-String
+        $output | Should -Match 'ffmpeg|handbrake|not found'
+    }
+    finally {
+        Remove-TestArtifacts
     }
 
     It 'Skips re-initialization when media-tools is already loaded' {

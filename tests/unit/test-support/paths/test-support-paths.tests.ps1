@@ -20,26 +20,43 @@ BeforeAll {
 }
 
 Describe 'TestPaths helpers' {
+    Context 'Get-TestRepoRelativePath' {
+        It 'Converts an absolute test-data path to a repository-relative path' {
+            $artifactPath = Get-TestArtifactPath -FileName 'repo-relative-probe.txt'
+            $relativePath = Get-TestRepoRelativePath -Path $artifactPath -StartPath $PSScriptRoot
+
+            $relativePath | Should -Match '^tests/test-data/repo-relative-probe\.txt$'
+            (Join-Path $script:TestRepoRoot $relativePath) | Should -Be $artifactPath
+        }
+    }
+
+    Context 'New-TestExternalTempDirectory' {
+        It 'Creates a directory outside the repository root and registers cleanup' {
+            $externalDir = New-TestExternalTempDirectory -Prefix 'PathsExternal'
+                        Test-Path -LiteralPath $externalDir | Should -Be $true
+            $externalDir.StartsWith($script:TestRepoRoot, [StringComparison]::OrdinalIgnoreCase) | Should -Be $false
+        }
+        finally {
+            Clear-RegisteredTestCleanupPaths
+        }
+    }
+
     Context 'New-TestTempFile' {
         It 'Creates a file with optional initial content' {
             $filePath = New-TestTempFile -Prefix 'PathsContent' -Extension '.txt' -Content 'probe-content'
-            try {
-                Test-Path -LiteralPath $filePath | Should -Be $true
-                (Get-Content -LiteralPath $filePath -Raw).Trim() | Should -Be 'probe-content'
-            }
-            finally {
-                Remove-Item -LiteralPath $filePath -Force -ErrorAction SilentlyContinue
-            }
+                        Test-Path -LiteralPath $filePath | Should -Be $true
+            (Get-Content -LiteralPath $filePath -Raw).Trim() | Should -Be 'probe-content'
+        }
+        finally {
+            Remove-Item -LiteralPath $filePath -Force -ErrorAction SilentlyContinue
         }
 
         It 'Normalizes extensions without a leading dot' {
             $filePath = New-TestTempFile -Prefix 'PathsExt' -Extension 'json'
-            try {
-                $filePath | Should -Match '\.json$'
-            }
-            finally {
-                Remove-Item -LiteralPath $filePath -Force -ErrorAction SilentlyContinue
-            }
+                        $filePath | Should -Match '\.json$'
+        }
+        finally {
+            Remove-Item -LiteralPath $filePath -Force -ErrorAction SilentlyContinue
         }
     }
 

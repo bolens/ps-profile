@@ -39,6 +39,67 @@ function script:Get-InvokeParallelTaskResults {
         })
 }
 
+function script:Set-ParallelTestEnvironment {
+    param(
+        [int]$TimeoutMs = 100,
+        [int]$DelayMs = 500,
+        [switch]$DirectScriptblock,
+        [switch]$ForceSetupError
+    )
+
+    $script:ParallelTestPreviousTimeoutMs = $env:PS_PROFILE_PARALLEL_TIMEOUT_MS
+    $script:ParallelTestPreviousDelayMs = $env:PS_PROFILE_PARALLEL_TEST_DELAY_MS
+    $script:ParallelTestPreviousDirectScriptblock = $env:PS_PROFILE_PARALLEL_DIRECT_SCRIPTBLOCK
+    $script:ParallelTestPreviousSetupError = $env:PS_PROFILE_PARALLEL_FORCE_SETUP_ERROR
+
+    $env:PS_PROFILE_PARALLEL_TIMEOUT_MS = "$TimeoutMs"
+    $env:PS_PROFILE_PARALLEL_TEST_DELAY_MS = "$DelayMs"
+
+    if ($DirectScriptblock) {
+        $env:PS_PROFILE_PARALLEL_DIRECT_SCRIPTBLOCK = '1'
+    }
+    else {
+        Remove-Item Env:PS_PROFILE_PARALLEL_DIRECT_SCRIPTBLOCK -ErrorAction SilentlyContinue
+    }
+
+    if ($ForceSetupError) {
+        $env:PS_PROFILE_PARALLEL_FORCE_SETUP_ERROR = '1'
+    }
+    else {
+        Remove-Item Env:PS_PROFILE_PARALLEL_FORCE_SETUP_ERROR -ErrorAction SilentlyContinue
+    }
+}
+
+function script:Restore-ParallelTestEnvironment {
+    if ($null -eq $script:ParallelTestPreviousTimeoutMs) {
+        Remove-Item Env:PS_PROFILE_PARALLEL_TIMEOUT_MS -ErrorAction SilentlyContinue
+    }
+    else {
+        $env:PS_PROFILE_PARALLEL_TIMEOUT_MS = $script:ParallelTestPreviousTimeoutMs
+    }
+
+    if ($null -eq $script:ParallelTestPreviousDelayMs) {
+        Remove-Item Env:PS_PROFILE_PARALLEL_TEST_DELAY_MS -ErrorAction SilentlyContinue
+    }
+    else {
+        $env:PS_PROFILE_PARALLEL_TEST_DELAY_MS = $script:ParallelTestPreviousDelayMs
+    }
+
+    if ($null -eq $script:ParallelTestPreviousDirectScriptblock) {
+        Remove-Item Env:PS_PROFILE_PARALLEL_DIRECT_SCRIPTBLOCK -ErrorAction SilentlyContinue
+    }
+    else {
+        $env:PS_PROFILE_PARALLEL_DIRECT_SCRIPTBLOCK = $script:ParallelTestPreviousDirectScriptblock
+    }
+
+    if ($null -eq $script:ParallelTestPreviousSetupError) {
+        Remove-Item Env:PS_PROFILE_PARALLEL_FORCE_SETUP_ERROR -ErrorAction SilentlyContinue
+    }
+    else {
+        $env:PS_PROFILE_PARALLEL_FORCE_SETUP_ERROR = $script:ParallelTestPreviousSetupError
+    }
+}
+
 AfterAll {
     Remove-Module Parallel -ErrorAction SilentlyContinue -Force
 }
@@ -390,6 +451,194 @@ Describe 'Parallel extended scenarios' {
                 @($result)[0] | Should -Be 4
             }
             finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Invokes wrapper scriptblock paths in direct scriptblock mode for coverage attribution' {
+            Set-ParallelTestEnvironment -DirectScriptblock
+
+            try {
+                $result = Invoke-Parallel -Items @(2, 4) -ScriptBlock { $_ * 3 }
+                @($result).Count | Should -Be 2
+                $result | Should -Contain 6
+                $result | Should -Contain 12
+
+                $multiParamBlock = { param($Value, $Offset) "pair:${Value}:${Offset}" }
+                $pairItem = ,@(5, 9)
+                $pairResult = Invoke-Parallel -Items $pairItem -ScriptBlock $multiParamBlock
+                @($pairResult).Count | Should -Be 1
+                @($pairResult)[0] | Should -Be 'pair:5:9'
+            }
+            finally {
+                Restore-ParallelTestEnvironment
+            }
+        }
+
+        It 'Honors the test delay hook in direct scriptblock mode' {
+            Set-ParallelTestEnvironment -DirectScriptblock -DelayMs 1
+
+            try {
+                $result = Invoke-Parallel -Items @(4) -ScriptBlock { $_ + 1 }
+                @($result).Count | Should -Be 1
+                @($result)[0] | Should -Be 5
+            }
+            finally {
+                Restore-ParallelTestEnvironment
+            }
+        }
+
+        It 'Recreates script blocks from source text in direct scriptblock mode' {
+            Set-ParallelTestEnvironment -DirectScriptblock
+
+            try {
+                $scriptBlock = [scriptblock]::Create('$_ * 4')
+                $result = Invoke-Parallel -Items @(2) -ScriptBlock $scriptBlock
+                @($result).Count | Should -Be 1
+                @($result)[0] | Should -Be 8
+            }
+            finally {
+                Restore-ParallelTestEnvironment
+            }
+        }
+
+        It 'Uses the processor-based throttle limit when ThrottleLimit is zero' {
+            $result = @(1, 2, 3) | Invoke-Parallel -ScriptBlock { $_ } -ThrottleLimit 0
+            @($result).Count | Should -Be 3
+        }
+
+        It 'Returns an empty array when no items are supplied' {
+            $result = Invoke-Parallel -Items @() -ScriptBlock { $_ }
+            @($result).Count | Should -Be 0
+        }
+
+        It 'Runs timeout scenarios in direct scriptblock mode' {
+            Set-ParallelTestEnvironment -DirectScriptblock -TimeoutMs 50 -DelayMs 200
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                $timeoutResult = Get-InvokeParallelTaskResults -Output @(12 | Invoke-Parallel -ScriptBlock { $_ } -TimeoutSeconds 60)
+                @($timeoutResult).Count | Should -BeLessOrEqual 1
+            }
+            finally {
+                Restore-ParallelTestEnvironment
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Times out quickly using env delay and timeout overrides' {
+            Enable-TestStructuredLogging
+            Set-ParallelTestEnvironment -TimeoutMs 50 -DelayMs 200
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '0'
+
+            try {
+                $result = Get-InvokeParallelTaskResults -Output @(7 | Invoke-Parallel -ScriptBlock { $_ } -TimeoutSeconds 60)
+
+                @($result).Count | Should -BeLessOrEqual 1
+            }
+            finally {
+                Restore-ParallelTestEnvironment
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Rethrows when parallel setup fails via the setup error probe' {
+            Set-ParallelTestEnvironment -ForceSetupError
+            Enable-TestStructuredLogging
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '0'
+
+            try {
+                { Invoke-Parallel -Items @(1) -ScriptBlock { $_ } } | Should -Throw '*parallel setup error probe*'
+            }
+            finally {
+                Restore-ParallelTestEnvironment
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses Write-StructuredWarning for global timeouts when debug is explicitly disabled' {
+            Enable-TestStructuredLogging
+            Set-ParallelTestEnvironment -TimeoutMs 50 -DelayMs 200
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '0'
+
+            try {
+                $result = Get-InvokeParallelTaskResults -Output @(11 | Invoke-Parallel -ScriptBlock {
+                        Start-Sleep -Milliseconds 200
+                        $_
+                    } -TimeoutSeconds 60)
+
+                @($result).Count | Should -BeLessOrEqual 1
+            }
+            finally {
+                Restore-ParallelTestEnvironment
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Emits structured per-task timeout warnings when debug is explicitly disabled' {
+            Enable-TestStructuredLogging
+            Set-ParallelTestEnvironment -TimeoutMs 250 -DelayMs 0
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '0'
+
+            try {
+                $result = Get-InvokeParallelTaskResults -Output @(1, 2 | Invoke-Parallel -ScriptBlock {
+                        if ($_ -eq 2) { Start-Sleep -Milliseconds 600 }
+                        $_
+                    } -TimeoutSeconds 60)
+
+                @($result).Count | Should -BeLessOrEqual 2
+            }
+            finally {
+                Restore-ParallelTestEnvironment
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Surfaces outer catch diagnostics when setup fails with debug level 3' {
+            Set-ParallelTestEnvironment -ForceSetupError
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                { Invoke-Parallel -Items @(1) -ScriptBlock { $_ } } | Should -Throw '*parallel setup error probe*'
+            }
+            finally {
+                Restore-ParallelTestEnvironment
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
                 }

@@ -42,12 +42,10 @@ Describe 'Output path utilities extended scenarios' {
             Initialize-OutputUtils -RepoRoot $null
             $external = '/tmp/not-in-repo/example.txt'
 
-            try {
-                ConvertTo-RepoRelativePath -PathString $external | Should -Be $external
-            }
-            finally {
-                Initialize-OutputUtils -RepoRoot $script:TestRepoRoot
-            }
+                        ConvertTo-RepoRelativePath -PathString $external | Should -Be $external
+        }
+        finally {
+            Initialize-OutputUtils -RepoRoot $script:TestRepoRoot
         }
     }
 

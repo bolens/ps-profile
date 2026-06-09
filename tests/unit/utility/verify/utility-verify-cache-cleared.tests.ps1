@@ -46,19 +46,12 @@ BeforeAll {
 Describe 'verify-cache-cleared.ps1 execution' {
     It 'Reports success when the cache database does not exist in an isolated cache directory' {
         $cacheDir = New-TestTempDirectory -Prefix 'VerifyCacheCleared'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:VerifyCacheScript -EnvironmentVariables @{
                 PS_PROFILE_CACHE_DIR = $cacheDir
             }
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Database file does not exist|cache is cleared'
-        }
-        finally {
-            if (Test-Path -LiteralPath $cacheDir) {
-                Remove-Item -LiteralPath $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Reports non-empty cache entries without failing when sqlite3 is available' {
@@ -68,7 +61,6 @@ Describe 'verify-cache-cleared.ps1 execution' {
         }
 
         $cacheDir = New-TestTempDirectory -Prefix 'VerifyCacheNotCleared'
-        try {
             $null = New-FragmentCacheDatabaseWithEntries -CacheDir $cacheDir
             $result = Invoke-TestScriptFile -ScriptPath $script:VerifyCacheScript -EnvironmentVariables @{
                 PS_PROFILE_CACHE_DIR = $cacheDir
@@ -77,12 +69,6 @@ Describe 'verify-cache-cleared.ps1 execution' {
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Database file exists'
             $result.Output | Should -Match 'Cache is NOT fully cleared|AST cache entries: 1|Content cache entries: 1'
-        }
-        finally {
-            if (Test-Path -LiteralPath $cacheDir) {
-                Remove-Item -LiteralPath $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Reports a fully cleared cache when database tables exist but contain no rows' {
@@ -92,7 +78,6 @@ Describe 'verify-cache-cleared.ps1 execution' {
         }
 
         $cacheDir = New-TestTempDirectory -Prefix 'VerifyCacheEmptyTables'
-        try {
             $dbPath = Join-Path $cacheDir 'fragment-cache.db'
             @'
 CREATE TABLE fragment_ast_cache (id INTEGER PRIMARY KEY);
@@ -108,11 +93,5 @@ CREATE TABLE fragment_content_cache (id INTEGER PRIMARY KEY);
             $result.Output | Should -Match 'AST cache entries: 0'
             $result.Output | Should -Match 'Content cache entries: 0'
             $result.Output | Should -Match 'Cache is cleared \(both AST and content caches are empty\)'
-        }
-        finally {
-            if (Test-Path -LiteralPath $cacheDir) {
-                Remove-Item -LiteralPath $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

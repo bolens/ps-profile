@@ -45,6 +45,12 @@ Describe 'ErrorHandling extended scenarios' {
         It 'Writes errors without throwing when ErrorActionPreference is Continue' {
             { Write-ErrorOrThrow -Message 'continued message' -ErrorActionPreference 'Continue' } | Should -Not -Throw
         }
+
+        It 'Includes exception and error id when writing non-terminating errors' {
+            $ex = [InvalidOperationException]::new('wrapped failure')
+            { Write-ErrorOrThrow -Message 'continued with exception' -Exception $ex -ErrorId 'WrappedFailure' -ErrorActionPreference 'Continue' } |
+                Should -Not -Throw
+        }
     }
 
     Context 'Get-ErrorActionPreference' {

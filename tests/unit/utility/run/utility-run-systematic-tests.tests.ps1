@@ -86,11 +86,6 @@ exit 0
             $result.Output | Should -Match 'Running Bootstrap Tests'
             $result.Output | Should -Match 'Bootstrap.*Passed|Category.*Bootstrap'
         }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Fails when the stub Pester runner reports Bootstrap test failures' {
@@ -144,11 +139,6 @@ exit 1
             $result.ExitCode | Should -Be 1
             $result.Output | Should -Match 'Systematic Test Execution'
             $result.Output | Should -Match 'Bootstrap.*failures|Failed: [1-9]'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 
@@ -218,10 +208,187 @@ exit 0
             $result.Output | Should -Match 'Running Bootstrap Tests'
             $result.Output | Should -Not -Match 'Running Performance Tests'
         }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
+    It 'Runs Conversion-Data category tests through run-pester in an isolated repository' {
+        $repo = New-TestTempDirectory -Prefix 'SystematicConversionData'
+        try {
+            $conversionDir = Join-Path $repo 'tests' 'integration' 'conversion' 'data' 'stub-batch'
+            $runnerDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
+            $verificationDir = Join-Path $repo 'scripts' 'utils' 'test-verification'
+            $null = New-Item -ItemType Directory -Path $conversionDir -Force
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            $null = New-Item -ItemType Directory -Path $verificationDir -Force
+            $null = New-Item -ItemType File -Path (Join-Path $conversionDir 'sample.tests.ps1') -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:SystematicTestsScript -Destination (Join-Path $verificationDir 'run-systematic-tests.ps1') -Force
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                Set-Content -LiteralPath (Join-Path $repo 'README.md') -Value 'fixture' -Encoding UTF8
+                git add README.md
+                git commit -m 'init' -q
             }
+            finally {
+                Pop-Location
+            }
+
+            $stubRunner = @'
+param(
+    [string]$TestFile,
+    [string]$OutputPath
+)
+if ($OutputPath) {
+    $dir = Split-Path -Parent $OutputPath
+    if ($dir -and -not (Test-Path -LiteralPath $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
+    $xml = '<?xml version="1.0"?><test-results total="1" failures="0" errors="0" skipped="0" />'
+    Set-Content -LiteralPath $OutputPath -Value $xml -Encoding UTF8
+}
+Write-Host 'Tests Passed: 1, Failed: 0, Skipped: 0'
+exit 0
+'@
+            Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $verificationDir 'run-systematic-tests.ps1') -ArgumentList @(
+                '-Category', 'Conversion-Data'
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Systematic Test Execution'
+            $result.Output | Should -Match 'Running Conversion-Data Tests'
+            $result.Output | Should -Match 'Conversion-Data.*Passed|Category.*Conversion-Data'
+        }
+    }
+
+    It 'Generates a report when GenerateReport is requested for a single category' {
+        $repo = New-TestTempDirectory -Prefix 'SystematicGenerateReport'
+        try {
+            $bootstrapDir = Join-Path $repo 'tests' 'integration' 'bootstrap'
+            $runnerDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
+            $verificationDir = Join-Path $repo 'scripts' 'utils' 'test-verification'
+            $null = New-Item -ItemType Directory -Path $bootstrapDir -Force
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            $null = New-Item -ItemType Directory -Path $verificationDir -Force
+            $null = New-Item -ItemType File -Path (Join-Path $bootstrapDir 'sample.tests.ps1') -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:SystematicTestsScript -Destination (Join-Path $verificationDir 'run-systematic-tests.ps1') -Force
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                Set-Content -LiteralPath (Join-Path $repo 'README.md') -Value 'fixture' -Encoding UTF8
+                git add README.md
+                git commit -m 'init' -q
+            }
+            finally {
+                Pop-Location
+            }
+
+            $stubRunner = @'
+param([string]$TestFile, [string]$OutputPath)
+if ($OutputPath) {
+    $dir = Split-Path -Parent $OutputPath
+    if ($dir -and -not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+    Set-Content -LiteralPath $OutputPath -Value '<?xml version="1.0"?><test-results total="1" failures="0" errors="0" skipped="0" />' -Encoding UTF8
+}
+Write-Host 'Tests Passed: 1, Failed: 0, Skipped: 0'
+exit 0
+'@
+            Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $verificationDir 'run-systematic-tests.ps1') -ArgumentList @(
+                '-Category', 'Bootstrap',
+                '-GenerateReport'
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Systematic Test Execution'
+            $reportDir = Join-Path $repo 'docs' 'test-verification-reports'
+            @(Get-ChildItem -LiteralPath $reportDir -Filter 'systematic-test-report-*.md' -ErrorAction SilentlyContinue).Count |
+                Should -BeGreaterThan 0
+        }
+    }
+
+    It 'Stops after the first failing category when StopOnFailure is requested' {
+        $repo = New-TestTempDirectory -Prefix 'SystematicStopOnFailure'
+        try {
+            $priorityOneDirs = @(
+                'bootstrap'
+                'error-handling'
+                'cross-platform'
+                'utilities'
+            )
+            $runnerDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
+            $verificationDir = Join-Path $repo 'scripts' 'utils' 'test-verification'
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            $null = New-Item -ItemType Directory -Path $verificationDir -Force
+
+            foreach ($category in $priorityOneDirs) {
+                $categoryDir = Join-Path $repo 'tests' 'integration' $category
+                $null = New-Item -ItemType Directory -Path $categoryDir -Force
+                $null = New-Item -ItemType File -Path (Join-Path $categoryDir 'sample.tests.ps1') -Force
+            }
+
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:SystematicTestsScript -Destination (Join-Path $verificationDir 'run-systematic-tests.ps1') -Force
+
+            Push-Location $repo
+            try {
+                git init -q | Out-Null
+                git config user.email 'fixture@example.com'
+                git config user.name 'Fixture'
+                Set-Content -LiteralPath (Join-Path $repo 'README.md') -Value 'fixture' -Encoding UTF8
+                git add README.md
+                git commit -m 'init' -q
+            }
+            finally {
+                Pop-Location
+            }
+
+            $stubRunner = @'
+param(
+    [string]$TestFile,
+    [string]$OutputPath
+)
+if ($TestFile -match 'bootstrap') {
+    if ($OutputPath) {
+        $dir = Split-Path -Parent $OutputPath
+        if ($dir -and -not (Test-Path -LiteralPath $dir)) {
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        }
+        Set-Content -LiteralPath $OutputPath -Value '<?xml version="1.0"?><test-results total="1" failures="1" errors="0" skipped="0" />' -Encoding UTF8
+    }
+    Write-Host 'Tests Passed: 0, Failed: 1, Skipped: 0'
+    exit 1
+}
+if ($OutputPath) {
+    $dir = Split-Path -Parent $OutputPath
+    if ($dir -and -not (Test-Path -LiteralPath $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
+    Set-Content -LiteralPath $OutputPath -Value '<?xml version="1.0"?><test-results total="1" failures="0" errors="0" skipped="0" />' -Encoding UTF8
+}
+Write-Host 'Tests Passed: 1, Failed: 0, Skipped: 0'
+exit 0
+'@
+            Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $verificationDir 'run-systematic-tests.ps1') -ArgumentList @(
+                '-Priority', '1',
+                '-StopOnFailure'
+            )
+
+            $result.ExitCode | Should -Be 1
+            $result.Output | Should -Match 'Running Bootstrap Tests'
+            $result.Output | Should -Match 'Stopping on first failure'
+            $result.Output | Should -Not -Match 'Running Error-Handling Tests'
         }
     }
 }

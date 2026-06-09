@@ -59,13 +59,11 @@ Describe 'Test-CommandAvailable extended scenarios' {
     Context 'Assumed command integration' {
         It 'Treats assumed commands as available without probing providers' {
             $commandName = "assumed-available-$([Guid]::NewGuid().ToString('N'))"
-            try {
-                Add-AssumedCommand -Name $commandName | Out-Null
-                Test-CommandAvailable -CommandName $commandName | Should -Be $true
-            }
-            finally {
-                Remove-AssumedCommand -Name $commandName | Out-Null
-            }
+                        Add-AssumedCommand -Name $commandName | Out-Null
+            Test-CommandAvailable -CommandName $commandName | Should -Be $true
+        }
+        finally {
+            Remove-AssumedCommand -Name $commandName | Out-Null
         }
     }
 }

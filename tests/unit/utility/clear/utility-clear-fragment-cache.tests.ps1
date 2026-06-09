@@ -48,7 +48,6 @@ Describe 'clear-fragment-cache.ps1 execution' {
         }
 
         $cacheDir = New-TestTempDirectory -Prefix 'ClearFragmentCacheApply'
-        try {
             $dbPath = Join-Path $cacheDir 'fragment-cache.db'
             'CREATE TABLE fragment_ast_cache (id INTEGER PRIMARY KEY);' | sqlite3 $dbPath 2>&1 | Out-Null
             Test-Path -LiteralPath $dbPath | Should -Be $true
@@ -60,12 +59,6 @@ Describe 'clear-fragment-cache.ps1 execution' {
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Deleted cache database|cache database not found'
             Test-Path -LiteralPath $dbPath | Should -Be $false
-        }
-        finally {
-            if (Test-Path -LiteralPath $cacheDir) {
-                Remove-Item -LiteralPath $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Clears only in-memory caches when IncludeDatabase is disabled' {
@@ -75,7 +68,6 @@ Describe 'clear-fragment-cache.ps1 execution' {
         }
 
         $cacheDir = New-TestTempDirectory -Prefix 'ClearFragmentCacheMemoryOnly'
-        try {
             $dbPath = Join-Path $cacheDir 'fragment-cache.db'
             'CREATE TABLE fragment_ast_cache (id INTEGER PRIMARY KEY);' | sqlite3 $dbPath 2>&1 | Out-Null
             Test-Path -LiteralPath $dbPath | Should -Be $true
@@ -89,11 +81,5 @@ Describe 'clear-fragment-cache.ps1 execution' {
             $result.ExitCode | Should -BeIn @(0, 1)
             Test-Path -LiteralPath $dbPath | Should -Be $true
             $result.Output | Should -Match 'FragmentContentCache|FragmentAstCache|No cache components were cleared|cache clearing completed'
-        }
-        finally {
-            if (Test-Path -LiteralPath $cacheDir) {
-                Remove-Item -LiteralPath $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

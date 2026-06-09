@@ -69,23 +69,14 @@ Describe 'check-task-parity.ps1 execution' {
 
     It 'Fails when the repository root path does not exist' {
         $missingRepo = Join-Path (New-TestTempDirectory -Prefix 'TaskParityMissingRepo') 'missing-repo-root'
-        try {
             $result = Invoke-CheckTaskParityScript -ArgumentList @('-RepoRoot', $missingRepo)
 
             $result.ExitCode | Should -Not -Be 0
             $result.Output | Should -Match 'Repository root|not found|missing-repo-root'
-        }
-        finally {
-            $parent = Split-Path -Parent $missingRepo
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Reports task parity for an isolated repository with minimal runner files' {
         $repo = New-TestTempDirectory -Prefix 'TaskParityIsolated'
-        try {
             Set-Content -LiteralPath (Join-Path $repo 'package.json') -Value '{"name":"parity-fixture","scripts":{"test":"echo test"}}' -Encoding UTF8
             Set-Content -LiteralPath (Join-Path $repo 'Taskfile.yml') -Value "version: '3'`ntasks:`n  test:`n    cmds:`n      - echo test" -Encoding UTF8
 
@@ -104,11 +95,5 @@ Describe 'check-task-parity.ps1 execution' {
             $result = Invoke-CheckTaskParityScript -ArgumentList @('-RepoRoot', $repo)
             $result.Output | Should -Match 'task|parity|Taskfile|package\.json'
             $result.ExitCode | Should -BeIn @(0, 1)
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

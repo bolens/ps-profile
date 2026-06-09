@@ -224,5 +224,24 @@ Describe 'FileBackup Module extended scenarios' {
                 Remove-OldFileBackups -RepoRoot $repo -Category $script:Category
             } | Should -Throw '*KeepCount and/or -MaxAgeDays*'
         }
+
+        It 'Prunes all backups in a category when SourcePath is omitted' {
+            $repo = New-TestTempDirectory -Prefix 'FileBackupCategoryPrune'
+            $first = Join-Path $repo 'first.txt'
+            $second = Join-Path $repo 'second.txt'
+
+            1..2 | ForEach-Object {
+                Set-Content -LiteralPath $first -Value "first-$_" -NoNewline
+                New-FileBackup -SourcePath $first -RepoRoot $repo -Category 'prune-all-cat' -SkipPrune | Out-Null
+                Start-Sleep -Milliseconds 20
+            }
+            Set-Content -LiteralPath $second -Value 'second-v1' -NoNewline
+            New-FileBackup -SourcePath $second -RepoRoot $repo -Category 'prune-all-cat' -SkipPrune | Out-Null
+
+            $removed = Remove-OldFileBackups -RepoRoot $repo -Category 'prune-all-cat' -KeepCount 1
+            $removed | Should -BeGreaterOrEqual 1
+            @(Get-FileBackups -RepoRoot $repo -Category 'prune-all-cat' -SourcePath $first).Count | Should -Be 1
+            @(Get-FileBackups -RepoRoot $repo -Category 'prune-all-cat' -SourcePath $second).Count | Should -Be 1
+        }
     }
 }

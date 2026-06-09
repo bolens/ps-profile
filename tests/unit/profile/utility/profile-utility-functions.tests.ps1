@@ -22,6 +22,10 @@ BeforeAll {
 }
 
 Describe 'Profile utility functions' {
+    BeforeEach {
+        Register-TestCleanupPath -Path $script:TestTempRoot
+    }
+
     Context 'Environment variable helpers' {
         It 'Get-EnvVar retrieves environment variable from registry' {
             $tempVar = "TEST_VAR_{0}" -f (Get-Random)
@@ -120,9 +124,6 @@ Describe 'Profile utility functions' {
             }
             finally {
                 $env:PATH = $originalPath
-                if (Test-Path $testPath) {
-                    Remove-Item -Path $testPath -Recurse -Force
-                }
             }
         }
 

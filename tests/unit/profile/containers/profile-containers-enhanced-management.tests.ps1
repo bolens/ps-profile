@@ -228,13 +228,11 @@ Describe 'containers-enhanced.ps1 - Management Functions' {
             }
 
             Push-Location $backupDir
-            try {
-                $result = Backup-ContainerVolumes -Volume 'test-volume' -OutputPath 'test-volume-backup.tar.gz' -Confirm:$false -ErrorAction SilentlyContinue
-                $result | Should -Not -BeNullOrEmpty
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Backup-ContainerVolumes -Volume 'test-volume' -OutputPath 'test-volume-backup.tar.gz' -Confirm:$false -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+        }
+        finally {
+            Pop-Location
         }
     }
 

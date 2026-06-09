@@ -23,39 +23,37 @@ BeforeAll {
 
 Describe 'Security Tools Integration Tests' {
     BeforeAll {
-        try {
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
-                throw "Get-TestPath returned null or empty value for ProfileDir"
-            }
-            if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-                throw "Profile directory not found at: $script:ProfileDir"
-            }
-            
-            $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-            if ($null -eq $bootstrapPath -or [string]::IsNullOrWhiteSpace($bootstrapPath)) {
-                throw "BootstrapPath is null or empty"
-            }
-            if (-not (Test-Path -LiteralPath $bootstrapPath)) {
-                throw "Bootstrap file not found at: $bootstrapPath"
-            }
-            . $bootstrapPath
-            
-            $securityToolsPath = Join-Path $script:ProfileDir 'security-tools.ps1'
-            if (-not (Test-Path -LiteralPath $securityToolsPath)) {
-                throw "Security tools fragment not found at: $securityToolsPath"
-            }
-            . $securityToolsPath
+                $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
+            throw "Get-TestPath returned null or empty value for ProfileDir"
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to initialize security tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
+            throw "Profile directory not found at: $script:ProfileDir"
         }
+        
+        $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
+        if ($null -eq $bootstrapPath -or [string]::IsNullOrWhiteSpace($bootstrapPath)) {
+            throw "BootstrapPath is null or empty"
+        }
+        if (-not (Test-Path -LiteralPath $bootstrapPath)) {
+            throw "Bootstrap file not found at: $bootstrapPath"
+        }
+        . $bootstrapPath
+        
+        $securityToolsPath = Join-Path $script:ProfileDir 'security-tools.ps1'
+        if (-not (Test-Path -LiteralPath $securityToolsPath)) {
+            throw "Security tools fragment not found at: $securityToolsPath"
+        }
+        . $securityToolsPath
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize security tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
 
     Context 'GitLeaks helpers (Invoke-GitLeaksScan)' {

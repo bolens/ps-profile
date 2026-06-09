@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-utilities-profile-extended.tests.ps1
-#>
+# ===============================================
+# profile-utilities-profile-extended.tests.ps1
+# Execution tests for utilities-modules/system/utilities-profile.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,33 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/utilities-modules/system/utilities-profile.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'utilities.ps1')
+    Ensure-Utilities
 }
+
 Describe 'profile.d/utilities-modules/system/utilities-profile.ps1 extended scenarios' {
-    It 'Documents profile management utilities for reload and backup' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Profile management utility functions'
-        $c | Should -Match 'Profile reloading, editing, backup'
+    It 'Registers profile management helpers through Ensure-Utilities' {
+        Get-Command Reload-Profile -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Reload-Fragment -ErrorAction Stop | Should -Not -BeNullOrEmpty
+
+        $reloadAlias = Get-Alias reload -ErrorAction SilentlyContinue
+        if ($reloadAlias) {
+            $reloadAlias.ResolvedCommandName | Should -Be 'Reload-Profile'
+        }
     }
-    It 'Defines Reload-Profile with Fast mode and PS_PROFILE_FAST_RELOAD support' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Reload-Profile'
-        $c | Should -Match 'PS_PROFILE_FAST_RELOAD'
-        $c | Should -Match 'PS_PROFILE_DEV_MODE'
+
+    It 'Reload-Profile exposes a Fast switch parameter' {
+        (Get-Command Reload-Profile -ErrorAction Stop).Parameters.ContainsKey('Fast') | Should -Be $true
     }
-    It 'Registers reload, edit-profile, backup-profile, and list-functions aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'reload'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'edit-profile'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'backup-profile'"
-        $c | Should -Match 'Reload-Fragment'
+
+    It 'Allows repeated Ensure-Utilities calls without losing profile helpers' {
+        Ensure-Utilities
+        Ensure-Utilities
+
+        Get-Command Reload-Profile -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
 }

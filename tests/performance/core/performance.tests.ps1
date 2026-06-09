@@ -41,22 +41,20 @@ Describe 'Profile Performance Regression Tests' {
             
             # Allow override via environment variables, but use baseline-based defaults
             if (Test-Path -LiteralPath $baselineFile) {
-                try {
-                    $baseline = Get-Content -LiteralPath $baselineFile -Raw | ConvertFrom-Json
-                    if ($baseline.FullStartupMean -gt 0) {
-                        $defaultLoadTime = [Math]::Round($baseline.FullStartupMean * 3)
-                    }
-                    if ($baseline.Fragments -and $baseline.Fragments.Count -gt 0) {
-                        $maxFragment = ($baseline.Fragments | Measure-Object -Property MeanMs -Maximum).Maximum
-                        if ($maxFragment -gt 0) {
-                            $defaultFragmentTime = [Math]::Round($maxFragment * 3)
-                        }
+                                $baseline = Get-Content -LiteralPath $baselineFile -Raw | ConvertFrom-Json
+                if ($baseline.FullStartupMean -gt 0) {
+                    $defaultLoadTime = [Math]::Round($baseline.FullStartupMean * 3)
+                }
+                if ($baseline.Fragments -and $baseline.Fragments.Count -gt 0) {
+                    $maxFragment = ($baseline.Fragments | Measure-Object -Property MeanMs -Maximum).Maximum
+                    if ($maxFragment -gt 0) {
+                        $defaultFragmentTime = [Math]::Round($maxFragment * 3)
                     }
                 }
-                catch {
-                    # If baseline parsing fails, use hardcoded defaults
-                    Write-Verbose "Failed to parse baseline file, using hardcoded defaults: $_" -Verbose
-                }
+            }
+            catch {
+                # If baseline parsing fails, use hardcoded defaults
+                Write-Verbose "Failed to parse baseline file, using hardcoded defaults: $_" -Verbose
             }
             
             $script:MaxLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_MAX_LOAD_MS' -Default $defaultLoadTime
@@ -113,130 +111,128 @@ Describe 'Profile Performance Regression Tests' {
                 $handle = $null
                 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
                 
-                try {
-                    # Create runspace pool (single runspace for profile load)
-                    $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1)
-                    $runspacePool.Open()
+                                # Create runspace pool (single runspace for profile load)
+                $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1)
+                $runspacePool.Open()
+                
+                # Scriptblock to load profile in isolated runspace
+                $scriptBlock = {
+                    param(
+                        [string]$ProfilePath,
+                        [string]$BatchModeValue,
+                        [string]$EnvironmentValue,
+                        [bool]$CollectFragmentTimesValue
+                    )
                     
-                    # Scriptblock to load profile in isolated runspace
-                    $scriptBlock = {
-                        param(
-                            [string]$ProfilePath,
-                            [string]$BatchModeValue,
-                            [string]$EnvironmentValue,
-                            [bool]$CollectFragmentTimesValue
-                        )
-                        
-                        try {
-                            # Set environment variables in runspace
-                            if ($BatchModeValue -eq 'Sequential') {
-                                Remove-Item -Path Env:PS_PROFILE_BATCH_LOAD -ErrorAction SilentlyContinue
-                            }
-                            elseif ($BatchModeValue -eq 'Batch') {
-                                $env:PS_PROFILE_BATCH_LOAD = '1'
-                            }
-                            
-                            if ($CollectFragmentTimesValue) {
-                                $env:PS_PROFILE_DEBUG = '3'
-                            }
-                            
-                            if ($EnvironmentValue) {
-                                $env:PS_PROFILE_ENVIRONMENT = $EnvironmentValue
-                            }
-                            
-                            # Load profile
-                            $null = . $ProfilePath
-                            
-                            # Collect fragment times if requested
-                            $fragmentTimes = $null
-                            if ($CollectFragmentTimesValue -and $global:PSProfileFragmentTimes) {
-                                $fragmentTimes = @($global:PSProfileFragmentTimes | ForEach-Object { $_ })
-                            }
-                            
-                            return @{
-                                Success       = $true
-                                FragmentTimes = $fragmentTimes
-                            }
+                    try {
+                        # Set environment variables in runspace
+                        if ($BatchModeValue -eq 'Sequential') {
+                            Remove-Item -Path Env:PS_PROFILE_BATCH_LOAD -ErrorAction SilentlyContinue
                         }
-                        catch {
-                            return @{
-                                Success = $false
-                                Error   = $_.Exception.Message
-                            }
-                        }
-                    }
-                    
-                    # Start profile load in runspace
-                    $powershell = [PowerShell]::Create()
-                    $powershell.RunspacePool = $runspacePool
-                    $null = $powershell.AddScript($scriptBlock)
-                    $null = $powershell.AddArgument($script:ProfilePath)
-                    $null = $powershell.AddArgument($BatchMode)
-                    $null = $powershell.AddArgument($env:PS_PROFILE_ENVIRONMENT)
-                    $null = $powershell.AddArgument($CollectFragmentTimes)
-                    $handle = $powershell.BeginInvoke()
-                    
-                    # Wait for completion with timeout (polling approach, STA-compatible)
-                    $pollIntervalMs = 100
-                    $timeoutMs = $TimeoutSeconds * 1000
-                    $startTime = Get-Date
-                    $completed = $false
-                    
-                    while (-not $completed) {
-                        if ($handle.IsCompleted) {
-                            $completed = $true
-                            break
+                        elseif ($BatchModeValue -eq 'Batch') {
+                            $env:PS_PROFILE_BATCH_LOAD = '1'
                         }
                         
-                        $elapsed = ((Get-Date) - $startTime).TotalMilliseconds
-                        if ($elapsed -ge $timeoutMs) {
-                            # Timeout - stop the runspace
-                            if ($powershell) {
-                                $powershell.Stop()
-                            }
-                            throw "Profile load timed out after $TimeoutSeconds seconds"
+                        if ($CollectFragmentTimesValue) {
+                            $env:PS_PROFILE_DEBUG = '3'
                         }
                         
-                        Start-Sleep -Milliseconds $pollIntervalMs
+                        if ($EnvironmentValue) {
+                            $env:PS_PROFILE_ENVIRONMENT = $EnvironmentValue
+                        }
+                        
+                        # Load profile
+                        $null = . $ProfilePath
+                        
+                        # Collect fragment times if requested
+                        $fragmentTimes = $null
+                        if ($CollectFragmentTimesValue -and $global:PSProfileFragmentTimes) {
+                            $fragmentTimes = @($global:PSProfileFragmentTimes | ForEach-Object { $_ })
+                        }
+                        
+                        return @{
+                            Success       = $true
+                            FragmentTimes = $fragmentTimes
+                        }
                     }
-                    
-                    # Get result
-                    $result = $powershell.EndInvoke($handle)
-                    $stopwatch.Stop()
-                    
-                    if (-not $result.Success) {
-                        throw "Profile load failed: $($result.Error)"
+                    catch {
+                        return @{
+                            Success = $false
+                            Error   = $_.Exception.Message
+                        }
                     }
-                    
-                    $fragmentTimes = $result.FragmentTimes
                 }
-                finally {
-                    $stopwatch.Stop()
+                
+                # Start profile load in runspace
+                $powershell = [PowerShell]::Create()
+                $powershell.RunspacePool = $runspacePool
+                $null = $powershell.AddScript($scriptBlock)
+                $null = $powershell.AddArgument($script:ProfilePath)
+                $null = $powershell.AddArgument($BatchMode)
+                $null = $powershell.AddArgument($env:PS_PROFILE_ENVIRONMENT)
+                $null = $powershell.AddArgument($CollectFragmentTimes)
+                $handle = $powershell.BeginInvoke()
+                
+                # Wait for completion with timeout (polling approach, STA-compatible)
+                $pollIntervalMs = 100
+                $timeoutMs = $TimeoutSeconds * 1000
+                $startTime = Get-Date
+                $completed = $false
+                
+                while (-not $completed) {
+                    if ($handle.IsCompleted) {
+                        $completed = $true
+                        break
+                    }
                     
-                    # Cleanup runspace
-                    if ($handle) {
-                        try {
-                            $null = $powershell.EndInvoke($handle)
+                    $elapsed = ((Get-Date) - $startTime).TotalMilliseconds
+                    if ($elapsed -ge $timeoutMs) {
+                        # Timeout - stop the runspace
+                        if ($powershell) {
+                            $powershell.Stop()
                         }
-                        catch {
-                            # Ignore errors during cleanup
-                        }
-                    }
-                    if ($powershell) {
-                        $powershell.Dispose()
-                    }
-                    if ($runspacePool) {
-                        $runspacePool.Close()
-                        $runspacePool.Dispose()
+                        throw "Profile load timed out after $TimeoutSeconds seconds"
                     }
                     
-                    # Restore original environment
-                    if ($null -eq $originalEnv) {
-                        Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
+                    Start-Sleep -Milliseconds $pollIntervalMs
+                }
+                
+                # Get result
+                $result = $powershell.EndInvoke($handle)
+                $stopwatch.Stop()
+                
+                if (-not $result.Success) {
+                    throw "Profile load failed: $($result.Error)"
+                }
+                
+                $fragmentTimes = $result.FragmentTimes
+            }
+            finally {
+                $stopwatch.Stop()
+                
+                # Cleanup runspace
+                if ($handle) {
+                    try {
+                        $null = $powershell.EndInvoke($handle)
                     }
-                    else {
-                        $env:PS_PROFILE_ENVIRONMENT = $originalEnv
+                    catch {
+                        # Ignore errors during cleanup
                     }
+                }
+                if ($powershell) {
+                    $powershell.Dispose()
+                }
+                if ($runspacePool) {
+                    $runspacePool.Close()
+                    $runspacePool.Dispose()
+                }
+                
+                # Restore original environment
+                if ($null -eq $originalEnv) {
+                    Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_ENVIRONMENT = $originalEnv
                 }
 
                 return [pscustomobject]@{
@@ -316,16 +312,14 @@ Describe 'Profile Performance Regression Tests' {
                 $originalEnv = $env:PS_PROFILE_ENVIRONMENT
                 $env:PS_PROFILE_ENVIRONMENT = 'minimal'
                 
-                try {
-                    $result = Measure-ProfileLoads -Count 1 -BatchMode Sequential -WarmUp
+                                $result = Measure-ProfileLoads -Count 1 -BatchMode Sequential -WarmUp
+            }
+            finally {
+                if ($null -eq $originalEnv) {
+                    Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
                 }
-                finally {
-                    if ($null -eq $originalEnv) {
-                        Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
-                    }
-                    else {
-                        $env:PS_PROFILE_ENVIRONMENT = $originalEnv
-                    }
+                else {
+                    $env:PS_PROFILE_ENVIRONMENT = $originalEnv
                 }
                 $loadTimeMs = [Math]::Round($result[0].DurationMs, 0)
 
@@ -437,16 +431,14 @@ Describe 'Profile Performance Regression Tests' {
                 $originalEnv = $env:PS_PROFILE_ENVIRONMENT
                 $env:PS_PROFILE_ENVIRONMENT = 'minimal'
                 
-                try {
-                    . $script:ProfilePath
+                                . $script:ProfilePath
+            }
+            finally {
+                if ($null -eq $originalEnv) {
+                    Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
                 }
-                finally {
-                    if ($null -eq $originalEnv) {
-                        Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
-                    }
-                    else {
-                        $env:PS_PROFILE_ENVIRONMENT = $originalEnv
-                    }
+                else {
+                    $env:PS_PROFILE_ENVIRONMENT = $originalEnv
                 }
 
                 $after = [System.GC]::GetTotalMemory($false)
@@ -476,17 +468,15 @@ Describe 'Profile Performance Regression Tests' {
             $originalEnv = $env:PS_PROFILE_ENVIRONMENT
             $env:PS_PROFILE_ENVIRONMENT = 'minimal'
             
-            try {
-                $sequentialResult = Measure-ProfileLoads -Count 1 -BatchMode Sequential -WarmUp
-                $batchResult = Measure-ProfileLoads -Count 1 -BatchMode Batch -WarmUp
+                        $sequentialResult = Measure-ProfileLoads -Count 1 -BatchMode Sequential -WarmUp
+            $batchResult = Measure-ProfileLoads -Count 1 -BatchMode Batch -WarmUp
+        }
+        finally {
+            if ($null -eq $originalEnv) {
+                Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
             }
-            finally {
-                if ($null -eq $originalEnv) {
-                    Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
-                }
-                else {
-                    $env:PS_PROFILE_ENVIRONMENT = $originalEnv
-                }
+            else {
+                $env:PS_PROFILE_ENVIRONMENT = $originalEnv
             }
 
             $sequentialTime = $sequentialResult[0].DurationMs

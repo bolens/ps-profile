@@ -112,31 +112,27 @@ Describe 'Platform Detection Helpers' {
         It 'Get-UserHome prefers $env:HOME on Unix' {
             if ((Test-IsLinux) -or (Test-IsMacOS)) {
                 $originalHome = $env:HOME
-                try {
-                    $env:HOME = '/test/home'
-                    $result = Get-UserHome
-                    $result | Should -Be '/test/home'
-                }
-                finally {
-                    $env:HOME = $originalHome
-                }
+                                $env:HOME = '/test/home'
+                $result = Get-UserHome
+                $result | Should -Be '/test/home'
+            }
+            finally {
+                $env:HOME = $originalHome
             }
         }
 
         It 'Get-UserHome falls back to $env:USERPROFILE' {
             $originalHome = $env:HOME
             $originalUserProfile = $env:USERPROFILE
-            try {
-                $env:HOME = $null
-                if ($env:USERPROFILE) {
-                    $result = Get-UserHome
-                    $result | Should -Not -BeNullOrEmpty
-                }
+                        $env:HOME = $null
+            if ($env:USERPROFILE) {
+                $result = Get-UserHome
+                $result | Should -Not -BeNullOrEmpty
             }
-            finally {
-                $env:HOME = $originalHome
-                $env:USERPROFILE = $originalUserProfile
-            }
+        }
+        finally {
+            $env:HOME = $originalHome
+            $env:USERPROFILE = $originalUserProfile
         }
     }
 

@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-nimble-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-nimble-fragment-extended.tests.ps1
+# Execution tests for nimble.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/nimble.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/nimble.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by nimble availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Test-CachedCommand nimble'
+    It 'Registers Nimble helpers when nimble is available' {
+        Set-TestCommandAvailabilityState -CommandName 'nimble' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'nimble.ps1')
+
+        Get-Command Test-NimbleOutdated -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Install-NimblePackage -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command nimble-outdated -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Test-NimbleOutdated wrapping nimble outdated' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Test-NimbleOutdated'
-        $c | Should -Match 'nimble outdated'
+
+    It 'Skips Nimble helper registration when nimble is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'nimble' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'nimble.ps1')
+
+        Get-Command Test-NimbleOutdated -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers nimble-outdated and nimble-update aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'nimble-outdated'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'nimble-update'"
+
+    It 'Emits missing-tool warning when nimble is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'nimble' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('nim', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'nimble.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'nim not found'
     }
 }

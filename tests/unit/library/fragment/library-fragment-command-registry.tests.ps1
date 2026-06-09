@@ -181,12 +181,10 @@ Describe 'FragmentCommandRegistry.psm1' {
             $originalRegistry = $global:FragmentCommandRegistry
             Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
             
-            try {
-                Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
-            }
-            finally {
-                $global:FragmentCommandRegistry = $originalRegistry
-            }
+                        Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
+        }
+        finally {
+            $global:FragmentCommandRegistry = $originalRegistry
         }
     }
 }
@@ -222,12 +220,10 @@ Describe 'FragmentCommandRegistry.psm1' {
             $originalRegistry = $global:FragmentCommandRegistry
             Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
             
-            try {
-                (Get-CommandsForFragment -FragmentName 'fragment-a').Count | Should -Be 0
-            }
-            finally {
-                $global:FragmentCommandRegistry = $originalRegistry
-            }
+                        (Get-CommandsForFragment -FragmentName 'fragment-a').Count | Should -Be 0
+        }
+        finally {
+            $global:FragmentCommandRegistry = $originalRegistry
         }
     }
     
@@ -283,14 +279,12 @@ Describe 'FragmentCommandRegistry.psm1' {
             $originalRegistry = $global:FragmentCommandRegistry
             Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
             
-            try {
-                $json = Export-CommandRegistry
-                $json | Should -Not -BeNullOrEmpty
-                $json | Should -Match '^\s*\{\s*\}\s*$'
-            }
-            finally {
-                $global:FragmentCommandRegistry = $originalRegistry
-            }
+                        $json = Export-CommandRegistry
+            $json | Should -Not -BeNullOrEmpty
+            $json | Should -Match '^\s*\{\s*\}\s*$'
+        }
+        finally {
+            $global:FragmentCommandRegistry = $originalRegistry
         }
     }
     
@@ -443,17 +437,15 @@ Describe 'FragmentCommandRegistry.psm1' {
             $originalRegistry = $global:FragmentCommandRegistry
             Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
             
-            try {
-                $stats = Get-CommandRegistryStats
-                $stats | Should -Not -BeNullOrEmpty
-                $stats.TotalCommands | Should -Be 0
-                $stats.Fragments | Should -Be 0
-                $stats.CommandsByType | Should -Not -Be $null
-                $stats.CommandsByFragment | Should -Not -Be $null
-            }
-            finally {
-                $global:FragmentCommandRegistry = $originalRegistry
-            }
+                        $stats = Get-CommandRegistryStats
+            $stats | Should -Not -BeNullOrEmpty
+            $stats.TotalCommands | Should -Be 0
+            $stats.Fragments | Should -Be 0
+            $stats.CommandsByType | Should -Not -Be $null
+            $stats.CommandsByFragment | Should -Not -Be $null
+        }
+        finally {
+            $global:FragmentCommandRegistry = $originalRegistry
         }
     }
     

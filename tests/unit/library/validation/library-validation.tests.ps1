@@ -138,9 +138,10 @@ Describe 'Validation Module Functions' {
         It 'Includes parameter name in error message' {
             try {
                 Assert-ValidPath -Path $null -ParameterName 'ConfigFile'
+                throw 'Expected Assert-ValidPath to throw'
             }
             catch {
-                $_.Exception.Message | Should -Match 'Parameter.*ConfigFile'
+                $_.Exception.Message | Should -Match "Parameter 'ConfigFile'"
             }
         }
 
@@ -148,6 +149,7 @@ Describe 'Validation Module Functions' {
             $customMessage = 'Custom error message'
             try {
                 Assert-ValidPath -Path $null -ErrorMessage $customMessage
+                throw 'Expected Assert-ValidPath to throw'
             }
             catch {
                 $_.Exception.Message | Should -Be $customMessage
@@ -157,6 +159,7 @@ Describe 'Validation Module Functions' {
         It 'Includes path type in error message' {
             try {
                 Assert-ValidPath -Path $script:TestFile -PathType Directory
+                throw 'Expected Assert-ValidPath to throw'
             }
             catch {
                 $_.Exception.Message | Should -Match 'Directory'
@@ -185,9 +188,10 @@ Describe 'Validation Module Functions' {
         It 'Includes parameter name in error message' {
             try {
                 Assert-ValidString -Value $null -ParameterName 'Name'
+                throw 'Expected Assert-ValidString to throw'
             }
             catch {
-                $_.Exception.Message | Should -Match 'Parameter.*Name'
+                $_.Exception.Message | Should -Match "Parameter 'Name'"
             }
         }
 
@@ -195,6 +199,7 @@ Describe 'Validation Module Functions' {
             $customMessage = 'Custom validation error'
             try {
                 Assert-ValidString -Value $null -ErrorMessage $customMessage
+                throw 'Expected Assert-ValidString to throw'
             }
             catch {
                 $_.Exception.Message | Should -Be $customMessage

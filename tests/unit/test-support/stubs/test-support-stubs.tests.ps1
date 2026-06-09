@@ -54,13 +54,11 @@ Describe 'TestEnvironmentStubs Module' {
             $varName = "TEST_SUPPORT_STUB_$([Guid]::NewGuid().ToString('N'))"
             Set-Item -Path "Env:\$varName" -Value 'to-be-cleared' -Force
 
-            try {
-                Mock-EnvironmentVariable -Name $varName -Value $null
-                Get-Item -Path "Env:\$varName" -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
-            }
-            finally {
-                Remove-Item -Path "Env:\$varName" -Force -ErrorAction SilentlyContinue
-            }
+                        Mock-EnvironmentVariable -Name $varName -Value $null
+            Get-Item -Path "Env:\$varName" -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+        finally {
+            Remove-Item -Path "Env:\$varName" -Force -ErrorAction SilentlyContinue
         }
 
         It 'Mocks multiple variables via Mock-EnvironmentVariables' {
@@ -70,15 +68,13 @@ Describe 'TestEnvironmentStubs Module' {
                 "TEST_MULTI_${prefix}_B" = 'beta'
             }
 
-            try {
-                Mock-EnvironmentVariables -Variables $vars
-                (Get-Item -Path "Env:\TEST_MULTI_${prefix}_A").Value | Should -Be 'alpha'
-                (Get-Item -Path "Env:\TEST_MULTI_${prefix}_B").Value | Should -Be 'beta'
-            }
-            finally {
-                foreach ($name in $vars.Keys) {
-                    Remove-Item -Path "Env:\$name" -Force -ErrorAction SilentlyContinue
-                }
+                        Mock-EnvironmentVariables -Variables $vars
+            (Get-Item -Path "Env:\TEST_MULTI_${prefix}_A").Value | Should -Be 'alpha'
+            (Get-Item -Path "Env:\TEST_MULTI_${prefix}_B").Value | Should -Be 'beta'
+        }
+        finally {
+            foreach ($name in $vars.Keys) {
+                Remove-Item -Path "Env:\$name" -Force -ErrorAction SilentlyContinue
             }
         }
     }

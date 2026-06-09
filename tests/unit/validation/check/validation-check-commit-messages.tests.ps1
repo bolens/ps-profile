@@ -17,10 +17,10 @@ function global:New-CommitMessagesTestRepository {
 
     Push-Location $repo
     try {
-        & git init -q 2>$null
-        & git config user.email 'test@example.com' 2>$null
-        & git config user.name 'Test User' 2>$null
-        & git commit --allow-empty -m 'feat(init): seed repository' -q 2>$null
+    & git init -q 2>$null
+    & git config user.email 'test@example.com' 2>$null
+    & git config user.name 'Test User' 2>$null
+    & git commit --allow-empty -m 'feat(init): seed repository' -q 2>$null
     }
     finally {
         Pop-Location
@@ -38,11 +38,11 @@ function global:Invoke-CommitMessagesCheck {
     $scriptPath = Join-Path $RepositoryRoot 'scripts' 'checks' 'check-commit-messages.ps1'
     Push-Location $RepositoryRoot
     try {
-        $output = & pwsh -NoProfile -File $scriptPath -Base $Base 2>&1 | Out-String
-        return [pscustomobject]@{
-            ExitCode = $LASTEXITCODE
-            Output   = $output
-        }
+    $output = & pwsh -NoProfile -File $scriptPath -Base $Base 2>&1 | Out-String
+    return [pscustomobject]@{
+        ExitCode = $LASTEXITCODE
+        Output   = $output
+    }
     }
     finally {
         Pop-Location
@@ -57,7 +57,7 @@ function global:Add-TestCommit {
 
     Push-Location $RepositoryRoot
     try {
-        & git commit --allow-empty -m $Subject -q 2>$null
+    & git commit --allow-empty -m $Subject -q 2>$null
     }
     finally {
         Pop-Location
@@ -89,15 +89,8 @@ Describe 'check-commit-messages.ps1 execution' {
         }
 
         $repo = New-CommitMessagesTestRepository
-        try {
-            Add-TestCommit -RepositoryRoot $repo -Subject 'feat(test): add validated commit'
-            Invoke-CommitMessagesCheck -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        Add-TestCommit -RepositoryRoot $repo -Subject 'feat(test): add validated commit'
+        Invoke-CommitMessagesCheck -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -Be 0
     }
 
     It 'Fails when a commit subject does not follow Conventional Commits' {
@@ -107,15 +100,8 @@ Describe 'check-commit-messages.ps1 execution' {
         }
 
         $repo = New-CommitMessagesTestRepository
-        try {
-            Add-TestCommit -RepositoryRoot $repo -Subject 'bad commit subject'
-            Invoke-CommitMessagesCheck -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -BeIn @(1, 2)
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        Add-TestCommit -RepositoryRoot $repo -Subject 'bad commit subject'
+        Invoke-CommitMessagesCheck -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -BeIn @(1, 2)
     }
 
     It 'Passes when a revert commit subject is excluded from validation' {
@@ -125,17 +111,9 @@ Describe 'check-commit-messages.ps1 execution' {
         }
 
         $repo = New-CommitMessagesTestRepository
-        try {
-            Add-TestCommit -RepositoryRoot $repo -Subject 'Revert "feat(test): experimental change"'
-            $result = Invoke-CommitMessagesCheck -RepositoryRoot $repo
-
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'Checking commits against base'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        Add-TestCommit -RepositoryRoot $repo -Subject 'Revert "feat(test): experimental change"'
+        $result = Invoke-CommitMessagesCheck -RepositoryRoot $repo
+                $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'Checking commits against base'
     }
 }

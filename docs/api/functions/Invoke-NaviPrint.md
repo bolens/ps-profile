@@ -1,0 +1,41 @@
+# Invoke-NaviPrint
+
+## Synopsis
+
+Prints commands from navi cheatsheets without executing them.
+
+## Description
+
+Searches navi cheatsheets and prints the selected command without executing it. If a query is provided, uses it for searching.
+
+## Signature
+
+```powershell
+Invoke-NaviPrint
+```
+
+## Parameters
+
+### -Query
+
+Optional search text used when printing a cheatsheet command.
+
+
+## Examples
+
+### Example 1
+
+```powershell
+Invoke-NaviPrint -Query 'git rebase'
+```
+
+## Aliases
+
+This function has the following aliases:
+
+- `navip` - Prints commands from navi cheatsheets without executing them.
+
+
+## Source
+
+Defined in: ../profile.d/navi.ps1

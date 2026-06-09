@@ -213,7 +213,7 @@ function Get-CodeQualityScore {
         }
     }
     elseif ([math]::Abs($totalWeight - 1.0) -gt 0.0001) {
-        foreach ($key in $normalizedWeights.Keys) {
+        foreach ($key in @($normalizedWeights.Keys)) {
             $normalizedWeights[$key] = if ($totalWeight -ne 0) { $normalizedWeights[$key] / $totalWeight } else { 0 }
         }
     }

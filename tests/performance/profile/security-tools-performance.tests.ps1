@@ -59,12 +59,10 @@ Describe 'Security Tools Fragment Performance Tests' {
 
             # Measure fragment load time
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-            try {
-                . $script:SecurityToolsPath -ErrorAction Stop
-            }
-            finally {
-                $stopwatch.Stop()
-            }
+                        . $script:SecurityToolsPath -ErrorAction Stop
+        }
+        finally {
+            $stopwatch.Stop()
 
             $loadTimeMs = $stopwatch.Elapsed.TotalMilliseconds
             Write-Verbose "Security tools fragment loaded in $([Math]::Round($loadTimeMs, 2)) ms" -Verbose
@@ -90,12 +88,10 @@ Describe 'Security Tools Fragment Performance Tests' {
                 Remove-Item Function:\Invoke-DangerzoneConvert -ErrorAction SilentlyContinue
 
                 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-                try {
-                    . $script:SecurityToolsPath -ErrorAction Stop
-                }
-                finally {
-                    $stopwatch.Stop()
-                }
+                                . $script:SecurityToolsPath -ErrorAction Stop
+            }
+            finally {
+                $stopwatch.Stop()
                 $loadTimes += $stopwatch.Elapsed.TotalMilliseconds
             }
 

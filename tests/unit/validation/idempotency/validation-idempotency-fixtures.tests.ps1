@@ -70,25 +70,11 @@ BeforeAll {
 Describe 'check-idempotency.ps1 fixture execution' {
     It 'Passes when isolated profile fragments are idempotent' {
         $repo = New-IdempotencyFixtureRepository
-        try {
-            Invoke-IdempotencyCheck -RepositoryRoot $repo | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                Invoke-IdempotencyCheck -RepositoryRoot $repo | Should -Be 0
     }
 
     It 'Fails when a fragment throws on the second dot-source' {
         $repo = New-IdempotencyFixtureRepository -IncludeNonIdempotentFragment
-        try {
-            Invoke-IdempotencyCheck -RepositoryRoot $repo | Should -BeIn @(1, 2)
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                Invoke-IdempotencyCheck -RepositoryRoot $repo | Should -BeIn @(1, 2)
     }
 }

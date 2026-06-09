@@ -45,14 +45,12 @@ Describe 'Path Management Integration Tests' {
             $testPath = Join-Path $TestDrive 'TestAddPathEnd'
             New-Item -ItemType Directory -Path $testPath -Force | Out-Null
 
-            try {
-                Add-Path -Path $testPath
-                $pathArray = $env:PATH -split $script:PathSeparator
-                $pathArray[0] | Should -Be $testPath
-            }
-            finally {
-                $env:PATH = $originalPath
-            }
+                        Add-Path -Path $testPath
+            $pathArray = $env:PATH -split $script:PathSeparator
+            $pathArray[0] | Should -Be $testPath
+        }
+        finally {
+            $env:PATH = $originalPath
         }
 
         It 'Add-Path handles duplicate paths' {
@@ -95,13 +93,11 @@ Describe 'Path Management Integration Tests' {
 
         It 'Remove-Path handles non-existent path' {
             $originalPath = $env:PATH
-            try {
-                Remove-Path -Path (Join-Path $TestDrive 'NonExistentPath')
-                $env:PATH | Should -Be $originalPath
-            }
-            finally {
-                $env:PATH = $originalPath
-            }
+                        Remove-Path -Path (Join-Path $TestDrive 'NonExistentPath')
+            $env:PATH | Should -Be $originalPath
+        }
+        finally {
+            $env:PATH = $originalPath
         }
     }
 
@@ -131,13 +127,11 @@ Describe 'Path Management Integration Tests' {
             New-Item -ItemType Directory -Path $basePath -Force | Out-Null
 
             Push-Location $basePath
-            try {
-                $result = Test-SafePath -Path $relativePath -BasePath $basePath
-                $result | Should -Be $true
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Test-SafePath -Path $relativePath -BasePath $basePath
+            $result | Should -Be $true
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Test-SafePath rejects path traversal attempts' {

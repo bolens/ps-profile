@@ -33,6 +33,11 @@ Describe 'run-unit-batch.ps1 extended scenarios' {
             $content = Get-Content -LiteralPath $script:UnitBatchScript -Raw
             $content | Should -Match 'per.*file'
         }
+
+        It 'Discovers test files recursively under tests/unit' {
+            $content = Get-Content -LiteralPath $script:UnitBatchScript -Raw
+            $content | Should -Match "Get-ChildItem -Path \`$unitRoot -Filter '\*\.tests\.ps1' -File -Recurse"
+        }
     }
 
     Context 'Failure handling' {

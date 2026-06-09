@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-kube-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-kube-fragment-extended.tests.ps1
+# Execution tests for kube.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,38 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/kube.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'kube.ps1')
 }
+
 Describe 'profile.d/kube.ps1 extended scenarios' {
-    It 'Declares essential tier for Minikube cluster helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: essential'
-        $c | Should -Match 'Minikube helper'
+    It 'Registers minikube cluster helpers and aliases' {
+        Get-Command Start-MinikubeCluster -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Stop-MinikubeCluster -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command minikube-start -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Start-MinikubeCluster guarded by Test-CachedCommand minikube' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Start-MinikubeCluster'
-        $c | Should -Match 'Test-CachedCommand minikube'
+
+    It 'Start-MinikubeCluster warns when minikube is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'minikube' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('minikube', [ref]$null)
+        }
+
+        $output = Start-MinikubeCluster 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'minikube not found'
     }
-    It 'Notes kubectl shorthands live in kubectl.ps1 and registers minikube-start alias' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'kubectl.ps1'
-        $c | Should -Match "Set-AgentModeAlias -Name 'minikube-start'"
+
+    It 'Preserves existing kube helper bodies on repeated fragment loads' {
+        $firstStart = Get-Command Start-MinikubeCluster -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'kube.ps1')
+
+        (Get-Command Start-MinikubeCluster -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstStart.ScriptBlock.ToString()
     }
 }

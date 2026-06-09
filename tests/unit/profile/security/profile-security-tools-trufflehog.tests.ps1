@@ -71,26 +71,22 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
             Setup-CapturingCommandMock -CommandName 'trufflehog' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
-            try {
-                $result = Invoke-TruffleHogScan -ErrorAction SilentlyContinue
-                $result | Should -Not -BeNullOrEmpty
-                $global:TestCommandInvocationCaptures.Count | Should -Be 1
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Invoke-TruffleHogScan -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Handles trufflehog execution errors gracefully' {
             Set-TestCommandThrowingMock -CommandName 'trufflehog' -Message 'Execution failed'
 
             $result = $null
-            try {
-                $result = Invoke-TruffleHogScan -Path $script:TestRepoPath -ErrorAction SilentlyContinue
-            }
-            catch {
-                $result = $null
-            }
+                        $result = Invoke-TruffleHogScan -Path $script:TestRepoPath -ErrorAction SilentlyContinue
+        }
+        catch {
+            $result = $null
 
             $result | Should -BeNullOrEmpty
         }
@@ -114,13 +110,11 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
             Setup-CapturingCommandMock -CommandName 'trufflehog' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
-            try {
-                $result = Invoke-TruffleHogScan -Path '' -ErrorAction SilentlyContinue
-                $result | Should -Not -BeNullOrEmpty
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Invoke-TruffleHogScan -Path '' -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Handles trufflehog path not found' {
@@ -135,13 +129,11 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
             Setup-CapturingCommandMock -CommandName 'trufflehog' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
-            try {
-                $result = Invoke-TruffleHogScan -Path '   ' -ErrorAction SilentlyContinue
-                $result | Should -Not -BeNullOrEmpty
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Invoke-TruffleHogScan -Path '   ' -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Handles multiple pipeline inputs' {

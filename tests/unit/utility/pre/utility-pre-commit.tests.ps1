@@ -34,7 +34,7 @@ function global:New-PreCommitTestRepository {
 
     Push-Location $repo
     try {
-        & git init -q 2>$null
+    & git init -q 2>$null
     }
     finally {
         Pop-Location
@@ -80,14 +80,7 @@ Describe 'pre-commit.ps1 execution' {
             return
         }
         $repo = New-PreCommitTestRepository -FormatExitCode 0 -ValidateExitCode 0
-        try {
-            Invoke-PreCommitScript -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        Invoke-PreCommitScript -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -Be 0
     }
 
     It 'Announces formatting before validation in hook output' {
@@ -96,17 +89,10 @@ Describe 'pre-commit.ps1 execution' {
             return
         }
         $repo = New-PreCommitTestRepository -FormatExitCode 0 -ValidateExitCode 0
-        try {
-            $result = Invoke-PreCommitScript -RepositoryRoot $repo
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'Running code formatting'
-            $result.Output | Should -Match 'Running profile validation|Running validation'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result = Invoke-PreCommitScript -RepositoryRoot $repo
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'Running code formatting'
+        $result.Output | Should -Match 'Running profile validation|Running validation'
     }
 
     It 'Fails when formatting fails' {
@@ -115,16 +101,9 @@ Describe 'pre-commit.ps1 execution' {
             return
         }
         $repo = New-PreCommitTestRepository -FormatExitCode 1 -ValidateExitCode 0
-        try {
-            $result = Invoke-PreCommitScript -RepositoryRoot $repo
-            $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'formatting failed|Code formatting failed'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result = Invoke-PreCommitScript -RepositoryRoot $repo
+        $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'formatting failed|Code formatting failed'
     }
 
     It 'Fails when validation fails after formatting succeeds' {
@@ -133,16 +112,9 @@ Describe 'pre-commit.ps1 execution' {
             return
         }
         $repo = New-PreCommitTestRepository -FormatExitCode 0 -ValidateExitCode 1
-        try {
-            $result = Invoke-PreCommitScript -RepositoryRoot $repo
-            $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'validation failed|Validation checks failed'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result = Invoke-PreCommitScript -RepositoryRoot $repo
+        $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'validation failed|Validation checks failed'
     }
 
     It 'Returns setup error when validate-profile.ps1 is missing' {
@@ -151,15 +123,8 @@ Describe 'pre-commit.ps1 execution' {
             return
         }
         $repo = New-PreCommitTestRepository -OmitValidateScript
-        try {
-            $result = Invoke-PreCommitScript -RepositoryRoot $repo
-            $result.ExitCode | Should -BeIn @(1, 2)
-            $result.Output | Should -Match 'validate-profile|not found|Setup'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result = Invoke-PreCommitScript -RepositoryRoot $repo
+        $result.ExitCode | Should -BeIn @(1, 2)
+        $result.Output | Should -Match 'validate-profile|not found|Setup'
     }
 }

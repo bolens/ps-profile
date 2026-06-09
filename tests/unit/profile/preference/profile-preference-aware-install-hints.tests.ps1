@@ -243,13 +243,11 @@ Describe 'Preference-Aware Install Hints - Unit Tests' {
             $env:PS_PYTHON_PACKAGE_MANAGER = 'uv'
             Remove-AssumedCommand -Name 'uv' | Out-Null
             Set-TestCommandAvailabilityState -CommandName 'uv' -Available $false
-            try {
-                $result = Test-PreferenceAwareInstallPreferences -PreferenceType 'python-package'
-                $result.Warnings | Should -Match 'uv'
-            }
-            finally {
-                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
-            }
+                        $result = Test-PreferenceAwareInstallPreferences -PreferenceType 'python-package'
+            $result.Warnings | Should -Match 'uv'
+        }
+        finally {
+            Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
         }
         
         It 'Validates all preferences when PreferenceType is all' {
@@ -395,13 +393,11 @@ Describe 'Preference-Aware Install Hints - Unit Tests' {
             $env:PS_PYTHON_PACKAGE_MANAGER = 'uv'
             Remove-AssumedCommand -Name 'uv' | Out-Null
             Set-TestCommandAvailabilityState -CommandName 'uv' -Available $false
-            try {
-                $validation = Test-PreferenceAwareInstallPreferences -PreferenceType 'python-package'
-                $validation.Warnings | Should -Match 'uv'
-            }
-            finally {
-                Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
-            }
+                        $validation = Test-PreferenceAwareInstallPreferences -PreferenceType 'python-package'
+            $validation.Warnings | Should -Match 'uv'
+        }
+        finally {
+            Set-TestCommandAvailabilityState -CommandName 'uv' -Available $true
         }
     }
     

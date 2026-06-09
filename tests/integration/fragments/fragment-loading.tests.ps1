@@ -5,9 +5,19 @@ tests/integration/fragments/fragment-loading.tests.ps1
     Integration tests for fragment loading workflow using new modules.
 #>
 
-
 BeforeAll {
     try {
+        $current = Get-Item $PSScriptRoot
+        while ($null -ne $current) {
+            $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+            if (Test-Path -LiteralPath $testSupportPath) {
+                . $testSupportPath
+                break
+            }
+            if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+            $current = $current.Parent
+        }
+
         # Import required modules
         $pathResolutionModulePath = Get-TestPath -RelativePath 'scripts\lib\path\PathResolution.psm1' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $pathResolutionModulePath -or [string]::IsNullOrWhiteSpace($pathResolutionModulePath)) {
@@ -44,12 +54,6 @@ BeforeAll {
             throw "FragmentIdempotency module not found at: $fragmentIdempotencyModulePath"
         }
         Import-Module $fragmentIdempotencyModulePath -DisableNameChecking -ErrorAction Stop
-
-        # Get test data directory
-        $testDataDir = Join-Path $PSScriptRoot '..' '..' 'test-data'
-        if ($testDataDir -and -not [string]::IsNullOrWhiteSpace($testDataDir) -and -not (Test-Path -LiteralPath $testDataDir)) {
-            New-Item -Path $testDataDir -ItemType Directory -Force | Out-Null
-        }
     }
     catch {
         $errorDetails = @{
@@ -65,18 +69,10 @@ BeforeAll {
 Describe 'Fragment Loading Integration' {
     Context 'End-to-end fragment loading workflow' {
         It 'Loads fragments in correct dependency order' {
-            $tempProfileDir = $null
-            $cleanupNeeded = $false
-
             try {
-                $tempProfileDir = Join-Path $testDataDir 'fragment-loading-integration'
-                if ($tempProfileDir -and -not [string]::IsNullOrWhiteSpace($tempProfileDir) -and (Test-Path -LiteralPath $tempProfileDir)) {
-                    Remove-Item $tempProfileDir -Recurse -Force -ErrorAction SilentlyContinue
-                }
-                New-Item -Path $tempProfileDir -ItemType Directory -Force | Out-Null
+                $tempProfileDir = New-TestTempDirectory -Prefix 'FragmentLoadingIntegration'
                 $profileDDir = Join-Path $tempProfileDir 'profile.d'
                 New-Item -Path $profileDDir -ItemType Directory -Force | Out-Null
-                $cleanupNeeded = $true
 
                 # Create test fragments with dependencies
                 # Fragment B has no dependencies
@@ -129,29 +125,21 @@ $global:FragmentCLoaded = $true
             }
             catch {
                 $errorDetails = @{
-                    Message        = $_.Exception.Message
-                    TempProfileDir = $tempProfileDir
-                    Category       = $_.CategoryInfo.Category
+                    Message  = $_.Exception.Message
+                    Category = $_.CategoryInfo.Category
                 }
                 Write-Error "Fragment dependency order test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
                 throw
             }
             finally {
-                if ($cleanupNeeded) {
-                    Remove-Item $tempProfileDir -Recurse -Force -ErrorAction SilentlyContinue
-                    $global:FragmentALoaded = $null
-                    $global:FragmentBLoaded = $null
-                    $global:FragmentCLoaded = $null
-                }
+                $global:FragmentALoaded = $null
+                $global:FragmentBLoaded = $null
+                $global:FragmentCLoaded = $null
             }
         }
 
         It 'Respects disabled fragments from configuration' {
-            $tempProfileDir = Join-Path $testDataDir 'fragment-disabled-integration'
-            if ($tempProfileDir -and -not [string]::IsNullOrWhiteSpace($tempProfileDir) -and (Test-Path -LiteralPath $tempProfileDir)) {
-                Remove-Item $tempProfileDir -Recurse -Force
-            }
-            New-Item -Path $tempProfileDir -ItemType Directory -Force | Out-Null
+            $tempProfileDir = New-TestTempDirectory -Prefix 'FragmentDisabledIntegration'
             $profileDDir = Join-Path $tempProfileDir 'profile.d'
             New-Item -Path $profileDDir -ItemType Directory -Force | Out-Null
 
@@ -178,17 +166,10 @@ $global:FragmentCLoaded = $true
             # Verify disabled fragment is excluded
             $sortedFragments.BaseName | Should -Contain '10-fragment'
             $sortedFragments.BaseName | Should -Not -Contain '20-fragment'
-
-            # Cleanup
-            Remove-Item $tempProfileDir -Recurse -Force -ErrorAction SilentlyContinue
         }
 
         It 'Handles environment-specific fragment sets' {
-            $tempProfileDir = Join-Path $testDataDir 'fragment-env-integration'
-            if ($tempProfileDir -and -not [string]::IsNullOrWhiteSpace($tempProfileDir) -and (Test-Path -LiteralPath $tempProfileDir)) {
-                Remove-Item $tempProfileDir -Recurse -Force
-            }
-            New-Item -Path $tempProfileDir -ItemType Directory -Force | Out-Null
+            $tempProfileDir = New-TestTempDirectory -Prefix 'FragmentEnvIntegration'
             $profileDDir = Join-Path $tempProfileDir 'profile.d'
             New-Item -Path $profileDDir -ItemType Directory -Force | Out-Null
 
@@ -223,16 +204,12 @@ $global:FragmentCLoaded = $true
             finally {
                 $env:PS_PROFILE_ENVIRONMENT = $originalEnv
             }
-
-            # Cleanup
-            Remove-Item $tempProfileDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 
     Context 'Fragment idempotency integration' {
         It 'Prevents double-loading of fragments' {
-            $tempFragment = Join-Path $testDataDir 'fragment-idempotency-test.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-idempotency-test' -Extension '.ps1' -Content @'
 # Test fragment
 $global:FragmentLoadCount = ($global:FragmentLoadCount + 1)
 '@
@@ -259,9 +236,7 @@ $global:FragmentLoadCount = ($global:FragmentLoadCount + 1)
 
             # Cleanup
             Clear-FragmentLoaded -FragmentName 'fragment-idempotency-test'
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
             $global:FragmentLoadCount = $null
         }
     }
 }
-

@@ -122,8 +122,9 @@ function Get-ScoopRoot {
     )
     
     foreach ($envVar in $scoopEnvVars) {
-        if (Get-Variable -Name "env:$envVar" -ErrorAction SilentlyContinue) {
-            $candidate = (Get-Variable -Name "env:$envVar" -ErrorAction SilentlyContinue).Value
+        $envItem = Get-Item -Path "env:$envVar" -ErrorAction SilentlyContinue
+        if ($envItem) {
+            $candidate = $envItem.Value
             if ($candidate -and -not [string]::IsNullOrWhiteSpace($candidate)) {
                 # If it points to a subdirectory, try to get the parent
                 $testPath = $candidate

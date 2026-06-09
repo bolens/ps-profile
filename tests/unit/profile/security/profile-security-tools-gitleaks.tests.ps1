@@ -94,14 +94,12 @@ Describe 'security-tools.ps1 - Invoke-GitLeaksScan' {
             Setup-CapturingCommandMock -CommandName 'gitleaks' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
-            try {
-                $result = Invoke-GitLeaksScan -ErrorAction SilentlyContinue
-                $result | Should -Not -BeNullOrEmpty
-                $global:TestCommandInvocationCaptures.Count | Should -Be 1
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Invoke-GitLeaksScan -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Supports different output formats' {
@@ -136,12 +134,10 @@ Describe 'security-tools.ps1 - Invoke-GitLeaksScan' {
             Set-TestCommandThrowingMock -CommandName 'gitleaks' -Message 'Execution failed'
 
             $result = $null
-            try {
-                $result = Invoke-GitLeaksScan -RepositoryPath $script:TestRepoPath -ErrorAction SilentlyContinue
-            }
-            catch {
-                $result = $null
-            }
+                        $result = Invoke-GitLeaksScan -RepositoryPath $script:TestRepoPath -ErrorAction SilentlyContinue
+        }
+        catch {
+            $result = $null
 
             $result | Should -BeNullOrEmpty
         }
@@ -150,41 +146,35 @@ Describe 'security-tools.ps1 - Invoke-GitLeaksScan' {
             Setup-CapturingCommandMock -CommandName 'gitleaks' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
-            try {
-                $result = Invoke-GitLeaksScan -RepositoryPath '' -ErrorAction SilentlyContinue
-                $result | Should -Not -BeNullOrEmpty
-                $global:TestCommandInvocationCaptures.Count | Should -Be 1
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Invoke-GitLeaksScan -RepositoryPath '' -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Handles null repository path' {
             Setup-CapturingCommandMock -CommandName 'gitleaks' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
-            try {
-                $result = Invoke-GitLeaksScan -RepositoryPath $null -ErrorAction SilentlyContinue
-                $result | Should -Not -BeNullOrEmpty
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Invoke-GitLeaksScan -RepositoryPath $null -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Uses default repository path when whitespace path is provided' {
             Setup-CapturingCommandMock -CommandName 'gitleaks' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
-            try {
-                $result = Invoke-GitLeaksScan -RepositoryPath '   ' -ErrorAction SilentlyContinue
-                $result | Should -Not -BeNullOrEmpty
-                $global:TestCommandInvocationCaptures.Count | Should -Be 1
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Invoke-GitLeaksScan -RepositoryPath '   ' -ErrorAction SilentlyContinue
+            $result | Should -Not -BeNullOrEmpty
+            $global:TestCommandInvocationCaptures.Count | Should -Be 1
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Falls back to Write-Warning when Write-MissingToolWarning is unavailable' {

@@ -300,12 +300,14 @@ task generate-docs              # API documentation (or: just generate-docs, mak
 task generate-fragment-readmes  # Fragment READMEs (or: just generate-fragment-readmes, make generate-fragment-readmes, npm run generate-fragment-readmes)
 ```
 
-After editing `docs/guides/` or sources those guides document:
+After editing `docs/guides/`, tests, `docs/api/`, or sources those docs document:
 
 ```powershell
-task drift-link   # Refresh drift.lock bindings
+task drift-link   # Refresh drift.lock bindings (tests, guides, API docs)
 task drift-check  # Included in quality-check
 ```
+
+After `task generate-docs`, run `task drift-link` so generated `docs/api/**` files pick up drift anchors.
 
 ## Common Development Tasks
 

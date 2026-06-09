@@ -31,15 +31,13 @@ BeforeAll {
     # Import the FragmentLoading module
     $fragmentLoadingPath = Get-TestPath -RelativePath 'scripts\lib\fragment\FragmentLoading.psm1' -StartPath $PSScriptRoot -EnsureExists
     if ($fragmentLoadingPath -and (Test-Path -LiteralPath $fragmentLoadingPath)) {
-        try {
-            Import-Module $fragmentLoadingPath -DisableNameChecking -ErrorAction Stop -Force
-        }
-        catch {
-            # If import fails, try to get more details
-            Write-Warning "Failed to import FragmentLoading module: $($_.Exception.Message)"
-            Write-Warning "Error details: $($_.Exception.GetType().FullName)"
-            throw
-        }
+                Import-Module $fragmentLoadingPath -DisableNameChecking -ErrorAction Stop -Force
+    }
+    catch {
+        # If import fails, try to get more details
+        Write-Warning "Failed to import FragmentLoading module: $($_.Exception.Message)"
+        Write-Warning "Error details: $($_.Exception.GetType().FullName)"
+        throw
     }
     else {
         throw "FragmentLoading module not found at: $fragmentLoadingPath"
@@ -59,39 +57,29 @@ BeforeAll {
     if (-not (Get-Command Get-FragmentLoadOrder -ErrorAction SilentlyContinue)) {
         $missingFunctions += 'Get-FragmentLoadOrder'
     }
-    
+
     if ($missingFunctions.Count -gt 0) {
         $availableFunctions = Get-Command -Module FragmentLoading -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
         throw "Required functions not available after importing FragmentLoading module. Missing: $($missingFunctions -join ', '). Available: $($availableFunctions -join ', ')"
-    }
-
-    # Get test data directory
-    $testDataDir = Join-Path $PSScriptRoot '..' 'test-data'
-    if (-not (Test-Path $testDataDir)) {
-        New-Item -Path $testDataDir -ItemType Directory -Force | Out-Null
     }
 }
 
 Describe 'Get-FragmentDependencies' {
     Context 'When fragment has no dependencies' {
         It 'Returns empty array' {
-            $tempFragment = Join-Path $testDataDir 'fragment-no-deps.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-no-deps' -Extension '.ps1' -Content @'
 # Test fragment with no dependencies
 Write-Host "Test"
 '@
 
             $deps = Get-FragmentDependencies -FragmentFile $tempFragment
             $deps | Should -Be @()
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
         }
     }
 
     Context 'When fragment uses #Requires -Fragment syntax' {
         It 'Parses dependencies correctly' {
-            $tempFragment = Join-Path $testDataDir 'fragment-requires.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-requires' -Extension '.ps1' -Content @'
 #Requires -Fragment 'bootstrap'
 #Requires -Fragment 'env'
 # Test fragment
@@ -102,15 +90,12 @@ Write-Host "Test"
             $deps | Should -Contain 'bootstrap'
             $deps | Should -Contain 'env'
             $deps.Count | Should -Be 2
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
         }
     }
 
     Context 'When fragment uses Dependencies: comment syntax' {
         It 'Parses dependencies correctly' {
-            $tempFragment = Join-Path $testDataDir 'fragment-deps-comment.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-deps-comment' -Extension '.ps1' -Content @'
 # Dependencies: bootstrap, env, utilities
 # Test fragment
 Write-Host "Test"
@@ -121,8 +106,6 @@ Write-Host "Test"
             $deps | Should -Contain 'env'
             $deps | Should -Contain 'utilities'
             $deps.Count | Should -Be 3
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
         }
     }
 }
@@ -130,11 +113,7 @@ Write-Host "Test"
 Describe 'Get-FragmentLoadOrder' {
     Context 'When fragments have dependencies' {
         It 'Sorts fragments in dependency order' {
-            $tempDir = Join-Path $testDataDir 'fragment-load-order-test'
-            if (Test-Path $tempDir) {
-                Remove-Item $tempDir -Recurse -Force
-            }
-            New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+            $tempDir = New-TestTempDirectory -Prefix 'FragmentLoadOrder'
 
             # Create test fragments
             # Fragment A depends on B
@@ -163,18 +142,12 @@ Describe 'Get-FragmentLoadOrder' {
 
             $bIndex | Should -BeLessThan $aIndex
             $bIndex | Should -BeLessThan $cIndex
-
-            Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 
     Context 'When fragments are disabled' {
         It 'Excludes disabled fragments from result' {
-            $tempDir = Join-Path $testDataDir 'fragment-disabled-test'
-            if (Test-Path $tempDir) {
-                Remove-Item $tempDir -Recurse -Force
-            }
-            New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+            $tempDir = New-TestTempDirectory -Prefix 'FragmentDisabled'
 
             Set-Content -Path (Join-Path $tempDir '10-fragment.ps1') -Value '# Test'
             Set-Content -Path (Join-Path $tempDir '20-fragment.ps1') -Value '# Test'
@@ -184,8 +157,6 @@ Describe 'Get-FragmentLoadOrder' {
 
             $sorted.BaseName | Should -Not -Contain '20-fragment'
             $sorted.BaseName | Should -Contain '10-fragment'
-
-            Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 }
@@ -193,8 +164,7 @@ Describe 'Get-FragmentLoadOrder' {
 Describe 'Get-FragmentTier' {
     Context 'When fragment has explicit tier declaration' {
         It 'Parses core tier correctly' {
-            $tempFragment = Join-Path $testDataDir 'fragment-tier-core.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-tier-core' -Extension '.ps1' -Content @'
 # Tier: core
 # Test fragment
 Write-Host "Test"
@@ -202,13 +172,10 @@ Write-Host "Test"
 
             $tier = Get-FragmentTier -FragmentFile $tempFragment
             $tier | Should -Be 'core'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
         }
 
         It 'Parses essential tier correctly' {
-            $tempFragment = Join-Path $testDataDir 'fragment-tier-essential.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-tier-essential' -Extension '.ps1' -Content @'
 # Tier: essential
 # Test fragment
 Write-Host "Test"
@@ -216,13 +183,10 @@ Write-Host "Test"
 
             $tier = Get-FragmentTier -FragmentFile $tempFragment
             $tier | Should -Be 'essential'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
         }
 
         It 'Parses standard tier correctly' {
-            $tempFragment = Join-Path $testDataDir 'fragment-tier-standard.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-tier-standard' -Extension '.ps1' -Content @'
 # Tier: standard
 # Test fragment
 Write-Host "Test"
@@ -230,13 +194,10 @@ Write-Host "Test"
 
             $tier = Get-FragmentTier -FragmentFile $tempFragment
             $tier | Should -Be 'standard'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
         }
 
         It 'Parses optional tier correctly' {
-            $tempFragment = Join-Path $testDataDir 'fragment-tier-optional.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-tier-optional' -Extension '.ps1' -Content @'
 # Tier: optional
 # Test fragment
 Write-Host "Test"
@@ -244,13 +205,10 @@ Write-Host "Test"
 
             $tier = Get-FragmentTier -FragmentFile $tempFragment
             $tier | Should -Be 'optional'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
         }
 
         It 'Is case-insensitive' {
-            $tempFragment = Join-Path $testDataDir 'fragment-tier-case.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-tier-case' -Extension '.ps1' -Content @'
 # TIER: CORE
 # Test fragment
 Write-Host "Test"
@@ -258,29 +216,24 @@ Write-Host "Test"
 
             $tier = Get-FragmentTier -FragmentFile $tempFragment
             $tier | Should -Be 'core'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
         }
     }
 
     Context 'When fragment has no tier declaration' {
         It 'Defaults to optional tier' {
-            $tempFragment = Join-Path $testDataDir 'fragment-no-tier.ps1'
-            Set-Content -Path $tempFragment -Value @'
+            $tempFragment = New-TestTempFile -Prefix 'fragment-no-tier' -Extension '.ps1' -Content @'
 # Test fragment with no tier declaration
 Write-Host "Test"
 '@
 
             $tier = Get-FragmentTier -FragmentFile $tempFragment
             $tier | Should -Be 'optional'
-
-            Remove-Item $tempFragment -Force -ErrorAction SilentlyContinue
         }
     }
 
     Context 'When fragment file does not exist' {
         It 'Returns optional tier' {
-            $nonExistentFile = Join-Path $testDataDir 'nonexistent-fragment.ps1'
+            $nonExistentFile = Join-Path (New-TestTempDirectory -Prefix 'NonexistentFragment') 'nonexistent-fragment.ps1'
             $tier = Get-FragmentTier -FragmentFile $nonExistentFile
             $tier | Should -Be 'optional'
         }
@@ -290,11 +243,7 @@ Write-Host "Test"
 Describe 'Get-FragmentTiers' {
     Context 'When fragments use explicit tier declarations' {
         It 'Groups fragments by explicit tier declarations' {
-            $tempDir = Join-Path $testDataDir 'fragment-tiers-explicit-test'
-            if (Test-Path $tempDir) {
-                Remove-Item $tempDir -Recurse -Force
-            }
-            New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+            $tempDir = New-TestTempDirectory -Prefix 'FragmentTiersExplicit'
 
             # Create fragments with explicit tier declarations
             Set-Content -Path (Join-Path $tempDir 'core-fragment.ps1') -Value @'
@@ -321,17 +270,11 @@ Describe 'Get-FragmentTiers' {
             $tiers.Tier1.BaseName | Should -Contain 'essential-fragment'
             $tiers.Tier2.BaseName | Should -Contain 'standard-fragment'
             $tiers.Tier3.BaseName | Should -Contain 'optional-fragment'
-
-            Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 
     It 'Excludes bootstrap when ExcludeBootstrap is specified' {
-        $tempDir = Join-Path $testDataDir 'fragment-tiers-bootstrap-test'
-        if (Test-Path $tempDir) {
-            Remove-Item $tempDir -Recurse -Force
-        }
-        New-Item -Path $tempDir -ItemType Directory -Force | Out-Null
+        $tempDir = New-TestTempDirectory -Prefix 'FragmentTiersBootstrap'
 
         Set-Content -Path (Join-Path $tempDir 'bootstrap.ps1') -Value @'
 # Tier: core
@@ -347,8 +290,5 @@ Describe 'Get-FragmentTiers' {
 
         $tiers.Tier0.BaseName | Should -Not -Contain 'bootstrap'
         $tiers.Tier0.BaseName | Should -Contain 'core-fragment'
-
-        Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
-

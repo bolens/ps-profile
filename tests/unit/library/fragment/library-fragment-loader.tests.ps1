@@ -169,12 +169,10 @@ Describe 'FragmentLoader.psm1 - Load-FragmentForCommand' {
             $originalRegistry = $global:FragmentCommandRegistry
             Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
             
-            try {
-                { Load-FragmentForCommand -CommandName 'Test-Command' } | Should -Not -Throw
-            }
-            finally {
-                $global:FragmentCommandRegistry = $originalRegistry
-            }
+                        { Load-FragmentForCommand -CommandName 'Test-Command' } | Should -Not -Throw
+        }
+        finally {
+            $global:FragmentCommandRegistry = $originalRegistry
         }
     }
     

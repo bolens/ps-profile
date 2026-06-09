@@ -49,14 +49,12 @@ Describe 'Get-PlatformInstallHint package override extended scenarios' {
             Remove-Item Function:\Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
 
-            try {
-                Get-PlatformInstallHint -ToolName 'custom-tool' |
-                    Should -Be 'Install with: scoop install custom-tool'
-            }
-            finally {
-                if ($null -ne $originalPreferenceHint) {
-                    Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalPreferenceHint.ScriptBlock -Force
-                }
+                        Get-PlatformInstallHint -ToolName 'custom-tool' |
+                Should -Be 'Install with: scoop install custom-tool'
+        }
+        finally {
+            if ($null -ne $originalPreferenceHint) {
+                Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalPreferenceHint.ScriptBlock -Force
             }
         }
 

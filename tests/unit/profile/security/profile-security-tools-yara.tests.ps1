@@ -105,12 +105,10 @@ Describe 'security-tools.ps1 - Invoke-YaraScan' {
             Set-TestCommandThrowingMock -CommandName 'yara' -Message 'Execution failed'
 
             $result = $null
-            try {
-                $result = Invoke-YaraScan -FilePath $script:TestFile -RulesPath $script:TestRulesPath -ErrorAction SilentlyContinue
-            }
-            catch {
-                $result = $null
-            }
+                        $result = Invoke-YaraScan -FilePath $script:TestFile -RulesPath $script:TestRulesPath -ErrorAction SilentlyContinue
+        }
+        catch {
+            $result = $null
 
             $result | Should -BeNullOrEmpty
         }

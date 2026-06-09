@@ -132,6 +132,12 @@ if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and
     if ($testBackupPath -and -not [string]::IsNullOrWhiteSpace($testBackupPath) -and (Test-Path -LiteralPath $testBackupPath)) {
         . $testBackupPath
     }
+
+    # Load TestDriftLock (depends on TestPaths)
+    $testDriftLockPath = Join-Path $testSupportDir 'TestDriftLock.ps1'
+    if ($testDriftLockPath -and -not [string]::IsNullOrWhiteSpace($testDriftLockPath) -and (Test-Path -LiteralPath $testDriftLockPath)) {
+        . $testDriftLockPath
+    }
     
     # Load TestNpmHelpers (standalone)
     $testNpmHelpersPath = Join-Path $testSupportDir 'TestNpmHelpers.ps1'

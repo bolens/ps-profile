@@ -105,17 +105,15 @@ Describe 'ProfileFragmentLoadingOrchestration' {
             '30-orch-b.ps1|$global:OrchProbeB = $true'
         )
 
-        try {
-            Remove-Variable -Name OrchProbeA, OrchProbeB -Scope Global -ErrorAction SilentlyContinue
-            $result = Invoke-OrchestrationFixture -Fixture $fixture
-            $result.LoadedCount | Should -Be 2
-            $result.AllSucceeded.Count | Should -Be 2
-            $global:OrchProbeA | Should -Be $true
-            $global:OrchProbeB | Should -Be $true
-        }
-        finally {
-            Remove-Variable -Name OrchProbeA, OrchProbeB -Scope Global -ErrorAction SilentlyContinue
-        }
+                Remove-Variable -Name OrchProbeA, OrchProbeB -Scope Global -ErrorAction SilentlyContinue
+        $result = Invoke-OrchestrationFixture -Fixture $fixture
+        $result.LoadedCount | Should -Be 2
+        $result.AllSucceeded.Count | Should -Be 2
+        $global:OrchProbeA | Should -Be $true
+        $global:OrchProbeB | Should -Be $true
+    }
+    finally {
+        Remove-Variable -Name OrchProbeA, OrchProbeB -Scope Global -ErrorAction SilentlyContinue
     }
 
     It 'Skips disabled fragments' {
@@ -125,15 +123,13 @@ Describe 'ProfileFragmentLoadingOrchestration' {
         $disabled = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
         [void]$disabled.Add('20-orch-disabled')
 
-        try {
-            Remove-Variable -Name OrchDisabledProbe -Scope Global -ErrorAction SilentlyContinue
-            $result = Invoke-OrchestrationFixture -Fixture $fixture -DisabledSet $disabled
-            $result.LoadedCount | Should -Be 0
-            Get-Variable -Name OrchDisabledProbe -Scope Global -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
-        }
-        finally {
-            Remove-Variable -Name OrchDisabledProbe -Scope Global -ErrorAction SilentlyContinue
-        }
+                Remove-Variable -Name OrchDisabledProbe -Scope Global -ErrorAction SilentlyContinue
+        $result = Invoke-OrchestrationFixture -Fixture $fixture -DisabledSet $disabled
+        $result.LoadedCount | Should -Be 0
+        Get-Variable -Name OrchDisabledProbe -Scope Global -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+    }
+    finally {
+        Remove-Variable -Name OrchDisabledProbe -Scope Global -ErrorAction SilentlyContinue
     }
 
     It 'Records failures without stopping other fragments' {
@@ -142,16 +138,14 @@ Describe 'ProfileFragmentLoadingOrchestration' {
             '30-orch-bad.ps1|throw "orch failure probe"'
         )
 
-        try {
-            Remove-Variable -Name OrchFailOk -Scope Global -ErrorAction SilentlyContinue
-            $result = Invoke-OrchestrationFixture -Fixture $fixture
-            $result.AllSucceeded.Count | Should -Be 1
-            $result.AllFailed.Count | Should -Be 1
-            $global:OrchFailOk | Should -Be $true
-        }
-        finally {
-            Remove-Variable -Name OrchFailOk -Scope Global -ErrorAction SilentlyContinue
-        }
+                Remove-Variable -Name OrchFailOk -Scope Global -ErrorAction SilentlyContinue
+        $result = Invoke-OrchestrationFixture -Fixture $fixture
+        $result.AllSucceeded.Count | Should -Be 1
+        $result.AllFailed.Count | Should -Be 1
+        $global:OrchFailOk | Should -Be $true
+    }
+    finally {
+        Remove-Variable -Name OrchFailOk -Scope Global -ErrorAction SilentlyContinue
     }
 
     It 'Populates LoadedFragments for debug level 1 batching' {
@@ -172,15 +166,13 @@ Describe 'ProfileFragmentLoadingOrchestration' {
             Level1 = @('30-level-b')
         }
 
-        try {
-            Remove-Variable -Name OrchLevelA, OrchLevelB -Scope Global -ErrorAction SilentlyContinue
-            $result = Invoke-OrchestrationFixture -Fixture $fixture -FragmentLevels $levels
-            $result.LoadedCount | Should -Be 2
-            $global:OrchLevelA | Should -Be $true
-            $global:OrchLevelB | Should -Be $true
-        }
-        finally {
-            Remove-Variable -Name OrchLevelA, OrchLevelB -Scope Global -ErrorAction SilentlyContinue
-        }
+                Remove-Variable -Name OrchLevelA, OrchLevelB -Scope Global -ErrorAction SilentlyContinue
+        $result = Invoke-OrchestrationFixture -Fixture $fixture -FragmentLevels $levels
+        $result.LoadedCount | Should -Be 2
+        $global:OrchLevelA | Should -Be $true
+        $global:OrchLevelB | Should -Be $true
+    }
+    finally {
+        Remove-Variable -Name OrchLevelA, OrchLevelB -Scope Global -ErrorAction SilentlyContinue
     }
 }

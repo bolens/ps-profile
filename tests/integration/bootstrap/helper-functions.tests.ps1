@@ -8,26 +8,24 @@ tests/integration/bootstrap/helper-functions.tests.ps1
 
 Describe 'Bootstrap Helper Functions' {
     BeforeAll {
-        try {
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
-            if ($null -eq $script:BootstrapPath -or [string]::IsNullOrWhiteSpace($script:BootstrapPath)) {
-                throw "Get-TestPath returned null or empty value for BootstrapPath"
-            }
-            if (-not (Test-Path -LiteralPath $script:BootstrapPath)) {
-                throw "Bootstrap file not found at: $script:BootstrapPath"
-            }
-            . $script:BootstrapPath
+                $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
+        if ($null -eq $script:BootstrapPath -or [string]::IsNullOrWhiteSpace($script:BootstrapPath)) {
+            throw "Get-TestPath returned null or empty value for BootstrapPath"
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to load bootstrap in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+        if (-not (Test-Path -LiteralPath $script:BootstrapPath)) {
+            throw "Bootstrap file not found at: $script:BootstrapPath"
         }
+        . $script:BootstrapPath
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to load bootstrap in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
 
     Context 'Bootstrap helper functions' {
@@ -224,47 +222,43 @@ Describe 'Bootstrap Helper Functions' {
         }
 
         It 'Set-AgentModeFunction returns false when function already exists' {
-            try {
-                $existingFunc = 'Get-Command'
-                if (-not (Get-Command -Name $existingFunc -ErrorAction SilentlyContinue)) {
-                    Set-ItResult -Skipped -Because "Test requires existing function: $existingFunc"
-                    return
-                }
-                
-                $result = Set-AgentModeFunction -Name $existingFunc -Body { 'test' }
-                $result | Should -Be $false -Because "Set-AgentModeFunction should return false when function already exists"
+                        $existingFunc = 'Get-Command'
+            if (-not (Get-Command -Name $existingFunc -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because "Test requires existing function: $existingFunc"
+                return
             }
-            catch {
-                $errorDetails = @{
-                    Message      = $_.Exception.Message
-                    FunctionName = $existingFunc
-                    Category     = $_.CategoryInfo.Category
-                }
-                Write-Error "Set-AgentModeFunction existing function test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
+            
+            $result = Set-AgentModeFunction -Name $existingFunc -Body { 'test' }
+            $result | Should -Be $false -Because "Set-AgentModeFunction should return false when function already exists"
+        }
+        catch {
+            $errorDetails = @{
+                Message      = $_.Exception.Message
+                FunctionName = $existingFunc
+                Category     = $_.CategoryInfo.Category
             }
+            Write-Error "Set-AgentModeFunction existing function test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
         }
 
         It 'Set-AgentModeAlias returns false when alias already exists' {
-            try {
-                $existingAlias = 'ls'
-                if (-not (Get-Command -Name $existingAlias -ErrorAction SilentlyContinue)) {
-                    Set-ItResult -Skipped -Because "Test requires existing alias: $existingAlias"
-                    return
-                }
-                
-                $result = Set-AgentModeAlias -Name $existingAlias -Target 'Get-Command'
-                $result | Should -Be $false -Because "Set-AgentModeAlias should return false when alias already exists"
+                        $existingAlias = 'ls'
+            if (-not (Get-Command -Name $existingAlias -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because "Test requires existing alias: $existingAlias"
+                return
             }
-            catch {
-                $errorDetails = @{
-                    Message   = $_.Exception.Message
-                    AliasName = $existingAlias
-                    Category  = $_.CategoryInfo.Category
-                }
-                Write-Error "Set-AgentModeAlias existing alias test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
+            
+            $result = Set-AgentModeAlias -Name $existingAlias -Target 'Get-Command'
+            $result | Should -Be $false -Because "Set-AgentModeAlias should return false when alias already exists"
+        }
+        catch {
+            $errorDetails = @{
+                Message   = $_.Exception.Message
+                AliasName = $existingAlias
+                Category  = $_.CategoryInfo.Category
             }
+            Write-Error "Set-AgentModeAlias existing alias test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
         }
     }
 }

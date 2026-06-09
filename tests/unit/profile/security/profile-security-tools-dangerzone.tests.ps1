@@ -84,12 +84,10 @@ Describe 'security-tools.ps1 - Invoke-DangerzoneConvert' {
             Set-TestCommandThrowingMock -CommandName 'dangerzone' -Message 'Execution failed'
 
             $result = $null
-            try {
-                $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
-            }
-            catch {
-                $result = $null
-            }
+                        $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
+        }
+        catch {
+            $result = $null
 
             $result | Should -BeNullOrEmpty
         }

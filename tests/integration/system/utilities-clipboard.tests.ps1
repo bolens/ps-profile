@@ -9,43 +9,41 @@
 
 Describe 'System Utilities - Clipboard Integration Tests' {
     BeforeAll {
-        try {
-            $current = Get-Item $PSScriptRoot
-            while ($null -ne $current) {
-                $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
-                if (Test-Path -LiteralPath $testSupportPath) {
-                    . $testSupportPath
-                    break
-                }
-                if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
-                $current = $current.Parent
+                $current = Get-Item $PSScriptRoot
+        while ($null -ne $current) {
+            $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+            if (Test-Path -LiteralPath $testSupportPath) {
+                . $testSupportPath
+                break
             }
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
-                throw "Get-TestPath returned null or empty value for ProfileDir"
-            }
-            if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-                throw "Profile directory not found at: $script:ProfileDir"
-            }
-            
-            $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-            if ($null -eq $bootstrapPath -or [string]::IsNullOrWhiteSpace($bootstrapPath)) {
-                throw "BootstrapPath is null or empty"
-            }
-            if (-not (Test-Path -LiteralPath $bootstrapPath)) {
-                throw "Bootstrap file not found at: $bootstrapPath"
-            }
-            . $bootstrapPath
+            if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+            $current = $current.Parent
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to initialize system utilities clipboard tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
+            throw "Get-TestPath returned null or empty value for ProfileDir"
         }
+        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
+            throw "Profile directory not found at: $script:ProfileDir"
+        }
+        
+        $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
+        if ($null -eq $bootstrapPath -or [string]::IsNullOrWhiteSpace($bootstrapPath)) {
+            throw "BootstrapPath is null or empty"
+        }
+        if (-not (Test-Path -LiteralPath $bootstrapPath)) {
+            throw "Bootstrap file not found at: $bootstrapPath"
+        }
+        . $bootstrapPath
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize system utilities clipboard tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
 
     Context 'Clipboard helpers (clipboard.ps1)' {
@@ -74,13 +72,11 @@ Describe 'System Utilities - Clipboard Integration Tests' {
         It 'Copy-ToClipboard function accepts pipeline input' {
             # Test that the function accepts pipeline input (it has ValueFromPipeline parameter)
             $testText = "Test clipboard content $(Get-Random)"
-            try {
-                $testText | Copy-ToClipboard
-                $result = $true
-            }
-            catch {
-                $result = $false
-            }
+                        $testText | Copy-ToClipboard
+            $result = $true
+        }
+        catch {
+            $result = $false
             $result | Should -Be $true
         }
     }

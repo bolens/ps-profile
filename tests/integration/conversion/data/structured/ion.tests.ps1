@@ -75,32 +75,30 @@ Describe 'Ion Format Conversion Tests' {
             $ionFile = Join-Path $TestDrive 'test.ion'
             Set-Content -Path $ionFile -Value 'dummy ion content' -NoNewline
             
-            try {
-                $jsonFile = Join-Path $TestDrive 'test-output.json'
-                ConvertFrom-IonToJson -InputPath $ionFile -OutputPath $jsonFile -ErrorAction Stop 2>&1 | Out-Null
-                # If we get here, conversion succeeded (ion-python package is installed)
-                if ($jsonFile -and -not [string]::IsNullOrWhiteSpace($jsonFile) -and (Test-Path -LiteralPath $jsonFile)) {
-                    $jsonFile | Should -Exist
+                        $jsonFile = Join-Path $TestDrive 'test-output.json'
+            ConvertFrom-IonToJson -InputPath $ionFile -OutputPath $jsonFile -ErrorAction Stop 2>&1 | Out-Null
+            # If we get here, conversion succeeded (ion-python package is installed)
+            if ($jsonFile -and -not [string]::IsNullOrWhiteSpace($jsonFile) -and (Test-Path -LiteralPath $jsonFile)) {
+                $jsonFile | Should -Exist
+            }
+        }
+        catch {
+            $errorMessage = $_.Exception.Message
+            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+            # If conversion fails, verify it's due to missing ion-python package
+            if ($errorMessage -match 'ion-python.*not.*installed' -or $errorMessage -match 'ImportError' -or $fullError -match 'ion-python') {
+                $installCommand = 'uv pip install ion-python'
+                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                }
+                elseif ($errorMessage -match 'ion-python' -or $fullError -match 'ion-python') {
+                    Write-Host "ion-python package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                    $errorMessage | Should -Match 'ion-python'
                 }
             }
-            catch {
-                $errorMessage = $_.Exception.Message
-                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-                
-                # If conversion fails, verify it's due to missing ion-python package
-                if ($errorMessage -match 'ion-python.*not.*installed' -or $errorMessage -match 'ImportError' -or $fullError -match 'ion-python') {
-                    $installCommand = 'uv pip install ion-python'
-                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                    }
-                    elseif ($errorMessage -match 'ion-python' -or $fullError -match 'ion-python') {
-                        Write-Host "ion-python package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                        $errorMessage | Should -Match 'ion-python'
-                    }
-                }
-                # Other errors (like invalid file format) are also acceptable
-            }
+            # Other errors (like invalid file format) are also acceptable
         }
 
         It 'ConvertTo-IonFromJson handles missing ion-python package gracefully when Python/UV is available' {
@@ -127,32 +125,30 @@ Describe 'Ion Format Conversion Tests' {
             $jsonFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $jsonFile -Value $jsonContent -NoNewline
             
-            try {
-                $ionFile = Join-Path $TestDrive 'test-output.ion'
-                ConvertTo-IonFromJson -InputPath $jsonFile -OutputPath $ionFile -ErrorAction Stop 2>&1 | Out-Null
-                # If we get here, conversion succeeded (ion-python package is installed)
-                if ($ionFile -and -not [string]::IsNullOrWhiteSpace($ionFile) -and (Test-Path -LiteralPath $ionFile)) {
-                    $ionFile | Should -Exist
+                        $ionFile = Join-Path $TestDrive 'test-output.ion'
+            ConvertTo-IonFromJson -InputPath $jsonFile -OutputPath $ionFile -ErrorAction Stop 2>&1 | Out-Null
+            # If we get here, conversion succeeded (ion-python package is installed)
+            if ($ionFile -and -not [string]::IsNullOrWhiteSpace($ionFile) -and (Test-Path -LiteralPath $ionFile)) {
+                $ionFile | Should -Exist
+            }
+        }
+        catch {
+            $errorMessage = $_.Exception.Message
+            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+            # If conversion fails, verify it's due to missing ion-python package
+            if ($errorMessage -match 'ion-python.*not.*installed' -or $errorMessage -match 'ImportError' -or $fullError -match 'ion-python') {
+                $installCommand = 'uv pip install ion-python'
+                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                }
+                elseif ($errorMessage -match 'ion-python' -or $fullError -match 'ion-python') {
+                    Write-Host "ion-python package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                    $errorMessage | Should -Match 'ion-python'
                 }
             }
-            catch {
-                $errorMessage = $_.Exception.Message
-                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-                
-                # If conversion fails, verify it's due to missing ion-python package
-                if ($errorMessage -match 'ion-python.*not.*installed' -or $errorMessage -match 'ImportError' -or $fullError -match 'ion-python') {
-                    $installCommand = 'uv pip install ion-python'
-                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                    }
-                    elseif ($errorMessage -match 'ion-python' -or $fullError -match 'ion-python') {
-                        Write-Host "ion-python package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                        $errorMessage | Should -Match 'ion-python'
-                    }
-                }
-                # Other errors (like invalid file format) are also acceptable
-            }
+            # Other errors (like invalid file format) are also acceptable
         }
 
         It 'Ion aliases resolve to functions' {

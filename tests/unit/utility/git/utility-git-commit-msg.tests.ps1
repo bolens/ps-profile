@@ -51,50 +51,27 @@ BeforeAll {
 Describe 'commit-msg.ps1 execution' {
     It 'Accepts a valid Conventional Commit subject' {
         $fixture = New-CommitMsgHookFixture
-        try {
-            Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "feat(cli): add hook test`n" | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.RepoRoot) {
-                Remove-Item -LiteralPath $fixture.RepoRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "feat(cli): add hook test`n" | Should -Be 0
     }
 
     It 'Rejects an invalid commit subject' {
         $fixture = New-CommitMsgHookFixture
-        try {
-            Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "bad commit message`n" | Should -BeIn @(1, 2)
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.RepoRoot) {
-                Remove-Item -LiteralPath $fixture.RepoRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "bad commit message`n" | Should -BeIn @(1, 2)
     }
 
     It 'Allows merge commit subjects' {
         $fixture = New-CommitMsgHookFixture
-        try {
-            Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "Merge branch 'main' into feature`n" | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.RepoRoot) {
-                Remove-Item -LiteralPath $fixture.RepoRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "Merge branch 'main' into feature`n" | Should -Be 0
+    }
+
+    It 'Accepts revert commits with a Conventional Commit subject' {
+        $fixture = New-CommitMsgHookFixture
+                Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "revert: feat(cli): roll back hook test`n" | Should -Be 0
     }
 
     It 'Fails when the commit message file is missing' {
         $fixture = New-CommitMsgHookFixture
-        try {
-            & pwsh -NoProfile -File $fixture.HookPath -CommitMsgFile (Join-Path $fixture.RepoRoot 'missing.txt') 2>&1 | Out-Null
-            $LASTEXITCODE | Should -BeIn @(1, 2)
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.RepoRoot) {
-                Remove-Item -LiteralPath $fixture.RepoRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                & pwsh -NoProfile -File $fixture.HookPath -CommitMsgFile (Join-Path $fixture.RepoRoot 'missing.txt') 2>&1 | Out-Null
+        $LASTEXITCODE | Should -BeIn @(1, 2)
     }
 }

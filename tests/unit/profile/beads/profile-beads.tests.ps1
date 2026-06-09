@@ -101,12 +101,10 @@ Describe 'beads.ps1 - Invoke-Beads' {
             Set-TestCommandThrowingMock -CommandName 'bd' -Message 'bd: command failed'
 
             $result = $null
-            try {
-                $result = Invoke-Beads 'invalid-command' -ErrorAction SilentlyContinue
-            }
-            catch {
-                $result = $null
-            }
+                        $result = Invoke-Beads 'invalid-command' -ErrorAction SilentlyContinue
+        }
+        catch {
+            $result = $null
 
             $result | Should -BeNullOrEmpty
         }

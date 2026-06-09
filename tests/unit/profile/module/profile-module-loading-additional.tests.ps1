@@ -129,32 +129,28 @@ Describe "ModuleLoading Functions - Additional Coverage" {
             $invalidExtFile = Join-Path $script:TestModulesDir 'invalid.txt'
             Set-Content -Path $invalidExtFile -Value 'test' -NoNewline
             
-            try {
-                { Import-FragmentModule `
-                        -FragmentRoot $script:TestFragmentRoot `
-                        -ModulePath @('test-modules', 'invalid.txt') `
-                        -Context 'Test: required-invalid-ext' `
-                        -Required } | Should -Throw
-            }
-            finally {
-                Remove-Item -Path $invalidExtFile -Force -ErrorAction SilentlyContinue
-            }
+                        { Import-FragmentModule `
+                    -FragmentRoot $script:TestFragmentRoot `
+                    -ModulePath @('test-modules', 'invalid.txt') `
+                    -Context 'Test: required-invalid-ext' `
+                    -Required } | Should -Throw
+        }
+        finally {
+            Remove-Item -Path $invalidExtFile -Force -ErrorAction SilentlyContinue
         }
         
         It "Throws when Required is specified and module fails to load" {
             $errorModule = Join-Path $script:TestModulesDir 'error-module.ps1'
             Set-Content -Path $errorModule -Value 'throw "Test error"' -NoNewline
             
-            try {
-                { Import-FragmentModule `
-                        -FragmentRoot $script:TestFragmentRoot `
-                        -ModulePath @('test-modules', 'error-module.ps1') `
-                        -Context 'Test: required-load-error' `
-                        -Required } | Should -Throw
-            }
-            finally {
-                Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
-            }
+                        { Import-FragmentModule `
+                    -FragmentRoot $script:TestFragmentRoot `
+                    -ModulePath @('test-modules', 'error-module.ps1') `
+                    -Context 'Test: required-load-error' `
+                    -Required } | Should -Throw
+        }
+        finally {
+            Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
         }
     }
     
@@ -216,17 +212,15 @@ Describe "ModuleLoading Functions - Additional Coverage" {
             $invalidExtFile = Join-Path $script:TestModulesDir 'invalid.txt'
             Set-Content -Path $invalidExtFile -Value 'test' -NoNewline
             
-            try {
-                $result = Import-FragmentModule `
-                    -FragmentRoot $script:TestFragmentRoot `
-                    -ModulePath @('test-modules', 'invalid.txt') `
-                    -Context 'Test: debug-invalid-ext'
-                
-                $result | Should -Be $false
-            }
-            finally {
-                Remove-Item -Path $invalidExtFile -Force -ErrorAction SilentlyContinue
-            }
+                        $result = Import-FragmentModule `
+                -FragmentRoot $script:TestFragmentRoot `
+                -ModulePath @('test-modules', 'invalid.txt') `
+                -Context 'Test: debug-invalid-ext'
+            
+            $result | Should -Be $false
+        }
+        finally {
+            Remove-Item -Path $invalidExtFile -Force -ErrorAction SilentlyContinue
         }
         
         It "Writes warning in debug mode when syntax check fails" {
@@ -234,35 +228,31 @@ Describe "ModuleLoading Functions - Additional Coverage" {
             Set-Content -Path $syntaxErrorModule -Value 'invalid syntax {' -NoNewline
             $env:PS_PROFILE_DEBUG_SYNTAX_CHECK = '1'
             
-            try {
-                $result = Import-FragmentModule `
-                    -FragmentRoot $script:TestFragmentRoot `
-                    -ModulePath @('test-modules', 'syntax-error.ps1') `
-                    -Context 'Test: debug-syntax-error'
-                
-                $result | Should -Be $false
-            }
-            finally {
-                Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
-                Remove-Item Env:PS_PROFILE_DEBUG_SYNTAX_CHECK -ErrorAction SilentlyContinue
-            }
+                        $result = Import-FragmentModule `
+                -FragmentRoot $script:TestFragmentRoot `
+                -ModulePath @('test-modules', 'syntax-error.ps1') `
+                -Context 'Test: debug-syntax-error'
+            
+            $result | Should -Be $false
+        }
+        finally {
+            Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+            Remove-Item Env:PS_PROFILE_DEBUG_SYNTAX_CHECK -ErrorAction SilentlyContinue
         }
         
         It "Writes warning in debug mode when module fails to load" {
             $errorModule = Join-Path $script:TestModulesDir 'error-module.ps1'
             Set-Content -Path $errorModule -Value 'throw "Test error"' -NoNewline
             
-            try {
-                $result = Import-FragmentModule `
-                    -FragmentRoot $script:TestFragmentRoot `
-                    -ModulePath @('test-modules', 'error-module.ps1') `
-                    -Context 'Test: debug-load-error'
-                
-                $result | Should -Be $false
-            }
-            finally {
-                Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
-            }
+                        $result = Import-FragmentModule `
+                -FragmentRoot $script:TestFragmentRoot `
+                -ModulePath @('test-modules', 'error-module.ps1') `
+                -Context 'Test: debug-load-error'
+            
+            $result | Should -Be $false
+        }
+        finally {
+            Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
         }
     }
     
@@ -284,22 +274,20 @@ Describe "ModuleLoading Functions - Additional Coverage" {
             $errorModule = Join-Path $script:TestModulesDir 'error-module.ps1'
             Set-Content -Path $errorModule -Value 'throw "Test error"' -NoNewline
             
-            try {
-                $script:WriteProfileErrorCalled = $false
-                $result = Import-FragmentModule `
-                    -FragmentRoot $script:TestFragmentRoot `
-                    -ModulePath @('test-modules', 'error-module.ps1') `
-                    -Context 'Test: write-profile-error'
-                
-                $result | Should -Be $false
-                $script:WriteProfileErrorCalled | Should -Be $true
-                $script:WriteProfileErrorContext | Should -Be 'Test: write-profile-error'
-            }
-            finally {
-                Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
-                Remove-Item -Path 'Function:\Write-ProfileError' -Force -ErrorAction SilentlyContinue
-                Remove-Variable -Name WriteProfileErrorCalled, WriteProfileErrorErrorRecord, WriteProfileErrorContext -Scope Script -ErrorAction SilentlyContinue
-            }
+                        $script:WriteProfileErrorCalled = $false
+            $result = Import-FragmentModule `
+                -FragmentRoot $script:TestFragmentRoot `
+                -ModulePath @('test-modules', 'error-module.ps1') `
+                -Context 'Test: write-profile-error'
+            
+            $result | Should -Be $false
+            $script:WriteProfileErrorCalled | Should -Be $true
+            $script:WriteProfileErrorContext | Should -Be 'Test: write-profile-error'
+        }
+        finally {
+            Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path 'Function:\Write-ProfileError' -Force -ErrorAction SilentlyContinue
+            Remove-Variable -Name WriteProfileErrorCalled, WriteProfileErrorErrorRecord, WriteProfileErrorContext -Scope Script -ErrorAction SilentlyContinue
         }
         
         It "Uses Write-ProfileError when available with Message only" {
@@ -318,22 +306,20 @@ Describe "ModuleLoading Functions - Additional Coverage" {
             # For this test, we need a scenario where lastError is null but errorMsg exists
             # This happens when Invoke-FragmentSafely returns false without throwing
             # Let's create a scenario where the file doesn't exist (no ErrorRecord, just message)
-            try {
-                $script:WriteProfileErrorCalled = $false
-                $result = Import-FragmentModule `
-                    -FragmentRoot $script:TestFragmentRoot `
-                    -ModulePath @('test-modules', 'nonexistent.ps1') `
-                    -Context 'Test: write-profile-error-message'
-                
-                $result | Should -Be $false
-                # Note: Write-ProfileError may not be called if file doesn't exist (path validation fails first)
-                # So we just verify the function exists and the module returns false
-                Get-Command Write-ProfileError -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-            }
-            finally {
-                Remove-Item -Path 'Function:\Write-ProfileError' -Force -ErrorAction SilentlyContinue
-                Remove-Variable -Name WriteProfileErrorCalled, WriteProfileErrorMessage, WriteProfileErrorContext -Scope Script -ErrorAction SilentlyContinue
-            }
+                        $script:WriteProfileErrorCalled = $false
+            $result = Import-FragmentModule `
+                -FragmentRoot $script:TestFragmentRoot `
+                -ModulePath @('test-modules', 'nonexistent.ps1') `
+                -Context 'Test: write-profile-error-message'
+            
+            $result | Should -Be $false
+            # Note: Write-ProfileError may not be called if file doesn't exist (path validation fails first)
+            # So we just verify the function exists and the module returns false
+            Get-Command Write-ProfileError -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+        }
+        finally {
+            Remove-Item -Path 'Function:\Write-ProfileError' -Force -ErrorAction SilentlyContinue
+            Remove-Variable -Name WriteProfileErrorCalled, WriteProfileErrorMessage, WriteProfileErrorContext -Scope Script -ErrorAction SilentlyContinue
         }
     }
     
@@ -365,22 +351,20 @@ Describe "ModuleLoading Functions - Additional Coverage" {
                 Remove-Item -Path 'Function:\Test-ModulePath' -Force -ErrorAction SilentlyContinue
             }
             
-            try {
-                $result = Import-FragmentModule `
-                    -FragmentRoot $script:TestFragmentRoot `
-                    -ModulePath @('test-modules', 'valid-module.ps1') `
-                    -Context 'Test: no-cache-fallback' `
-                    -CacheResults
-                
-                $result | Should -Be $true
-            }
-            finally {
-                # Restore Test-ModulePath if it existed
-                if ($originalTestModulePath) {
-                    $modulePathCachePath = Join-Path $script:BootstrapDir 'ModulePathCache.ps1'
-                    if (Test-Path $modulePathCachePath) {
-                        . $modulePathCachePath
-                    }
+                        $result = Import-FragmentModule `
+                -FragmentRoot $script:TestFragmentRoot `
+                -ModulePath @('test-modules', 'valid-module.ps1') `
+                -Context 'Test: no-cache-fallback' `
+                -CacheResults
+            
+            $result | Should -Be $true
+        }
+        finally {
+            # Restore Test-ModulePath if it existed
+            if ($originalTestModulePath) {
+                $modulePathCachePath = Join-Path $script:BootstrapDir 'ModulePathCache.ps1'
+                if (Test-Path $modulePathCachePath) {
+                    . $modulePathCachePath
                 }
             }
         }
@@ -538,24 +522,22 @@ function Test-RetryBackoffFunction {
 '@
             Set-Content -Path $retryModule -Value $moduleContent -NoNewline
             
-            try {
-                $startTime = Get-Date
-                $result = Import-FragmentModule `
-                    -FragmentRoot $script:TestFragmentRoot `
-                    -ModulePath @('test-modules', 'retry-backoff.ps1') `
-                    -Context 'Test: retry-backoff' `
-                    -RetryCount 3
-                
-                $result | Should -Be $true
-                $script:RetryAttempt | Should -Be 3
-                # Verify delays occurred (exponential backoff: 100ms, 200ms, 400ms)
-                $elapsed = (Get-Date) - $startTime
-                $elapsed.TotalMilliseconds | Should -BeGreaterThan 300  # At least 100+200ms
-            }
-            finally {
-                Remove-Item -Path $retryModule -Force -ErrorAction SilentlyContinue
-                Remove-Variable -Name RetryAttempt, RetryTimes -Scope Script -ErrorAction SilentlyContinue
-            }
+                        $startTime = Get-Date
+            $result = Import-FragmentModule `
+                -FragmentRoot $script:TestFragmentRoot `
+                -ModulePath @('test-modules', 'retry-backoff.ps1') `
+                -Context 'Test: retry-backoff' `
+                -RetryCount 3
+            
+            $result | Should -Be $true
+            $script:RetryAttempt | Should -Be 3
+            # Verify delays occurred (exponential backoff: 100ms, 200ms, 400ms)
+            $elapsed = (Get-Date) - $startTime
+            $elapsed.TotalMilliseconds | Should -BeGreaterThan 300  # At least 100+200ms
+        }
+        finally {
+            Remove-Item -Path $retryModule -Force -ErrorAction SilentlyContinue
+            Remove-Variable -Name RetryAttempt, RetryTimes -Scope Script -ErrorAction SilentlyContinue
         }
     }
 }

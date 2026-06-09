@@ -75,12 +75,14 @@ All documentation is automatically generated from source code:
 - **Fragment Documentation**: Run `task generate-fragment-readmes` or `pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1`
 - **All Documentation**: Run `task all-docs` to generate both
 
-After editing guides or the source files they describe, refresh drift bindings:
+After editing guides, tests, or the source files they describe—or after `generate-docs`—refresh drift bindings:
 
 ```powershell
-task drift-link    # updates drift.lock for tests and guides
+task drift-link    # updates drift.lock for tests, guides, and docs/api
 task drift-check   # included in quality-check
 ```
+
+After a full API doc regeneration, run `task drift-link` again so `docs/api/**` source anchors stay current.
 
 ## Statistics
 

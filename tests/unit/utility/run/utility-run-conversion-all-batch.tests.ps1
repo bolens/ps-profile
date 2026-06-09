@@ -59,11 +59,6 @@ exit 0
             $result.Output | Should -Match 'Conversion all-batch'
             $result.Output | Should -Match '1P / 0F / 0S'
         }
-        finally {
-            if (Test-Path -LiteralPath $tempRepo) {
-                Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Fails the batch when the stub integration runner reports failures' {
@@ -90,11 +85,6 @@ exit 1
 
             $result.ExitCode | Should -Be 1
             $result.Output | Should -Match 'Conversion all-batch|Sub-batches with failures|0P / 1F / 0S'
-        }
-        finally {
-            if (Test-Path -LiteralPath $tempRepo) {
-                Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 
@@ -131,10 +121,37 @@ exit 0
             $result.Output | Should -Match '=== document ==='
             $result.Output | Should -Match '=== media ==='
         }
-        finally {
-            if (Test-Path -LiteralPath $tempRepo) {
-                Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
-            }
+    }
+
+    It 'Discovers data sub-batches when tests exist only in nested subdirectories' {
+        $tempRepo = New-TestTempDirectory -Prefix 'ConversionAllNestedDataStub'
+        try {
+            $runnerDir = Join-Path $tempRepo 'scripts' 'utils' 'code-quality'
+            $encodingDir = Join-Path $tempRepo 'tests' 'integration' 'conversion' 'data' 'encoding'
+            $nestedTestDir = Join-Path $encodingDir 'nested' 'suite'
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            $null = New-Item -ItemType Directory -Path $nestedTestDir -Force
+            $null = New-Item -ItemType File -Path (Join-Path $nestedTestDir 'encoding-nested.tests.ps1') -Force
+
+            $stubRunner = @'
+param(
+    [string]$RelativePath,
+    [switch]$Quiet
+)
+Write-Host "Batch: $RelativePath"
+Write-Host '1P / 0F / 0S'
+exit 0
+'@
+            Set-Content -LiteralPath (Join-Path $runnerDir 'run-conversion-integration-batch.ps1') -Value $stubRunner -Encoding UTF8
+
+            $result = Invoke-TestScriptFile -ScriptPath $script:RunConversionAllBatchScript -ArgumentList @(
+                '-RepoRoot', $tempRepo,
+                '-Quiet'
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Conversion all-batch'
+            $result.Output | Should -Match '=== data/encoding ==='
         }
     }
 }

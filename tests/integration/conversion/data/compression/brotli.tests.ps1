@@ -19,13 +19,11 @@ Describe 'Brotli Compression Tests' {
         
         # Check if BrotliStream is available once for all tests
         $script:brotliAvailable = $false
-        try {
-            $null = [System.IO.Compression.BrotliStream]
-            $script:brotliAvailable = $true
-        }
-        catch {
-            $script:brotliAvailable = $false
-        }
+                $null = [System.IO.Compression.BrotliStream]
+        $script:brotliAvailable = $true
+    }
+    catch {
+        $script:brotliAvailable = $false
     }
 
     Context 'Brotli Compression' {

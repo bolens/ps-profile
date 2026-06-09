@@ -66,22 +66,20 @@ Describe 'Formatting Module Functions' {
                 $script:createdMock = $false
             }
             
-            try {
-                # Verify function exists
-                Get-Command Format-LocaleDate -ErrorAction Stop | Should -Not -BeNullOrEmpty
-                
-                $date = Get-Date '2024-01-15 14:30:00'
-                $result = Format-DateWithFallback -Date $date -Format 'yyyy-MM-dd'
-                $result | Should -Match 'LOCALE:'
+                        # Verify function exists
+            Get-Command Format-LocaleDate -ErrorAction Stop | Should -Not -BeNullOrEmpty
+            
+            $date = Get-Date '2024-01-15 14:30:00'
+            $result = Format-DateWithFallback -Date $date -Format 'yyyy-MM-dd'
+            $result | Should -Match 'LOCALE:'
+        }
+        finally {
+            # Clean up: if we created the mock, remove it; otherwise restore original
+            if ($script:createdMock) {
+                Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
             }
-            finally {
-                # Clean up: if we created the mock, remove it; otherwise restore original
-                if ($script:createdMock) {
-                    Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
-                }
-                elseif ($originalCmd) {
-                    Set-Item -Path Function:\global:Format-LocaleDate -Value $originalCmd.ScriptBlock -Force
-                }
+            elseif ($originalCmd) {
+                Set-Item -Path Function:\global:Format-LocaleDate -Value $originalCmd.ScriptBlock -Force
             }
         }
 
@@ -103,17 +101,15 @@ Describe 'Formatting Module Functions' {
                 }
             }
             
-            try {
-                $date = Get-Date '2024-01-15 14:30:00'
-                # Call with 'invalid' format - Format-DateWithFallback should skip Format-LocaleDate
-                # and use fallback format even if Format-LocaleDate exists
-                $result = Format-DateWithFallback -Date $date -Format 'invalid' -FallbackFormat 'yyyy-MM-dd'
-                $result | Should -Match '2024-01-15'
-            }
-            finally {
-                if ($originalCmd) {
-                    Set-Item -Path Function:\global:Format-LocaleDate -Value $originalCmd.ScriptBlock -Force
-                }
+                        $date = Get-Date '2024-01-15 14:30:00'
+            # Call with 'invalid' format - Format-DateWithFallback should skip Format-LocaleDate
+            # and use fallback format even if Format-LocaleDate exists
+            $result = Format-DateWithFallback -Date $date -Format 'invalid' -FallbackFormat 'yyyy-MM-dd'
+            $result | Should -Match '2024-01-15'
+        }
+        finally {
+            if ($originalCmd) {
+                Set-Item -Path Function:\global:Format-LocaleDate -Value $originalCmd.ScriptBlock -Force
             }
         }
 
@@ -129,19 +125,17 @@ Describe 'Formatting Module Functions' {
                 Start-Sleep -Milliseconds 10
             }
             
-            try {
-                $date = Get-Date '2024-01-15 14:30:00'
-                $culture = [System.Globalization.CultureInfo]::GetCultureInfo('en-US')
-                # If Format-LocaleDate still exists, Format-DateWithFallback will use it
-                # But since we're using a valid format, it should work either way
-                $result = Format-DateWithFallback -Date $date -Format 'yyyy-MM-dd' -Culture $culture
-                # Result should be '2024-01-15' regardless of whether Format-LocaleDate exists
-                $result | Should -Match '2024-01-15'
-            }
-            finally {
-                if ($originalCmd) {
-                    Set-Item -Path Function:\global:Format-LocaleDate -Value $originalCmd.ScriptBlock -Force
-                }
+                        $date = Get-Date '2024-01-15 14:30:00'
+            $culture = [System.Globalization.CultureInfo]::GetCultureInfo('en-US')
+            # If Format-LocaleDate still exists, Format-DateWithFallback will use it
+            # But since we're using a valid format, it should work either way
+            $result = Format-DateWithFallback -Date $date -Format 'yyyy-MM-dd' -Culture $culture
+            # Result should be '2024-01-15' regardless of whether Format-LocaleDate exists
+            $result | Should -Match '2024-01-15'
+        }
+        finally {
+            if ($originalCmd) {
+                Set-Item -Path Function:\global:Format-LocaleDate -Value $originalCmd.ScriptBlock -Force
             }
         }
     }
@@ -165,14 +159,12 @@ Describe 'Formatting Module Functions' {
                 Set-Item -Path Function:\global:Format-LocaleNumber -Value $mockBody -Force
             }
             
-            try {
-                $result = Format-NumberWithFallback -Number 1234.56 -Format 'N2'
-                $result | Should -Match 'LOCALE:'
-            }
-            finally {
-                if (-not $originalCmd) {
-                    Remove-Item -Path Function:\global:Format-LocaleNumber -Force -ErrorAction SilentlyContinue
-                }
+                        $result = Format-NumberWithFallback -Number 1234.56 -Format 'N2'
+            $result | Should -Match 'LOCALE:'
+        }
+        finally {
+            if (-not $originalCmd) {
+                Remove-Item -Path Function:\global:Format-LocaleNumber -Force -ErrorAction SilentlyContinue
             }
         }
 
@@ -229,18 +221,16 @@ Describe 'Formatting Module Functions' {
             }
             Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
             
-            try {
-                # Verify function exists
-                Get-Command $funcName -ErrorAction Stop | Should -Not -BeNullOrEmpty
-                
-                $result = Invoke-CommandWithFallback -CommandName $funcName `
-                    -Arguments @{ Name = 'test'; Count = 5 } `
-                    -FallbackValue 'fallback'
-                $result | Should -Be 'test-5'
-            }
-            finally {
-                Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
-            }
+                        # Verify function exists
+            Get-Command $funcName -ErrorAction Stop | Should -Not -BeNullOrEmpty
+            
+            $result = Invoke-CommandWithFallback -CommandName $funcName `
+                -Arguments @{ Name = 'test'; Count = 5 } `
+                -FallbackValue 'fallback'
+            $result | Should -Be 'test-5'
+        }
+        finally {
+            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
         }
     }
 

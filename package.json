@@ -75,7 +75,7 @@
     "dev-setup": "pwsh -NoProfile -File scripts/dev/setup.ps1",
     "check-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1",
     "generate-task-parity": "pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate",
-    "drift-link": "pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh && pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh",
+    "drift-link": "pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh && pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh && pwsh -NoProfile -File scripts/utils/code-quality/link-api-drift.ps1 -Refresh",
     "drift-check": "drift check",
     "drift-status": "drift status",
     "test-performance-batch": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1",

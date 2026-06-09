@@ -65,13 +65,11 @@ Describe 'System Utility Functions Edge Cases' {
             New-Item -ItemType Directory -Path $emptyDir -Force | Out-Null
 
             Push-Location $emptyDir
-            try {
-                $result = search '*.txt'
-                ($result -eq $null -or $result.Count -eq 0) | Should -Be $true
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = search '*.txt'
+            ($result -eq $null -or $result.Count -eq 0) | Should -Be $true
+        }
+        finally {
+            Pop-Location
         }
     }
 }

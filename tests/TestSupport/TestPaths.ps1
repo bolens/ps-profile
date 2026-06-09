@@ -152,6 +152,43 @@ function New-TestTempDirectory {
 
 <#
 .SYNOPSIS
+    Creates a temporary directory outside the repository tree.
+.DESCRIPTION
+    Use when a test requires a path that must not resolve to this repository
+    (for example Get-RepoRoot failure cases) or must avoid paths matched by
+    Filter-Files -ExcludeTests (/tests/ path segments). Registers the directory
+    for automatic cleanup via Remove-TestArtifacts.
+.PARAMETER Prefix
+    Text used at the start of the generated directory name.
+.PARAMETER StartPath
+    Optional path used to locate the repository root when verifying isolation.
+.OUTPUTS
+    System.String
+#>
+function New-TestExternalTempDirectory {
+    param(
+        [string]$Prefix = 'PesterExternal',
+        [string]$StartPath = $PSScriptRoot
+    )
+
+    $repoRoot = Get-TestRepoRoot -StartPath $StartPath
+    $uniqueName = '{0}-{1}' -f $Prefix, ([System.Guid]::NewGuid().ToString())
+    $path = Join-Path ([System.IO.Path]::GetTempPath()) $uniqueName
+    New-Item -ItemType Directory -Path $path -Force | Out-Null
+
+    $normalizedPath = (Resolve-Path -LiteralPath $path).Path
+    $normalizedRepo = (Resolve-Path -LiteralPath $repoRoot).Path.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $repoPrefix = '{0}{1}' -f $normalizedRepo, [System.IO.Path]::DirectorySeparatorChar
+    if ($normalizedPath.StartsWith($repoPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "External temp directory must be outside repository root: $normalizedPath"
+    }
+
+    Register-TestCleanupPath -Path $path
+    return $path
+}
+
+<#
+.SYNOPSIS
     Gets the tests/test-data directory path.
 .DESCRIPTION
     Resolves and optionally creates the test-data directory used for transient test files.
@@ -268,6 +305,50 @@ function Get-TestArtifactPath {
     $artifactPath = Join-Path $testDataPath $FileName
     Register-TestCleanupPath -Path $artifactPath
     return $artifactPath
+}
+
+<#
+.SYNOPSIS
+    Converts an absolute path to a repository-relative path.
+.DESCRIPTION
+    Use when a script under test expects paths relative to the repository root
+    but the test created the target via Get-TestArtifactPath or New-TestTempDirectory.
+.PARAMETER Path
+    Absolute path to convert.
+.PARAMETER StartPath
+    Optional path used to locate the repository root.
+.OUTPUTS
+    System.String
+#>
+function Get-TestRepoRelativePath {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path,
+
+        [string]$StartPath = $PSScriptRoot
+    )
+
+    $repoRoot = (Get-TestRepoRoot -StartPath $StartPath).TrimEnd(
+        [System.IO.Path]::DirectorySeparatorChar,
+        [System.IO.Path]::AltDirectorySeparatorChar
+    )
+
+    $resolvedPath = if (Test-Path -LiteralPath $Path) {
+        (Resolve-Path -LiteralPath $Path).Path
+    }
+    else {
+        $Path
+    }
+
+    $normalizedRepo = $repoRoot.Replace('\', '/')
+    $normalizedPath = $resolvedPath.Replace('\', '/')
+    $repoPrefix = "$normalizedRepo/"
+
+    if ($normalizedPath.StartsWith($repoPrefix, [StringComparison]::OrdinalIgnoreCase)) {
+        return $normalizedPath.Substring($repoPrefix.Length)
+    }
+
+    return $resolvedPath
 }
 
 <#

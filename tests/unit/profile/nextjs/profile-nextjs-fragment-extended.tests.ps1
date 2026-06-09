@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-nextjs-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-nextjs-fragment-extended.tests.ps1
+# Execution tests for nextjs.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,38 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/nextjs.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'nextjs.ps1')
 }
+
 Describe 'profile.d/nextjs.ps1 extended scenarios' {
-    It 'Declares standard tier for Next.js development helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'PowerShell.Profile.NextJs'
+    It 'Registers Next.js dev helpers and aliases' {
+        Get-Command Start-NextJsDev -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command New-NextJsApp -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command next-dev -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Start-NextJsDev wrapping npx next dev' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Start-NextJsDev'
-        $c | Should -Match 'next dev'
+
+    It 'Start-NextJsDev warns when npx is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'npx' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('npm', [ref]$null)
+        }
+
+        $output = Start-NextJsDev 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'npx not found'
     }
-    It 'Registers next-dev and create-next-app aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'next-dev'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'create-next-app'"
+
+    It 'Preserves existing nextjs helper bodies on repeated fragment loads' {
+        $firstDev = Get-Command Start-NextJsDev -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'nextjs.ps1')
+
+        (Get-Command Start-NextJsDev -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstDev.ScriptBlock.ToString()
     }
 }

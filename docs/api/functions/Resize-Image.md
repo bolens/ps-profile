@@ -1,0 +1,53 @@
+# Resize-Image
+
+## Synopsis
+
+Resizes an image.
+
+## Description
+
+Uses ImageMagick to resize an image to specified dimensions.
+
+## Signature
+
+```powershell
+Resize-Image
+```
+
+## Parameters
+
+### -InputPath
+
+The path to the input image file.
+
+### -OutputPath
+
+The path for the output image file.
+
+### -Width
+
+The desired width.
+
+### -Height
+
+The desired height.
+
+
+## Examples
+
+### Example 1
+
+```powershell
+Resize-Image -InputPath ./input.file -OutputPath ./output.file
+```
+
+## Aliases
+
+This function has the following aliases:
+
+- `image-resize` - Resizes an image.
+
+
+## Source
+
+Defined in: ../profile.d/conversion-modules/media/images/legacy-image.ps1

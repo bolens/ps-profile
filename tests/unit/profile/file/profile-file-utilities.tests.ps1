@@ -30,12 +30,10 @@ BeforeAll {
             foreach ($helperFile in $helperFiles) {
                 $helperPath = Join-Path $helpersDir $helperFile
                 if (Test-Path $helperPath) {
-                    try {
-                        . $helperPath
-                    }
-                    catch {
-                        Write-Warning "Failed to load $helperFile : $($_.Exception.Message)"
-                    }
+                                        . $helperPath
+                }
+                catch {
+                    Write-Warning "Failed to load $helperFile : $($_.Exception.Message)"
                 }
             }
         }
@@ -50,12 +48,10 @@ BeforeAll {
                 foreach ($coreFile in $coreFiles) {
                     $corePath = Join-Path $coreDir $coreFile
                     if (Test-Path $corePath) {
-                        try {
-                            . $corePath
-                        }
-                        catch {
-                            Write-Warning "Failed to load $coreFile : $($_.Exception.Message)"
-                        }
+                                                . $corePath
+                    }
+                    catch {
+                        Write-Warning "Failed to load $coreFile : $($_.Exception.Message)"
                     }
                 }
             }
@@ -74,12 +70,10 @@ BeforeAll {
                     foreach ($moduleFile in $moduleDir.Files) {
                         $modulePath = Join-Path $moduleDir.Dir $moduleFile
                         if (Test-Path $modulePath) {
-                            try {
-                                . $modulePath
-                            }
-                            catch {
-                                # Silently continue - some modules may have dependencies that aren't available
-                            }
+                                                        . $modulePath
+                        }
+                        catch {
+                            # Silently continue - some modules may have dependencies that aren't available
                         }
                     }
                 }
@@ -89,17 +83,15 @@ BeforeAll {
     
     # Initialize conversion modules if available
     # Ensure-FileConversion-Data will call all initialization functions
-    try {
         if (Get-Command Ensure-FileConversion-Data -ErrorAction SilentlyContinue) {
-            # Suppress errors for missing initialization functions
-            $ErrorActionPreference = 'SilentlyContinue'
-            Ensure-FileConversion-Data
-            $ErrorActionPreference = 'Continue'
-        }
+        # Suppress errors for missing initialization functions
+        $ErrorActionPreference = 'SilentlyContinue'
+        Ensure-FileConversion-Data
+        $ErrorActionPreference = 'Continue'
     }
-    catch {
-        Write-Warning "File conversion data modules not fully available: $($_.Exception.Message)"
-    }
+}
+catch {
+    Write-Warning "File conversion data modules not fully available: $($_.Exception.Message)"
     
     # Load document conversion modules
     $documentDir = Join-Path $conversionModulesDir 'document'
@@ -108,35 +100,29 @@ BeforeAll {
         foreach ($docFile in $documentFiles) {
             $docPath = Join-Path $documentDir $docFile
             if (Test-Path $docPath) {
-                try {
-                    . $docPath
-                }
-                catch {
-                    # Silently continue - some modules may have dependencies that aren't available
-                }
+                                . $docPath
+            }
+            catch {
+                # Silently continue - some modules may have dependencies that aren't available
             }
         }
     }
     
-    try {
         if (Get-Command Ensure-FileConversion-Documents -ErrorAction SilentlyContinue) {
-            $ErrorActionPreference = 'SilentlyContinue'
-            Ensure-FileConversion-Documents
-            $ErrorActionPreference = 'Continue'
-        }
+        $ErrorActionPreference = 'SilentlyContinue'
+        Ensure-FileConversion-Documents
+        $ErrorActionPreference = 'Continue'
     }
-    catch {
-        Write-Warning "File conversion document modules not available: $($_.Exception.Message)"
-    }
+}
+catch {
+    Write-Warning "File conversion document modules not available: $($_.Exception.Message)"
     
-    try {
         if (Get-Command Initialize-FileConversion-MediaImages -ErrorAction SilentlyContinue) {
-            Ensure-FileConversion-Media -ErrorAction SilentlyContinue
-        }
+        Ensure-FileConversion-Media -ErrorAction SilentlyContinue
     }
-    catch {
-        Write-Warning "File conversion media modules not available: $($_.Exception.Message)"
-    }
+}
+catch {
+    Write-Warning "File conversion media modules not available: $($_.Exception.Message)"
     
     # File utilities should always be available
     # The modules should be loaded by files.ps1, but if they're not, try to load them manually
@@ -155,12 +141,10 @@ BeforeAll {
         foreach ($moduleFile in $moduleFiles) {
             $modulePath = Join-Path $inspectionDir $moduleFile
             if (Test-Path $modulePath) {
-                try {
-                    . $modulePath
-                }
-                catch {
-                    Write-Warning "Failed to load $moduleFile : $($_.Exception.Message)"
-                }
+                                . $modulePath
+            }
+            catch {
+                Write-Warning "Failed to load $moduleFile : $($_.Exception.Message)"
             }
         }
     }
@@ -183,23 +167,19 @@ BeforeAll {
     
     if ($allModulesLoaded) {
         # Explicitly call initialization functions to ensure Global helper functions are created
-        try {
-            Initialize-FileUtilities-HeadTail -ErrorAction Stop
-            Initialize-FileUtilities-Hash -ErrorAction Stop
-            Initialize-FileUtilities-Size -ErrorAction Stop
-            Initialize-FileUtilities-HexDump -ErrorAction Stop
-        }
-        catch {
-            Write-Warning "Failed to initialize file utility functions: $($_.Exception.Message)"
-        }
+                Initialize-FileUtilities-HeadTail -ErrorAction Stop
+        Initialize-FileUtilities-Hash -ErrorAction Stop
+        Initialize-FileUtilities-Size -ErrorAction Stop
+        Initialize-FileUtilities-HexDump -ErrorAction Stop
+    }
+    catch {
+        Write-Warning "Failed to initialize file utility functions: $($_.Exception.Message)"
         
         # Also call Ensure-FileUtilities as a fallback
-        try {
-            Ensure-FileUtilities -ErrorAction SilentlyContinue
-        }
-        catch {
-            Write-Warning "Ensure-FileUtilities failed: $($_.Exception.Message)"
-        }
+                Ensure-FileUtilities -ErrorAction SilentlyContinue
+    }
+    catch {
+        Write-Warning "Ensure-FileUtilities failed: $($_.Exception.Message)"
     }
     else {
         Write-Warning "File utility modules not fully available. Some tests may be skipped."
@@ -461,13 +441,11 @@ Describe 'Profile file utility functions' {
             $missing = Join-Path $script:TestTempRoot 'non_existent.txt'
             {
                 $originalWarningPreference = $WarningPreference
-                try {
-                    $WarningPreference = 'SilentlyContinue'
-                    file-hash -Path $missing | Out-Null
-                }
-                finally {
-                    $WarningPreference = $originalWarningPreference
-                }
+                                $WarningPreference = 'SilentlyContinue'
+                file-hash -Path $missing | Out-Null
+            }
+            finally {
+                $WarningPreference = $originalWarningPreference
             } | Should -Not -Throw
         }
     }

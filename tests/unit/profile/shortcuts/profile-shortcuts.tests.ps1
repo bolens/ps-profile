@@ -64,25 +64,21 @@ Describe 'Profile shortcut functions' {
             $originalErrorActionPreference = $ErrorActionPreference
             $WarningPreference = 'SilentlyContinue'
             $ErrorActionPreference = 'SilentlyContinue'
-            try {
-                # vsc should not throw when no editor is available (it should just warn)
-                { vsc } | Should -Not -Throw
-            }
-            finally {
-                $WarningPreference = $originalWarningPreference
-                $ErrorActionPreference = $originalErrorActionPreference
-            }
+                        # vsc should not throw when no editor is available (it should just warn)
+            { vsc } | Should -Not -Throw
+        }
+        finally {
+            $WarningPreference = $originalWarningPreference
+            $ErrorActionPreference = $originalErrorActionPreference
         }
 
         It 'e requires a path parameter' {
             $originalWarningPreference = $WarningPreference
             $WarningPreference = 'SilentlyContinue'
-            try {
-                { e } | Should -Not -Throw
-            }
-            finally {
-                $WarningPreference = $originalWarningPreference
-            }
+                        { e } | Should -Not -Throw
+        }
+        finally {
+            $WarningPreference = $originalWarningPreference
         }
     }
 }

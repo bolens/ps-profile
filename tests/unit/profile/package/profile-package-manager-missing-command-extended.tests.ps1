@@ -100,12 +100,10 @@ Describe 'PackageManagerBase missing command extended scenarios' {
                 -CommandName $script:CommandName `
                 -CustomCommands @{ $customName = { 'audit-ok' } }
 
-            try {
-                & $customName | Should -Be 'audit-ok'
-            }
-            finally {
-                Remove-Item -Path "Function:\$customName" -Force -ErrorAction SilentlyContinue
-            }
+                        & $customName | Should -Be 'audit-ok'
+        }
+        finally {
+            Remove-Item -Path "Function:\$customName" -Force -ErrorAction SilentlyContinue
         }
 
         It 'Returns false when manager metadata is blank' {

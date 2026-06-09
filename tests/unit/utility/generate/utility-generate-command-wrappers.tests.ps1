@@ -41,87 +41,52 @@ Describe 'generate-command-wrappers.ps1 execution' {
 
     It 'Fails validation when the registry has no commands' {
         $outputDir = New-TestTempDirectory -Prefix 'WrapperEmpty'
-        try {
-            & pwsh -NoProfile -File $script:GenerateScript -OutputPath $outputDir 2>&1 | Out-Null
-            $LASTEXITCODE | Should -Be 1
-        }
-        finally {
-            if (Test-Path -LiteralPath $outputDir) {
-                Remove-Item -LiteralPath $outputDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                & pwsh -NoProfile -File $script:GenerateScript -OutputPath $outputDir 2>&1 | Out-Null
+        $LASTEXITCODE | Should -Be 1
     }
 
     It 'DryRun reports a wrapper plan for a registered function command' {
         $null = Register-FragmentCommand -CommandName 'Invoke-WrapperTest' -FragmentName 'bootstrap' -CommandType 'Function'
         $outputDir = New-TestTempDirectory -Prefix 'WrapperDryRun'
 
-        try {
-            $output = & $script:GenerateScript -DryRun -CommandName 'Invoke-WrapperTest' -OutputPath $outputDir *>&1 | Out-String
-            $LASTEXITCODE | Should -Be 0
-            $output | Should -Match '\[GENERATE\] Invoke-WrapperTest'
-            $expectedPath = [regex]::Escape((Join-Path $outputDir 'Invoke-WrapperTest.ps1'))
-            $output | Should -Match $expectedPath
-            Test-Path -LiteralPath (Join-Path $outputDir 'Invoke-WrapperTest.ps1') | Should -Be $false
-        }
-        finally {
-            if (Test-Path -LiteralPath $outputDir) {
-                Remove-Item -LiteralPath $outputDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                $output = & $script:GenerateScript -DryRun -CommandName 'Invoke-WrapperTest' -OutputPath $outputDir *>&1 | Out-String
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -Match '\[GENERATE\] Invoke-WrapperTest'
+        $expectedPath = [regex]::Escape((Join-Path $outputDir 'Invoke-WrapperTest.ps1'))
+        $output | Should -Match $expectedPath
+        Test-Path -LiteralPath (Join-Path $outputDir 'Invoke-WrapperTest.ps1') | Should -Be $false
     }
 
     It 'Writes a wrapper script for a registered function command' {
         $null = Register-FragmentCommand -CommandName 'Invoke-WrapperWriteTest' -FragmentName 'bootstrap' -CommandType 'Function'
         $outputDir = New-TestTempDirectory -Prefix 'WrapperWrite'
 
-        try {
-            $output = & $script:GenerateScript -CommandName 'Invoke-WrapperWriteTest' -OutputPath $outputDir -Force *>&1 | Out-String
-            $LASTEXITCODE | Should -Be 0
-            $output | Should -Match '\[GENERATED\] Invoke-WrapperWriteTest'
+        $output = & $script:GenerateScript -CommandName 'Invoke-WrapperWriteTest' -OutputPath $outputDir -Force *>&1 | Out-String
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -Match '\[GENERATED\] Invoke-WrapperWriteTest'
 
-            $wrapperPath = Join-Path $outputDir 'Invoke-WrapperWriteTest.ps1'
-            Test-Path -LiteralPath $wrapperPath | Should -Be $true
-            $wrapperContent = Get-Content -LiteralPath $wrapperPath -Raw
-            $wrapperContent | Should -Match 'Generated wrapper for Invoke-WrapperWriteTest'
-            $wrapperContent | Should -Match "Source fragment: bootstrap"
-            $wrapperContent | Should -Match "& 'Invoke-WrapperWriteTest' @Arguments"
-        }
-        finally {
-            if (Test-Path -LiteralPath $outputDir) {
-                Remove-Item -LiteralPath $outputDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $wrapperPath = Join-Path $outputDir 'Invoke-WrapperWriteTest.ps1'
+        Test-Path -LiteralPath $wrapperPath | Should -Be $true
+        $wrapperContent = Get-Content -LiteralPath $wrapperPath -Raw
+        $wrapperContent | Should -Match 'Generated wrapper for Invoke-WrapperWriteTest'
+        $wrapperContent | Should -Match "Source fragment: bootstrap"
+        $wrapperContent | Should -Match "& 'Invoke-WrapperWriteTest' @Arguments"
     }
 
     It 'Fails validation when a specific command name is not registered' {
         $outputDir = New-TestTempDirectory -Prefix 'WrapperUnknownCommand'
-        try {
-            $output = & pwsh -NoProfile -File $script:GenerateScript -CommandName 'Definitely-Not-Registered-Command' -OutputPath $outputDir 2>&1 | Out-String
-            $LASTEXITCODE | Should -Be 1
-            $output | Should -Match 'No commands to generate wrappers for|No commands found in registry'
-        }
-        finally {
-            if (Test-Path -LiteralPath $outputDir) {
-                Remove-Item -LiteralPath $outputDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                $output = & pwsh -NoProfile -File $script:GenerateScript -CommandName 'Definitely-Not-Registered-Command' -OutputPath $outputDir 2>&1 | Out-String
+        $LASTEXITCODE | Should -Be 1
+        $output | Should -Match 'No commands to generate wrappers for|No commands found in registry'
     }
 
     It 'DryRun reports a wrapper plan for a registered alias command' {
         $null = Register-FragmentCommand -CommandName 'gs' -FragmentName 'git' -CommandType 'Alias'
         $outputDir = New-TestTempDirectory -Prefix 'WrapperAliasDryRun'
 
-        try {
-            $output = & $script:GenerateScript -DryRun -CommandName 'gs' -OutputPath $outputDir *>&1 | Out-String
-            $LASTEXITCODE | Should -Be 0
-            $output | Should -Match '\[GENERATE\] gs|Found 1 command'
-            Test-Path -LiteralPath (Join-Path $outputDir 'gs.ps1') | Should -Be $false
-        }
-        finally {
-            if (Test-Path -LiteralPath $outputDir) {
-                Remove-Item -LiteralPath $outputDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+                $output = & $script:GenerateScript -DryRun -CommandName 'gs' -OutputPath $outputDir *>&1 | Out-String
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -Match '\[GENERATE\] gs|Found 1 command'
+        Test-Path -LiteralPath (Join-Path $outputDir 'gs.ps1') | Should -Be $false
     }
 }

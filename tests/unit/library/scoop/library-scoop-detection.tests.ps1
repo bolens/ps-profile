@@ -19,12 +19,6 @@ BeforeAll {
     # Import the ScoopDetection module
     $scoopDetectionPath = Get-TestPath -RelativePath 'scripts\lib\runtime\ScoopDetection.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $scoopDetectionPath -DisableNameChecking -ErrorAction Stop
-
-    # Get test data directory
-    $testDataDir = Join-Path $PSScriptRoot '..' 'test-data'
-    if (-not (Test-Path $testDataDir)) {
-        New-Item -Path $testDataDir -ItemType Directory -Force | Out-Null
-    }
 }
 
 Describe 'Get-ScoopRoot' {
@@ -32,11 +26,8 @@ Describe 'Get-ScoopRoot' {
         It 'Returns the path from environment variable' {
             $originalScoop = $env:SCOOP
             $originalScoopGlobal = $env:SCOOP_GLOBAL
-            $testScoopPath = Join-Path $testDataDir 'scoop-env-test'
+            $testScoopPath = New-TestTempDirectory -Prefix 'ScoopEnvTest'
             try {
-                if (-not (Test-Path $testScoopPath)) {
-                    New-Item -Path $testScoopPath -ItemType Directory -Force | Out-Null
-                }
                 # Clear SCOOP_GLOBAL to ensure we test SCOOP
                 $env:SCOOP_GLOBAL = $null
                 $env:SCOOP = $testScoopPath
@@ -47,9 +38,6 @@ Describe 'Get-ScoopRoot' {
             finally {
                 $env:SCOOP = $originalScoop
                 $env:SCOOP_GLOBAL = $originalScoopGlobal
-                if (Test-Path $testScoopPath) {
-                    Remove-Item $testScoopPath -Recurse -Force -ErrorAction SilentlyContinue
-                }
             }
         }
     }
@@ -61,11 +49,7 @@ Describe 'Get-ScoopRoot' {
             $originalHome = $env:HOME
             $originalUserProfile = $env:USERPROFILE
 
-            # Use test data directory to avoid modifying user's home directory
-            $testHome = Join-Path $testDataDir 'test-home'
-            if (-not (Test-Path $testHome)) {
-                New-Item -Path $testHome -ItemType Directory -Force | Out-Null
-            }
+            $testHome = New-TestTempDirectory -Prefix 'ScoopTestHome'
             $testScoopPath = Join-Path $testHome 'scoop'
 
             try {
@@ -75,10 +59,8 @@ Describe 'Get-ScoopRoot' {
                 # Set HOME to point to our test directory
                 $env:HOME = $testHome
                 $env:USERPROFILE = $null
-                
-                if (-not (Test-Path $testScoopPath)) {
-                    New-Item -Path $testScoopPath -ItemType Directory -Force | Out-Null
-                }
+
+                New-Item -Path $testScoopPath -ItemType Directory -Force | Out-Null
 
                 $scoopRoot = Get-ScoopRoot
                 $scoopRoot | Should -Be $testScoopPath
@@ -88,12 +70,6 @@ Describe 'Get-ScoopRoot' {
                 $env:SCOOP_GLOBAL = $originalScoopGlobal
                 $env:HOME = $originalHome
                 $env:USERPROFILE = $originalUserProfile
-                if (Test-Path $testScoopPath) {
-                    Remove-Item $testScoopPath -Recurse -Force -ErrorAction SilentlyContinue
-                }
-                if (Test-Path $testHome) {
-                    Remove-Item $testHome -Recurse -Force -ErrorAction SilentlyContinue
-                }
             }
         }
     }
@@ -112,12 +88,13 @@ Describe 'Get-ScoopRoot' {
                 # Temporarily rename HOME/USERPROFILE to prevent detection
                 $tempHome = $env:HOME
                 $tempUserProfile = $env:USERPROFILE
-                $env:HOME = Join-Path $testDataDir 'nonexistent-home'
-                $env:USERPROFILE = Join-Path $testDataDir 'nonexistent-userprofile'
+                $isolatedHome = New-TestTempDirectory -Prefix 'NonexistentScoopHome'
+                $env:HOME = $isolatedHome
+                $env:USERPROFILE = Join-Path $isolatedHome 'nonexistent-userprofile'
 
                 # Note: This test checks that Get-ScoopRoot returns null when no valid paths exist
                 $scoopRoot = Get-ScoopRoot
-                
+
                 # If A:\scoop exists, the function will return it (which is correct behavior)
                 # If it doesn't exist, it should return null
                 # We can't reliably test "not installed" without mocking Test-Path
@@ -144,20 +121,15 @@ Describe 'Get-ScoopCompletionPath' {
     It 'Returns completion path when Scoop is installed' {
         $originalScoop = $env:SCOOP
         $originalScoopGlobal = $env:SCOOP_GLOBAL
-        $testScoopPath = Join-Path $testDataDir 'scoop-completion-test'
+        $testScoopPath = New-TestTempDirectory -Prefix 'ScoopCompletionTest'
         try {
-            if (-not (Test-Path $testScoopPath)) {
-                New-Item -Path $testScoopPath -ItemType Directory -Force | Out-Null
-            }
             # Clear SCOOP_GLOBAL to ensure we test SCOOP
             $env:SCOOP_GLOBAL = $null
             $env:SCOOP = $testScoopPath
 
             # Create completion path structure
             $completionDir = Join-Path $testScoopPath 'apps' 'scoop' 'current' 'supporting' 'completion'
-            if (-not (Test-Path $completionDir)) {
-                New-Item -Path $completionDir -ItemType Directory -Force | Out-Null
-            }
+            New-Item -Path $completionDir -ItemType Directory -Force | Out-Null
             $completionFile = Join-Path $completionDir 'Scoop-Completion.psd1'
             Set-Content -Path $completionFile -Value '# Test completion file'
 
@@ -167,20 +139,14 @@ Describe 'Get-ScoopCompletionPath' {
         finally {
             $env:SCOOP = $originalScoop
             $env:SCOOP_GLOBAL = $originalScoopGlobal
-            if (Test-Path $testScoopPath) {
-                Remove-Item $testScoopPath -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 
     It 'Returns null when completion file does not exist' {
         $originalScoop = $env:SCOOP
         $originalScoopGlobal = $env:SCOOP_GLOBAL
-        $testScoopPath = Join-Path $testDataDir 'scoop-no-completion'
+        $testScoopPath = New-TestTempDirectory -Prefix 'ScoopNoCompletion'
         try {
-            if (-not (Test-Path $testScoopPath)) {
-                New-Item -Path $testScoopPath -ItemType Directory -Force | Out-Null
-            }
             # Clear SCOOP_GLOBAL to ensure we test SCOOP
             $env:SCOOP_GLOBAL = $null
             $env:SCOOP = $testScoopPath
@@ -191,9 +157,6 @@ Describe 'Get-ScoopCompletionPath' {
         finally {
             $env:SCOOP = $originalScoop
             $env:SCOOP_GLOBAL = $originalScoopGlobal
-            if (Test-Path $testScoopPath) {
-                Remove-Item $testScoopPath -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 }
@@ -202,11 +165,8 @@ Describe 'Test-ScoopInstalled' {
     It 'Returns true when Scoop is installed' {
         $originalScoop = $env:SCOOP
         $originalScoopGlobal = $env:SCOOP_GLOBAL
-        $testScoopPath = Join-Path $testDataDir 'scoop-installed-test'
+        $testScoopPath = New-TestTempDirectory -Prefix 'ScoopInstalledTest'
         try {
-            if (-not (Test-Path $testScoopPath)) {
-                New-Item -Path $testScoopPath -ItemType Directory -Force | Out-Null
-            }
             # Clear SCOOP_GLOBAL to ensure we test SCOOP
             $env:SCOOP_GLOBAL = $null
             $env:SCOOP = $testScoopPath
@@ -217,9 +177,6 @@ Describe 'Test-ScoopInstalled' {
         finally {
             $env:SCOOP = $originalScoop
             $env:SCOOP_GLOBAL = $originalScoopGlobal
-            if (Test-Path $testScoopPath) {
-                Remove-Item $testScoopPath -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 
@@ -231,11 +188,11 @@ Describe 'Test-ScoopInstalled' {
             $env:SCOOP = $null
             $env:SCOOP_GLOBAL = $null
             $tempHome = $env:HOME
-            $env:HOME = Join-Path $testDataDir 'nonexistent-home'
+            $env:HOME = New-TestTempDirectory -Prefix 'NonexistentScoopHome'
 
             # Note: This test checks that Test-ScoopInstalled returns a boolean value
             $installed = Test-ScoopInstalled
-            
+
             # If A:\scoop exists, Test-ScoopInstalled will return true (which is correct)
             # If it doesn't exist, it should return false
             # We can't reliably test "not installed" without mocking Test-Path
@@ -249,4 +206,3 @@ Describe 'Test-ScoopInstalled' {
         }
     }
 }
-

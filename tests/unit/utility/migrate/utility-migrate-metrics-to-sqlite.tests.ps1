@@ -36,7 +36,6 @@ Describe 'migrate-metrics-to-sqlite.ps1 execution' {
             Timestamp       = '2026-01-01T00:00:00Z'
         } | ConvertTo-Json | Set-Content -LiteralPath $baselinePath -Encoding UTF8
 
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:MigrateMetricsScript -ArgumentList @(
                 '-BaselineFile', $baselinePath
             )
@@ -44,12 +43,5 @@ Describe 'migrate-metrics-to-sqlite.ps1 execution' {
             $result.ExitCode | Should -BeIn @(1, 2)
             $result.Output | Should -Match 'Performance Metrics Database|PerformanceMetricsDatabase|not found'
             $result.Output | Should -Not -Match 'Imported [1-9]'
-        }
-        finally {
-            $parent = Split-Path -Parent $baselinePath
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

@@ -44,14 +44,12 @@ Describe 'FragmentConfig extended accessors' {
                 loadOrder = @('bootstrap', 'env', 'git')
             }
 
-            try {
-                $loadOrder = Get-FragmentLoadOrderOverride -ProfileDir $profileDir
-                $loadOrder | Should -Contain 'bootstrap'
-                $loadOrder | Should -Contain 'git'
-            }
-            finally {
-                Remove-Item -LiteralPath $profileDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+                        $loadOrder = Get-FragmentLoadOrderOverride -ProfileDir $profileDir
+            $loadOrder | Should -Contain 'bootstrap'
+            $loadOrder | Should -Contain 'git'
+        }
+        finally {
+            Remove-Item -LiteralPath $profileDir -Recurse -Force -ErrorAction SilentlyContinue
         }
 
         It 'Get-FragmentEnvironments returns environment fragment sets' {
@@ -62,14 +60,12 @@ Describe 'FragmentConfig extended accessors' {
                 }
             }
 
-            try {
-                $environments = Get-FragmentEnvironments -ProfileDir $profileDir
-                $environments['minimal'] | Should -Contain 'bootstrap'
-                $environments['development'] | Should -Contain 'git'
-            }
-            finally {
-                Remove-Item -LiteralPath $profileDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+                        $environments = Get-FragmentEnvironments -ProfileDir $profileDir
+            $environments['minimal'] | Should -Contain 'bootstrap'
+            $environments['development'] | Should -Contain 'git'
+        }
+        finally {
+            Remove-Item -LiteralPath $profileDir -Recurse -Force -ErrorAction SilentlyContinue
         }
 
         It 'Get-FragmentFeatureFlags returns configured feature flags' {
@@ -80,14 +76,12 @@ Describe 'FragmentConfig extended accessors' {
                 }
             }
 
-            try {
-                $flags = Get-FragmentFeatureFlags -ProfileDir $profileDir
-                $flags['enableAdvancedFeatures'] | Should -Be $true
-                $flags['experimentalPrompt'] | Should -Be $false
-            }
-            finally {
-                Remove-Item -LiteralPath $profileDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+                        $flags = Get-FragmentFeatureFlags -ProfileDir $profileDir
+            $flags['enableAdvancedFeatures'] | Should -Be $true
+            $flags['experimentalPrompt'] | Should -Be $false
+        }
+        finally {
+            Remove-Item -LiteralPath $profileDir -Recurse -Force -ErrorAction SilentlyContinue
         }
 
         It 'Get-FragmentPerformanceConfig returns performance settings' {
@@ -98,14 +92,12 @@ Describe 'FragmentConfig extended accessors' {
                 }
             }
 
-            try {
-                $performance = Get-FragmentPerformanceConfig -ProfileDir $profileDir
-                $performance.batchLoad | Should -Be $true
-                $performance.maxFragmentTime | Should -Be 750
-            }
-            finally {
-                Remove-Item -LiteralPath $profileDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+                        $performance = Get-FragmentPerformanceConfig -ProfileDir $profileDir
+            $performance.batchLoad | Should -Be $true
+            $performance.maxFragmentTime | Should -Be 750
+        }
+        finally {
+            Remove-Item -LiteralPath $profileDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 
@@ -154,13 +146,11 @@ Set-AgentModeFunction -Name 'Enable-DockerTools' -Body { }
         It 'Detects category keywords from fragment file names' {
             $fragmentFile = New-TestTempFile -Prefix '11-git-enhanced' -Extension '.ps1' -Content '# git helpers'
 
-            try {
-                $metadata = Get-FragmentMetadata -FragmentFile $fragmentFile
-                $metadata.Keywords | Should -Contain 'git'
-            }
-            finally {
-                Remove-Item -LiteralPath $fragmentFile -Force -ErrorAction SilentlyContinue
-            }
+                        $metadata = Get-FragmentMetadata -FragmentFile $fragmentFile
+            $metadata.Keywords | Should -Contain 'git'
+        }
+        finally {
+            Remove-Item -LiteralPath $fragmentFile -Force -ErrorAction SilentlyContinue
         }
     }
 }

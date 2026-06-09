@@ -46,15 +46,13 @@ Describe 'TestRunnerHelpers extended scenarios' {
             Set-Content -LiteralPath $nestedFile -Value 'Describe nested {}' -Encoding UTF8
 
             Register-TestWriteHostCapture
-            try {
-                Invoke-TestDryRun -Config $null -TestPaths @($tempDir) | Out-Null
-                $output = Get-TestWriteHostOutputString
-                $output | Should -Match ([regex]::Escape('root.tests.ps1'))
-                $output | Should -Match ([regex]::Escape('nested.tests.ps1'))
-            }
-            finally {
-                Restore-TestTerminalStubs
-            }
+                        Invoke-TestDryRun -Config $null -TestPaths @($tempDir) | Out-Null
+            $output = Get-TestWriteHostOutputString
+            $output | Should -Match ([regex]::Escape('root.tests.ps1'))
+            $output | Should -Match ([regex]::Escape('nested.tests.ps1'))
+        }
+        finally {
+            Restore-TestTerminalStubs
         }
 
         It 'Lists a single file path without executing tests' {
@@ -62,13 +60,11 @@ Describe 'TestRunnerHelpers extended scenarios' {
             Set-Content -LiteralPath $testFile -Value 'Describe single {}' -Encoding UTF8
 
             Register-TestWriteHostCapture
-            try {
-                Invoke-TestDryRun -Config $null -TestPaths @($testFile) | Out-Null
-                Get-TestWriteHostOutputString | Should -Match ([regex]::Escape('single.tests.ps1'))
-            }
-            finally {
-                Restore-TestTerminalStubs
-            }
+                        Invoke-TestDryRun -Config $null -TestPaths @($testFile) | Out-Null
+            Get-TestWriteHostOutputString | Should -Match ([regex]::Escape('single.tests.ps1'))
+        }
+        finally {
+            Restore-TestTerminalStubs
         }
     }
 }

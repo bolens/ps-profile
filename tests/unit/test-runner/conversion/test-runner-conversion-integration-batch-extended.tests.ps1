@@ -33,6 +33,17 @@ Describe 'run-conversion-integration-batch.ps1 extended scenarios' {
             $content = Get-Content -LiteralPath $script:ConversionBatchScript -Raw
             $content | Should -Match '\.PARAMETER Parallel'
         }
+
+        It 'Documents data/structured as the per-file structured conversion example' {
+            $content = Get-Content -LiteralPath $script:ConversionBatchScript -Raw
+            $content | Should -Match 'data/structured'
+            $content | Should -Match '-PerFile'
+        }
+
+        It 'Discovers test files recursively under the conversion batch directory' {
+            $content = Get-Content -LiteralPath $script:ConversionBatchScript -Raw
+            $content | Should -Match "Get-ChildItem -Path \`$testDir -Filter '\*\.tests\.ps1' -File -Recurse"
+        }
     }
 
     Context 'Failure handling' {

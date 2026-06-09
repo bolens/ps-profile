@@ -39,10 +39,6 @@ AfterAll {
     else {
         $env:SCOOP_GLOBAL = $script:OriginalScoopGlobal
     }
-
-    if ($script:TempDir -and (Test-Path -LiteralPath $script:TempDir)) {
-        Remove-Item -LiteralPath $script:TempDir -Recurse -Force -ErrorAction SilentlyContinue
-    }
 }
 
 Describe 'ProfileScoop Module' {

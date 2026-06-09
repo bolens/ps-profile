@@ -33,6 +33,11 @@ Describe 'run-performance-batch.ps1 extended scenarios' {
             $content = Get-Content -LiteralPath $script:PerformanceBatchScript -Raw
             $content | Should -Match 'per.*file'
         }
+
+        It 'Discovers test files recursively under tests/performance' {
+            $content = Get-Content -LiteralPath $script:PerformanceBatchScript -Raw
+            $content | Should -Match "Get-ChildItem -Path \`$perfRoot -Filter '\*\.tests\.ps1' -File -Recurse"
+        }
     }
 
     Context 'Failure handling' {

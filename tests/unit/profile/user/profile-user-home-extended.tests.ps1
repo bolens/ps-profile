@@ -37,17 +37,15 @@ Describe 'UserHome extended scenarios' {
             $originalHome = $env:HOME
             $testHome = New-TestTempDirectory -Prefix 'UserHomeExtended'
 
-            try {
-                $env:HOME = $testHome
-                Get-UserHome | Should -Be $testHome
+                        $env:HOME = $testHome
+            Get-UserHome | Should -Be $testHome
+        }
+        finally {
+            if ($null -ne $originalHome) {
+                $env:HOME = $originalHome
             }
-            finally {
-                if ($null -ne $originalHome) {
-                    $env:HOME = $originalHome
-                }
-                else {
-                    Remove-Item Env:\HOME -ErrorAction SilentlyContinue
-                }
+            else {
+                Remove-Item Env:\HOME -ErrorAction SilentlyContinue
             }
         }
 
@@ -56,21 +54,19 @@ Describe 'UserHome extended scenarios' {
             $originalProfile = $env:USERPROFILE
             $testProfile = New-TestTempDirectory -Prefix 'UserProfileExtended'
 
-            try {
-                Remove-Item Env:\HOME -ErrorAction SilentlyContinue
-                $env:USERPROFILE = $testProfile
-                Get-UserHome | Should -Be $testProfile
+                        Remove-Item Env:\HOME -ErrorAction SilentlyContinue
+            $env:USERPROFILE = $testProfile
+            Get-UserHome | Should -Be $testProfile
+        }
+        finally {
+            if ($null -ne $originalHome) {
+                $env:HOME = $originalHome
             }
-            finally {
-                if ($null -ne $originalHome) {
-                    $env:HOME = $originalHome
-                }
-                if ($null -ne $originalProfile) {
-                    $env:USERPROFILE = $originalProfile
-                }
-                else {
-                    Remove-Item Env:\USERPROFILE -ErrorAction SilentlyContinue
-                }
+            if ($null -ne $originalProfile) {
+                $env:USERPROFILE = $originalProfile
+            }
+            else {
+                Remove-Item Env:\USERPROFILE -ErrorAction SilentlyContinue
             }
         }
 

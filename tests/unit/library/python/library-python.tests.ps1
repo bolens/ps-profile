@@ -116,14 +116,12 @@ Describe 'Python Module Functions' {
             Set-Content -Path $fakePython -Value '#!/bin/sh'
 
             $original = $env:VIRTUAL_ENV
-            try {
-                $env:VIRTUAL_ENV = $fakeVenv
-                $result = Get-PythonPath
-                $result | Should -Be $fakePython
-            }
-            finally {
-                $env:VIRTUAL_ENV = $original
-            }
+                        $env:VIRTUAL_ENV = $fakeVenv
+            $result = Get-PythonPath
+            $result | Should -Be $fakePython
+        }
+        finally {
+            $env:VIRTUAL_ENV = $original
         }
     }
 

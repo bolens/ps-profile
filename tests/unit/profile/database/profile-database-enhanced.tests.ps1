@@ -200,13 +200,11 @@ Describe 'database.ps1 - Enhanced Functions' {
             Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
 
             Push-Location $script:TestWorkDir
-            try {
-                $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
-                @($result)[-1] | Should -Match '^testdb-\d{14}\.dump$'
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
+            @($result)[-1] | Should -Match '^testdb-\d{14}\.dump$'
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Uses provided BackupPath' {

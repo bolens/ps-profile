@@ -75,12 +75,10 @@ Describe 'lang-go.ps1 - Invoke-Mage' {
         It 'Handles mage execution errors' {
             Set-TestCommandThrowingMock -CommandName 'mage' -Message 'mage: command failed'
 
-            try {
-                $result = Invoke-Mage -Target 'invalid' -ErrorAction SilentlyContinue
-            }
-            catch {
-                $result = $null
-            }
+                        $result = Invoke-Mage -Target 'invalid' -ErrorAction SilentlyContinue
+        }
+        catch {
+            $result = $null
 
             $result | Should -BeNullOrEmpty
         }

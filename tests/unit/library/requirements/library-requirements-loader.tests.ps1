@@ -152,13 +152,11 @@ Describe 'RequirementsLoader Module Functions' {
             New-Item -ItemType Directory -Path $subDir -Force | Out-Null
             
             Push-Location $subDir
-            try {
-                $result = Import-Requirements
-                $result | Should -Not -BeNullOrEmpty
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Import-Requirements
+            $result | Should -Not -BeNullOrEmpty
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Handles loader script errors gracefully' {

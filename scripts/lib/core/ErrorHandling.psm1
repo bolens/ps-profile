@@ -91,7 +91,8 @@ function Invoke-WithErrorHandling {
         [ValidateNotNull()]
         [scriptblock]$ScriptBlock,
 
-        [System.Management.Automation.ActionPreference]$ErrorActionPreference = 'Stop',
+        [Alias('ErrorActionPreference')]
+        [System.Management.Automation.ActionPreference]$Preference = 'Stop',
 
         [string]$ErrorMessage
     )
@@ -99,23 +100,23 @@ function Invoke-WithErrorHandling {
     try {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
-            Write-Host "  [error-handling.invoke] Executing scriptblock with ErrorAction: $ErrorActionPreference" -ForegroundColor DarkGray
+            Write-Host "  [error-handling.invoke] Executing scriptblock with ErrorAction: $Preference" -ForegroundColor DarkGray
         }
         return & $ScriptBlock
     }
     catch {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
-            Write-Host "  [error-handling.invoke] Scriptblock execution failed: $($_.Exception.Message) (ErrorAction: $ErrorActionPreference)" -ForegroundColor DarkGray
+            Write-Host "  [error-handling.invoke] Scriptblock execution failed: $($_.Exception.Message) (ErrorAction: $Preference)" -ForegroundColor DarkGray
         }
         
-        if ($ErrorActionPreference -eq 'Stop') {
+        if ($Preference -eq 'Stop') {
             if ($ErrorMessage) {
                 throw $ErrorMessage
             }
             throw
         }
-        elseif ($ErrorActionPreference -eq 'Continue') {
+        elseif ($Preference -eq 'Continue') {
             Write-Error -Message ($ErrorMessage ?? $_.Exception.Message) -Exception $_.Exception -ErrorAction Continue
             return $null
         }
@@ -123,7 +124,7 @@ function Invoke-WithErrorHandling {
             # SilentlyContinue or other - return null without error
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
-                Write-Host "  [error-handling.invoke] Suppressing error due to ErrorAction: $ErrorActionPreference" -ForegroundColor DarkGray
+                Write-Host "  [error-handling.invoke] Suppressing error due to ErrorAction: $Preference" -ForegroundColor DarkGray
             }
             return $null
         }
@@ -169,7 +170,8 @@ function Write-ErrorOrThrow {
         [ValidateNotNullOrEmpty()]
         [string]$Message,
 
-        [System.Management.Automation.ActionPreference]$ErrorActionPreference = 'Stop',
+        [Alias('ErrorActionPreference')]
+        [System.Management.Automation.ActionPreference]$Preference = 'Stop',
 
         [Exception]$Exception,
 
@@ -180,10 +182,10 @@ function Write-ErrorOrThrow {
 
     $debugLevel = 0
     if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
-        Write-Host "  [error-handling.write-error-or-throw] Error handling with ErrorAction: $ErrorActionPreference, Message: $Message" -ForegroundColor DarkGray
+        Write-Host "  [error-handling.write-error-or-throw] Error handling with ErrorAction: $Preference, Message: $Message" -ForegroundColor DarkGray
     }
     
-    if ($ErrorActionPreference -eq 'Stop') {
+    if ($Preference -eq 'Stop') {
         if ($Exception) {
             throw $Exception
         }
@@ -192,7 +194,7 @@ function Write-ErrorOrThrow {
     else {
         $errorParams = @{
             Message     = $Message
-            ErrorAction = $ErrorActionPreference
+            ErrorAction = $Preference
             Category    = $Category
         }
         if ($Exception) {

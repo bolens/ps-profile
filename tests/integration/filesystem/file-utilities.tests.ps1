@@ -2,23 +2,21 @@
 
 Describe 'File Utility Functions Integration Tests' {
     BeforeAll {
-        try {
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
-            if (-not ($script:BootstrapPath -and -not [string]::IsNullOrWhiteSpace($script:BootstrapPath) -and (Test-Path -LiteralPath $script:BootstrapPath))) {
-                throw "Bootstrap file not found at: $script:BootstrapPath"
-            }
-            . $script:BootstrapPath
+                $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
+        if (-not ($script:BootstrapPath -and -not [string]::IsNullOrWhiteSpace($script:BootstrapPath) -and (Test-Path -LiteralPath $script:BootstrapPath))) {
+            throw "Bootstrap file not found at: $script:BootstrapPath"
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to load bootstrap in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+        . $script:BootstrapPath
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
         }
+        Write-Error "Failed to load bootstrap in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
 
     Context 'Import-FragmentModule helper function' {
@@ -35,38 +33,36 @@ Describe 'File Utility Functions Integration Tests' {
             $testModuleDir = $null
             $cleanupNeeded = $false
             
-            try {
-                # Create a test module file with function in global scope
-                $testModuleDir = Join-Path $TestDrive 'test-modules'
-                New-Item -ItemType Directory -Path $testModuleDir -Force | Out-Null
-                $testModuleFile = Join-Path $testModuleDir 'test-module.ps1'
-                Set-Content -Path $testModuleFile -Value 'function global:Test-ModuleFunction { return "success" }'
-                
-                # Import the module
-                {
-                    Import-FragmentModule `
-                        -FragmentRoot $testModuleDir `
-                        -ModulePath @('test-module.ps1') `
-                        -Context 'Test: test-module.ps1'
-                } | Should -Not -Throw -Because 'Import-FragmentModule should load valid module without errors'
-                
-                # Verify function is available
-                Get-Command Test-ModuleFunction -ErrorAction SilentlyContinue | Should -Not -Be $null -Because "module function should be available after import"
-                $cleanupNeeded = $true
+                        # Create a test module file with function in global scope
+            $testModuleDir = Join-Path $TestDrive 'test-modules'
+            New-Item -ItemType Directory -Path $testModuleDir -Force | Out-Null
+            $testModuleFile = Join-Path $testModuleDir 'test-module.ps1'
+            Set-Content -Path $testModuleFile -Value 'function global:Test-ModuleFunction { return "success" }'
+            
+            # Import the module
+            {
+                Import-FragmentModule `
+                    -FragmentRoot $testModuleDir `
+                    -ModulePath @('test-module.ps1') `
+                    -Context 'Test: test-module.ps1'
+            } | Should -Not -Throw -Because 'Import-FragmentModule should load valid module without errors'
+            
+            # Verify function is available
+            Get-Command Test-ModuleFunction -ErrorAction SilentlyContinue | Should -Not -Be $null -Because "module function should be available after import"
+            $cleanupNeeded = $true
+        }
+        catch {
+            $errorDetails = @{
+                Message       = $_.Exception.Message
+                TestModuleDir = $testModuleDir
+                Category      = $_.CategoryInfo.Category
             }
-            catch {
-                $errorDetails = @{
-                    Message       = $_.Exception.Message
-                    TestModuleDir = $testModuleDir
-                    Category      = $_.CategoryInfo.Category
-                }
-                Write-Error "Import-FragmentModule load test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
-            }
-            finally {
-                if ($cleanupNeeded) {
-                    Remove-Item Function:\global:Test-ModuleFunction -ErrorAction SilentlyContinue
-                }
+            Write-Error "Import-FragmentModule load test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
+        }
+        finally {
+            if ($cleanupNeeded) {
+                Remove-Item Function:\global:Test-ModuleFunction -ErrorAction SilentlyContinue
             }
         }
 
@@ -81,29 +77,27 @@ Describe 'File Utility Functions Integration Tests' {
         }
 
         It 'Import-FragmentModule handles module with syntax errors gracefully' {
-            try {
-                # Create a module with syntax error
-                $testModuleDir = Join-Path $TestDrive 'test-modules-error'
-                New-Item -ItemType Directory -Path $testModuleDir -Force | Out-Null
-                $testModuleFile = Join-Path $testModuleDir 'error-module.ps1'
-                Set-Content -Path $testModuleFile -Value 'function Broken { invalid syntax here }'
-                
-                # Should not throw (error is caught and logged)
-                {
-                    Import-FragmentModule `
-                        -FragmentRoot $testModuleDir `
-                        -ModulePath @('error-module.ps1') `
-                        -Context 'Test: error-module.ps1'
-                } | Should -Not -Throw -Because 'Import-FragmentModule should handle syntax errors gracefully'
+                        # Create a module with syntax error
+            $testModuleDir = Join-Path $TestDrive 'test-modules-error'
+            New-Item -ItemType Directory -Path $testModuleDir -Force | Out-Null
+            $testModuleFile = Join-Path $testModuleDir 'error-module.ps1'
+            Set-Content -Path $testModuleFile -Value 'function Broken { invalid syntax here }'
+            
+            # Should not throw (error is caught and logged)
+            {
+                Import-FragmentModule `
+                    -FragmentRoot $testModuleDir `
+                    -ModulePath @('error-module.ps1') `
+                    -Context 'Test: error-module.ps1'
+            } | Should -Not -Throw -Because 'Import-FragmentModule should handle syntax errors gracefully'
+        }
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Category = $_.CategoryInfo.Category
             }
-            catch {
-                $errorDetails = @{
-                    Message  = $_.Exception.Message
-                    Category = $_.CategoryInfo.Category
-                }
-                Write-Error "Import-FragmentModule syntax error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
-            }
+            Write-Error "Import-FragmentModule syntax error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
         }
 
         It 'Import-FragmentModule uses custom module name in error messages' {
@@ -125,61 +119,59 @@ Describe 'File Utility Functions Integration Tests' {
 
     Context 'File utility functions' {
         BeforeAll {
-            try {
-                . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-                # Dot-source files.ps1 - PSScriptRoot will be automatically set to profile.d directory
-                $filesPath = Join-Path $script:ProfileDir 'files.ps1'
-                if ($null -eq $filesPath -or [string]::IsNullOrWhiteSpace($filesPath)) {
-                    throw "FilesPath is null or empty"
-                }
-                if (-not (Test-Path -LiteralPath $filesPath)) {
-                    throw "Files fragment not found at: $filesPath"
-                }
-                $null = . $filesPath
-                
-                # Verify all initialization functions exist before calling Ensure-FileUtilities
-                # If they don't exist, the modules may not have loaded (path issue or silent error)
-                $filesModulesDir = Join-Path $script:ProfileDir 'files-modules'
-                $inspectionDir = Join-Path $filesModulesDir 'inspection'
-                
-                $requiredModules = @(
-                    'files-head-tail.ps1',
-                    'files-hash.ps1',
-                    'files-size.ps1',
-                    'files-hexdump.ps1'
-                )
-                
-                foreach ($moduleFile in $requiredModules) {
-                    $modulePath = Join-Path $inspectionDir $moduleFile
-                    if ($modulePath -and (Test-Path -LiteralPath $modulePath)) {
-                        try {
-                            . $modulePath
-                        }
-                        catch {
-                            Write-Warning "Failed to load module ${moduleFile}: $_"
-                        }
+                        . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+            # Dot-source files.ps1 - PSScriptRoot will be automatically set to profile.d directory
+            $filesPath = Join-Path $script:ProfileDir 'files.ps1'
+            if ($null -eq $filesPath -or [string]::IsNullOrWhiteSpace($filesPath)) {
+                throw "FilesPath is null or empty"
+            }
+            if (-not (Test-Path -LiteralPath $filesPath)) {
+                throw "Files fragment not found at: $filesPath"
+            }
+            $null = . $filesPath
+            
+            # Verify all initialization functions exist before calling Ensure-FileUtilities
+            # If they don't exist, the modules may not have loaded (path issue or silent error)
+            $filesModulesDir = Join-Path $script:ProfileDir 'files-modules'
+            $inspectionDir = Join-Path $filesModulesDir 'inspection'
+            
+            $requiredModules = @(
+                'files-head-tail.ps1',
+                'files-hash.ps1',
+                'files-size.ps1',
+                'files-hexdump.ps1'
+            )
+            
+            foreach ($moduleFile in $requiredModules) {
+                $modulePath = Join-Path $inspectionDir $moduleFile
+                if ($modulePath -and (Test-Path -LiteralPath $modulePath)) {
+                    try {
+                        . $modulePath
                     }
-                    else {
-                        Write-Warning "Module file not found: $modulePath"
+                    catch {
+                        Write-Warning "Failed to load module ${moduleFile}: $_"
                     }
                 }
-                
-                # Verify at least one initialization function exists
-                if (-not (Get-Command Initialize-FileUtilities-HeadTail -ErrorAction SilentlyContinue)) {
-                    throw "Initialize-FileUtilities-HeadTail function not found after loading modules"
+                else {
+                    Write-Warning "Module file not found: $modulePath"
                 }
-                
-                Ensure-FileUtilities
             }
-            catch {
-                $errorDetails = @{
-                    Message  = $_.Exception.Message
-                    Type     = $_.Exception.GetType().FullName
-                    Location = $_.InvocationInfo.ScriptLineNumber
-                }
-                Write-Error "Failed to initialize file utilities in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-                throw
+            
+            # Verify at least one initialization function exists
+            if (-not (Get-Command Initialize-FileUtilities-HeadTail -ErrorAction SilentlyContinue)) {
+                throw "Initialize-FileUtilities-HeadTail function not found after loading modules"
             }
+            
+            Ensure-FileUtilities
+        }
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize file utilities in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
         }
 
         It 'Get-FileHead (head) function is available' {

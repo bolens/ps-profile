@@ -48,15 +48,13 @@ Describe 'Invoke-WithRetry' {
         }
 
         $script:attempt = 0
-        try {
-            Invoke-WithRetry -ScriptBlock {
-                $script:attempt++
-                throw 'Fail'
-            } -MaxRetries 2 -RetryDelaySeconds 1 -ExponentialBackoff -OnRetry $onRetry -ErrorAction SilentlyContinue
-        }
-        catch {
-            # Expected to fail
-        }
+                Invoke-WithRetry -ScriptBlock {
+            $script:attempt++
+            throw 'Fail'
+        } -MaxRetries 2 -RetryDelaySeconds 1 -ExponentialBackoff -OnRetry $onRetry -ErrorAction SilentlyContinue
+    }
+    catch {
+        # Expected to fail
 
         $script:onRetryCalled | Should -Be $true
         $script:delays.Count | Should -BeGreaterOrEqual 1
@@ -74,15 +72,13 @@ Describe 'Invoke-WithRetry' {
         }
 
         $attempt = 0
-        try {
-            Invoke-WithRetry -ScriptBlock {
-                $script:attempt++
-                throw 'Fail'
-            } -MaxRetries 2 -RetryDelaySeconds 1 -LinearBackoff -OnRetry $onRetry -ErrorAction SilentlyContinue
-        }
-        catch {
-            # Expected to fail
-        }
+                Invoke-WithRetry -ScriptBlock {
+            $script:attempt++
+            throw 'Fail'
+        } -MaxRetries 2 -RetryDelaySeconds 1 -LinearBackoff -OnRetry $onRetry -ErrorAction SilentlyContinue
+    }
+    catch {
+        # Expected to fail
 
         if ($delays.Count -ge 1) {
             $delays[0] | Should -Be 1
@@ -125,15 +121,13 @@ Describe 'Invoke-WithRetry' {
         }
 
         $attempt = 0
-        try {
-            Invoke-WithRetry -ScriptBlock {
-                $script:attempt++
-                throw 'Fail'
-            } -MaxRetries 5 -RetryDelaySeconds 100 -ExponentialBackoff -MaxDelaySeconds 10 -OnRetry $onRetry -ErrorAction SilentlyContinue
-        }
-        catch {
-            # Expected to fail
-        }
+                Invoke-WithRetry -ScriptBlock {
+            $script:attempt++
+            throw 'Fail'
+        } -MaxRetries 5 -RetryDelaySeconds 100 -ExponentialBackoff -MaxDelaySeconds 10 -OnRetry $onRetry -ErrorAction SilentlyContinue
+    }
+    catch {
+        # Expected to fail
 
         # All delays should be capped at 10 seconds
         foreach ($delay in $delays) {

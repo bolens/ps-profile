@@ -43,12 +43,10 @@ Describe 'OutputUtils extended scenarios' {
             Initialize-OutputUtils -RepoRoot $null
             $external = '/tmp/outside-repo/sample.txt'
 
-            try {
-                ConvertTo-RepoRelativePath -PathString $external | Should -Be $external
-            }
-            finally {
-                Initialize-OutputUtils -RepoRoot $script:RepoRoot
-            }
+                        ConvertTo-RepoRelativePath -PathString $external | Should -Be $external
+        }
+        finally {
+            Initialize-OutputUtils -RepoRoot $script:RepoRoot
         }
     }
 

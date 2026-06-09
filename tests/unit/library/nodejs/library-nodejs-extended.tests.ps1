@@ -56,13 +56,11 @@ Describe 'NodeJs extended scenarios' {
             New-Item -ItemType Directory -Path $nodeModules -Force | Out-Null
 
             $original = $env:PNPM_HOME
-            try {
-                $env:PNPM_HOME = $pnpmHome
-                Get-PnpmGlobalPath | Should -Be $nodeModules
-            }
-            finally {
-                $env:PNPM_HOME = $original
-            }
+                        $env:PNPM_HOME = $pnpmHome
+            Get-PnpmGlobalPath | Should -Be $nodeModules
+        }
+        finally {
+            $env:PNPM_HOME = $original
         }
     }
 

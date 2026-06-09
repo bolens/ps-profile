@@ -34,26 +34,16 @@ Describe 'generate-changelog.ps1 with git-cliff installed' {
             return
         }
 
-        $outputRel = 'tests/test-data/CHANGELOG-cli-test.md'
-        $outputFull = Join-Path $script:TestRepoRoot $outputRel
-        try {
-            if (Test-Path -LiteralPath $outputFull) {
-                Remove-Item -LiteralPath $outputFull -Force -ErrorAction SilentlyContinue
-            }
+        $outputFull = Get-TestArtifactPath -FileName 'CHANGELOG-cli-test.md'
+        $outputRel = Get-TestRepoRelativePath -Path $outputFull -StartPath $PSScriptRoot
 
-            $result = Invoke-TestScriptFile -ScriptPath $script:GenerateChangelogScript -ArgumentList @(
-                '-OutputFile', $outputRel
-            )
+        $result = Invoke-TestScriptFile -ScriptPath $script:GenerateChangelogScript -ArgumentList @(
+            '-OutputFile', $outputRel
+        )
 
-            $result.ExitCode | Should -Be 0
-            Test-Path -LiteralPath $outputFull | Should -BeTrue
-            $result.Output | Should -Not -Match 'cliff.toml.*is not found'
-        }
-        finally {
-            if (Test-Path -LiteralPath $outputFull) {
-                Remove-Item -LiteralPath $outputFull -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result.ExitCode | Should -Be 0
+        Test-Path -LiteralPath $outputFull | Should -BeTrue
+        $result.Output | Should -Not -Match 'cliff.toml.*is not found'
     }
 
     It 'Uses git-cliff default configuration when cliff.toml is missing in an isolated repository' {
@@ -63,38 +53,29 @@ Describe 'generate-changelog.ps1 with git-cliff installed' {
         }
 
         $repo = New-TestTempDirectory -Prefix 'GenerateChangelogNoCliff'
-        try {
-            $docsDir = Join-Path $repo 'scripts' 'utils' 'docs'
-            $null = New-Item -ItemType Directory -Path $docsDir -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-            Copy-Item -LiteralPath $script:GenerateChangelogScript -Destination (Join-Path $docsDir 'generate-changelog.ps1') -Force
+        $docsDir = Join-Path $repo 'scripts' 'utils' 'docs'
+        $null = New-Item -ItemType Directory -Path $docsDir -Force
+        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+        Copy-Item -LiteralPath $script:GenerateChangelogScript -Destination (Join-Path $docsDir 'generate-changelog.ps1') -Force
 
-            Push-Location $repo
-            try {
+        Push-Location $repo
                 git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
-                Set-Content -LiteralPath (Join-Path $repo 'README.md') -Value 'fixture' -Encoding UTF8
-                git add README.md
-                git commit -m 'init' -q
-            }
-            finally {
-                Pop-Location
-            }
+        git config user.email 'fixture@example.com'
+        git config user.name 'Fixture'
+        Set-Content -LiteralPath (Join-Path $repo 'README.md') -Value 'fixture' -Encoding UTF8
+        git add README.md
+        git commit -m 'init' -q
+    }
+    finally {
+        Pop-Location
 
-            $outputRel = 'CHANGELOG-fixture.md'
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $docsDir 'generate-changelog.ps1') -ArgumentList @(
-                '-OutputFile', $outputRel
-            )
+        $outputRel = 'CHANGELOG-fixture.md'
+        $result = Invoke-TestScriptFile -ScriptPath (Join-Path $docsDir 'generate-changelog.ps1') -ArgumentList @(
+            '-OutputFile', $outputRel
+        )
 
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'cliff\.toml.*not found|default configuration|Changelog generated successfully'
-            Test-Path -LiteralPath (Join-Path $repo $outputRel) | Should -BeTrue
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'cliff\.toml.*not found|default configuration|Changelog generated successfully'
+        Test-Path -LiteralPath (Join-Path $repo $outputRel) | Should -BeTrue
     }
 }

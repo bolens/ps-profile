@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-laravel-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-laravel-fragment-extended.tests.ps1
+# Execution tests for laravel.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,38 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/laravel.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'laravel.ps1')
 }
+
 Describe 'profile.d/laravel.ps1 extended scenarios' {
-    It 'Declares standard tier for web and development Laravel helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Environment: web, development'
+    It 'Registers Laravel helpers and aliases' {
+        Get-Command Invoke-LaravelArtisan -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command New-LaravelApp -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command artisan -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Invoke-LaravelArtisan wrapping artisan commands' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Invoke-LaravelArtisan'
-        $c | Should -Match 'artisan'
+
+    It 'New-LaravelApp warns when composer is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'composer' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('composer', [ref]$null)
+        }
+
+        $output = New-LaravelApp 'test-app' 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'composer not found'
     }
-    It 'Registers artisan and laravel-new aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'artisan'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'laravel-new'"
+
+    It 'Preserves existing laravel helper bodies on repeated fragment loads' {
+        $firstArtisan = Get-Command Invoke-LaravelArtisan -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'laravel.ps1')
+
+        (Get-Command Invoke-LaravelArtisan -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstArtisan.ScriptBlock.ToString()
     }
 }

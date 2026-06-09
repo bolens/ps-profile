@@ -86,7 +86,7 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Performan
 Run a specific test file:
 
 ```powershell
-pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -TestFile tests/unit/library-common.tests.ps1
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -TestFile tests/unit/library/common/library-common.tests.ps1
 ```
 
 Run tests with code coverage:

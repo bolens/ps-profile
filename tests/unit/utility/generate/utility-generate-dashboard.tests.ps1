@@ -24,7 +24,6 @@ BeforeAll {
 Describe 'generate-dashboard.ps1 execution' {
     It 'DryRun previews dashboard generation without writing HTML output' {
         $outputFile = Join-Path (New-TestTempDirectory -Prefix 'DashboardDryRun') 'dashboard.html'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDashboardScript -ArgumentList @(
                 '-DryRun',
                 '-OutputPath', $outputFile
@@ -33,18 +32,10 @@ Describe 'generate-dashboard.ps1 execution' {
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'DRY RUN|Would generate dashboard'
             Test-Path -LiteralPath $outputFile | Should -BeFalse
-        }
-        finally {
-            $parent = Split-Path -Parent $outputFile
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Writes an HTML dashboard file when not in DryRun mode' {
         $outputFile = Join-Path (New-TestTempDirectory -Prefix 'DashboardWrite') 'dashboard.html'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDashboardScript -ArgumentList @(
                 '-OutputPath', $outputFile
             )
@@ -53,19 +44,11 @@ Describe 'generate-dashboard.ps1 execution' {
             $result.Output | Should -Match 'Dashboard generated successfully'
             Test-Path -LiteralPath $outputFile | Should -BeTrue
             (Get-Content -LiteralPath $outputFile -Raw) | Should -Match '<html|DOCTYPE html'
-        }
-        finally {
-            $parent = Split-Path -Parent $outputFile
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Does not write a dashboard file when nested output directories are missing' {
         $parentDir = New-TestTempDirectory -Prefix 'DashboardNestedMissing'
         $outputFile = Join-Path $parentDir 'nested' 'dashboard.html'
-        try {
             Test-Path -LiteralPath (Split-Path -Parent $outputFile) | Should -BeFalse
 
             $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDashboardScript -ArgumentList @(
@@ -75,17 +58,10 @@ Describe 'generate-dashboard.ps1 execution' {
             $result.ExitCode | Should -BeIn @(0, 2, 3)
             Test-Path -LiteralPath $outputFile | Should -BeFalse
             $result.Output | Should -Match 'Dashboard generated successfully|Could not find a part of the path|Failed to generate dashboard'
-        }
-        finally {
-            if (Test-Path -LiteralPath $parentDir) {
-                Remove-Item -LiteralPath $parentDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'DryRun previews historical dashboard generation without writing output' {
         $outputFile = Join-Path (New-TestTempDirectory -Prefix 'DashboardHistoricalDryRun') 'dashboard.html'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDashboardScript -ArgumentList @(
                 '-DryRun',
                 '-IncludeHistorical',
@@ -95,12 +71,5 @@ Describe 'generate-dashboard.ps1 execution' {
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'DRY RUN|Would generate dashboard|Historical trend analysis'
             Test-Path -LiteralPath $outputFile | Should -BeFalse
-        }
-        finally {
-            $parent = Split-Path -Parent $outputFile
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

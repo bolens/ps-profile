@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-utilities-datetime-extended.tests.ps1
-#>
+# ===============================================
+# profile-utilities-datetime-extended.tests.ps1
+# Execution tests for utilities-modules/data/utilities-datetime.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,31 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/utilities-modules/data/utilities-datetime.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'utilities.ps1')
+    Ensure-Utilities
 }
+
 Describe 'profile.d/utilities-modules/data/utilities-datetime.ps1 extended scenarios' {
-    It 'Documents DateTime utilities for epoch conversion and formatting' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'DateTime utility functions'
-        $c | Should -Match 'Epoch conversion and date/time formatting'
+    It 'Registers epoch conversion helpers through Ensure-Utilities' {
+        Get-Command ConvertFrom-Epoch -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ConvertTo-Epoch -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-Epoch -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-DateTime -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines ConvertFrom-Epoch, ConvertTo-Epoch, and Get-Epoch helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'ConvertFrom-Epoch'
-        $c | Should -Match 'ConvertTo-Epoch'
-        $c | Should -Match 'Get-Epoch'
-        $c | Should -Match 'FromUnixTimeSeconds'
+
+    It 'ConvertFrom-Epoch and ConvertTo-Epoch round-trip a known timestamp' {
+        $epoch = 1700000000
+        $converted = ConvertFrom-Epoch -epoch $epoch
+        ConvertTo-Epoch -date $converted.DateTime | Should -Be $epoch
     }
-    It 'Registers from-epoch, to-epoch, epoch, and now aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'from-epoch'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'to-epoch'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'now'"
+
+    It 'ConvertTo-Epoch and Get-Epoch return numeric timestamps' {
+        $epoch = Get-Epoch
+        $epoch | Should -BeGreaterThan 0
+        ConvertTo-Epoch -date ([datetime]'2024-01-01T00:00:00') | Should -BeGreaterThan 0
     }
 }

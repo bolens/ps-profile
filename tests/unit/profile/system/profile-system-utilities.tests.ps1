@@ -97,6 +97,10 @@ function global:Invoke-SystemUtility {
 }
 
 Describe 'Profile system utility functions' {
+    BeforeEach {
+        Register-TestCleanupPath -Path $script:TestRoot
+    }
+
     Context 'Command discovery helpers' {
         It 'which shows command information' {
             $result = Invoke-SystemUtility Get-CommandInfo which Get-Command
@@ -160,9 +164,6 @@ Describe 'Profile system utility functions' {
     Context 'File creation and metadata helpers' {
         It 'touch creates empty files' {
             $tempFile = Join-Path $script:TestRoot 'test_touch.txt'
-            if (Test-Path $tempFile) {
-                Remove-Item $tempFile -Force
-            }
             Invoke-SystemUtility New-EmptyFile touch $tempFile
             Test-Path $tempFile | Should -Be $true
         }
@@ -184,10 +185,6 @@ Describe 'Profile system utility functions' {
                 New-Item -ItemType Directory -Path $directory -Force | Out-Null
             }
 
-            if (Test-Path $tempFile) {
-                Remove-Item $tempFile -Force
-            }
-
             $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
             $spillPath = Join-Path $repoRoot '-LiteralPath'
 
@@ -198,10 +195,6 @@ Describe 'Profile system utility functions' {
 
         It 'touch throws when parent directory is missing' {
             $tempFile = Join-Path $script:TestRoot 'missing' 'nope.txt'
-            $parent = Split-Path -Parent $tempFile
-            if (Test-Path $parent) {
-                Remove-Item $parent -Recurse -Force
-            }
 
             { Invoke-SystemUtility New-EmptyFile touch $tempFile -ErrorAction Stop } | Should -Throw
             Test-Path $tempFile | Should -Be $false
@@ -214,9 +207,6 @@ Describe 'Profile system utility functions' {
             $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
             $spillPath = Join-Path $repoRoot '-LiteralPath'
 
-            if (Test-Path -LiteralPath $tempDir) {
-                Remove-Item -LiteralPath $tempDir -Recurse -Force
-            }
 
             Invoke-SystemUtility New-Directory mkdir -LiteralPath $tempDir
             Test-Path -LiteralPath $tempDir | Should -Be $true
@@ -227,9 +217,6 @@ Describe 'Profile system utility functions' {
     Context 'File management wrappers' {
         It 'New-Directory creates directories via wrapper' {
             $tempDir = Join-Path $script:TestRoot 'wrapper_mkdir'
-            if (Test-Path $tempDir) {
-                Remove-Item $tempDir -Force -Recurse
-            }
 
             New-Directory -Path $tempDir | Out-Null
             Test-Path $tempDir | Should -Be $true
@@ -279,9 +266,6 @@ Describe 'Profile system utility functions' {
     Context 'mkdir Unix-like behavior' {
         It 'mkdir creates a single directory' {
             $tempDir = Join-Path $script:TestRoot 'single_dir'
-            if (Test-Path $tempDir) {
-                Remove-Item $tempDir -Force -Recurse
-            }
             Invoke-SystemUtility New-Directory mkdir $tempDir | Out-Null
             Test-Path $tempDir | Should -Be $true
             (Get-Item $tempDir).PSIsContainer | Should -Be $true
@@ -292,10 +276,7 @@ Describe 'Profile system utility functions' {
             $dir1 = Join-Path $baseDir 'core'
             $dir2 = Join-Path $baseDir 'fragment'
             $dir3 = Join-Path $baseDir 'path'
-            
-            if (Test-Path $baseDir) {
-                Remove-Item $baseDir -Force -Recurse
-            }
+
             New-Item -ItemType Directory -Path $baseDir -Force | Out-Null
 
             Invoke-SystemUtility New-Directory mkdir $dir1 $dir2 $dir3 | Out-Null
@@ -306,9 +287,6 @@ Describe 'Profile system utility functions' {
 
         It 'mkdir -p creates parent directories' {
             $nestedPath = Join-Path $script:TestRoot 'parent' 'child' 'grandchild'
-            if (Test-Path (Split-Path $nestedPath -Parent)) {
-                Remove-Item (Split-Path $nestedPath -Parent) -Force -Recurse
-            }
 
             Invoke-SystemUtility New-Directory mkdir @('-p', $nestedPath) | Out-Null
             Test-Path $nestedPath | Should -Be $true
@@ -318,9 +296,6 @@ Describe 'Profile system utility functions' {
 
         It 'mkdir -Parent creates parent directories' {
             $nestedPath = Join-Path $script:TestRoot 'parent2' 'child2' 'grandchild2'
-            if (Test-Path (Split-Path $nestedPath -Parent)) {
-                Remove-Item (Split-Path $nestedPath -Parent) -Force -Recurse
-            }
 
             New-Directory -Parent $nestedPath | Out-Null
             Test-Path $nestedPath | Should -Be $true
@@ -331,10 +306,6 @@ Describe 'Profile system utility functions' {
             $dir1 = Join-Path $baseDir 'file'
             $dir2 = Join-Path $baseDir 'metrics'
             $dir3 = Join-Path $baseDir 'performance'
-            
-            if (Test-Path $baseDir) {
-                Remove-Item $baseDir -Force -Recurse
-            }
 
             Invoke-SystemUtility New-Directory mkdir @('-p', $dir1, $dir2, $dir3) | Out-Null
             Test-Path $dir1 | Should -Be $true
@@ -345,10 +316,7 @@ Describe 'Profile system utility functions' {
         It 'mkdir -p core fragment path file metrics performance code-analysis utilities runtime parallel creates all directories' {
             $baseDir = Join-Path $script:TestRoot 'unix_like_test'
             $dirs = @('core', 'fragment', 'path', 'file', 'metrics', 'performance', 'code-analysis', 'utilities', 'runtime', 'parallel')
-            
-            if (Test-Path $baseDir) {
-                Remove-Item $baseDir -Force -Recurse
-            }
+
             New-Item -ItemType Directory -Path $baseDir -Force | Out-Null
 
             $fullPaths = $dirs | ForEach-Object { Join-Path $baseDir $_ }
@@ -372,10 +340,6 @@ Describe 'Profile system utility functions' {
 
         It 'mkdir fails when parent directory does not exist without -p' {
             $nestedPath = Join-Path $script:TestRoot 'missing_parent' 'child'
-            $parent = Split-Path $nestedPath -Parent
-            if (Test-Path $parent) {
-                Remove-Item $parent -Force -Recurse
-            }
 
             { Invoke-SystemUtility New-Directory mkdir $nestedPath -ErrorAction Stop 2>$null } | Should -Throw
             Test-Path $nestedPath | Should -Be $false
@@ -387,9 +351,6 @@ Describe 'Profile system utility functions' {
 
         It 'mkdir handles -p flag in argument list' {
             $nestedPath = Join-Path $script:TestRoot 'arg_p' 'child'
-            if (Test-Path (Split-Path $nestedPath -Parent)) {
-                Remove-Item (Split-Path $nestedPath -Parent) -Force -Recurse
-            }
 
             # Test that -p can be passed as an argument (Unix style)
             Invoke-SystemUtility New-Directory mkdir @('-p', $nestedPath) | Out-Null
@@ -398,9 +359,6 @@ Describe 'Profile system utility functions' {
 
         It 'mkdir skips empty strings in path list' {
             $validDir = Join-Path $script:TestRoot 'valid_dir'
-            if (Test-Path $validDir) {
-                Remove-Item $validDir -Force -Recurse
-            }
 
             # Pass empty string and valid path
             Invoke-SystemUtility New-Directory mkdir '' $validDir | Out-Null
@@ -409,9 +367,6 @@ Describe 'Profile system utility functions' {
 
         It 'mkdir creates directories with spaces in names' {
             $dirWithSpaces = Join-Path $script:TestRoot 'dir with spaces'
-            if (Test-Path $dirWithSpaces) {
-                Remove-Item $dirWithSpaces -Force -Recurse
-            }
 
             Invoke-SystemUtility New-Directory mkdir $dirWithSpaces | Out-Null
             Test-Path $dirWithSpaces | Should -Be $true
@@ -419,9 +374,6 @@ Describe 'Profile system utility functions' {
 
         It 'mkdir -p creates nested directories with spaces' {
             $nestedWithSpaces = Join-Path $script:TestRoot 'parent dir' 'child dir' 'grandchild dir'
-            if (Test-Path (Split-Path $nestedWithSpaces -Parent)) {
-                Remove-Item (Split-Path $nestedWithSpaces -Parent) -Force -Recurse
-            }
 
             Invoke-SystemUtility New-Directory mkdir @('-p', $nestedWithSpaces) | Out-Null
             Test-Path $nestedWithSpaces | Should -Be $true
@@ -431,10 +383,7 @@ Describe 'Profile system utility functions' {
             $baseDir = Join-Path $script:TestRoot 'switch_p_test'
             $dir1 = Join-Path $baseDir 'dir1'
             $dir2 = Join-Path $baseDir 'dir2'
-            
-            if (Test-Path $baseDir) {
-                Remove-Item $baseDir -Force -Recurse
-            }
+
             New-Item -ItemType Directory -Path $baseDir -Force | Out-Null
 
             # Test -p as a switch parameter (PowerShell style)
@@ -445,9 +394,6 @@ Describe 'Profile system utility functions' {
 
         It 'mkdir creates multiple directories in current directory' {
             $testBase = Join-Path $script:TestRoot 'current_dir_test'
-            if (Test-Path $testBase) {
-                Remove-Item $testBase -Force -Recurse
-            }
             New-Item -ItemType Directory -Path $testBase -Force | Out-Null
 
             Push-Location $testBase

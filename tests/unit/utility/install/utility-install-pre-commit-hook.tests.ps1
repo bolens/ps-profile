@@ -24,34 +24,20 @@ BeforeAll {
 Describe 'install-pre-commit-hook.ps1 execution' {
     It 'Fails when the repository root does not contain a .git directory' {
         $repo = New-TestTempDirectory -Prefix 'InstallHookNoGit'
-        try {
-            $result = Invoke-BackupTestScript -ScriptPath $script:InstallHookScript -ArgumentList @('-RepoRoot', $repo)
+        $result = Invoke-BackupTestScript -ScriptPath $script:InstallHookScript -ArgumentList @('-RepoRoot', $repo)
 
-            $result.ExitCode | Should -Not -Be 0
-            $result.Output | Should -Match 'No \.git directory found'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result.ExitCode | Should -Not -Be 0
+        $result.Output | Should -Match 'No \.git directory found'
     }
 
     It 'Installs a pre-commit hook that invokes scripts/git/pre-commit.ps1' {
         $fixture = New-TestGitRepositoryWithHook
-        try {
-            $result = Invoke-BackupTestScript -ScriptPath $script:InstallHookScript -ArgumentList @('-RepoRoot', $fixture.RepoRoot)
+        $result = Invoke-BackupTestScript -ScriptPath $script:InstallHookScript -ArgumentList @('-RepoRoot', $fixture.RepoRoot)
 
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'Installed pre-commit hook'
-            Test-Path -LiteralPath $fixture.HookPath | Should -BeTrue
-            Get-Content -LiteralPath $fixture.HookPath -Raw | Should -Match 'pre-commit\.ps1'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.RepoRoot) {
-                Remove-Item -LiteralPath $fixture.RepoRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'Installed pre-commit hook'
+        Test-Path -LiteralPath $fixture.HookPath | Should -BeTrue
+        Get-Content -LiteralPath $fixture.HookPath -Raw | Should -Match 'pre-commit\.ps1'
     }
 
     It 'Does not create git-hooks backups when no pre-commit hook exists yet' {
@@ -59,16 +45,21 @@ Describe 'install-pre-commit-hook.ps1 execution' {
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
         Import-Module (Join-Path $libPath 'file' 'FileBackup.psm1') -DisableNameChecking -ErrorAction Stop
 
-        try {
-            $result = Invoke-BackupTestScript -ScriptPath $script:InstallHookScript -ArgumentList @('-RepoRoot', $fixture.RepoRoot)
+        $result = Invoke-BackupTestScript -ScriptPath $script:InstallHookScript -ArgumentList @('-RepoRoot', $fixture.RepoRoot)
 
-            $result.ExitCode | Should -Be 0
-            @(Get-FileBackups -RepoRoot $fixture.RepoRoot -Category 'git-hooks').Count | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.RepoRoot) {
-                Remove-Item -LiteralPath $fixture.RepoRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result.ExitCode | Should -Be 0
+        @(Get-FileBackups -RepoRoot $fixture.RepoRoot -Category 'git-hooks').Count | Should -Be 0
+    }
+
+    It 'Reinstalls the pre-commit hook idempotently when run a second time' {
+        $fixture = New-TestGitRepositoryWithHook
+        $first = Invoke-BackupTestScript -ScriptPath $script:InstallHookScript -ArgumentList @('-RepoRoot', $fixture.RepoRoot)
+        $second = Invoke-BackupTestScript -ScriptPath $script:InstallHookScript -ArgumentList @('-RepoRoot', $fixture.RepoRoot)
+
+        $first.ExitCode | Should -Be 0
+        $second.ExitCode | Should -Be 0
+        Test-Path -LiteralPath $fixture.HookPath | Should -BeTrue
+        Get-Content -LiteralPath $fixture.HookPath -Raw | Should -Match 'pre-commit\.ps1'
     }
 }
+

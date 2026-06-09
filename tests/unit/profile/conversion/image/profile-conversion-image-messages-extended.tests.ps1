@@ -36,16 +36,14 @@ Describe 'Conversion image messages extended scenarios' {
             Remove-Item Function:\Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
 
-            try {
-                Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
-                $message = Get-ImageConversionToolMissingMessage
-                $message | Should -Match 'ImageMagick or GraphicsMagick'
-                $message | Should -Match 'package manager'
-            }
-            finally {
-                if ($null -ne $originalPlatformHint) {
-                    Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
-                }
+                        Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            $message = Get-ImageConversionToolMissingMessage
+            $message | Should -Match 'ImageMagick or GraphicsMagick'
+            $message | Should -Match 'package manager'
+        }
+        finally {
+            if ($null -ne $originalPlatformHint) {
+                Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
             }
         }
 
@@ -63,16 +61,14 @@ Describe 'Conversion image messages extended scenarios' {
             Remove-Item Function:\Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
 
-            try {
-                Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
-                $message = Get-ConversionToolMissingMessage -ToolName 'ffmpeg'
-                $message | Should -Match 'ffmpeg'
-                $message | Should -Match 'Install with:'
-            }
-            finally {
-                if ($null -ne $originalPlatformHint) {
-                    Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
-                }
+                        Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            $message = Get-ConversionToolMissingMessage -ToolName 'ffmpeg'
+            $message | Should -Match 'ffmpeg'
+            $message | Should -Match 'Install with:'
+        }
+        finally {
+            if ($null -ne $originalPlatformHint) {
+                Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
             }
         }
     }

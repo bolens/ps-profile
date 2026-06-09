@@ -10,8 +10,7 @@ function global:New-FunctionNamingFixtureDirectory {
         [switch]$IncludeInvalidFunction
     )
 
-    $fixtureDir = Join-Path ([System.IO.Path]::GetTempPath()) ('FunctionNamingFixture-{0}' -f [System.Guid]::NewGuid())
-    New-Item -ItemType Directory -Path $fixtureDir -Force | Out-Null
+    $fixtureDir = New-TestExternalTempDirectory -Prefix 'FunctionNamingFixture'
 
     Set-Content -LiteralPath (Join-Path $fixtureDir 'good.ps1') -Value @'
 function Get-NamingFixtureOk {
@@ -50,52 +49,46 @@ BeforeAll {
 Describe 'validate-function-naming.ps1 execution' {
     It 'Passes when fixture functions follow Verb-Noun naming conventions' {
         $fixtureDir = New-FunctionNamingFixtureDirectory
-        try {
-            $result = Invoke-TestScriptFile -ScriptPath $script:ValidateNamingScript -ArgumentList @(
-                '-Path', $fixtureDir,
-                '-ExceptionsFile', $script:ExceptionsFile
-            )
-            $result.ExitCode | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixtureDir) {
-                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result = Invoke-TestScriptFile -ScriptPath $script:ValidateNamingScript -ArgumentList @(
+            '-Path', $fixtureDir,
+            '-ExceptionsFile', $script:ExceptionsFile
+        )
+        $result.ExitCode | Should -Be 0
     }
 
     It 'Fails when a fixture function does not follow Verb-Noun naming conventions' {
         $fixtureDir = New-FunctionNamingFixtureDirectory -IncludeInvalidFunction
-        try {
-            $result = Invoke-TestScriptFile -ScriptPath $script:ValidateNamingScript -ArgumentList @(
-                '-Path', $fixtureDir,
-                '-ExceptionsFile', $script:ExceptionsFile
-            )
-            $result.ExitCode | Should -BeIn @(1, 2)
-            $result.Output | Should -Match 'Foo-NamingFixtureBad|Unapproved verb'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixtureDir) {
-                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result = Invoke-TestScriptFile -ScriptPath $script:ValidateNamingScript -ArgumentList @(
+            '-Path', $fixtureDir,
+            '-ExceptionsFile', $script:ExceptionsFile
+        )
+        $result.ExitCode | Should -BeIn @(1, 2)
+        $result.Output | Should -Match 'Foo-NamingFixtureBad|Unapproved verb'
     }
 
     It 'Reports no matching functions when the analysis path contains no PowerShell files' {
         $emptyDir = New-TestTempDirectory -Prefix 'FunctionNamingEmptyPath'
-        try {
-            $result = Invoke-TestScriptFile -ScriptPath $script:ValidateNamingScript -ArgumentList @(
-                '-Path', $emptyDir,
-                '-ExceptionsFile', $script:ExceptionsFile
-            )
+        $result = Invoke-TestScriptFile -ScriptPath $script:ValidateNamingScript -ArgumentList @(
+            '-Path', $emptyDir,
+            '-ExceptionsFile', $script:ExceptionsFile
+        )
 
-            $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
-            $result.Output | Should -Match 'Functions|Cannot bind argument|Results'
-        }
-        finally {
-            if (Test-Path -LiteralPath $emptyDir) {
-                Remove-Item -LiteralPath $emptyDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
+        $result.Output | Should -Match 'Functions|Cannot bind argument|Results'
+    }
+
+    It 'Writes a JSON validation report when OutputPath is specified' {
+        $fixtureDir = New-FunctionNamingFixtureDirectory
+        $reportPath = Join-Path $fixtureDir 'naming-report.json'
+        $result = Invoke-TestScriptFile -ScriptPath $script:ValidateNamingScript -ArgumentList @(
+            '-Path', $fixtureDir,
+            '-ExceptionsFile', $script:ExceptionsFile,
+            '-OutputPath', $reportPath
+        )
+
+        $result.ExitCode | Should -Be 0
+        Test-Path -LiteralPath $reportPath | Should -BeTrue
+        $report = Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json
+        $report.Summary.TotalFunctions | Should -BeGreaterThan 0
     }
 }

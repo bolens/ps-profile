@@ -24,15 +24,7 @@ Describe 'Scoop Completion Integration Tests' {
                 throw "Profile directory not found at: $script:ProfileDir"
             }
 
-            # Use Get-TestPath without EnsureExists so tests can create/remove this directory freely.
-            $script:TestScoopDir = Get-TestPath -RelativePath 'test-scoop' -StartPath $PSScriptRoot
-
-            # Create test directory if it doesn't exist
-            if ($script:TestScoopDir -and -not [string]::IsNullOrWhiteSpace($script:TestScoopDir) -and -not (Test-Path -LiteralPath $script:TestScoopDir)) {
-                New-Item -ItemType Directory -Path $script:TestScoopDir -Force | Out-Null
-            }
-
-            $script:CompletionModulePath = Join-Path $script:TestScoopDir 'apps\scoop\current\supporting\completion\Scoop-Completion.psd1'
+            $script:CompletionRelativePath = Join-Path 'apps' 'scoop' 'current' 'supporting' 'completion' 'Scoop-Completion.psd1'
         }
         catch {
             $errorDetails = @{
@@ -61,11 +53,6 @@ Describe 'Scoop Completion Integration Tests' {
             # Clear any existing function
             if (Get-Command Enable-ScoopCompletion -CommandType Function -ErrorAction SilentlyContinue) {
                 Remove-Item Function:\Enable-ScoopCompletion -Force
-            }
-
-            # Remove test directories
-            if ($script:TestScoopDir -and -not [string]::IsNullOrWhiteSpace($script:TestScoopDir) -and (Test-Path -LiteralPath $script:TestScoopDir)) {
-                Remove-Item $script:TestScoopDir -Recurse -Force
             }
         }
 
@@ -99,14 +86,13 @@ Describe 'Scoop Completion Integration Tests' {
         }
 
         It 'Creates Enable-ScoopCompletion when scoop found via SCOOP environment variable' {
-            # Set up environment
-            $env:SCOOP_GLOBAL = $null
-            $env:SCOOP = $script:TestScoopDir
+            $testScoopDir = New-TestTempDirectory -Prefix 'ScoopCompletionEnv'
+            $completionPath = Join-Path $testScoopDir $script:CompletionRelativePath
+            New-Item -ItemType Directory -Path (Split-Path $completionPath -Parent) -Force | Out-Null
+            New-Item -ItemType File -Path $completionPath -Force | Out-Null
 
-            # Create the completion module file
-            $completionDir = Split-Path $script:CompletionModulePath -Parent
-            New-Item -ItemType Directory -Path $completionDir -Force | Out-Null
-            New-Item -ItemType File -Path $script:CompletionModulePath -Force | Out-Null
+            $env:SCOOP_GLOBAL = $null
+            $env:SCOOP = $testScoopDir
 
             . (Join-Path $script:ProfileDir 'scoop-completion.ps1')
 
@@ -114,14 +100,13 @@ Describe 'Scoop Completion Integration Tests' {
         }
 
         It 'Enable-ScoopCompletion can be called' {
-            # Set up environment
-            $env:SCOOP_GLOBAL = $null
-            $env:SCOOP = $script:TestScoopDir
+            $testScoopDir = New-TestTempDirectory -Prefix 'ScoopCompletionCall'
+            $completionPath = Join-Path $testScoopDir $script:CompletionRelativePath
+            New-Item -ItemType Directory -Path (Split-Path $completionPath -Parent) -Force | Out-Null
+            New-Item -ItemType File -Path $completionPath -Force | Out-Null
 
-            # Create the completion module file
-            $completionDir = Split-Path $script:CompletionModulePath -Parent
-            New-Item -ItemType Directory -Path $completionDir -Force | Out-Null
-            New-Item -ItemType File -Path $script:CompletionModulePath -Force | Out-Null
+            $env:SCOOP_GLOBAL = $null
+            $env:SCOOP = $testScoopDir
 
             . (Join-Path $script:ProfileDir 'scoop-completion.ps1')
 

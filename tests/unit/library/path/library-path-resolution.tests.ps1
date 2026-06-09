@@ -9,47 +9,45 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    try {
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-        $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-        if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
-            throw "Get-TestPath returned null or empty value for LibPath"
-        }
-        if (-not (Test-Path -LiteralPath $script:LibPath)) {
-            throw "Library path not found at: $script:LibPath"
-        }
-        
-        $script:PathResolutionPath = Join-Path $script:LibPath 'path' 'PathResolution.psm1'
-        if ($null -eq $script:PathResolutionPath -or [string]::IsNullOrWhiteSpace($script:PathResolutionPath)) {
-            throw "PathResolutionPath is null or empty"
-        }
-        if (-not (Test-Path -LiteralPath $script:PathResolutionPath)) {
-            throw "PathResolution module not found at: $script:PathResolutionPath"
-        }
-        
-        # Import Cache module first (dependency)
-        $cachePath = Join-Path $script:LibPath 'utilities' 'Cache.psm1'
-        if ($cachePath -and (Test-Path -LiteralPath $cachePath)) {
-            Import-Module $cachePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
-        }
-        
-        # Import the module under test
-        Import-Module $script:PathResolutionPath -DisableNameChecking -ErrorAction Stop -Force
-        
-        # Create test script path in test artifacts directory
-        $script:TestScriptPath = Get-TestScriptPath -RelativePath 'scripts/utils/test.ps1' -StartPath $PSScriptRoot
-        $script:TestScriptCreated = $true
-        $script:TempRoot = New-TestTempDirectory -Prefix 'PathResolutionTests'
+    $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
+        throw "Get-TestPath returned null or empty value for LibPath"
     }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
-        }
-        Write-Error "Failed to initialize PathResolution tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+    if (-not (Test-Path -LiteralPath $script:LibPath)) {
+        throw "Library path not found at: $script:LibPath"
     }
+    
+    $script:PathResolutionPath = Join-Path $script:LibPath 'path' 'PathResolution.psm1'
+    if ($null -eq $script:PathResolutionPath -or [string]::IsNullOrWhiteSpace($script:PathResolutionPath)) {
+        throw "PathResolutionPath is null or empty"
+    }
+    if (-not (Test-Path -LiteralPath $script:PathResolutionPath)) {
+        throw "PathResolution module not found at: $script:PathResolutionPath"
+    }
+    
+    # Import Cache module first (dependency)
+    $cachePath = Join-Path $script:LibPath 'utilities' 'Cache.psm1'
+    if ($cachePath -and (Test-Path -LiteralPath $cachePath)) {
+        Import-Module $cachePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+    }
+    
+    # Import the module under test
+    Import-Module $script:PathResolutionPath -DisableNameChecking -ErrorAction Stop -Force
+    
+    # Create test script path in test artifacts directory
+    $script:TestScriptPath = Get-TestScriptPath -RelativePath 'scripts/utils/test.ps1' -StartPath $PSScriptRoot
+    $script:TestScriptCreated = $true
+    $script:TempRoot = New-TestTempDirectory -Prefix 'PathResolutionTests'
+}
+catch {
+    $errorDetails = @{
+        Message  = $_.Exception.Message
+        Type     = $_.Exception.GetType().FullName
+        Location = $_.InvocationInfo.ScriptLineNumber
+    }
+    Write-Error "Failed to initialize PathResolution tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+    throw
 }
 
 AfterAll {
@@ -65,6 +63,13 @@ AfterAll {
             Remove-Item -Path $parentDir -Force -ErrorAction SilentlyContinue
         }
     }
+}
+
+function script:New-NoRepoScriptPath {
+    $tempDir = New-TestExternalTempDirectory -Prefix 'PathResolutionNoRepo'
+    $tempScript = Join-Path $tempDir 'test.ps1'
+    Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
+    return $tempScript
 }
 
 Describe 'PathResolution Module Functions' {
@@ -99,13 +104,11 @@ Describe 'PathResolution Module Functions' {
             if ($checksDir -and (Test-Path -LiteralPath $checksDir)) {
                 $checksScriptPath = Join-Path $checksDir 'test.ps1'
                 Set-Content -Path $checksScriptPath -Value '# Test' -ErrorAction SilentlyContinue
-                try {
-                    $result = Get-RepoRoot -ScriptPath $checksScriptPath
-                    $result | Should -Be $script:RepoRoot
-                }
-                finally {
-                    Remove-Item -Path $checksScriptPath -Force -ErrorAction SilentlyContinue
-                }
+                                $result = Get-RepoRoot -ScriptPath $checksScriptPath
+                $result | Should -Be $script:RepoRoot
+            }
+            finally {
+                Remove-Item -Path $checksScriptPath -Force -ErrorAction SilentlyContinue
             }
         }
 
@@ -146,17 +149,8 @@ Describe 'PathResolution Module Functions' {
         }
 
         It 'Throws when repository root not found' {
-            # Create a temporary directory structure without scripts/
-            $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "ps-profile-no-repo-$([guid]::NewGuid().ToString('n'))"
-            $tempScript = Join-Path $tempDir 'test.ps1'
-            New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-            Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
-            try {
-                { Get-RepoRoot -ScriptPath $tempScript } | Should -Throw "*Repository root not found*"
-            }
-            finally {
-                Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            $tempScript = New-NoRepoScriptPath
+            { Get-RepoRoot -ScriptPath $tempScript } | Should -Throw "*Repository root not found*"
         }
 
         It 'Handles file that does not exist but parent directory does' {
@@ -203,16 +197,8 @@ Describe 'PathResolution Module Functions' {
         }
 
         It 'Throws when repository root cannot be determined' {
-            $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "ps-profile-no-repo-$([guid]::NewGuid().ToString('n'))"
-            $tempScript = Join-Path $tempDir 'test.ps1'
-            New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-            Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
-            try {
-                { Get-ProfileDirectory -ScriptPath $tempScript } | Should -Throw
-            }
-            finally {
-                Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            $tempScript = New-NoRepoScriptPath
+            { Get-ProfileDirectory -ScriptPath $tempScript } | Should -Throw
         }
     }
 
@@ -224,46 +210,22 @@ Describe 'PathResolution Module Functions' {
         }
 
         It 'Returns null when repository root not found and ErrorAction is SilentlyContinue' {
-            $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "ps-profile-no-repo-$([guid]::NewGuid().ToString('n'))"
-            $tempScript = Join-Path $tempDir 'test.ps1'
-            New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-            Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
-            try {
-                $result = Get-RepoRootSafe -ScriptPath $tempScript -ErrorAction SilentlyContinue
-                $result | Should -BeNullOrEmpty
-            }
-            finally {
-                Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            $tempScript = New-NoRepoScriptPath
+            $result = Get-RepoRootSafe -ScriptPath $tempScript -ErrorAction SilentlyContinue
+            $result | Should -BeNullOrEmpty
         }
 
         It 'Throws when repository root not found and ErrorAction is Stop' {
-            $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "ps-profile-no-repo-$([guid]::NewGuid().ToString('n'))"
-            $tempScript = Join-Path $tempDir 'test.ps1'
-            New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-            Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
-            try {
-                { Get-RepoRootSafe -ScriptPath $tempScript -ErrorAction Stop } | Should -Throw
-            }
-            finally {
-                Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            $tempScript = New-NoRepoScriptPath
+            { Get-RepoRootSafe -ScriptPath $tempScript -ErrorAction Stop } | Should -Throw
         }
 
         It 'Exits with code 2 when ExitOnError is specified and ExitCodes module not available' {
             # This is difficult to test without actually exiting, but we can verify the structure
             # The function should attempt to use Exit-WithCode if available
-            $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "ps-profile-no-repo-$([guid]::NewGuid().ToString('n'))"
-            $tempScript = Join-Path $tempDir 'test.ps1'
-            New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-            Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
-            try {
-                # Without ExitCodes module, it should throw or exit
-                { Get-RepoRootSafe -ScriptPath $tempScript -ExitOnError } | Should -Throw
-            }
-            finally {
-                Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            $tempScript = New-NoRepoScriptPath
+            # Without ExitCodes module, it should throw or exit
+            { Get-RepoRootSafe -ScriptPath $tempScript -ExitOnError } | Should -Throw
         }
 
         It 'Uses Exit-WithCode when ExitCodes module is available and ExitOnError is specified' {
@@ -271,35 +233,21 @@ Describe 'PathResolution Module Functions' {
             $exitCodesPath = Join-Path $script:LibPath 'core' 'ExitCodes.psm1'
             if ($exitCodesPath -and (Test-Path -LiteralPath $exitCodesPath)) {
                 Import-Module $exitCodesPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
-                
-                $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "ps-profile-no-repo-$([guid]::NewGuid().ToString('n'))"
-                $tempScript = Join-Path $tempDir 'test.ps1'
-                New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-                Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
-                try {
-                    # This will exit the script, so we can't test it directly
-                    # But we can verify the function structure is correct
-                    Get-Command Get-RepoRootSafe | Should -Not -BeNullOrEmpty
-                }
-                finally {
-                    Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-                    Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
-                }
+
+                $tempScript = New-NoRepoScriptPath
+                                # This will exit the script, so we can't test it directly
+                # But we can verify the function structure is correct
+                Get-Command Get-RepoRootSafe | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
             }
         }
 
         It 'Handles ErrorAction Continue' {
-            $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) "ps-profile-no-repo-$([guid]::NewGuid().ToString('n'))"
-            $tempScript = Join-Path $tempDir 'test.ps1'
-            New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-            Set-Content -Path $tempScript -Value '# Test' -ErrorAction SilentlyContinue
-            try {
-                $result = Get-RepoRootSafe -ScriptPath $tempScript -ErrorAction Continue
-                $result | Should -BeNullOrEmpty
-            }
-            finally {
-                Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            $tempScript = New-NoRepoScriptPath
+            $result = Get-RepoRootSafe -ScriptPath $tempScript -ErrorAction Continue
+            $result | Should -BeNullOrEmpty
         }
     }
 }

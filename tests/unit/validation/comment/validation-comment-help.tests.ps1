@@ -45,11 +45,11 @@ function Get-CommentHelpDocumentedFixture {
 
     Push-Location $repo
     try {
-        git init -q | Out-Null
-        git config user.email 'fixture@example.com'
-        git config user.name 'Fixture'
-        git add profile.d/
-        git commit -m 'init comment-help fixture' -q
+    git init -q | Out-Null
+    git config user.email 'fixture@example.com'
+    git config user.name 'Fixture'
+    git add profile.d/
+    git commit -m 'init comment-help fixture' -q
     }
     finally {
         Pop-Location
@@ -83,23 +83,15 @@ Describe 'check-comment-help.ps1' {
         }
 
         $repo = New-CommentHelpTestRepository
+        Push-Location $repo
         try {
-            Push-Location $repo
-            try {
-                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'checks' 'check-comment-help.ps1')
-            }
-            finally {
-                Pop-Location
-            }
-
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'All functions have comment-based help'
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'checks' 'check-comment-help.ps1')
         }
         finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
         }
+                $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'All functions have comment-based help'
     }
 
     It 'Fails when profile.d contains functions without comment-based help' {
@@ -109,22 +101,14 @@ Describe 'check-comment-help.ps1' {
         }
 
         $repo = New-CommentHelpTestRepository -IncludeUndocumentedFunction
+        Push-Location $repo
         try {
-            Push-Location $repo
-            try {
-                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'checks' 'check-comment-help.ps1')
-            }
-            finally {
-                Pop-Location
-            }
-
-            $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'MISSING HELP|missing comment-based help|Get-CommentHelpMissingFixture'
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'checks' 'check-comment-help.ps1')
         }
         finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
         }
+                $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'MISSING HELP|missing comment-based help|Get-CommentHelpMissingFixture'
     }
 }

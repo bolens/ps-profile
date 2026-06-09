@@ -121,41 +121,39 @@ Describe 'SuperJSON to/from XML Conversion Tests' {
             $jsonFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $jsonFile -Value $jsonContent -NoNewline
             
+                        # First convert to SuperJSON if possible
+            $superjsonFile = Join-Path $TestDrive 'test.superjson'
             try {
-                # First convert to SuperJSON if possible
-                $superjsonFile = Join-Path $TestDrive 'test.superjson'
-                try {
-                    ConvertTo-SuperJsonFromJson -InputPath $jsonFile -OutputPath $superjsonFile -ErrorAction Stop 2>&1 | Out-Null
-                }
-                catch {
-                    # If SuperJSON conversion fails, create a dummy file for testing
-                    Set-Content -Path $superjsonFile -Value 'dummy content' -NoNewline
-                }
-                
-                $xmlFile = Join-Path $TestDrive 'test-output.xml'
-                ConvertFrom-SuperJsonToXml -InputPath $superjsonFile -OutputPath $xmlFile -ErrorAction Stop 2>&1 | Out-Null
-                # If we get here, conversion succeeded (superjson package is installed)
-                if ($xmlFile -and -not [string]::IsNullOrWhiteSpace($xmlFile) -and (Test-Path -LiteralPath $xmlFile)) {
-                    $xmlFile | Should -Exist
-                }
+                ConvertTo-SuperJsonFromJson -InputPath $jsonFile -OutputPath $superjsonFile -ErrorAction Stop 2>&1 | Out-Null
             }
             catch {
-                $errorMessage = $_.Exception.Message
-                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-                
-                if ($errorMessage -match 'superjson.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'superjson') {
-                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'superjson' -ToolType 'node-package'
-                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                    }
-                    elseif ($errorMessage -match 'superjson' -or $fullError -match 'superjson') {
-                        Write-Host "superjson package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                        $errorMessage | Should -Match 'superjson'
-                    }
-                }
-                # Other errors are also acceptable
+                # If SuperJSON conversion fails, create a dummy file for testing
+                Set-Content -Path $superjsonFile -Value 'dummy content' -NoNewline
             }
+            
+            $xmlFile = Join-Path $TestDrive 'test-output.xml'
+            ConvertFrom-SuperJsonToXml -InputPath $superjsonFile -OutputPath $xmlFile -ErrorAction Stop 2>&1 | Out-Null
+            # If we get here, conversion succeeded (superjson package is installed)
+            if ($xmlFile -and -not [string]::IsNullOrWhiteSpace($xmlFile) -and (Test-Path -LiteralPath $xmlFile)) {
+                $xmlFile | Should -Exist
+            }
+        }
+        catch {
+            $errorMessage = $_.Exception.Message
+            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+            if ($errorMessage -match 'superjson.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'superjson') {
+                $installCommand = Resolve-TestToolInstallCommand -ToolName 'superjson' -ToolType 'node-package'
+                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                }
+                elseif ($errorMessage -match 'superjson' -or $fullError -match 'superjson') {
+                    Write-Host "superjson package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                    $errorMessage | Should -Match 'superjson'
+                }
+            }
+            # Other errors are also acceptable
         }
     }
 }

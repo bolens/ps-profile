@@ -60,12 +60,10 @@ Describe 'File Listing Functions Integration Tests' {
             New-Item -ItemType File -Path (Join-Path $testDir 'test.txt') -Force | Out-Null
 
             Push-Location $testDir
-            try {
-                { Get-ChildItemDetailed | Out-Null } | Should -Not -Throw
-            }
-            finally {
-                Pop-Location
-            }
+                        { Get-ChildItemDetailed | Out-Null } | Should -Not -Throw
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Get-DirectoryTree displays directory structure' {
@@ -75,12 +73,10 @@ Describe 'File Listing Functions Integration Tests' {
             New-Item -ItemType File -Path (Join-Path $testDir 'file.txt') -Force | Out-Null
 
             Push-Location $testDir
-            try {
-                { Get-DirectoryTree | Out-Null } | Should -Not -Throw
-            }
-            finally {
-                Pop-Location
-            }
+                        { Get-DirectoryTree | Out-Null } | Should -Not -Throw
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Show-FileContent handles file input' {

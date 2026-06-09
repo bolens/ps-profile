@@ -13,42 +13,40 @@ BeforeAll {
 
 Describe 'Tooling Integration Tests' {
     BeforeAll {
-        try {
-            $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
-            $script:DocsPath = Get-TestPath -RelativePath 'docs' -StartPath $PSScriptRoot -EnsureExists
-            $script:CspellPath = Get-TestPath -RelativePath 'cspell.json' -StartPath $PSScriptRoot -EnsureExists
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
-            $script:ScriptsUtilsDocsPath = Get-TestPath -RelativePath 'scripts\utils\docs' -StartPath $PSScriptRoot -EnsureExists
-            
-            if ($null -eq $script:ProfilePath -or [string]::IsNullOrWhiteSpace($script:ProfilePath)) {
-                throw "Get-TestPath returned null or empty value for ProfilePath"
-            }
-            if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
-                throw "Get-TestPath returned null or empty value for ProfileDir"
-            }
-            if ($null -eq $script:ScriptsUtilsPath -or [string]::IsNullOrWhiteSpace($script:ScriptsUtilsPath)) {
-                throw "Get-TestPath returned null or empty value for ScriptsUtilsPath"
-            }
-            if (-not (Test-Path -LiteralPath $script:ProfilePath)) {
-                throw "Profile file not found at: $script:ProfilePath"
-            }
-            if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-                throw "Profile directory not found at: $script:ProfileDir"
-            }
-            if (-not (Test-Path -LiteralPath $script:ScriptsUtilsPath)) {
-                throw "Scripts utils path not found at: $script:ScriptsUtilsPath"
-            }
+                $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
+        $script:DocsPath = Get-TestPath -RelativePath 'docs' -StartPath $PSScriptRoot -EnsureExists
+        $script:CspellPath = Get-TestPath -RelativePath 'cspell.json' -StartPath $PSScriptRoot -EnsureExists
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
+        $script:ScriptsUtilsDocsPath = Get-TestPath -RelativePath 'scripts\utils\docs' -StartPath $PSScriptRoot -EnsureExists
+        
+        if ($null -eq $script:ProfilePath -or [string]::IsNullOrWhiteSpace($script:ProfilePath)) {
+            throw "Get-TestPath returned null or empty value for ProfilePath"
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to initialize tooling tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+        if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
+            throw "Get-TestPath returned null or empty value for ProfileDir"
         }
+        if ($null -eq $script:ScriptsUtilsPath -or [string]::IsNullOrWhiteSpace($script:ScriptsUtilsPath)) {
+            throw "Get-TestPath returned null or empty value for ScriptsUtilsPath"
+        }
+        if (-not (Test-Path -LiteralPath $script:ProfilePath)) {
+            throw "Profile file not found at: $script:ProfilePath"
+        }
+        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
+            throw "Profile directory not found at: $script:ProfileDir"
+        }
+        if (-not (Test-Path -LiteralPath $script:ScriptsUtilsPath)) {
+            throw "Scripts utils path not found at: $script:ScriptsUtilsPath"
+        }
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize tooling tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
 
     Context 'Documentation generation' {

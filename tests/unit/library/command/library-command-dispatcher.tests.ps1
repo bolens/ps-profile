@@ -133,13 +133,11 @@ Describe 'CommandDispatcher.psm1' {
             $originalRegistry = $global:FragmentCommandRegistry
             Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
             
-            try {
-                $result = Register-CommandDispatcher
-                $result | Should -Be $false
-            }
-            finally {
-                $global:FragmentCommandRegistry = $originalRegistry
-            }
+                        $result = Register-CommandDispatcher
+            $result | Should -Be $false
+        }
+        finally {
+            $global:FragmentCommandRegistry = $originalRegistry
         }
     }
     
@@ -327,13 +325,11 @@ Describe 'CommandDispatcher.psm1' {
             $testHandler = { param($cmd, $args) }
             $ExecutionContext.InvokeCommand.CommandNotFoundAction = $testHandler
             
-            try {
-                $result = Register-CommandDispatcher
-                $result | Should -Be $true
-            }
-            finally {
-                $ExecutionContext.InvokeCommand.CommandNotFoundAction = $originalHandler
-            }
+                        $result = Register-CommandDispatcher
+            $result | Should -Be $true
+        }
+        finally {
+            $ExecutionContext.InvokeCommand.CommandNotFoundAction = $originalHandler
         }
     }
     
@@ -352,12 +348,10 @@ Describe 'CommandDispatcher.psm1' {
             $originalRegistry = $global:FragmentCommandRegistry
             Remove-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue
             
-            try {
-                Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
-            }
-            finally {
-                $global:FragmentCommandRegistry = $originalRegistry
-            }
+                        Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
+        }
+        finally {
+            $global:FragmentCommandRegistry = $originalRegistry
         }
     }
     

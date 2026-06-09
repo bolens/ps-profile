@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-bootstrap-assumed-commands-extended.tests.ps1
-#>
+# ===============================================
+# profile-bootstrap-assumed-commands-extended.tests.ps1
+# Execution tests for bootstrap/AssumedCommands.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,34 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/bootstrap/AssumedCommands.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:BootstrapDir = Join-Path $script:ProfileDir 'bootstrap'
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/bootstrap/AssumedCommands.ps1 extended scenarios' {
-    It 'Documents assumed command management utilities' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Assumed command management utilities'
-        $c | Should -Match 'treat as present'
+    It 'Registers assumed command management helpers' {
+        Get-Command Add-AssumedCommand -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Remove-AssumedCommand -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-AssumedCommands -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Add-AssumedCommand using AssumedAvailableCommands cache' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Add-AssumedCommand'
-        $c | Should -Match 'AssumedAvailableCommands'
-        $c | Should -Match 'TryAdd'
+
+    It 'Add-AssumedCommand marks commands as assumed available' {
+        $commandName = "AssumedCmd_$([Guid]::NewGuid().ToString('N'))"
+                Add-AssumedCommand -Name $commandName | Should -Be $true
+        [string[]](Get-AssumedCommands) | Should -Contain $commandName
     }
-    It 'Defines Remove-AssumedCommand and Get-AssumedCommands' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Remove-AssumedCommand'
-        $c | Should -Match 'Get-AssumedCommands'
+    finally {
+        Remove-AssumedCommand -Name $commandName | Out-Null
+    }
+
+    It 'Preserves assumed command helper bodies on repeated module loads' {
+        $firstAdd = Get-Command Add-AssumedCommand -ErrorAction Stop
+
+        . (Join-Path $script:BootstrapDir 'AssumedCommands.ps1')
+
+        (Get-Command Add-AssumedCommand -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstAdd.ScriptBlock.ToString()
     }
 }

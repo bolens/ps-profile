@@ -46,25 +46,16 @@ Describe 'sync-profile-fragments.ps1 execution' {
 
     It 'Fails when the profile directory does not exist' {
         $missingProfileDir = Join-Path (New-TestTempDirectory -Prefix 'SyncFragmentsMissing') 'no-profile-dir'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:SyncFragmentsScript -ArgumentList @(
                 '-ProfileDir', $missingProfileDir
             )
 
             $result.ExitCode | Should -BeIn @(1, 2)
             $result.Output | Should -Match 'profile\.d directory not found'
-        }
-        finally {
-            $parent = Split-Path -Parent $missingProfileDir
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Writes .profile-fragments.json for an isolated profile directory' {
         $repo = New-TestTempDirectory -Prefix 'SyncFragmentsApply'
-        try {
             $fragmentDir = Join-Path $repo 'scripts' 'utils' 'fragment'
             $profileDir = Join-Path $repo 'profile.d'
             $null = New-Item -ItemType Directory -Path $fragmentDir -Force
@@ -98,11 +89,5 @@ function Get-SyncFragmentsFixture {
             Test-Path -LiteralPath $configPath | Should -BeTrue
             $config = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
             $config.environments | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

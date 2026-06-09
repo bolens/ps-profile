@@ -48,26 +48,19 @@ Describe 'check-missing-packages.ps1 execution' {
             Set-Content -LiteralPath (Join-Path $repo 'requirements.txt') -Value '' -Encoding UTF8
 
             Push-Location $repo
-            try {
-                git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
-                git add package.json requirements.txt
-                git commit -m 'init manifests' -q
-            }
-            finally {
-                Pop-Location
-            }
+                        git init -q | Out-Null
+            git config user.email 'fixture@example.com'
+            git config user.name 'Fixture'
+            git add package.json requirements.txt
+            git commit -m 'init manifests' -q
+        }
+        finally {
+            Pop-Location
 
             $result = Invoke-TestScriptFile -ScriptPath (Join-Path $scriptDir 'check-missing-packages.ps1')
 
             $result.Output | Should -Match 'npm|package|Checking|definitely-not-a-real-npm-package-xyz|missing'
             $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 
@@ -95,26 +88,50 @@ Describe 'check-missing-packages.ps1 execution' {
             Set-Content -LiteralPath (Join-Path $requirementsDir 'scoop.txt') -Value '' -Encoding UTF8
 
             Push-Location $repo
-            try {
-                git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
-                git add package.json requirements.txt requirements/linux.txt requirements/scoop.txt
-                git commit -m 'init manifests' -q
-            }
-            finally {
-                Pop-Location
-            }
+                        git init -q | Out-Null
+            git config user.email 'fixture@example.com'
+            git config user.name 'Fixture'
+            git add package.json requirements.txt requirements/linux.txt requirements/scoop.txt
+            git commit -m 'init manifests' -q
+        }
+        finally {
+            Pop-Location
 
             $result = Invoke-TestScriptFile -ScriptPath (Join-Path $scriptDir 'check-missing-packages.ps1')
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'npm|python|Checking|package|All'
         }
+    }
+
+    It 'Checks Python packages from an isolated requirements.txt manifest' {
+        $repo = New-TestTempDirectory -Prefix 'CheckMissingPackagesPython'
+        try {
+            $scriptDir = Join-Path $repo 'scripts' 'utils' 'dependencies'
+            $null = New-Item -ItemType Directory -Path $scriptDir -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:CheckMissingPackagesScript -Destination (Join-Path $scriptDir 'check-missing-packages.ps1') -Force
+
+            @{
+                name    = 'missing-packages-python-fixture'
+                version = '1.0.0'
+            } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $repo 'package.json') -Encoding UTF8
+            Set-Content -LiteralPath (Join-Path $repo 'requirements.txt') -Value 'definitely-not-a-real-python-package-xyz==1.0.0' -Encoding UTF8
+
+            Push-Location $repo
+                        git init -q | Out-Null
+            git config user.email 'fixture@example.com'
+            git config user.name 'Fixture'
+            git add package.json requirements.txt
+            git commit -m 'init manifests' -q
+        }
         finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
+
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $scriptDir 'check-missing-packages.ps1')
+
+            $result.Output | Should -Match 'Python|requirements\.txt|definitely-not-a-real-python-package-xyz|Checking'
+            $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
         }
     }
 }

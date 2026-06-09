@@ -61,18 +61,11 @@ Describe 'initialize-databases.ps1 execution' {
         }
 
         $cacheDir = New-TestTempDirectory -Prefix 'InitializeDatabasesCache'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:InitializeDatabasesScript -EnvironmentVariables @{
                 PS_PROFILE_CACHE_DIR = $cacheDir
             }
 
             $result.Output | Should -Match ([regex]::Escape($cacheDir))
             $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
-        }
-        finally {
-            if (Test-Path -LiteralPath $cacheDir) {
-                Remove-Item -LiteralPath $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

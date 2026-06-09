@@ -25,15 +25,13 @@ BeforeAll {
         param([hashtable]$Parameters = @{})
 
         $captured = [System.Collections.Generic.List[string]]::new()
-        try {
-            & $script:RunPesterPath @Parameters 2>&1 | ForEach-Object {
-                $null = $captured.Add("$($_)")
-            }
-            $null = $captured.Add("EXIT:$LASTEXITCODE")
+                & $script:RunPesterPath @Parameters 2>&1 | ForEach-Object {
+            $null = $captured.Add("$($_)")
         }
-        catch {
-            $null = $captured.Add($_.Exception.Message)
-        }
+        $null = $captured.Add("EXIT:$LASTEXITCODE")
+    }
+    catch {
+        $null = $captured.Add($_.Exception.Message)
 
         return $captured
     }
@@ -94,20 +92,18 @@ Describe 'Test Runner Error Handling (real run-pester.ps1)' {
         It 'Rejects interactive mode in non-interactive environments' {
             $previous = $env:PS_PROFILE_NONINTERACTIVE
             $env:PS_PROFILE_NONINTERACTIVE = '1'
-            try {
-                $output = Invoke-RunPesterCapturingOutput @{
-                    Interactive = $true
-                    TestFile    = $script:DryRunTestFile
-                }
-                ($output -join ' ') | Should -Match 'Interactive mode requires a TTY|EXIT:'
+                        $output = Invoke-RunPesterCapturingOutput @{
+                Interactive = $true
+                TestFile    = $script:DryRunTestFile
             }
-            finally {
-                if ($null -eq $previous) {
-                    Remove-Item Env:PS_PROFILE_NONINTERACTIVE -ErrorAction SilentlyContinue
-                }
-                else {
-                    $env:PS_PROFILE_NONINTERACTIVE = $previous
-                }
+            ($output -join ' ') | Should -Match 'Interactive mode requires a TTY|EXIT:'
+        }
+        finally {
+            if ($null -eq $previous) {
+                Remove-Item Env:PS_PROFILE_NONINTERACTIVE -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_NONINTERACTIVE = $previous
             }
         }
     }

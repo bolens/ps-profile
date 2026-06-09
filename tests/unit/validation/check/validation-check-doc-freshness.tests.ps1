@@ -55,26 +55,19 @@ exit 0
             Set-Content -LiteralPath (Join-Path $docsDir 'README.md') -Value '# api docs fixture' -Encoding UTF8
 
             Push-Location $repo
-            try {
-                git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
-                git add docs/api/README.md
-                git commit -m 'init docs' -q
-            }
-            finally {
-                Pop-Location
-            }
+                        git init -q | Out-Null
+            git config user.email 'fixture@example.com'
+            git config user.name 'Fixture'
+            git add docs/api/README.md
+            git commit -m 'init docs' -q
+        }
+        finally {
+            Pop-Location
 
             $result = Invoke-TestScriptFile -ScriptPath (Join-Path $checksDir 'check-doc-freshness.ps1')
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'API documentation is up to date'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 
@@ -103,26 +96,19 @@ exit 0
             Set-Content -LiteralPath (Join-Path $docsDir 'README.md') -Value '# api docs fixture' -Encoding UTF8
 
             Push-Location $repo
-            try {
-                git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
-                git add docs/api/README.md
-                git commit -m 'init docs' -q
-            }
-            finally {
-                Pop-Location
-            }
+                        git init -q | Out-Null
+            git config user.email 'fixture@example.com'
+            git config user.name 'Fixture'
+            git add docs/api/README.md
+            git commit -m 'init docs' -q
+        }
+        finally {
+            Pop-Location
 
             $result = Invoke-TestScriptFile -ScriptPath (Join-Path $checksDir 'check-doc-freshness.ps1')
 
             $result.ExitCode | Should -Be 1
             $result.Output | Should -Match 'out of date|freshness check failed'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 }

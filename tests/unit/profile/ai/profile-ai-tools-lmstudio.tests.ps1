@@ -40,18 +40,16 @@ Describe 'ai-tools.ps1 - Invoke-LMStudio' {
 
             $originalHome = $env:HOME
             $emptyHome = New-TestTempDirectory -Prefix 'LmStudioUnavailable'
-            try {
-                $env:HOME = $emptyHome
-                $result = Invoke-LMStudio -Arguments @('list') -ErrorAction SilentlyContinue
-                $result | Should -BeNullOrEmpty
+                        $env:HOME = $emptyHome
+            $result = Invoke-LMStudio -Arguments @('list') -ErrorAction SilentlyContinue
+            $result | Should -BeNullOrEmpty
+        }
+        finally {
+            if ($null -ne $originalHome) {
+                $env:HOME = $originalHome
             }
-            finally {
-                if ($null -ne $originalHome) {
-                    $env:HOME = $originalHome
-                }
-                else {
-                    Remove-Item Env:HOME -ErrorAction SilentlyContinue
-                }
+            else {
+                Remove-Item Env:HOME -ErrorAction SilentlyContinue
             }
         }
     }

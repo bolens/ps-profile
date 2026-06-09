@@ -51,12 +51,10 @@ Describe 'profile.d/jq-yq.ps1 extended scenarios' {
         }
 
         $testFile = New-TestTempFile -Prefix 'jq-fragment-test' -Extension '.json' -Content '{"ok":true}'
-        try {
-            $output = Convert-JqToJson -File $testFile 2>&1 3>&1 | Out-String
-            Assert-TestMissingToolWarning -Output $output -Pattern 'jq not found'
-        }
-        finally {
-            Remove-TestArtifacts
-        }
+                $output = Convert-JqToJson -File $testFile 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'jq not found'
+    }
+    finally {
+        Remove-TestArtifacts
     }
 }

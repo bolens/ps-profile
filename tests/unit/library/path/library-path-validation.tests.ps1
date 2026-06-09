@@ -117,15 +117,13 @@ Describe 'PathValidation Module Functions' {
                 Remove-Item -Path Function:\Test-PathExists -Force -ErrorAction SilentlyContinue
             }
             
-            try {
-                $defaultPath = $script:TestDir
-                $result = Resolve-DefaultPath -Path $script:TestFile -DefaultPath $defaultPath
-                $result | Should -Be $script:TestFile
-            }
-            finally {
-                if ($originalTestPathExists) {
-                    Import-Module (Join-Path $script:LibPath 'file' 'FileSystem.psm1') -DisableNameChecking -ErrorAction SilentlyContinue -Force
-                }
+                        $defaultPath = $script:TestDir
+            $result = Resolve-DefaultPath -Path $script:TestFile -DefaultPath $defaultPath
+            $result | Should -Be $script:TestFile
+        }
+        finally {
+            if ($originalTestPathExists) {
+                Import-Module (Join-Path $script:LibPath 'file' 'FileSystem.psm1') -DisableNameChecking -ErrorAction SilentlyContinue -Force
             }
         }
     }

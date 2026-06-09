@@ -56,14 +56,12 @@ Describe 'Error Handling Module' {
     Context 'Write-ProfileError' {
         It 'logs error to file when debug mode is enabled' {
             # Create an error record by executing a script that throws
-            try {
-                & {
-                    throw "Test error"
-                }
+                        & {
+                throw "Test error"
             }
-            catch {
-                $errorRecord = $_
-            }
+        }
+        catch {
+            $errorRecord = $_
 
             Write-ProfileError -ErrorRecord $errorRecord -Context "Test context" -Category "Profile"
 

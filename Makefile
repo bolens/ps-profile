@@ -204,9 +204,10 @@ check-task-parity: ## Check task parity across all task runner files
 generate-task-parity: ## Generate missing tasks to achieve parity across all task runner files
 	pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate $(ARGS)
 
-drift-link: ## Link tests and guides to source targets (drift.lock)
+drift-link: ## Link tests, guides, and API docs to source targets (drift.lock)
 	pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh
 	pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh
+	pwsh -NoProfile -File scripts/utils/code-quality/link-api-drift.ps1 -Refresh
 
 drift-check: ## Check that doc links and bindings are current (drift)
 	drift check
@@ -244,7 +245,7 @@ test-performance-batch: ## Run performance tests per file with summary
 test-unit-batch: ## Run unit tests per file with summary (use -Filter profile- etc.)
 	pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1 $(ARGS)
 
-test-conversion-batch: ## Run conversion integration tests by subdirectory (use -- -RelativePath data/structured etc.)
+test-conversion-batch: ## Run conversion integration tests by subdirectory (use -- -RelativePath data/structured -PerFile for per-file structured runs)
 	pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 $(ARGS)
 
 test-conversion-all-batch: ## Run all conversion integration sub-batches (document, media/*, data/*)

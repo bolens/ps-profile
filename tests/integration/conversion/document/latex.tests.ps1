@@ -13,69 +13,63 @@
 
 Describe 'LaTeX and Specialized Document Format Conversion Tests' {
     BeforeAll {
-        try {
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+                $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+            Category = 'BeforeAll'
+        }
+        Write-Error "Failed to initialize LaTeX document conversion tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
+    }
+
+    Context 'Document conversion utilities - RST and LaTeX' {
+        It 'ConvertFrom-RstToMarkdown converts RST to Markdown' {
+            $tempFile = $null
+                        Get-Command ConvertFrom-RstToMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $rst = 'Test RST Document'
+            $tempFile = Join-Path $TestDrive 'test.rst'
+            Set-Content -Path $tempFile -Value $rst
+            # Test that function doesn't throw when called (pandoc may not be available)
+            { ConvertFrom-RstToMarkdown -InputPath $tempFile } | Should -Not -Throw
         }
         catch {
             $errorDetails = @{
                 Message  = $_.Exception.Message
                 Type     = $_.Exception.GetType().FullName
                 Location = $_.InvocationInfo.ScriptLineNumber
-                Category = 'BeforeAll'
+                Category = 'Conversion'
+                TestFile = $tempFile
             }
-            Write-Error "Failed to initialize LaTeX document conversion tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            Write-Error "ConvertFrom-RstToMarkdown test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
             throw
-        }
-    }
-
-    Context 'Document conversion utilities - RST and LaTeX' {
-        It 'ConvertFrom-RstToMarkdown converts RST to Markdown' {
-            $tempFile = $null
-            try {
-                Get-Command ConvertFrom-RstToMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-                # Test function existence and basic parameter handling
-                $rst = 'Test RST Document'
-                $tempFile = Join-Path $TestDrive 'test.rst'
-                Set-Content -Path $tempFile -Value $rst
-                # Test that function doesn't throw when called (pandoc may not be available)
-                { ConvertFrom-RstToMarkdown -InputPath $tempFile } | Should -Not -Throw
-            }
-            catch {
-                $errorDetails = @{
-                    Message  = $_.Exception.Message
-                    Type     = $_.Exception.GetType().FullName
-                    Location = $_.InvocationInfo.ScriptLineNumber
-                    Category = 'Conversion'
-                    TestFile = $tempFile
-                }
-                Write-Error "ConvertFrom-RstToMarkdown test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
-            }
         }
 
         It 'ConvertFrom-LaTeXToMarkdown converts LaTeX to Markdown' {
             $tempFile = $null
-            try {
-                Get-Command ConvertFrom-LaTeXToMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-                # Test function existence and basic parameter handling
-                $latex = '\documentclass{article}\begin{document}Test\end{document}'
-                $tempFile = Join-Path $TestDrive 'test.tex'
-                Set-Content -Path $tempFile -Value $latex
-                # Test that function doesn't throw when called (pandoc may not be available)
-                { ConvertFrom-LaTeXToMarkdown -InputPath $tempFile } | Should -Not -Throw
+                        Get-Command ConvertFrom-LaTeXToMarkdown -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
+            # Test function existence and basic parameter handling
+            $latex = '\documentclass{article}\begin{document}Test\end{document}'
+            $tempFile = Join-Path $TestDrive 'test.tex'
+            Set-Content -Path $tempFile -Value $latex
+            # Test that function doesn't throw when called (pandoc may not be available)
+            { ConvertFrom-LaTeXToMarkdown -InputPath $tempFile } | Should -Not -Throw
+        }
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+                Category = 'Conversion'
+                TestFile = $tempFile
             }
-            catch {
-                $errorDetails = @{
-                    Message  = $_.Exception.Message
-                    Type     = $_.Exception.GetType().FullName
-                    Location = $_.InvocationInfo.ScriptLineNumber
-                    Category = 'Conversion'
-                    TestFile = $tempFile
-                }
-                Write-Error "ConvertFrom-LaTeXToMarkdown test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
-            }
+            Write-Error "ConvertFrom-LaTeXToMarkdown test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
         }
     }
 
@@ -201,23 +195,21 @@ This is test content.
 
         It 'Textile conversion functions handle missing input file gracefully' {
             $nonExistentFile = $null
-            try {
-                $nonExistentFile = Join-Path $TestDrive 'nonexistent.textile'
-                
-                # Should throw an error for missing file
-                { ConvertFrom-TextileToMarkdown -InputPath $nonExistentFile } | Should -Not -Throw
+                        $nonExistentFile = Join-Path $TestDrive 'nonexistent.textile'
+            
+            # Should throw an error for missing file
+            { ConvertFrom-TextileToMarkdown -InputPath $nonExistentFile } | Should -Not -Throw
+        }
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+                Category = 'ErrorHandling'
+                TestFile = $nonExistentFile
             }
-            catch {
-                $errorDetails = @{
-                    Message  = $_.Exception.Message
-                    Type     = $_.Exception.GetType().FullName
-                    Location = $_.InvocationInfo.ScriptLineNumber
-                    Category = 'ErrorHandling'
-                    TestFile = $nonExistentFile
-                }
-                Write-Error "Textile conversion error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
-            }
+            Write-Error "Textile conversion error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
         }
     }
 
@@ -320,23 +312,21 @@ This is test content.
 
         It 'DjVu conversion functions handle missing input file gracefully' {
             $nonExistentFile = $null
-            try {
-                $nonExistentFile = Join-Path $TestDrive 'nonexistent.djvu'
-                
-                # Should throw an error for missing file
-                { ConvertFrom-DjvuToPdf -InputPath $nonExistentFile } | Should -Not -Throw
+                        $nonExistentFile = Join-Path $TestDrive 'nonexistent.djvu'
+            
+            # Should throw an error for missing file
+            { ConvertFrom-DjvuToPdf -InputPath $nonExistentFile } | Should -Not -Throw
+        }
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+                Category = 'ErrorHandling'
+                TestFile = $nonExistentFile
             }
-            catch {
-                $errorDetails = @{
-                    Message  = $_.Exception.Message
-                    Type     = $_.Exception.GetType().FullName
-                    Location = $_.InvocationInfo.ScriptLineNumber
-                    Category = 'ErrorHandling'
-                    TestFile = $nonExistentFile
-                }
-                Write-Error "DjVu conversion error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
-            }
+            Write-Error "DjVu conversion error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
         }
 
         Context 'LaTeX conversion utilities' {

@@ -49,9 +49,6 @@ function Get-GenerateDocsFixture {
         }
         finally {
             foreach ($path in @($profileDir, $outputDir)) {
-                if (Test-Path -LiteralPath $path) {
-                    Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
-                }
             }
         }
     }
@@ -84,9 +81,6 @@ function Get-GenerateDocsFixture {
         }
         finally {
             foreach ($path in @($profileDir, $outputDir)) {
-                if (Test-Path -LiteralPath $path) {
-                    Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
-                }
             }
         }
     }
@@ -124,9 +118,25 @@ function Get-GenerateDocsIncrementalFixture {
         }
         finally {
             foreach ($path in @($profileDir, $outputDir)) {
-                if (Test-Path -LiteralPath $path) {
-                    Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
-                }
+            }
+        }
+    }
+
+    It 'Exits successfully when the profile directory contains no documented commands' {
+        $profileDir = New-TestTempDirectory -Prefix 'GenerateDocsEmptyProfile'
+        $outputDir = New-TestTempDirectory -Prefix 'GenerateDocsEmptyOutput'
+        try {
+            $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDocsScript -ArgumentList @(
+                '-ProfilePath', $profileDir,
+                '-OutputPath', $outputDir
+            )
+
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'No functions or aliases with documentation found'
+            @(Get-ChildItem -LiteralPath $outputDir -Recurse -File -ErrorAction SilentlyContinue).Count | Should -Be 0
+        }
+        finally {
+            foreach ($path in @($profileDir, $outputDir)) {
             }
         }
     }

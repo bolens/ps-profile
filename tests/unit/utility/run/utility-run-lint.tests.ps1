@@ -73,19 +73,17 @@ function Get-RunLintFixture {
 '@ -Encoding UTF8
 
             Push-Location $repo
-            try {
-                git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
-                git add profile.d/lint-fixture.ps1
-                if (Test-Path -LiteralPath (Join-Path $repo 'PSScriptAnalyzerSettings.psd1')) {
-                    git add PSScriptAnalyzerSettings.psd1
-                }
-                git commit -m 'init lint fixture' -q
+                        git init -q | Out-Null
+            git config user.email 'fixture@example.com'
+            git config user.name 'Fixture'
+            git add profile.d/lint-fixture.ps1
+            if (Test-Path -LiteralPath (Join-Path $repo 'PSScriptAnalyzerSettings.psd1')) {
+                git add PSScriptAnalyzerSettings.psd1
             }
-            finally {
-                Pop-Location
-            }
+            git commit -m 'init lint fixture' -q
+        }
+        finally {
+            Pop-Location
 
             $result = Invoke-TestScriptFile -ScriptPath (Join-Path $runnerDir 'run-lint.ps1')
 
@@ -95,11 +93,6 @@ function Get-RunLintFixture {
                 Select-Object -First 1
             $reportFile | Should -Not -BeNullOrEmpty
             Test-Path -LiteralPath $reportFile.FullName | Should -BeTrue
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 
@@ -128,19 +121,17 @@ function Get-LintViolationFixture {
 '@ -Encoding UTF8
 
             Push-Location $repo
-            try {
-                git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
-                git add scripts/lint-fixtures/lint-violation.ps1
-                if (Test-Path -LiteralPath (Join-Path $repo 'PSScriptAnalyzerSettings.psd1')) {
-                    git add PSScriptAnalyzerSettings.psd1
-                }
-                git commit -m 'init lint violation fixture' -q
+                        git init -q | Out-Null
+            git config user.email 'fixture@example.com'
+            git config user.name 'Fixture'
+            git add scripts/lint-fixtures/lint-violation.ps1
+            if (Test-Path -LiteralPath (Join-Path $repo 'PSScriptAnalyzerSettings.psd1')) {
+                git add PSScriptAnalyzerSettings.psd1
             }
-            finally {
-                Pop-Location
-            }
+            git commit -m 'init lint violation fixture' -q
+        }
+        finally {
+            Pop-Location
 
             $result = Invoke-TestScriptFile -ScriptPath (Join-Path $runnerDir 'run-lint.ps1')
 
@@ -150,11 +141,6 @@ function Get-LintViolationFixture {
                 Select-Object -First 1
             $reportFile | Should -Not -BeNullOrEmpty
             @((Get-Content -LiteralPath $reportFile.FullName -Raw | ConvertFrom-Json)).Count | Should -BeGreaterThan 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
         }
     }
 }

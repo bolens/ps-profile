@@ -35,13 +35,11 @@ Describe 'Fragment Missing Dependencies' {
         $script:InvokeProfileSilently = {
             # Temporarily silence warnings so intentionally failing fragments don't pollute test output.
             $originalWarningPreference = $WarningPreference
-            try {
-                $WarningPreference = 'SilentlyContinue'
-                . $script:ProfilePath
-            }
-            finally {
-                $WarningPreference = $originalWarningPreference
-            }
+                        $WarningPreference = 'SilentlyContinue'
+            . $script:ProfilePath
+        }
+        finally {
+            $WarningPreference = $originalWarningPreference
         }
 
         # Helper to create a temporary fragment with specific content

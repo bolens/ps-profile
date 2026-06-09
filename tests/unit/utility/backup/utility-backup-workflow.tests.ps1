@@ -2,7 +2,7 @@
 tests/unit/utility-backup-workflow.tests.ps1
 
 .SYNOPSIS
-    End-to-end workflow tests across FileBackup.psm1 and manage-backups.ps1.
+    End-to-end workflow tests for FileBackup.psm1 list, restore, and prune operations.
 #>
 
 BeforeAll {
@@ -16,15 +16,13 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:ManageBackupsScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'manage-backups.ps1'
     $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     Import-Module (Join-Path $libPath 'file' 'FileBackup.psm1') -DisableNameChecking -ErrorAction Stop
     $ConfirmPreference = 'None'
 }
 
 Describe 'Repository backup workflow' {
-    It 'Creates, lists, restores, and prunes backups through the shared stack' {
+    It 'Creates, lists, restores, and prunes backups through FileBackup module functions' {
         $repo = New-TestTempDirectory -Prefix 'BackupWorkflow'
         $source = Join-Path $repo 'workflow.txt'
         Set-Content -LiteralPath $source -Value 'workflow-v1' -NoNewline
@@ -33,35 +31,15 @@ Describe 'Repository backup workflow' {
         New-FileBackup -SourcePath $source -RepoRoot $repo -Category 'workflow' -SkipPrune | Out-Null
         Set-Content -LiteralPath $source -Value 'workflow-live' -NoNewline
 
-        $listResult = Invoke-BackupTestScript -ScriptPath $script:ManageBackupsScript -ArgumentList @(
-            '-Action', 'List',
-            '-RepoRoot', $repo,
-            '-Category', 'workflow',
-            '-SourcePath', $source
-        )
-        $listResult.ExitCode | Should -Be 0
-        $listResult.Output | Should -Match 'workflow'
+        $listed = @(Get-FileBackups -RepoRoot $repo -Category 'workflow' -SourcePath $source)
+        $listed.Count | Should -Be 2
+        $listed[0].SourcePath | Should -Match 'workflow\.txt'
 
-        $restoreResult = Invoke-BackupTestScript -ScriptPath $script:ManageBackupsScript -ArgumentList @(
-            '-Action', 'Restore',
-            '-RepoRoot', $repo,
-            '-Category', 'workflow',
-            '-SourcePath', $source,
-            '-Latest',
-            '-Force'
-        )
-        $restoreResult.ExitCode | Should -Be 0
-        $restoreResult.Output | Should -Match 'Restored backup to'
+        Restore-FileBackup -RepoRoot $repo -Category 'workflow' -SourcePath $source -Latest -Force | Out-Null
         Get-Content -LiteralPath $source -Raw | Should -Be 'workflow-v2'
 
-        $pruneResult = Invoke-BackupTestScript -ScriptPath $script:ManageBackupsScript -ArgumentList @(
-            '-Action', 'Prune',
-            '-RepoRoot', $repo,
-            '-Category', 'workflow',
-            '-KeepCount', '1'
-        )
-        $pruneResult.ExitCode | Should -Be 0
-        $pruneResult.Output | Should -Match 'Removed'
+        $removed = Remove-OldFileBackups -RepoRoot $repo -Category 'workflow' -KeepCount 1
+        $removed | Should -BeGreaterOrEqual 1
         @(Get-FileBackups -RepoRoot $repo -Category 'workflow' -SourcePath $source).Count | Should -Be 1
     }
 
@@ -75,5 +53,24 @@ Describe 'Repository backup workflow' {
         Test-Path -LiteralPath (Join-Path $repo '.backups') | Should -Be $true
         Test-Path -LiteralPath $source | Should -Be $true
         Get-ChildItem -LiteralPath $repo -File | ForEach-Object { $_.Name | Should -Not -Match '\.backup\.' }
+    }
+
+    It 'Prunes all backups in a category when SourcePath is omitted' {
+        $repo = New-TestTempDirectory -Prefix 'BackupWorkflowCategoryPrune'
+        $first = Join-Path $repo 'first.txt'
+        $second = Join-Path $repo 'second.txt'
+
+        1..2 | ForEach-Object {
+            Set-Content -LiteralPath $first -Value "first-$_" -NoNewline
+            New-FileBackup -SourcePath $first -RepoRoot $repo -Category 'workflow-prune-all' -SkipPrune | Out-Null
+            Start-Sleep -Milliseconds 20
+        }
+        Set-Content -LiteralPath $second -Value 'second-v1' -NoNewline
+        New-FileBackup -SourcePath $second -RepoRoot $repo -Category 'workflow-prune-all' -SkipPrune | Out-Null
+
+        Remove-OldFileBackups -RepoRoot $repo -Category 'workflow-prune-all' -KeepCount 1 | Out-Null
+
+        @(Get-FileBackups -RepoRoot $repo -Category 'workflow-prune-all' -SourcePath $first).Count | Should -Be 1
+        @(Get-FileBackups -RepoRoot $repo -Category 'workflow-prune-all' -SourcePath $second).Count | Should -Be 1
     }
 }

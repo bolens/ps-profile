@@ -8,34 +8,32 @@ tests/integration/system/monitor.tests.ps1
 
 Describe 'System Monitor Integration Tests' {
     BeforeAll {
-        try {
-            $current = Get-Item $PSScriptRoot
-            while ($null -ne $current) {
-                $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
-                if (Test-Path -LiteralPath $testSupportPath) {
-                    . $testSupportPath
-                    break
-                }
-                if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
-                $current = $current.Parent
+                $current = Get-Item $PSScriptRoot
+        while ($null -ne $current) {
+            $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+            if (Test-Path -LiteralPath $testSupportPath) {
+                . $testSupportPath
+                break
             }
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
-                throw "Get-TestPath returned null or empty value for ProfileDir"
-            }
-            if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-                throw "Profile directory not found at: $script:ProfileDir"
-            }
+            if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+            $current = $current.Parent
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to initialize system monitor tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
+            throw "Get-TestPath returned null or empty value for ProfileDir"
         }
+        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
+            throw "Profile directory not found at: $script:ProfileDir"
+        }
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize system monitor tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
 
     Context 'System monitor functions' {
@@ -53,18 +51,16 @@ Describe 'System Monitor Integration Tests' {
         }
 
         It 'Show-SystemDashboard executes without error' {
-            try {
-                { Show-SystemDashboard } | Should -Not -Throw -Because "Show-SystemDashboard should execute without errors"
+                        { Show-SystemDashboard } | Should -Not -Throw -Because "Show-SystemDashboard should execute without errors"
+        }
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Function = 'Show-SystemDashboard'
+                Category = $_.CategoryInfo.Category
             }
-            catch {
-                $errorDetails = @{
-                    Message  = $_.Exception.Message
-                    Function = 'Show-SystemDashboard'
-                    Category = $_.CategoryInfo.Category
-                }
-                Write-Error "Show-SystemDashboard execution test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
-            }
+            Write-Error "Show-SystemDashboard execution test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
         }
 
         It 'Show-SystemStatus function is available' {

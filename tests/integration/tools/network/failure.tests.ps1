@@ -6,33 +6,31 @@ Tests for network failure scenarios and error handling.
 
 
 BeforeAll {
-    try {
         # Get repository root
-        $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-        $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
-        $script:ScriptsChecksPath = Get-TestPath -RelativePath 'scripts\checks' -StartPath $PSScriptRoot -EnsureExists
-        if ($null -eq $script:ScriptsUtilsPath -or [string]::IsNullOrWhiteSpace($script:ScriptsUtilsPath)) {
-            throw "Get-TestPath returned null or empty value for ScriptsUtilsPath"
-        }
-        if ($null -eq $script:ScriptsChecksPath -or [string]::IsNullOrWhiteSpace($script:ScriptsChecksPath)) {
-            throw "Get-TestPath returned null or empty value for ScriptsChecksPath"
-        }
-        if (-not (Test-Path -LiteralPath $script:ScriptsUtilsPath)) {
-            throw "Scripts utils path not found at: $script:ScriptsUtilsPath"
-        }
-        if (-not (Test-Path -LiteralPath $script:ScriptsChecksPath)) {
-            throw "Scripts checks path not found at: $script:ScriptsChecksPath"
-        }
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
+    $script:ScriptsChecksPath = Get-TestPath -RelativePath 'scripts\checks' -StartPath $PSScriptRoot -EnsureExists
+    if ($null -eq $script:ScriptsUtilsPath -or [string]::IsNullOrWhiteSpace($script:ScriptsUtilsPath)) {
+        throw "Get-TestPath returned null or empty value for ScriptsUtilsPath"
     }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
-        }
-        Write-Error "Failed to initialize network failure tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+    if ($null -eq $script:ScriptsChecksPath -or [string]::IsNullOrWhiteSpace($script:ScriptsChecksPath)) {
+        throw "Get-TestPath returned null or empty value for ScriptsChecksPath"
     }
+    if (-not (Test-Path -LiteralPath $script:ScriptsUtilsPath)) {
+        throw "Scripts utils path not found at: $script:ScriptsUtilsPath"
+    }
+    if (-not (Test-Path -LiteralPath $script:ScriptsChecksPath)) {
+        throw "Scripts checks path not found at: $script:ScriptsChecksPath"
+    }
+}
+catch {
+    $errorDetails = @{
+        Message  = $_.Exception.Message
+        Type     = $_.Exception.GetType().FullName
+        Location = $_.InvocationInfo.ScriptLineNumber
+    }
+    Write-Error "Failed to initialize network failure tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+    throw
 }
 
 Describe 'Network Failure Scenarios' {

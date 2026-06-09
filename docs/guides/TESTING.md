@@ -207,7 +207,9 @@ The module uses a structured approach where module configurations are separated 
 
 - `Get-TestDataPath` / `Get-TestArtifactsPath` - Canonical storage under `tests/test-data` and `tests/test-artifacts`
 - `New-TestTempDirectory` / `New-TestTempFile` - Creates transient paths and registers them for cleanup
+- `New-TestExternalTempDirectory` - Creates temp dirs outside the repo (no `.git` ancestor; avoids `/tests/` filter paths)
 - `Get-TestArtifactPath` - Single named file under `tests/test-data` (use instead of bare filenames like `backup.dump`)
+- `Get-TestRepoRelativePath` - Converts an absolute artifact path to a repo-relative path for CLI scripts
 - `Register-TestCleanupPath` - Registers a path for `Remove-TestArtifacts`
 
 **TestNpmHelpers Module** (`TestSupport/TestNpmHelpers.ps1`):
@@ -240,7 +242,7 @@ BeforeAll {
 }
 
 # Transient outputs: never use bare relative paths (for example 'backup.dump' or 'CHANGELOG.md')
-# at repository CWD — use Get-TestArtifactPath, New-TestTempDirectory, or New-TestTempFile.
+# at repository CWD — use Get-TestArtifactPath, New-TestTempDirectory, New-TestExternalTempDirectory, or New-TestTempFile.
 
 AfterAll {
     # Cleanup if needed

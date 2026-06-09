@@ -29,13 +29,11 @@ Describe 'Hash Format Conversion Tests' {
             $base64 | Should -Not -BeNullOrEmpty
             $base64 | Should -BeOfType [string]
             # Verify it's valid Base64
-            try {
-                $bytes = [Convert]::FromBase64String($base64)
-                $bytes | Should -Not -BeNullOrEmpty
-            }
-            catch {
-                Set-ItResult -Inconclusive -Because "Base64 conversion validation failed"
-            }
+                        $bytes = [Convert]::FromBase64String($base64)
+            $bytes | Should -Not -BeNullOrEmpty
+        }
+        catch {
+            Set-ItResult -Inconclusive -Because "Base64 conversion validation failed"
         }
 
         It 'ConvertFrom-HashBase64ToHex function exists' {

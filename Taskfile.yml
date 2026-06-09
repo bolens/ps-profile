@@ -49,7 +49,7 @@ tasks:
       - pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1 {{.CLI_ARGS}}
 
   test-conversion-batch:
-    desc: Run conversion integration tests by subdirectory (use -- -RelativePath data/structured etc.)
+    desc: Run conversion integration tests by subdirectory (use -- -RelativePath data/structured -PerFile for per-file structured runs)
     cmds:
       - pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 {{.CLI_ARGS}}
 
@@ -382,10 +382,11 @@ tasks:
       - pwsh -NoProfile -File scripts/utils/task-parity/check-task-parity.ps1 -Generate {{.CLI_ARGS}}
 
   drift-link:
-    desc: Link tests and guides to source targets (drift.lock)
+    desc: Link tests, guides, and API docs to source targets (drift.lock)
     cmds:
       - pwsh -NoProfile -File scripts/utils/code-quality/link-test-drift.ps1 -Refresh
       - pwsh -NoProfile -File scripts/utils/code-quality/link-guide-drift.ps1 -Refresh
+      - pwsh -NoProfile -File scripts/utils/code-quality/link-api-drift.ps1 -Refresh
 
   drift-check:
     desc: Check that doc links and bindings are current (drift)

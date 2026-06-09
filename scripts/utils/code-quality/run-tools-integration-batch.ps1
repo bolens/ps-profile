@@ -5,8 +5,8 @@
 
 .DESCRIPTION
     Tools tests share global functions/aliases across files, so the default is per-file
-    isolation (one run-pester process per *.tests.ps1). Use -SingleSession for one combined
-    run (faster but requires pwsh -NonInteractive).
+    isolation (one run-pester process per *.tests.ps1, discovered recursively). Use
+    -SingleSession for one combined run (faster but requires pwsh -NonInteractive).
 
 .PARAMETER RelativePath
     Optional subdirectory under tests/integration/tools (default: run all tools tests).

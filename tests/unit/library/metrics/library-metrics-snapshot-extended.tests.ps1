@@ -416,6 +416,31 @@ Describe 'MetricsSnapshot extended scenarios' {
             }
         }
 
+        It 'Warns with Write-Warning when performance metrics JSON cannot be parsed without structured logging' {
+            $repoRoot = Join-Path $script:TempDir 'performance-warning-repo'
+            $dataDir = Join-Path $repoRoot 'scripts' 'data'
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $dataDir 'performance-baseline.json') -Value '{ bad-json' -Encoding UTF8
+
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+
+            try {
+                $snapshotPath = Get-SnapshotPathFromOutput -Output @(Save-MetricsSnapshot -OutputPath (Join-Path $repoRoot 'history') -IncludePerformanceMetrics -RepoRoot $repoRoot)
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
         It 'Warns with Write-Warning when code metrics loading fails without structured logging or debug' {
             $repoRoot = Join-Path $script:TempDir 'code-metrics-warning-repo'
             $dataDir = Join-Path $repoRoot 'scripts' 'data'
@@ -448,9 +473,225 @@ Describe 'MetricsSnapshot extended scenarios' {
             }
         }
 
+        It 'Emits level 3 save error diagnostics when structured logging is unavailable' {
+            $repoRoot = Join-Path $script:TempDir 'save-error-debug3-repo'
+            $historyDir = Join-Path $repoRoot 'history'
+            New-Item -ItemType Directory -Path $historyDir -Force | Out-Null
+
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                InModuleScope -ModuleName MetricsSnapshot {
+                    Mock Set-Content {
+                        throw 'snapshot save debug3 probe'
+                    }
+
+                    { Save-MetricsSnapshot -OutputPath $historyDir -RepoRoot $repoRoot } |
+                        Should -Throw '*Failed to save metrics snapshot*'
+                }
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Writes save errors with Write-Error when structured logging and debug output are unavailable' {
+            $repoRoot = Join-Path $script:TempDir 'save-error-no-debug-repo'
+            $historyDir = Join-Path $repoRoot 'history'
+            New-Item -ItemType Directory -Path $historyDir -Force | Out-Null
+
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+
+            try {
+                InModuleScope -ModuleName MetricsSnapshot {
+                    Mock Set-Content {
+                        throw 'snapshot save no-debug probe'
+                    }
+
+                    { Save-MetricsSnapshot -OutputPath $historyDir -RepoRoot $repoRoot } |
+                        Should -Throw '*Failed to save metrics snapshot*'
+                }
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Warns with Write-Warning when code metrics loading fails at debug level 1 without structured logging' {
+            $repoRoot = Join-Path $script:TempDir 'code-metrics-debug-warning-repo'
+            $dataDir = Join-Path $repoRoot 'scripts' 'data'
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            @{ TotalFiles = 2 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $dataDir 'code-metrics.json') -Encoding UTF8
+
+            function global:Read-JsonFile {
+                param([string]$Path)
+                throw 'code metrics debug warning probe'
+            }
+
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+
+            try {
+                $snapshotPath = Get-SnapshotPathFromOutput -Output @(Save-MetricsSnapshot -OutputPath (Join-Path $repoRoot 'history') -IncludeCodeMetrics -RepoRoot $repoRoot)
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                Remove-Item -Path Function:Read-JsonFile -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'utilities' 'JsonUtilities.psm1') -DisableNameChecking -Force
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Loads the module through manual import fallbacks when SafeImport is unavailable' {
+            $metricsDir = Join-Path $script:TempDir 'metrics-isolated'
+            New-Item -ItemType Directory -Path $metricsDir -Force | Out-Null
+            Copy-Item -LiteralPath (Join-Path $script:LibPath 'metrics' 'MetricsSnapshot.psm1') -Destination $metricsDir
+            Copy-Item -LiteralPath (Join-Path $script:LibPath 'path' 'PathResolution.psm1') -Destination $metricsDir
+            Copy-Item -LiteralPath (Join-Path $script:LibPath 'file' 'FileSystem.psm1') -Destination $metricsDir
+            Copy-Item -LiteralPath (Join-Path $script:LibPath 'utilities' 'JsonUtilities.psm1') -Destination $metricsDir
+
+            Get-Module SafeImport -All | Remove-Module -Force -ErrorAction SilentlyContinue
+            Remove-Module MetricsSnapshot, PathResolution, FileSystem, JsonUtilities -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Import-ModuleSafely -ErrorAction SilentlyContinue -Force
+
+            try {
+                { Import-Module (Join-Path $metricsDir 'MetricsSnapshot.psm1') -DisableNameChecking -Force } | Should -Not -Throw
+                Get-Command Save-MetricsSnapshot -ErrorAction Stop | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                Remove-Module MetricsSnapshot -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'path' 'PathResolution.psm1') -DisableNameChecking -Force
+                Import-Module (Join-Path $script:LibPath 'file' 'FileSystem.psm1') -DisableNameChecking -Force
+                Import-Module (Join-Path $script:LibPath 'utilities' 'JsonUtilities.psm1') -DisableNameChecking -Force
+                Import-Module (Join-Path $script:LibPath 'metrics' 'MetricsSnapshot.psm1') -DisableNameChecking -Force
+            }
+        }
+
+        It 'Writes save errors with Write-Error when debug is level 1 and structured logging is unavailable' {
+            $repoRoot = Join-Path $script:TempDir 'save-error-debug1-repo'
+            $historyDir = Join-Path $repoRoot 'history'
+            New-Item -ItemType Directory -Path $historyDir -Force | Out-Null
+
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+
+            try {
+                InModuleScope -ModuleName MetricsSnapshot {
+                    Mock Set-Content {
+                        throw 'snapshot save debug1 probe'
+                    }
+
+                    { Save-MetricsSnapshot -OutputPath $historyDir -RepoRoot $repoRoot } |
+                        Should -Throw '*Failed to save metrics snapshot*'
+                }
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses structured code-metrics warnings when debug is explicitly disabled' {
+            Enable-TestStructuredLogging
+
+            $repoRoot = Join-Path $script:TempDir 'structured-code-metrics-debug-off-repo'
+            $dataDir = Join-Path $repoRoot 'scripts' 'data'
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            @{ TotalFiles = 4 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $dataDir 'code-metrics.json') -Encoding UTF8
+
+            function global:Read-JsonFile {
+                param([string]$Path)
+                throw 'structured code metrics debug-off probe'
+            }
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '0'
+
+            try {
+                $snapshotPath = Get-SnapshotPathFromOutput -Output @(Save-MetricsSnapshot -OutputPath (Join-Path $repoRoot 'history') -IncludeCodeMetrics -RepoRoot $repoRoot)
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                Remove-Item -Path Function:Read-JsonFile -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'utilities' 'JsonUtilities.psm1') -DisableNameChecking -Force
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Skips code metrics collection when the metrics file is missing' {
+            $repoRoot = Join-Path $script:TempDir 'no-code-metrics-repo'
+            $outputDir = Join-Path $repoRoot 'history'
+            New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+
+            $snapshotPath = Save-MetricsSnapshot -OutputPath $outputDir -IncludeCodeMetrics -RepoRoot $repoRoot
+            $snapshot = Get-Content -LiteralPath $snapshotPath -Raw | ConvertFrom-Json
+
+            $snapshot.PSObject.Properties.Name | Should -Not -Contain 'CodeMetrics'
+        }
+
+        It 'Skips performance metrics collection when the baseline file is missing' {
+            $repoRoot = Join-Path $script:TempDir 'no-performance-metrics-repo'
+            $outputDir = Join-Path $repoRoot 'history'
+            New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
+
+            $snapshotPath = Save-MetricsSnapshot -OutputPath $outputDir -IncludePerformanceMetrics -RepoRoot $repoRoot
+            $snapshot = Get-Content -LiteralPath $snapshotPath -Raw | ConvertFrom-Json
+
+            $snapshot.PSObject.Properties.Name | Should -Not -Contain 'PerformanceMetrics'
+        }
+
+        It 'Resolves the repository root through Get-RepoRoot when RepoRoot is omitted' {
+            $repoRoot = Join-Path $script:TempDir 'auto-repo-root'
+            $historyDir = Join-Path $repoRoot 'history'
+            New-Item -ItemType Directory -Path (Join-Path $repoRoot '.git') -Force | Out-Null
+
+            $previousLocation = Get-Location
+            try {
+                Set-Location -LiteralPath $repoRoot
+                $snapshotPath = Save-MetricsSnapshot -OutputPath $historyDir
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                Set-Location -LiteralPath $previousLocation.Path
+            }
+        }
+
         It 'Throws when repository root cannot be detected from the current directory' {
-            $isolatedDir = Join-Path ([System.IO.Path]::GetTempPath()) "MetricsSnapshotNoGit-$([Guid]::NewGuid().ToString('N'))"
-            New-Item -ItemType Directory -Path $isolatedDir -Force | Out-Null
+            $isolatedDir = New-TestExternalTempDirectory -Prefix 'MetricsSnapshotNoGit'
 
             function global:Get-RepoRoot {
                 param([string]$ScriptPath)
@@ -468,9 +709,26 @@ Describe 'MetricsSnapshot extended scenarios' {
                 Set-Location -LiteralPath $previousLocation.Path
                 Remove-Item -Path Function:Get-RepoRoot -ErrorAction SilentlyContinue -Force
                 Import-Module (Join-Path $script:LibPath 'path' 'PathResolution.psm1') -DisableNameChecking -Force
-                if (Test-Path -LiteralPath $isolatedDir) {
-                    Remove-Item -LiteralPath $isolatedDir -Recurse -Force -ErrorAction SilentlyContinue
-                }
+            }
+        }
+
+        It 'Throws when Get-RepoRoot fails and no git directory exists in the parent walk' {
+            $isolatedDir = New-TestExternalTempDirectory -Prefix 'MetricsSnapshotNoGitWalk'
+
+            function global:Get-RepoRoot {
+                param([string]$ScriptPath)
+                throw 'repo root walk probe'
+            }
+
+            $previousLocation = Get-Location
+            try {
+                Set-Location -LiteralPath $isolatedDir
+                { Save-MetricsSnapshot -OutputPath (Join-Path $isolatedDir 'history') } |
+                    Should -Throw '*Could not determine repository root*'
+            }
+            finally {
+                Set-Location -LiteralPath $previousLocation.Path
+                Remove-Item -Path Function:Get-RepoRoot -ErrorAction SilentlyContinue -Force
             }
         }
     }

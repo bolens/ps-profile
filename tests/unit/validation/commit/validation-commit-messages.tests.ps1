@@ -17,10 +17,10 @@ function global:New-CommitMessagesSmokeRepository {
 
     Push-Location $repo
     try {
-        & git init -q 2>$null
-        & git config user.email 'test@example.com' 2>$null
-        & git config user.name 'Test User' 2>$null
-        & git commit --allow-empty -m 'feat(init): seed repository' -q 2>$null
+    & git init -q 2>$null
+    & git config user.email 'test@example.com' 2>$null
+    & git config user.name 'Test User' 2>$null
+    & git commit --allow-empty -m 'feat(init): seed repository' -q 2>$null
     }
     finally {
         Pop-Location
@@ -54,33 +54,24 @@ Describe 'check-commit-messages.ps1' {
         }
 
         $repo = New-CommitMessagesSmokeRepository
+        $scriptPath = Join-Path $repo 'scripts' 'checks' 'check-commit-messages.ps1'
+        Push-Location $repo
         try {
-            $scriptPath = Join-Path $repo 'scripts' 'checks' 'check-commit-messages.ps1'
-            Push-Location $repo
-            try {
-                & git commit --allow-empty -m 'feat(test): add commit message smoke fixture' -q 2>$null
-            }
-            finally {
-                Pop-Location
-            }
-
-            Push-Location $repo
-            try {
-                $output = & pwsh -NoProfile -File $scriptPath -ArgumentList @('-Base', 'HEAD~1') 2>&1 | Out-String
-                $exitCode = $LASTEXITCODE
-            }
-            finally {
-                Pop-Location
-            }
-
-            $exitCode | Should -Be 0
-            $output | Should -Match 'Conventional Commits|Checking commits against base'
+            & git commit --allow-empty -m 'feat(test): add commit message smoke fixture' -q 2>$null
         }
         finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
         }
+                Push-Location $repo
+        try {
+            $output = & pwsh -NoProfile -File $scriptPath -ArgumentList @('-Base', 'HEAD~1') 2>&1 | Out-String
+            $exitCode = $LASTEXITCODE
+        }
+        finally {
+            Pop-Location
+        }
+                $exitCode | Should -Be 0
+        $output | Should -Match 'Conventional Commits|Checking commits against base'
     }
 
     It 'Documents Base parameter defaulting to origin/main in comment-based help' {
@@ -96,26 +87,18 @@ Describe 'check-commit-messages.ps1' {
         }
 
         $repo = New-CommitMessagesSmokeRepository
+        $scriptPath = Join-Path $repo 'scripts' 'checks' 'check-commit-messages.ps1'
+        Push-Location $repo
         try {
-            $scriptPath = Join-Path $repo 'scripts' 'checks' 'check-commit-messages.ps1'
-            Push-Location $repo
-            try {
-                & git commit --allow-empty -m 'bad commit message without conventional format' -q 2>$null
-                $output = & pwsh -NoProfile -File $scriptPath -ArgumentList @('-Base', 'HEAD~1') 2>&1 | Out-String
-                $exitCode = $LASTEXITCODE
-            }
-            finally {
-                Pop-Location
-            }
-
-            $exitCode | Should -BeIn @(1, 2)
-            $output | Should -Match 'invalid commit subjects|bad commit message'
+            & git commit --allow-empty -m 'bad commit message without conventional format' -q 2>$null
+            $output = & pwsh -NoProfile -File $scriptPath -ArgumentList @('-Base', 'HEAD~1') 2>&1 | Out-String
+            $exitCode = $LASTEXITCODE
         }
         finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
         }
+                $exitCode | Should -BeIn @(1, 2)
+        $output | Should -Match 'invalid commit subjects|bad commit message'
     }
 
     It 'Reports no commits to check when Base equals HEAD in an isolated repository' {
@@ -125,24 +108,16 @@ Describe 'check-commit-messages.ps1' {
         }
 
         $repo = New-CommitMessagesSmokeRepository
+        $scriptPath = Join-Path $repo 'scripts' 'checks' 'check-commit-messages.ps1'
+        Push-Location $repo
         try {
-            $scriptPath = Join-Path $repo 'scripts' 'checks' 'check-commit-messages.ps1'
-            Push-Location $repo
-            try {
-                $output = & pwsh -NoProfile -File $scriptPath -ArgumentList @('-Base', 'HEAD') 2>&1 | Out-String
-                $exitCode = $LASTEXITCODE
-            }
-            finally {
-                Pop-Location
-            }
-
-            $exitCode | Should -Be 0
-            $output | Should -Match 'No commits to check against HEAD'
+            $output = & pwsh -NoProfile -File $scriptPath -ArgumentList @('-Base', 'HEAD') 2>&1 | Out-String
+            $exitCode = $LASTEXITCODE
         }
         finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
         }
+                $exitCode | Should -Be 0
+        $output | Should -Match 'No commits to check against HEAD'
     }
 }

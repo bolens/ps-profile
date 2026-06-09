@@ -10,83 +10,68 @@ Describe 'TestSupport Modules' {
             if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
             $current = $current.Parent
         }
-        try {
-            $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-            if ($null -eq $script:RepoRoot -or [string]::IsNullOrWhiteSpace($script:RepoRoot)) {
-                throw "Get-TestRepoRoot returned null or empty value"
-            }
-            if (-not (Test-Path -LiteralPath $script:RepoRoot)) {
-                throw "Repository root not found at: $script:RepoRoot"
-            }
+                $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+        if ($null -eq $script:RepoRoot -or [string]::IsNullOrWhiteSpace($script:RepoRoot)) {
+            throw "Get-TestRepoRoot returned null or empty value"
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to initialize TestSupport tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+        if (-not (Test-Path -LiteralPath $script:RepoRoot)) {
+            throw "Repository root not found at: $script:RepoRoot"
         }
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize TestSupport tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
 
     Describe 'TestPaths Module' {
         Context 'Get-TestRepoRoot' {
             It 'Returns valid repository root path' {
-                try {
-                    $result = Get-TestRepoRoot -StartPath $PSScriptRoot
-                    $result | Should -Not -BeNullOrEmpty -Because "Get-TestRepoRoot should return a valid path"
-                    if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
-                        Test-Path -LiteralPath $result | Should -Be $true -Because "Repository root path should exist"
-                        Test-Path -LiteralPath (Join-Path $result '.git') | Should -Be $true -Because "Repository root should contain .git directory"
-                    }
-                    $result | Should -Be $script:RepoRoot -Because "Result should match cached repository root"
+                                $result = Get-TestRepoRoot -StartPath $PSScriptRoot
+                $result | Should -Not -BeNullOrEmpty -Because "Get-TestRepoRoot should return a valid path"
+                if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
+                    Test-Path -LiteralPath $result | Should -Be $true -Because "Repository root path should exist"
+                    Test-Path -LiteralPath (Join-Path $result '.git') | Should -Be $true -Because "Repository root should contain .git directory"
                 }
-                catch {
-                    $errorDetails = @{
-                        Message  = $_.Exception.Message
-                        Test     = 'Returns valid repository root path'
-                        Category = $_.CategoryInfo.Category
-                    }
-                    Write-Error "Get-TestRepoRoot test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                    throw
+                $result | Should -Be $script:RepoRoot -Because "Result should match cached repository root"
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Returns valid repository root path'
+                    Category = $_.CategoryInfo.Category
                 }
+                Write-Error "Get-TestRepoRoot test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
             }
 
             It 'Throws error when repository root cannot be found' {
-                # This specific test must use a location outside the repository tree;
-                # otherwise Get-TestRepoRoot will always find the repo .git directory.
-                $tempBase = [System.IO.Path]::GetTempPath()
-                $tempDir = Join-Path $tempBase "NoGitRepo-$([Guid]::NewGuid())"
-                New-Item -ItemType Directory -Path $tempDir -Force | Out-Null
-                try {
-                    { Get-TestRepoRoot -StartPath $tempDir } | Should -Throw
-                }
-                finally {
-                    Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-                }
+                $tempDir = New-TestExternalTempDirectory -Prefix 'NoGitRepo'
+                { Get-TestRepoRoot -StartPath $tempDir } | Should -Throw
             }
         }
 
         Context 'Get-TestPath' {
             It 'Resolves path relative to repository root' {
-                try {
-                    $result = Get-TestPath -RelativePath 'tests' -StartPath $PSScriptRoot
-                    $result | Should -Not -BeNullOrEmpty -Because "Get-TestPath should return a valid path"
-                    if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
-                        Test-Path -LiteralPath $result | Should -Be $true -Because "Resolved path should exist"
-                    }
-                    $result | Should -BeLike "*tests" -Because "Path should contain 'tests'"
+                                $result = Get-TestPath -RelativePath 'tests' -StartPath $PSScriptRoot
+                $result | Should -Not -BeNullOrEmpty -Because "Get-TestPath should return a valid path"
+                if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
+                    Test-Path -LiteralPath $result | Should -Be $true -Because "Resolved path should exist"
                 }
-                catch {
-                    $errorDetails = @{
-                        Message  = $_.Exception.Message
-                        Test     = 'Resolves path relative to repository root'
-                        Category = $_.CategoryInfo.Category
-                    }
-                    Write-Error "Get-TestPath test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                    throw
+                $result | Should -BeLike "*tests" -Because "Path should contain 'tests'"
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Resolves path relative to repository root'
+                    Category = $_.CategoryInfo.Category
                 }
+                Write-Error "Get-TestPath test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
             }
 
             It 'Throws error when EnsureExists is true and path does not exist' {
@@ -94,84 +79,76 @@ Describe 'TestSupport Modules' {
             }
 
             It 'Does not throw when EnsureExists is false and path does not exist' {
-                try {
-                    $result = Get-TestPath -RelativePath 'nonexistent-path-12345' -StartPath $PSScriptRoot
-                    $result | Should -Not -BeNullOrEmpty -Because "Get-TestPath should return a path even if it doesn't exist"
-                    if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
-                        Test-Path -LiteralPath $result | Should -Be $false -Because "Non-existent path should return false"
-                    }
+                                $result = Get-TestPath -RelativePath 'nonexistent-path-12345' -StartPath $PSScriptRoot
+                $result | Should -Not -BeNullOrEmpty -Because "Get-TestPath should return a path even if it doesn't exist"
+                if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
+                    Test-Path -LiteralPath $result | Should -Be $false -Because "Non-existent path should return false"
                 }
-                catch {
-                    $errorDetails = @{
-                        Message  = $_.Exception.Message
-                        Test     = 'Does not throw when EnsureExists is false and path does not exist'
-                        Category = $_.CategoryInfo.Category
-                    }
-                    Write-Error "Get-TestPath non-existent test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                    throw
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Does not throw when EnsureExists is false and path does not exist'
+                    Category = $_.CategoryInfo.Category
                 }
+                Write-Error "Get-TestPath non-existent test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
             }
         }
 
         Context 'Get-TestSuitePath' {
             It 'Resolves Unit test suite path' {
-                try {
-                    $result = Get-TestSuitePath -Suite 'Unit' -StartPath $PSScriptRoot
-                    $result | Should -Not -BeNullOrEmpty -Because "Get-TestSuitePath should return a valid path"
-                    if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
-                        Test-Path -LiteralPath $result | Should -Be $true -Because "Unit test suite path should exist"
-                    }
-                    ($result -replace '\\', '/') | Should -BeLike '*/tests/unit' -Because "Path should contain 'tests/unit'"
+                                $result = Get-TestSuitePath -Suite 'Unit' -StartPath $PSScriptRoot
+                $result | Should -Not -BeNullOrEmpty -Because "Get-TestSuitePath should return a valid path"
+                if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
+                    Test-Path -LiteralPath $result | Should -Be $true -Because "Unit test suite path should exist"
                 }
-                catch {
-                    $errorDetails = @{
-                        Message  = $_.Exception.Message
-                        Test     = 'Resolves Unit test suite path'
-                        Category = $_.CategoryInfo.Category
-                    }
-                    Write-Error "Get-TestSuitePath Unit test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                    throw
+                ($result -replace '\\', '/') | Should -BeLike '*/tests/unit' -Because "Path should contain 'tests/unit'"
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Resolves Unit test suite path'
+                    Category = $_.CategoryInfo.Category
                 }
+                Write-Error "Get-TestSuitePath Unit test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
             }
 
             It 'Resolves Integration test suite path' {
-                try {
-                    $result = Get-TestSuitePath -Suite 'Integration' -StartPath $PSScriptRoot
-                    $result | Should -Not -BeNullOrEmpty -Because "Get-TestSuitePath should return a valid path"
-                    if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
-                        Test-Path -LiteralPath $result | Should -Be $true -Because "Integration test suite path should exist"
-                    }
-                    ($result -replace '\\', '/') | Should -BeLike '*/tests/integration' -Because "Path should contain 'tests/integration'"
+                                $result = Get-TestSuitePath -Suite 'Integration' -StartPath $PSScriptRoot
+                $result | Should -Not -BeNullOrEmpty -Because "Get-TestSuitePath should return a valid path"
+                if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
+                    Test-Path -LiteralPath $result | Should -Be $true -Because "Integration test suite path should exist"
                 }
-                catch {
-                    $errorDetails = @{
-                        Message  = $_.Exception.Message
-                        Test     = 'Resolves Integration test suite path'
-                        Category = $_.CategoryInfo.Category
-                    }
-                    Write-Error "Get-TestSuitePath Integration test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                    throw
+                ($result -replace '\\', '/') | Should -BeLike '*/tests/integration' -Because "Path should contain 'tests/integration'"
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Resolves Integration test suite path'
+                    Category = $_.CategoryInfo.Category
                 }
+                Write-Error "Get-TestSuitePath Integration test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
             }
 
             It 'Resolves Performance test suite path' {
-                try {
-                    $result = Get-TestSuitePath -Suite 'Performance' -StartPath $PSScriptRoot
-                    $result | Should -Not -BeNullOrEmpty -Because "Get-TestSuitePath should return a valid path"
-                    if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
-                        Test-Path -LiteralPath $result | Should -Be $true -Because "Performance test suite path should exist"
-                    }
-                    ($result -replace '\\', '/') | Should -BeLike '*/tests/performance' -Because "Path should contain 'tests/performance'"
+                                $result = Get-TestSuitePath -Suite 'Performance' -StartPath $PSScriptRoot
+                $result | Should -Not -BeNullOrEmpty -Because "Get-TestSuitePath should return a valid path"
+                if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
+                    Test-Path -LiteralPath $result | Should -Be $true -Because "Performance test suite path should exist"
                 }
-                catch {
-                    $errorDetails = @{
-                        Message  = $_.Exception.Message
-                        Test     = 'Resolves Performance test suite path'
-                        Category = $_.CategoryInfo.Category
-                    }
-                    Write-Error "Get-TestSuitePath Performance test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                    throw
+                ($result -replace '\\', '/') | Should -BeLike '*/tests/performance' -Because "Path should contain 'tests/performance'"
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Resolves Performance test suite path'
+                    Category = $_.CategoryInfo.Category
                 }
+                Write-Error "Get-TestSuitePath Performance test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
             }
         }
 
@@ -256,48 +233,44 @@ Describe 'TestSupport Modules' {
             It 'Skips cleanup when PS_PROFILE_SKIP_TEST_CLEANUP is set' {
                 $fixtureDir = New-TestTempDirectory -Prefix 'CleanupSkip'
                 $originalSkip = $env:PS_PROFILE_SKIP_TEST_CLEANUP
-                try {
-                    $env:PS_PROFILE_SKIP_TEST_CLEANUP = '1'
-                    $summary = Clear-TestTransientStorage -StartPath $PSScriptRoot
-                    $summary.RemovedItemCount | Should -Be 0
-                    Test-Path -LiteralPath $fixtureDir | Should -Be $true
+                                $env:PS_PROFILE_SKIP_TEST_CLEANUP = '1'
+                $summary = Clear-TestTransientStorage -StartPath $PSScriptRoot
+                $summary.RemovedItemCount | Should -Be 0
+                Test-Path -LiteralPath $fixtureDir | Should -Be $true
+            }
+            finally {
+                if ($null -eq $originalSkip) {
+                    Remove-Item Env:\PS_PROFILE_SKIP_TEST_CLEANUP -ErrorAction SilentlyContinue
                 }
-                finally {
-                    if ($null -eq $originalSkip) {
-                        Remove-Item Env:\PS_PROFILE_SKIP_TEST_CLEANUP -ErrorAction SilentlyContinue
-                    }
-                    else {
-                        $env:PS_PROFILE_SKIP_TEST_CLEANUP = $originalSkip
-                    }
-                    Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
+                else {
+                    $env:PS_PROFILE_SKIP_TEST_CLEANUP = $originalSkip
                 }
+                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
             }
         }
 
         Context 'New-TestTempDirectory' {
             It 'Creates a temporary directory' {
-                try {
-                    $result = New-TestTempDirectory -Prefix 'TestSupportTests'
-                    $result | Should -Not -BeNullOrEmpty -Because "New-TestTempDirectory should return a valid path"
-                    if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
-                        Test-Path -LiteralPath $result | Should -Be $true -Because "Temporary directory should exist"
-                        (Get-Item -LiteralPath $result).PSIsContainer | Should -Be $true -Because "Result should be a directory"
-                    }
-                    
-                    # Cleanup
-                    if ($result -and -not [string]::IsNullOrWhiteSpace($result)) {
-                        Remove-Item -LiteralPath $result -Force -ErrorAction SilentlyContinue
-                    }
+                                $result = New-TestTempDirectory -Prefix 'TestSupportTests'
+                $result | Should -Not -BeNullOrEmpty -Because "New-TestTempDirectory should return a valid path"
+                if ($null -ne $result -and -not [string]::IsNullOrWhiteSpace($result)) {
+                    Test-Path -LiteralPath $result | Should -Be $true -Because "Temporary directory should exist"
+                    (Get-Item -LiteralPath $result).PSIsContainer | Should -Be $true -Because "Result should be a directory"
                 }
-                catch {
-                    $errorDetails = @{
-                        Message  = $_.Exception.Message
-                        Test     = 'Creates a temporary directory'
-                        Category = $_.CategoryInfo.Category
-                    }
-                    Write-Error "New-TestTempDirectory test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                    throw
+                
+                # Cleanup
+                if ($result -and -not [string]::IsNullOrWhiteSpace($result)) {
+                    Remove-Item -LiteralPath $result -Force -ErrorAction SilentlyContinue
                 }
+            }
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Test     = 'Creates a temporary directory'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "New-TestTempDirectory test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
             }
 
             It 'Creates directory with unique name' {
@@ -399,21 +372,19 @@ Describe 'TestSupport Modules' {
                 Set-Content -LiteralPath $scriptPath -Value 'Write-Output $env:PS_PROFILE_TEST_INVOCATION_MARKER; exit 0' -Encoding UTF8
                 $previous = [Environment]::GetEnvironmentVariable('PS_PROFILE_TEST_INVOCATION_MARKER', 'Process')
 
-                try {
-                    $result = Invoke-TestScriptFile -ScriptPath $scriptPath -EnvironmentVariables @{
-                        PS_PROFILE_TEST_INVOCATION_MARKER = 'isolated-value'
-                    }
-                    $result.ExitCode | Should -Be 0
-                    $result.Output | Should -Match 'isolated-value'
-                    [Environment]::GetEnvironmentVariable('PS_PROFILE_TEST_INVOCATION_MARKER', 'Process') | Should -Be $previous
+                                $result = Invoke-TestScriptFile -ScriptPath $scriptPath -EnvironmentVariables @{
+                    PS_PROFILE_TEST_INVOCATION_MARKER = 'isolated-value'
                 }
-                finally {
-                    if ($null -eq $previous) {
-                        Remove-Item -Path Env:PS_PROFILE_TEST_INVOCATION_MARKER -ErrorAction SilentlyContinue
-                    }
-                    else {
-                        Set-Item -Path Env:PS_PROFILE_TEST_INVOCATION_MARKER -Value $previous
-                    }
+                $result.ExitCode | Should -Be 0
+                $result.Output | Should -Match 'isolated-value'
+                [Environment]::GetEnvironmentVariable('PS_PROFILE_TEST_INVOCATION_MARKER', 'Process') | Should -Be $previous
+            }
+            finally {
+                if ($null -eq $previous) {
+                    Remove-Item -Path Env:PS_PROFILE_TEST_INVOCATION_MARKER -ErrorAction SilentlyContinue
+                }
+                else {
+                    Set-Item -Path Env:PS_PROFILE_TEST_INVOCATION_MARKER -Value $previous
                 }
             }
         }
@@ -441,15 +412,13 @@ Describe 'TestSupport Modules' {
             It 'Handles missing node command gracefully' {
                 # This test assumes node might not be available
                 # The function should handle this without throwing
-                try {
-                    $result = Test-NpmPackageAvailable -PackageName 'some-package'
-                    # If we get here, function handled missing node gracefully
-                    $result | Should -BeOfType [bool]
-                }
-                catch {
-                    # If node is required, that's also acceptable behavior
-                    $_.Exception.Message | Should -Not -BeNullOrEmpty
-                }
+                                $result = Test-NpmPackageAvailable -PackageName 'some-package'
+                # If we get here, function handled missing node gracefully
+                $result | Should -BeOfType [bool]
+            }
+            catch {
+                # If node is required, that's also acceptable behavior
+                $_.Exception.Message | Should -Not -BeNullOrEmpty
             }
         }
     }
@@ -530,14 +499,12 @@ function Test-MyFunction {
 '@
                 Set-Content -Path $testModulePath -Value $moduleContent
 
-                try {
-                    Import-TestModule -ModulePath $testModulePath -FunctionPatterns @('^Test-')
-                    Get-Command Test-MyFunction -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-                }
-                finally {
-                    Remove-Item $testModulePath -Force -ErrorAction SilentlyContinue
-                    Remove-Item Function:\Test-MyFunction -Force -ErrorAction SilentlyContinue
-                }
+                                Import-TestModule -ModulePath $testModulePath -FunctionPatterns @('^Test-')
+                Get-Command Test-MyFunction -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                Remove-Item $testModulePath -Force -ErrorAction SilentlyContinue
+                Remove-Item Function:\Test-MyFunction -Force -ErrorAction SilentlyContinue
             }
 
             It 'Handles missing module file gracefully' {

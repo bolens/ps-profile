@@ -59,13 +59,14 @@ See also [ARCHITECTURE.md](../../ARCHITECTURE.md) for loader design and implemen
 | `task generate-docs` | After changing comment-based help on profile functions (full regen) |
 | `task generate-docs-incremental` | Day-to-day help edits (parses/writes only changed sources) |
 | `task generate-fragment-readmes` | After changing fragment behavior or exports |
-| `task drift-link` | After editing guides or the source files they document |
+| `task drift-link` | After editing guides/tests/sources they document, or after `generate-docs` |
 | `task drift-check` | Before commits (`quality-check` runs this automatically) |
 
 Drift links guides and tests to source files in `drift.lock`. Scripts:
 
 - `scripts/utils/code-quality/link-guide-drift.ps1`
 - `scripts/utils/code-quality/link-test-drift.ps1`
+- `scripts/utils/code-quality/link-api-drift.ps1`
 
 ## Related Documentation
 

@@ -35,13 +35,11 @@ Describe 'profile.d/aws.ps1 extended scenarios' {
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        try {
-            Set-AwsProfile -ProfileName 'fragment-test-profile'
-            $env:AWS_PROFILE | Should -Be 'fragment-test-profile'
-        }
-        finally {
-            Remove-Item Env:AWS_PROFILE -ErrorAction SilentlyContinue
-        }
+                Set-AwsProfile -ProfileName 'fragment-test-profile'
+        $env:AWS_PROFILE | Should -Be 'fragment-test-profile'
+    }
+    finally {
+        Remove-Item Env:AWS_PROFILE -ErrorAction SilentlyContinue
     }
 
     It 'Invoke-Aws warns when aws is unavailable' {

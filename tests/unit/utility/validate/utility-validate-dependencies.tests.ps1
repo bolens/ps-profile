@@ -60,53 +60,29 @@ BeforeAll {
 Describe 'validate-dependencies.ps1 execution' {
     It 'Passes when the requirements fixture only contains optional satisfied dependencies' {
         $requirementsFile = New-ValidateDependenciesRequirementsFile
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:ValidateDependenciesScript -ArgumentList @(
                 '-RequirementsFile', $requirementsFile
             )
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Dependencies|validation|passed|success'
-        }
-        finally {
-            $parent = Split-Path -Parent $requirementsFile
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Fails when a required module from the requirements fixture is missing' {
         $requirementsFile = New-ValidateDependenciesRequirementsFile -RequireMissingModule
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:ValidateDependenciesScript -ArgumentList @(
                 '-RequirementsFile', $requirementsFile
             )
             $result.ExitCode | Should -BeIn @(1, 2)
             $result.Output | Should -Match 'Definitely-Not-Installed-Module-12345|missing|Missing'
-        }
-        finally {
-            $parent = Split-Path -Parent $requirementsFile
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Fails setup when the requirements file path does not exist' {
         $missingRequirements = Join-Path (New-TestTempDirectory -Prefix 'ValidateDepsMissing') 'missing-requirements.psd1'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:ValidateDependenciesScript -ArgumentList @(
                 '-RequirementsFile', $missingRequirements
             )
 
             $result.ExitCode | Should -BeIn @(1, 2)
             $result.Output | Should -Match 'Requirements file not found|missing-requirements\.psd1'
-        }
-        finally {
-            $parent = Split-Path -Parent $missingRequirements
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

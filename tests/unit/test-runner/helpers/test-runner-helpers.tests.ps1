@@ -54,13 +54,11 @@ Describe 'TestRunnerHelpers Module' {
             }
 
             Register-TestWriteHostCapture
-            try {
-                Invoke-TestDryRun -Config $null -TestPaths @($testFile) | Out-Null
-                Get-TestWriteHostOutputString | Should -Match 'library-common\.tests\.ps1'
-            }
-            finally {
-                Restore-TestTerminalStubs
-            }
+                        Invoke-TestDryRun -Config $null -TestPaths @($testFile) | Out-Null
+            Get-TestWriteHostOutputString | Should -Match 'library-common\.tests\.ps1'
+        }
+        finally {
+            Restore-TestTerminalStubs
         }
     }
 }

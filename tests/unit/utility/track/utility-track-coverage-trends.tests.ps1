@@ -24,7 +24,6 @@ BeforeAll {
 Describe 'track-coverage-trends.ps1 execution' {
     It 'Exits successfully when no coverage XML file is available' {
         $historyDir = New-TestTempDirectory -Prefix 'CoverageTrendHistory'
-        try {
             $missingCoverage = Join-Path $historyDir 'missing-coverage.xml'
             $result = Invoke-TestScriptFile -ScriptPath $script:TrackCoverageScript -ArgumentList @(
                 '-CoverageXmlPath', $missingCoverage,
@@ -34,12 +33,6 @@ Describe 'track-coverage-trends.ps1 execution' {
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Coverage file not found|coverage'
-        }
-        finally {
-            if (Test-Path -LiteralPath $historyDir) {
-                Remove-Item -LiteralPath $historyDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Saves a coverage snapshot when a minimal coverage XML file is provided' {
@@ -58,7 +51,6 @@ Describe 'track-coverage-trends.ps1 execution' {
 </Coverage>
 '@ | Set-Content -LiteralPath $coverageXml -Encoding UTF8
 
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:TrackCoverageScript -ArgumentList @(
                 '-CoverageXmlPath', $coverageXml,
                 '-HistoryPath', $historyDir,
@@ -70,12 +62,6 @@ Describe 'track-coverage-trends.ps1 execution' {
             $result.Output | Should -Match 'Current Coverage|Coverage snapshot saved'
             @(Get-ChildItem -LiteralPath $historyDir -Filter 'coverage-*.json' -ErrorAction SilentlyContinue).Count |
                 Should -BeGreaterThan 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixtureDir) {
-                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Reports when no historical coverage snapshots exist in the history directory' {
@@ -104,9 +90,6 @@ Describe 'track-coverage-trends.ps1 execution' {
         }
         finally {
             foreach ($path in @($historyDir, (Split-Path -Parent $coverageXml))) {
-                if (Test-Path -LiteralPath $path) {
-                    Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
-                }
             }
         }
     }
@@ -146,7 +129,6 @@ Describe 'track-coverage-trends.ps1 execution' {
 </Coverage>
 '@ | Set-Content -LiteralPath $coverageXml -Encoding UTF8
 
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:TrackCoverageScript -ArgumentList @(
                 '-CoverageXmlPath', $coverageXml,
                 '-HistoryPath', $historyDir,
@@ -155,11 +137,5 @@ Describe 'track-coverage-trends.ps1 execution' {
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Analyzing 2 historical snapshots|Coverage Trends|historical snapshots'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixtureDir) {
-                Remove-Item -LiteralPath $fixtureDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

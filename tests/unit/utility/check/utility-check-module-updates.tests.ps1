@@ -57,7 +57,6 @@ Describe 'check-module-updates.ps1 execution' {
 
     It 'Writes an update report file when ReportFile is specified in DryRun mode' {
         $reportPath = Join-Path (New-TestTempDirectory -Prefix 'ModuleUpdateReport') 'updates.json'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:CheckModuleUpdatesScript -ArgumentList @(
                 '-DryRun',
                 '-ModuleFilter', 'Pester',
@@ -69,12 +68,5 @@ Describe 'check-module-updates.ps1 execution' {
                 $reportPath | Should -Exist
                 (Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json) | Should -Not -BeNullOrEmpty
             }
-        }
-        finally {
-            $parent = Split-Path -Parent $reportPath
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

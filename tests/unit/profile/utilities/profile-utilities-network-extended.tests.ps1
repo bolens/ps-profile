@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-utilities-network-extended.tests.ps1
-#>
+# ===============================================
+# profile-utilities-network-extended.tests.ps1
+# Execution tests for utilities-modules/network/utilities-network.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,36 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/utilities-modules/network/utilities-network.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'utilities.ps1')
+    Ensure-Utilities
 }
+
 Describe 'profile.d/utilities-modules/network/utilities-network.ps1 extended scenarios' {
-    It 'Documents network utilities for weather, IP, and speed tests' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Network utility functions'
-        $c | Should -Match 'Weather, IP address, speed test'
+    It 'Registers network helpers through Ensure-Utilities' {
+        Get-Command Get-Weather -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-MyIP -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Start-SpeedTest -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Get-Weather, Get-MyIP, and Start-SpeedTest helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Get-Weather'
-        $c | Should -Match 'Get-MyIP'
-        $c | Should -Match 'Start-SpeedTest'
-        $c | Should -Match 'wttr.in'
+
+    It 'Start-SpeedTest completes without throwing when speedtest binaries are unavailable' {
+        foreach ($cmd in @('speedtest', 'speedtest.exe')) {
+            Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
+        }
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        { Start-SpeedTest -ErrorAction SilentlyContinue | Out-Null } | Should -Not -Throw
     }
-    It 'Registers weather, myip, and speedtest aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'weather'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'myip'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'speedtest'"
+
+    It 'Allows repeated Ensure-Utilities calls without losing network helpers' {
+        Ensure-Utilities
+        Ensure-Utilities
+
+        Get-Command Get-MyIP -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
 }

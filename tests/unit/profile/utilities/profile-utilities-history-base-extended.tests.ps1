@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-utilities-history-base-extended.tests.ps1
-#>
+# ===============================================
+# profile-utilities-history-base-extended.tests.ps1
+# Execution tests for utilities-modules/history/utilities-history.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,31 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/utilities-modules/history/utilities-history.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'utilities.ps1')
+    Ensure-Utilities
 }
+
 Describe 'profile.d/utilities-modules/history/utilities-history.ps1 extended scenarios' {
-    It 'Documents basic command history viewing and searching' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Command history utility functions'
-        $c | Should -Match 'History viewing and searching'
+    It 'Registers history viewing helpers through Ensure-Utilities' {
+        Get-Command Get-History -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Find-History -ErrorAction Stop | Should -Not -BeNullOrEmpty
+
+        $alias = Get-Alias hg -ErrorAction SilentlyContinue
+        if ($alias) {
+            $alias.ResolvedCommandName | Should -Be 'Find-History'
+        }
     }
-    It 'Defines Get-History wrapper showing last 20 commands' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'function Get-History'
-        $c | Should -Match 'Microsoft.PowerShell.Core\\Get-History'
-        $c | Should -Match 'Select-Object -Last 20'
+
+    It 'Get-History returns at most 20 entries' {
+        $history = Get-History
+        @($history).Count | Should -BeLessOrEqual 20
     }
-    It 'Defines Find-History and registers hg alias' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Find-History'
-        $c | Should -Match 'Select-String'
-        $c | Should -Match "Set-AgentModeAlias -Name 'hg'"
+
+    It 'Find-History accepts a search pattern without throwing' {
+        { Find-History 'Ensure-Utilities' | Out-Null } | Should -Not -Throw
     }
 }

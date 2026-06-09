@@ -165,19 +165,17 @@ Describe 'Fragment Command Access - Integration Tests' {
             if (Get-Command Register-CommandDispatcher -ErrorAction SilentlyContinue) {
                 # Test with auto-loading disabled
                 $originalValue = $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS
-                try {
-                    $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = '0'
-                    $result = Register-CommandDispatcher
-                    # Should return false when disabled
-                    $result | Should -Be $false
+                                $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = '0'
+                $result = Register-CommandDispatcher
+                # Should return false when disabled
+                $result | Should -Be $false
+            }
+            finally {
+                if ($originalValue) {
+                    $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = $originalValue
                 }
-                finally {
-                    if ($originalValue) {
-                        $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = $originalValue
-                    }
-                    else {
-                        Remove-Item -Path env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
-                    }
+                else {
+                    Remove-Item -Path env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -189,18 +187,16 @@ Describe 'Fragment Command Access - Integration Tests' {
                 $null = Register-FragmentCommand -CommandName $commandName -FragmentName 'bootstrap' -CommandType 'Function'
 
                 $originalAutoLoad = $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS
-                try {
-                    $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = '1'
-                    { Invoke-CommandDispatcher -CommandName $commandName } | Should -Not -Throw
-                    Test-CommandInRegistry -CommandName $commandName | Should -Be $true
+                                $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = '1'
+                { Invoke-CommandDispatcher -CommandName $commandName } | Should -Not -Throw
+                Test-CommandInRegistry -CommandName $commandName | Should -Be $true
+            }
+            finally {
+                if ($null -ne $originalAutoLoad) {
+                    $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = $originalAutoLoad
                 }
-                finally {
-                    if ($null -ne $originalAutoLoad) {
-                        $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = $originalAutoLoad
-                    }
-                    else {
-                        Remove-Item -Path env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
-                    }
+                else {
+                    Remove-Item -Path env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
                 }
             }
         }
@@ -254,15 +250,13 @@ Describe 'Fragment Command Access - Integration Tests' {
                 $global:FragmentCommandRegistry = @{}
             }
             
-            try {
-                if (Get-Command Test-CommandInRegistry -ErrorAction SilentlyContinue) {
-                    Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
-                }
+                        if (Get-Command Test-CommandInRegistry -ErrorAction SilentlyContinue) {
+                Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
             }
-            finally {
-                if ($originalRegistry) {
-                    $global:FragmentCommandRegistry = $originalRegistry
-                }
+        }
+        finally {
+            if ($originalRegistry) {
+                $global:FragmentCommandRegistry = $originalRegistry
             }
         }
         

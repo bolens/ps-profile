@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-lang-python-pipx-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-lang-python-pipx-fragment-extended.tests.ps1
+# Execution tests for lang-python-pipx.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,52 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/lang-python-pipx.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts/lib/fragment/FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module $fragmentIdempotencyPath -DisableNameChecking -ErrorAction Stop -Force
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
+function script:Reset-LangPythonPipxFragmentState {
+    Clear-FragmentLoaded -FragmentName 'lang-python-pipx' -ErrorAction SilentlyContinue
+}
+
 Describe 'profile.d/lang-python-pipx.ps1 extended scenarios' {
-    It 'Declares standard tier with Test-FragmentLoaded idempotency guard' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match "FragmentName 'lang-python-pipx'"
+    BeforeEach {
+        Reset-LangPythonPipxFragmentState
     }
-    It 'Defines Install-PythonApp with Invoke-MissingToolWarning when pipx unavailable' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Install-PythonApp'
-        $c | Should -Match 'Invoke-MissingToolWarning'
+
+    It 'Registers pipx helpers and marks the fragment loaded' {
+        . (Join-Path $script:ProfileDir 'lang-python-pipx.ps1')
+
+        Get-Command Install-PythonApp -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-Pipx -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Test-FragmentLoaded -FragmentName 'lang-python-pipx' | Should -Be $true
     }
-    It 'Registers pipx-install alias and marks fragment loaded' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'pipx-install'"
-        $c | Should -Match "Set-FragmentLoaded -FragmentName 'lang-python-pipx'"
+
+    It 'Install-PythonApp warns when pipx is unavailable' {
+        . (Join-Path $script:ProfileDir 'lang-python-pipx.ps1')
+
+        Set-TestCommandAvailabilityState -CommandName 'pipx' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('pipx', [ref]$null)
+        }
+
+        $output = & { Install-PythonApp -Packages @('black') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'pipx not found'
+    }
+
+    It 'Skips re-initialization when lang-python-pipx is already loaded' {
+        . (Join-Path $script:ProfileDir 'lang-python-pipx.ps1')
+        $firstInstall = Get-Command Install-PythonApp -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'lang-python-pipx.ps1')
+
+        (Get-Command Install-PythonApp -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstInstall.ScriptBlock.ToString()
     }
 }

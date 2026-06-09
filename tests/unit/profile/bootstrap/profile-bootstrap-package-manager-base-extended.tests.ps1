@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-bootstrap-package-manager-base-extended.tests.ps1
-#>
+# ===============================================
+# profile-bootstrap-package-manager-base-extended.tests.ps1
+# Execution tests for bootstrap/PackageManagerBase.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,45 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/bootstrap/PackageManagerBase.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:BootstrapDir = Join-Path $script:ProfileDir 'bootstrap'
+    $fragmentIdempotencyPath = Get-TestPath -RelativePath 'scripts/lib/fragment/FragmentIdempotency.psm1' -StartPath $PSScriptRoot -EnsureExists
+    Import-Module $fragmentIdempotencyPath -DisableNameChecking -ErrorAction Stop -Force
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
+function script:Reset-PackageManagerBaseState {
+    Clear-FragmentLoaded -FragmentName 'package-manager-base' -ErrorAction SilentlyContinue
+}
+
 Describe 'profile.d/bootstrap/PackageManagerBase.ps1 extended scenarios' {
-    It 'Documents base module for package manager CLI wrappers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Base module for package manager wrappers'
-        $c | Should -Match 'npm, yarn, pip, cargo'
+    BeforeEach {
+        Reset-PackageManagerBaseState
     }
-    It 'Defines Register-PackageManager for standardized manager commands' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Register-PackageManager'
-        $c | Should -Match 'Install/uninstall packages'
-        $c | Should -Match 'Manage lock files'
+
+    It 'Registers package manager helpers and marks the fragment loaded' {
+        . (Join-Path $script:BootstrapDir 'PackageManagerBase.ps1')
+
+        Get-Command Register-PackageManager -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Test-FragmentLoaded -FragmentName 'package-manager-base' | Should -Be $true
     }
-    It 'Marks package-manager-base fragment loaded after registration' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Test-FragmentLoaded -FragmentName 'package-manager-base'"
-        $c | Should -Match "Set-FragmentLoaded -FragmentName 'package-manager-base'"
+
+    It 'Register-PackageManager creates standardized package manager helpers' {
+        . (Join-Path $script:BootstrapDir 'PackageManagerBase.ps1')
+
+        Register-PackageManager -ManagerName 'FakePkg' -CommandName 'fakepkgcli' | Out-Null
+        Get-Command Install-FakePkgPackage -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-FakePkg -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Skips re-initialization when package-manager-base is already loaded' {
+        . (Join-Path $script:BootstrapDir 'PackageManagerBase.ps1')
+        $firstRegister = Get-Command Register-PackageManager -ErrorAction Stop
+
+        . (Join-Path $script:BootstrapDir 'PackageManagerBase.ps1')
+
+        (Get-Command Register-PackageManager -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstRegister.ScriptBlock.ToString()
     }
 }

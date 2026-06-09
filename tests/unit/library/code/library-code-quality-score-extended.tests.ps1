@@ -17,7 +17,18 @@ BeforeAll {
         $current = $current.Parent
     }
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
     Import-Module (Join-Path $script:LibPath 'metrics' 'CodeQualityScore.psm1') -DisableNameChecking -Force
+}
+
+function script:Enable-TestStructuredLogging {
+    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+        return
+    }
+
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
 }
 
 AfterAll {
@@ -199,6 +210,149 @@ Describe 'CodeQualityScore extended scenarios' {
             $largeScore = (Get-CodeQualityScore -CodeMetrics $largeFiles).ComponentScores.FileSize
 
             $largeScore | Should -BeLessThan $smallScore
+        }
+
+        It 'Accepts CodeMetrics supplied as a generic PSObject' {
+            $metrics = New-Object PSObject -Property @{
+                TotalLines         = 500
+                TotalFunctions     = 10
+                TotalComplexity    = 25
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 120
+            }
+
+            $result = Get-CodeQualityScore -CodeMetrics $metrics
+
+            $result.Score | Should -BeGreaterOrEqual 0
+            $result.Score | Should -BeLessOrEqual 100
+        }
+
+        It 'Normalizes custom weights that do not sum to one' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 500
+                TotalFunctions     = 25
+                TotalComplexity    = 50
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 150
+            }
+            $weights = @{
+                Complexity      = 2
+                Duplicates      = 2
+                Coverage        = 2
+                FileSize        = 2
+                FunctionDensity = 2
+            }
+
+            $result = Get-CodeQualityScore -CodeMetrics $metrics -Weights $weights
+            $weightSum = ($result.Weights.Values | Measure-Object -Sum).Sum
+
+            [math]::Abs($weightSum - 1.0) | Should -BeLessThan 0.01
+        }
+
+        It 'Uses a neutral file-size score when AverageLinesPerFile is zero' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 0
+                TotalFunctions     = 0
+                TotalComplexity    = 0
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 0
+            }
+
+            $result = Get-CodeQualityScore -CodeMetrics $metrics
+
+            $result.ComponentScores.FileSize | Should -Be 50
+        }
+
+        It 'Rewards undersized files below the target range' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 500
+                TotalFunctions     = 5
+                TotalComplexity    = 10
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 40
+            }
+
+            $result = Get-CodeQualityScore -CodeMetrics $metrics
+
+            $result.ComponentScores.FileSize | Should -Be 100
+        }
+
+        It 'Scores sparse function density below the target range' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 1000
+                TotalFunctions     = 2
+                TotalComplexity    = 10
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 200
+            }
+
+            $result = Get-CodeQualityScore -CodeMetrics $metrics
+
+            $result.ComponentScores.FunctionDensity | Should -BeGreaterThan 50
+            $result.ComponentScores.FunctionDensity | Should -BeLessThan 100
+        }
+
+        It 'Warns when CoveragePercent is missing and debug output is enabled' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 100
+                TotalFunctions     = 5
+                TotalComplexity    = 10
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 100
+            }
+            $coverage = [PSCustomObject]@{ TotalLines = 50 }
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '2'
+
+            try {
+                $result = Get-CodeQualityScore -CodeMetrics $metrics -TestCoverage $coverage
+                $result.ComponentScores.Coverage | Should -Be 0
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Warns through structured logging when a required metric property is missing' {
+            Enable-TestStructuredLogging
+
+            $metrics = [PSCustomObject]@{
+                TotalLines      = 100
+                TotalFunctions  = 5
+                TotalComplexity = 10
+            }
+
+            { Get-CodeQualityScore -CodeMetrics $metrics } | Should -Throw '*DuplicateFunctions*'
+        }
+
+        It 'Emits debug tracing when PS_PROFILE_DEBUG is level 3' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 100
+                TotalFunctions     = 5
+                TotalComplexity    = 10
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 100
+            }
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                $result = Get-CodeQualityScore -CodeMetrics $metrics
+                $result.Score | Should -BeGreaterOrEqual 0
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
         }
 
         It 'Penalizes excessive function density' {

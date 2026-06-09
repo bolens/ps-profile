@@ -93,14 +93,12 @@ Describe 'Batch test runner scripts' {
 
         It 'Fails when batch runner is missing at RepoRoot' {
             $fakeRoot = New-TestTempDirectory -Prefix 'ConversionAllMissingRunner'
-            try {
-                $output = & pwsh -NoProfile -File $script:BatchScripts.ConversionAll -RepoRoot $fakeRoot 2>&1
-                $LASTEXITCODE | Should -Be 2
-                ($output -join ' ') | Should -Match 'Batch runner not found'
-            }
-            finally {
-                Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
+                        $output = & pwsh -NoProfile -File $script:BatchScripts.ConversionAll -RepoRoot $fakeRoot 2>&1
+            $LASTEXITCODE | Should -Be 2
+            ($output -join ' ') | Should -Match 'Batch runner not found'
+        }
+        finally {
+            Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue
         }
 
         It 'Runs a single sub-batch via RelativePath using a stub runner' {

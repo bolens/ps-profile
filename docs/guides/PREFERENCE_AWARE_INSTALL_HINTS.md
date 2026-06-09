@@ -165,7 +165,7 @@ Language fragments share the same `Get-PreferenceAwareInstallHint` pattern. Some
 
 ### Testing
 
-- Unit: `tests/unit/profile-preference-aware-install-hints.tests.ps1`
+- Unit: `tests/unit/profile/preference/profile-preference-aware-install-hints.tests.ps1`
 - Integration: `tests/integration/bootstrap/preference-aware-install-hints-*.tests.ps1`
 
 ### Cross-platform notes

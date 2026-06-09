@@ -48,16 +48,9 @@ function Invoke-InsecureFixtureExample {
 Describe 'run-security-scan.ps1 execution' {
     It 'Completes successfully when the scan directory has no PowerShell files' {
         $emptyDir = New-TestTempDirectory -Prefix 'SecurityScanEmpty'
-        try {
             $result = Invoke-SecurityScanScript -ArgumentList @('-Path', $emptyDir)
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'no issues found'
-        }
-        finally {
-            if (Test-Path -LiteralPath $emptyDir) {
-                Remove-Item -LiteralPath $emptyDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Fails parameter validation when the scan path does not exist' {
@@ -81,7 +74,6 @@ Describe 'run-security-scan.ps1 execution' {
         $allowlistPath = Join-Path $workDir 'allowlist.json'
         $emptyDir = Join-Path $workDir 'scan-target'
         New-Item -ItemType Directory -Path $emptyDir -Force | Out-Null
-        try {
             @{
                 FilePatterns = @('insecure\.ps1$')
             } | ConvertTo-Json | Set-Content -LiteralPath $allowlistPath -Encoding UTF8
@@ -93,11 +85,5 @@ Describe 'run-security-scan.ps1 execution' {
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'no issues found|Security scan completed'
-        }
-        finally {
-            if (Test-Path -LiteralPath $workDir) {
-                Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

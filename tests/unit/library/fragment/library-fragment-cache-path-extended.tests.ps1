@@ -54,14 +54,12 @@ Describe 'FragmentCachePath extended scenarios' {
         It 'Returns a path ending with fragment-cache.db' {
             $customCache = Join-Path $script:TempRoot 'db-path-cache'
 
-            try {
-                $env:PS_PROFILE_CACHE_DIR = $customCache
-                Get-FragmentCacheDbPath | Should -Be (Join-Path $customCache 'fragment-cache.db')
-            }
-            finally {
-                if ($null -eq $script:OriginalCacheDir) {
-                    Remove-Item Env:\PS_PROFILE_CACHE_DIR -ErrorAction SilentlyContinue
-                }
+                        $env:PS_PROFILE_CACHE_DIR = $customCache
+            Get-FragmentCacheDbPath | Should -Be (Join-Path $customCache 'fragment-cache.db')
+        }
+        finally {
+            if ($null -eq $script:OriginalCacheDir) {
+                Remove-Item Env:\PS_PROFILE_CACHE_DIR -ErrorAction SilentlyContinue
             }
         }
 
@@ -87,14 +85,12 @@ Describe 'FragmentCachePath extended scenarios' {
         It 'Honors PS_PROFILE_CACHE_DIR overrides from PlatformPaths' {
             $customCache = Join-Path $script:TempRoot 'override-cache'
 
-            try {
-                $env:PS_PROFILE_CACHE_DIR = $customCache
-                Get-FragmentCacheDirectory | Should -Be $customCache
-            }
-            finally {
-                if ($null -eq $script:OriginalCacheDir) {
-                    Remove-Item Env:\PS_PROFILE_CACHE_DIR -ErrorAction SilentlyContinue
-                }
+                        $env:PS_PROFILE_CACHE_DIR = $customCache
+            Get-FragmentCacheDirectory | Should -Be $customCache
+        }
+        finally {
+            if ($null -eq $script:OriginalCacheDir) {
+                Remove-Item Env:\PS_PROFILE_CACHE_DIR -ErrorAction SilentlyContinue
             }
         }
 
@@ -102,29 +98,25 @@ Describe 'FragmentCachePath extended scenarios' {
             $relativeCache = Join-Path 'relative-cache-extended' ''
             $relativeCache = $relativeCache.TrimEnd('\', '/')
 
-            try {
-                $env:PS_PROFILE_CACHE_DIR = $relativeCache
-                Get-FragmentCacheDirectory | Should -Be (Join-Path (Get-Location).Path $relativeCache)
-            }
-            finally {
-                if ($null -eq $script:OriginalCacheDir) {
-                    Remove-Item Env:\PS_PROFILE_CACHE_DIR -ErrorAction SilentlyContinue
-                }
+                        $env:PS_PROFILE_CACHE_DIR = $relativeCache
+            Get-FragmentCacheDirectory | Should -Be (Join-Path (Get-Location).Path $relativeCache)
+        }
+        finally {
+            if ($null -eq $script:OriginalCacheDir) {
+                Remove-Item Env:\PS_PROFILE_CACHE_DIR -ErrorAction SilentlyContinue
             }
         }
 
         It 'Creates missing cache directories when EnsureExists is enabled' {
             $customCache = Join-Path $script:TempRoot 'created-cache-dir'
 
-            try {
-                $env:PS_PROFILE_CACHE_DIR = $customCache
-                Get-FragmentCacheDirectory -EnsureExists | Should -Be $customCache
-                Test-Path -LiteralPath $customCache | Should -Be $true
-            }
-            finally {
-                if ($null -eq $script:OriginalCacheDir) {
-                    Remove-Item Env:\PS_PROFILE_CACHE_DIR -ErrorAction SilentlyContinue
-                }
+                        $env:PS_PROFILE_CACHE_DIR = $customCache
+            Get-FragmentCacheDirectory -EnsureExists | Should -Be $customCache
+            Test-Path -LiteralPath $customCache | Should -Be $true
+        }
+        finally {
+            if ($null -eq $script:OriginalCacheDir) {
+                Remove-Item Env:\PS_PROFILE_CACHE_DIR -ErrorAction SilentlyContinue
             }
         }
     }

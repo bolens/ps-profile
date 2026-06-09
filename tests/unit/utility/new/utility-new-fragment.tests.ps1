@@ -19,9 +19,9 @@ function global:New-NewFragmentFixtureRepository {
 
     Push-Location $repo
     try {
-        git init -q | Out-Null
-        git config user.email 'fixture@example.com'
-        git config user.name 'Fixture'
+    git init -q | Out-Null
+    git config user.email 'fixture@example.com'
+    git config user.name 'Fixture'
     }
     finally {
         Pop-Location
@@ -51,31 +51,23 @@ Describe 'new-fragment.ps1 execution' {
         $repo = New-NewFragmentFixtureRepository
         $fragmentName = 'fixture-feature'
         $fragmentNumber = 88
+        Push-Location $repo
         try {
-            Push-Location $repo
-            try {
-                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1') -ArgumentList @(
-                    '-Name', $fragmentName,
-                    '-Number', "$fragmentNumber",
-                    '-Description', 'Fixture fragment for new-fragment tests'
-                )
-            }
-            finally {
-                Pop-Location
-            }
-
-            $result.ExitCode | Should -Be 0
-            $fragmentPath = Join-Path $repo 'profile.d' ('{0:D2}-{1}.ps1' -f $fragmentNumber, $fragmentName)
-            $readmePath = Join-Path $repo 'profile.d' ('{0:D2}-{1}.ps1.README.md' -f $fragmentNumber, $fragmentName)
-            Test-Path -LiteralPath $fragmentPath | Should -BeTrue
-            Test-Path -LiteralPath $readmePath | Should -BeTrue
-            Get-Content -LiteralPath $fragmentPath -Raw | Should -Match 'fixture-featureLoaded'
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1') -ArgumentList @(
+                '-Name', $fragmentName,
+                '-Number', "$fragmentNumber",
+                '-Description', 'Fixture fragment for new-fragment tests'
+            )
         }
         finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
         }
+                $result.ExitCode | Should -Be 0
+        $fragmentPath = Join-Path $repo 'profile.d' ('{0:D2}-{1}.ps1' -f $fragmentNumber, $fragmentName)
+        $readmePath = Join-Path $repo 'profile.d' ('{0:D2}-{1}.ps1.README.md' -f $fragmentNumber, $fragmentName)
+        Test-Path -LiteralPath $fragmentPath | Should -BeTrue
+        Test-Path -LiteralPath $readmePath | Should -BeTrue
+        Get-Content -LiteralPath $fragmentPath -Raw | Should -Match 'fixture-featureLoaded'
     }
 
     It 'Fails when creating a fragment that already exists' {
@@ -83,45 +75,29 @@ Describe 'new-fragment.ps1 execution' {
         $fragmentName = 'duplicate-feature'
         $fragmentNumber = 77
         $scriptPath = Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1'
-        try {
-            $first = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
-                '-Name', $fragmentName,
-                '-Number', "$fragmentNumber",
-                '-Description', 'First fragment creation'
-            )
-            $first.ExitCode | Should -Be 0
-
-            $second = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
-                '-Name', $fragmentName,
-                '-Number', "$fragmentNumber",
-                '-Description', 'Duplicate fragment creation'
-            )
-            $second.ExitCode | Should -BeIn @(1, 2)
-            $second.Output | Should -Match 'already exists'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $first = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+            '-Name', $fragmentName,
+            '-Number', "$fragmentNumber",
+            '-Description', 'First fragment creation'
+        )
+        $first.ExitCode | Should -Be 0
+                $second = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+            '-Name', $fragmentName,
+            '-Number', "$fragmentNumber",
+            '-Description', 'Duplicate fragment creation'
+        )
+        $second.ExitCode | Should -BeIn @(1, 2)
+        $second.Output | Should -Match 'already exists'
     }
 
     It 'Fails when the fragment number is outside the supported range' {
         $repo = New-NewFragmentFixtureRepository
-        try {
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1') -ArgumentList @(
-                '-Name', 'out-of-range',
-                '-Number', '150',
-                '-Description', 'Fragment number out of range'
-            )
-
-            $result.ExitCode | Should -BeIn @(1, 2)
-            $result.Output | Should -Match 'Fragment number must be between 00 and 99'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'utils' 'fragment' 'new-fragment.ps1') -ArgumentList @(
+            '-Name', 'out-of-range',
+            '-Number', '150',
+            '-Description', 'Fragment number out of range'
+        )
+                $result.ExitCode | Should -BeIn @(1, 2)
+        $result.Output | Should -Match 'Fragment number must be between 00 and 99'
     }
 }

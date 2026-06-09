@@ -129,19 +129,15 @@ function Invoke-ParallelDependencyParsing {
     }
 
     $runspacePool = $null
+    $script:ParallelParseProcessRunspaceErrorTriggered = $false
+    $script:ParallelParseEndInvokeErrorTriggered = $false
     # Optimized: Use List for better performance with Add() instead of +=
     # Note: These are used in main scope, not inside runspaces, so List<T> is safe
     $runspaces = [System.Collections.Generic.List[hashtable]]::new()
     $results = [System.Collections.Generic.List[hashtable]]::new()
 
-    try {
-        # Create runspace pool (min 1, max CPU count, capped at 10)
-        $throttleLimit = [Math]::Min(10, [System.Environment]::ProcessorCount)
-        $runspacePool = [runspacefactory]::CreateRunspacePool(1, $throttleLimit)
-        $runspacePool.Open()
-
-        # Scriptblock to parse dependencies (inline logic to avoid module imports)
-        $scriptBlock = {
+    # Scriptblock to parse dependencies (inline logic to avoid module imports)
+    $scriptBlock = {
             param([string]$FilePath)
 
             $errorDetails = $null
@@ -152,6 +148,25 @@ function Invoke-ParallelDependencyParsing {
                 # Validate input
                 if ([string]::IsNullOrWhiteSpace($FilePath)) {
                     return @{ FragmentName = $null; Dependencies = ''; Error = 'Empty file path' }
+                }
+
+                # Test-only stall hook for runspace timeout coverage (interruptible via PowerShell.Stop)
+                $testDelayMs = 0
+                if ($env:PS_PROFILE_PARALLEL_PARSE_TEST_DELAY_MS -and [int]::TryParse($env:PS_PROFILE_PARALLEL_PARSE_TEST_DELAY_MS, [ref]$testDelayMs) -and $testDelayMs -gt 0) {
+                    Start-Sleep -Milliseconds $testDelayMs
+                }
+
+                # Test-only per-file stall for partial global timeout coverage
+                $slowDelayMs = 0
+                if ($env:PS_PROFILE_PARALLEL_PARSE_SLOW_FILE_DELAY_MS -and [int]::TryParse($env:PS_PROFILE_PARALLEL_PARSE_SLOW_FILE_DELAY_MS, [ref]$slowDelayMs) -and $slowDelayMs -gt 0 -and $FilePath -like '*slow-parse*') {
+                    Start-Sleep -Milliseconds $slowDelayMs
+                }
+
+                # Test-only non-terminating error for PowerShell.HadErrors coverage
+                if ($env:PS_PROFILE_PARALLEL_PARSE_EMIT_PS_ERROR -and (
+                        $env:PS_PROFILE_PARALLEL_PARSE_EMIT_PS_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                        $env:PS_PROFILE_PARALLEL_PARSE_EMIT_PS_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                    Write-Error 'parallel parse ps error probe' -ErrorAction Continue
                 }
 
                 # Get file info
@@ -262,9 +277,51 @@ function Invoke-ParallelDependencyParsing {
             }
         }
 
-        # Start all parsing tasks in parallel
+    $useDirectScriptblock = $false
+    if ($env:PS_PROFILE_PARALLEL_PARSE_DIRECT_SCRIPTBLOCK) {
+        $normalizedDirect = $env:PS_PROFILE_PARALLEL_PARSE_DIRECT_SCRIPTBLOCK.Trim().ToLowerInvariant()
+        $useDirectScriptblock = ($normalizedDirect -eq '1' -or $normalizedDirect -eq 'true')
+    }
+
+    if ($useDirectScriptblock) {
         foreach ($filePath in $FilePaths) {
+            $raw = & $scriptBlock $filePath
+            if ($null -ne $raw) {
+                $resultHashtable = @{
+                    FragmentName = $raw.FragmentName
+                    Dependencies = $raw.Dependencies
+                }
+                if ($raw.Error) {
+                    $resultHashtable['Error'] = $raw.Error
+                }
+
+                $results.Add($resultHashtable)
+            }
+        }
+    }
+    else {
+        try {
+            # Create runspace pool (min 1, max CPU count, capped at 10)
+            $throttleLimit = [Math]::Min(10, [System.Environment]::ProcessorCount)
+            $runspacePool = [runspacefactory]::CreateRunspacePool(1, $throttleLimit)
+            $runspacePool.Open()
+
+            # Test-only setup failure hook for outer catch coverage
+            if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_SETUP_ERROR -and (
+                    $env:PS_PROFILE_PARALLEL_PARSE_FORCE_SETUP_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                    $env:PS_PROFILE_PARALLEL_PARSE_FORCE_SETUP_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                throw [System.InvalidOperationException]::new('parallel parse setup error probe')
+            }
+
+            # Start all parsing tasks in parallel
+            foreach ($filePath in $FilePaths) {
             try {
+                if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_SETUP_RUNSPACE_ERROR -and (
+                        $env:PS_PROFILE_PARALLEL_PARSE_FORCE_SETUP_RUNSPACE_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                        $env:PS_PROFILE_PARALLEL_PARSE_FORCE_SETUP_RUNSPACE_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                    throw [System.InvalidOperationException]::new('setup runspace error probe')
+                }
+
                 $powershell = [PowerShell]::Create()
                 if (-not $powershell) {
                     $debugLevel = 0
@@ -289,6 +346,12 @@ function Invoke-ParallelDependencyParsing {
                 $powershell.RunspacePool = $runspacePool
                 
                 try {
+                    if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_ADDSCRIPT_ERROR -and (
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ADDSCRIPT_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ADDSCRIPT_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                        throw [System.InvalidOperationException]::new('addscript error probe')
+                    }
+
                     $null = $powershell.AddScript($scriptBlock)
                 }
                 catch {
@@ -315,6 +378,12 @@ function Invoke-ParallelDependencyParsing {
                 }
 
                 try {
+                    if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_ADD_ARGUMENT_ERROR -and (
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ADD_ARGUMENT_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ADD_ARGUMENT_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                        throw [System.InvalidOperationException]::new('addargument error probe')
+                    }
+
                     $null = $powershell.AddArgument($filePath)
                 }
                 catch {
@@ -341,7 +410,21 @@ function Invoke-ParallelDependencyParsing {
                 }
 
                 try {
-                    $handle = $powershell.BeginInvoke()
+                    if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_BEGININVOKE_ERROR -and (
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_BEGININVOKE_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_BEGININVOKE_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                        throw [System.InvalidOperationException]::new('begininvoke error probe')
+                    }
+
+                    if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_BEGININVOKE_NULL -and (
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_BEGININVOKE_NULL.Trim().ToLowerInvariant() -eq '1' -or
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_BEGININVOKE_NULL.Trim().ToLowerInvariant() -eq 'true')) {
+                        $handle = $null
+                    }
+                    else {
+                        $handle = $powershell.BeginInvoke()
+                    }
+
                     if (-not $handle) {
                         $debugLevel = 0
                         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
@@ -388,6 +471,12 @@ function Invoke-ParallelDependencyParsing {
 
                 # Optimized: Use List.Add instead of +=
                 try {
+                    if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_ADD_TO_RUNSPACES_ERROR -and (
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ADD_TO_RUNSPACES_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ADD_TO_RUNSPACES_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                        throw [System.InvalidOperationException]::new('add to runspaces list probe')
+                    }
+
                     $runspaces.Add(@{
                             PowerShell = $powershell
                             Handle     = $handle
@@ -505,13 +594,49 @@ function Invoke-ParallelDependencyParsing {
                     Write-Host "  [fragment-loading.parallel-parsing] Timeout details - Total: $($runspaces.Count), Completed: $completedCount, Timeout: ${timeoutMs}ms" -ForegroundColor DarkGray
                 }
             }
+
+            foreach ($stalledRunspace in $runspaces) {
+                if ($stalledRunspace.Handle -and -not $stalledRunspace.Handle.IsCompleted -and $stalledRunspace.PowerShell) {
+                    try {
+                        if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_STOP_STALLED_ERROR -and (
+                                $env:PS_PROFILE_PARALLEL_PARSE_FORCE_STOP_STALLED_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                                $env:PS_PROFILE_PARALLEL_PARSE_FORCE_STOP_STALLED_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                            throw [System.InvalidOperationException]::new('stop stalled runspace probe')
+                        }
+
+                        $stalledRunspace.PowerShell.Stop()
+                    }
+                    catch {
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            Write-Verbose "[fragment-loading.parallel-parsing] Stop stalled runspace failed for $($stalledRunspace.FilePath): $($_.Exception.Message)"
+                        }
+                    }
+                }
+            }
         }
 
         # Collect results
         foreach ($rs in $runspaces) {
             try {
+                if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_PROCESS_RUNSPACE_ERROR -and (
+                        $env:PS_PROFILE_PARALLEL_PARSE_FORCE_PROCESS_RUNSPACE_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                        $env:PS_PROFILE_PARALLEL_PARSE_FORCE_PROCESS_RUNSPACE_ERROR.Trim().ToLowerInvariant() -eq 'true') -and
+                    -not $script:ParallelParseProcessRunspaceErrorTriggered) {
+                    $script:ParallelParseProcessRunspaceErrorTriggered = $true
+                    throw [System.InvalidOperationException]::new('process runspace error probe')
+                }
+
                 if ($rs.Handle.IsCompleted) {
                     try {
+                        if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_ENDINVOKE_ERROR -and (
+                                $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ENDINVOKE_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                                $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ENDINVOKE_ERROR.Trim().ToLowerInvariant() -eq 'true') -and
+                            -not $script:ParallelParseEndInvokeErrorTriggered) {
+                            $script:ParallelParseEndInvokeErrorTriggered = $true
+                            throw [System.InvalidOperationException]::new('endinvoke error probe')
+                        }
+
                         $result = $rs.PowerShell.EndInvoke($rs.Handle)
                         
                         # Check for errors in the result
@@ -683,6 +808,18 @@ function Invoke-ParallelDependencyParsing {
                 }
                 else {
                     # Timeout - return empty result for this file
+                    if ($rs.PowerShell -and $rs.Handle -and -not $rs.Handle.IsCompleted) {
+                        try {
+                            $rs.PowerShell.Stop()
+                        }
+                        catch {
+                            $debugLevel = 0
+                            if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                                Write-Verbose "[fragment-loading.parallel-parsing] Stop timed-out runspace failed for $($rs.FilePath): $($_.Exception.Message)"
+                            }
+                        }
+                    }
+
                     $debugLevel = 0
                     if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                         if ($debugLevel -ge 1) {
@@ -718,6 +855,12 @@ function Invoke-ParallelDependencyParsing {
                         }
                     }
                     try {
+                        if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_TIMEOUT_RESULT_ADD_ERROR -and (
+                                $env:PS_PROFILE_PARALLEL_PARSE_FORCE_TIMEOUT_RESULT_ADD_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                                $env:PS_PROFILE_PARALLEL_PARSE_FORCE_TIMEOUT_RESULT_ADD_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                            throw [System.InvalidOperationException]::new('timeout result add probe')
+                        }
+
                         $results.Add(@{ FragmentName = $null; Dependencies = ''; Error = 'Timeout' })
                     }
                     catch {
@@ -756,6 +899,12 @@ function Invoke-ParallelDependencyParsing {
                     Write-Verbose "[fragment-loading.parallel-parsing] ProcessRunspace error details - FilePath: $($rs.FilePath), Exception: $typeName, Message: $($_.Exception.Message), Stack: $($_.ScriptStackTrace)"
                 }
                 try {
+                    if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_ERROR_RESULT_ADD_ERROR -and (
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ERROR_RESULT_ADD_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                            $env:PS_PROFILE_PARALLEL_PARSE_FORCE_ERROR_RESULT_ADD_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                        throw [System.InvalidOperationException]::new('error result add probe')
+                    }
+
                     $results.Add(@{ FragmentName = $null; Dependencies = ''; Error = $_.Exception.Message })
                 }
                 catch {
@@ -796,6 +945,12 @@ function Invoke-ParallelDependencyParsing {
                     if ($rs.PowerShell) {
                         if ($rs.Handle -and -not $rs.Handle.IsCompleted) {
                             $rs.PowerShell.Stop()
+                        }
+
+                        if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_DISPOSE_ERROR -and (
+                                $env:PS_PROFILE_PARALLEL_PARSE_FORCE_DISPOSE_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                                $env:PS_PROFILE_PARALLEL_PARSE_FORCE_DISPOSE_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+                            throw [System.InvalidOperationException]::new('dispose error probe')
                         }
 
                         $rs.PowerShell.Dispose()
@@ -846,8 +1001,44 @@ function Invoke-ParallelDependencyParsing {
     finally {
         # Cleanup runspace pool
         if ($runspacePool) {
-            $runspacePool.Close()
-            $runspacePool.Dispose()
+            foreach ($rs in $runspaces) {
+                if ($null -eq $rs -or $null -eq $rs.PowerShell) {
+                    continue
+                }
+
+                try {
+                    if ($rs.Handle -and -not $rs.Handle.IsCompleted) {
+                        $rs.PowerShell.Stop()
+                    }
+                }
+                catch {
+                    $debugLevel = 0
+                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                        Write-Verbose "[fragment-loading.parallel-parsing] Final stop failed for $($rs.FilePath): $($_.Exception.Message)"
+                    }
+                }
+            }
+
+            try {
+                $runspacePool.Close()
+            }
+            catch {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Verbose "[fragment-loading.parallel-parsing] Runspace pool close failed: $($_.Exception.Message)"
+                }
+            }
+
+            try {
+                $runspacePool.Dispose()
+            }
+            catch {
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
+                    Write-Verbose "[fragment-loading.parallel-parsing] Runspace pool dispose failed: $($_.Exception.Message)"
+                }
+            }
+        }
         }
     }
 
@@ -855,6 +1046,13 @@ function Invoke-ParallelDependencyParsing {
     # (hashtable operations don't work in runspaces, so we return string and process here)
     foreach ($result in $results) {
         try {
+            if ($env:PS_PROFILE_PARALLEL_PARSE_FORCE_PROCESS_RESULT_ERROR -and (
+                    $env:PS_PROFILE_PARALLEL_PARSE_FORCE_PROCESS_RESULT_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                    $env:PS_PROFILE_PARALLEL_PARSE_FORCE_PROCESS_RESULT_ERROR.Trim().ToLowerInvariant() -eq 'true') -and
+                $result.FragmentName -eq 'force-process-result') {
+                throw [System.InvalidOperationException]::new('process result probe')
+            }
+
             if ($result.Dependencies) {
                 # Dependencies is a comma-separated string from the runspace
                 $depString = $result.Dependencies
@@ -1344,7 +1542,16 @@ function Get-FragmentLoadOrder {
             Write-Host "  Dependency parsing completed in $([Math]::Round($parseTime.TotalMilliseconds))ms" -ForegroundColor DarkGray
         }
         $graphStart = Get-Date
+        $graphDelayApplied = $false
         foreach ($result in $dependencyResults) {
+            if (-not $graphDelayApplied) {
+                $graphDelayMs = 0
+                if ($env:PS_PROFILE_FORCE_GRAPH_BUILD_DELAY_MS -and [int]::TryParse($env:PS_PROFILE_FORCE_GRAPH_BUILD_DELAY_MS, [ref]$graphDelayMs) -and $graphDelayMs -gt 0) {
+                    Start-Sleep -Milliseconds $graphDelayMs
+                    $graphDelayApplied = $true
+                }
+            }
+
             # Skip null or invalid results
             if ($null -eq $result -or $null -eq $result.FragmentName -or [string]::IsNullOrWhiteSpace($result.FragmentName)) {
                 if ($env:PS_PROFILE_DEBUG) {
@@ -1811,7 +2018,16 @@ function Get-FragmentDependencyLevels {
             Write-Host "  Dependency parsing completed in $([Math]::Round($parseTime.TotalMilliseconds))ms" -ForegroundColor DarkGray
         }
         $graphStart = Get-Date
+        $graphDelayApplied = $false
         foreach ($result in $dependencyResults) {
+            if (-not $graphDelayApplied) {
+                $graphDelayMs = 0
+                if ($env:PS_PROFILE_FORCE_GRAPH_BUILD_DELAY_MS -and [int]::TryParse($env:PS_PROFILE_FORCE_GRAPH_BUILD_DELAY_MS, [ref]$graphDelayMs) -and $graphDelayMs -gt 0) {
+                    Start-Sleep -Milliseconds $graphDelayMs
+                    $graphDelayApplied = $true
+                }
+            }
+
             # Skip null or invalid results
             if ($null -eq $result -or $null -eq $result.FragmentName -or [string]::IsNullOrWhiteSpace($result.FragmentName)) {
                 if ($env:PS_PROFILE_DEBUG) {

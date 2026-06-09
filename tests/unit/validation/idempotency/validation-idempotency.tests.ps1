@@ -37,11 +37,11 @@ if (-not (Test-Path Function:\Get-IdempotencyFixture)) {
 
     Push-Location $repo
     try {
-        git init -q | Out-Null
-        git config user.email 'fixture@example.com'
-        git config user.name 'Fixture'
-        git add profile.d/
-        git commit -m 'init idempotency fixture' -q
+    git init -q | Out-Null
+    git config user.email 'fixture@example.com'
+    git config user.name 'Fixture'
+    git add profile.d/
+    git commit -m 'init idempotency fixture' -q
     }
     finally {
         Pop-Location
@@ -76,23 +76,15 @@ Describe 'check-idempotency.ps1' {
             }
 
             $repo = New-IdempotencyTestRepository
+            Push-Location $repo
             try {
-                Push-Location $repo
-                try {
-                    $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'checks' 'check-idempotency.ps1')
-                }
-                finally {
-                    Pop-Location
-                }
-
-                $result.ExitCode | Should -Be 0
-                $result.Output | Should -Match 'Building temporary idempotency runner|Idempotency runner|loaded twice without errors'
+                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'checks' 'check-idempotency.ps1')
             }
             finally {
-                if (Test-Path -LiteralPath $repo) {
-                    Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-                }
+                Pop-Location
             }
+                        $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Building temporary idempotency runner|Idempotency runner|loaded twice without errors'
         }
 
         It 'Fails when a fragment throws on the second dot-source pass' {
@@ -102,23 +94,15 @@ Describe 'check-idempotency.ps1' {
             }
 
             $repo = New-IdempotencyTestRepository -NonIdempotent
+            Push-Location $repo
             try {
-                Push-Location $repo
-                try {
-                    $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'checks' 'check-idempotency.ps1')
-                }
-                finally {
-                    Pop-Location
-                }
-
-                $result.ExitCode | Should -Be 1
-                $result.Output | Should -Match 'Idempotency runner failed|Non-idempotent fragment loaded twice'
+                $result = Invoke-TestScriptFile -ScriptPath (Join-Path $repo 'scripts' 'checks' 'check-idempotency.ps1')
             }
             finally {
-                if (Test-Path -LiteralPath $repo) {
-                    Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-                }
+                Pop-Location
             }
+                        $result.ExitCode | Should -Be 1
+            $result.Output | Should -Match 'Idempotency runner failed|Non-idempotent fragment loaded twice'
         }
     }
 

@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-utilities-history-enhanced-extended.tests.ps1
-#>
+# ===============================================
+# profile-utilities-history-enhanced-extended.tests.ps1
+# Execution tests for utilities-modules/history/utilities-history-enhanced.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,52 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/utilities-modules/history/utilities-history-enhanced.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:UtilitiesModulesDir = Join-Path $script:ProfileDir 'utilities-modules'
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'utilities.ps1')
+    Ensure-Utilities
 }
+
+function script:Import-EnhancedHistoryModule {
+    Microsoft.PowerShell.Utility\Remove-Variable -Name 'EnhancedHistoryLoaded' -Scope Global -ErrorAction SilentlyContinue
+    . (Join-Path $script:ProfileDir 'history-enhanced.ps1')
+}
+
 Describe 'profile.d/utilities-modules/history/utilities-history-enhanced.ps1 extended scenarios' {
-    It 'Documents enhanced history search and management utilities' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Enhanced history utility functions'
-        $c | Should -Match 'Advanced history search, navigation, and management'
+    It 'Registers enhanced history helpers through history-enhanced.ps1' {
+        Import-EnhancedHistoryModule
+
+        Get-Command Find-HistoryFuzzy -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Find-HistoryQuick -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Show-HistoryStats -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        $global:EnhancedHistoryLoaded | Should -Be $true
+
+        $alias = Get-Alias fh -ErrorAction SilentlyContinue
+        if ($alias) {
+            $alias.ResolvedCommandName | Should -Be 'Find-HistoryQuick'
+        }
     }
-    It 'Defines Find-HistoryFuzzy and Find-HistoryQuick with Get-History' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Find-HistoryFuzzy'
-        $c | Should -Match 'Find-HistoryQuick'
-        $c | Should -Match 'Get-History'
-        $c | Should -Match 'EnhancedHistoryLoaded'
+
+    It 'Find-HistoryFuzzy warns when no search pattern is provided' {
+        Import-EnhancedHistoryModule
+
+        $warnings = $null
+        Find-HistoryFuzzy -WarningVariable warnings -WarningAction Continue | Out-Null
+        ($warnings | ForEach-Object {
+                if ($_ -is [System.Management.Automation.WarningRecord]) { $_.Message } else { "$_" }
+            }) -join ' ' | Should -Match 'search pattern'
     }
-    It 'Registers fh alias and sets EnhancedHistoryLoaded global flag' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'fh'"
-        $c | Should -Match "Set-Variable -Name 'EnhancedHistoryLoaded'"
-        $c | Should -Match 'Show-HistoryStats'
+
+    It 'Skips re-initialization when enhanced history is already loaded' {
+        Import-EnhancedHistoryModule
+        $firstFuzzy = Get-Command Find-HistoryFuzzy -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'history-enhanced.ps1')
+
+        (Get-Command Find-HistoryFuzzy -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstFuzzy.ScriptBlock.ToString()
     }
 }

@@ -1,0 +1,42 @@
+# Find-HistoryFuzzy
+
+## Synopsis
+
+Performs fuzzy search on command history.
+
+## Description
+
+Searches through PowerShell command history using fuzzy matching. Supports partial matches and shows results with context.
+
+## Signature
+
+```powershell
+Find-HistoryFuzzy
+```
+
+## Parameters
+
+### -Pattern
+
+The search pattern to match against history.
+
+### -CaseSensitive
+
+If specified, performs case-sensitive search.
+
+### -MaxResults
+
+Maximum number of results to return (default: 20).
+
+
+## Examples
+
+### Example 1
+
+```powershell
+Find-HistoryFuzzy -Pattern 'search-term' -MaxResults 1
+```
+
+## Source
+
+Defined in: ../profile.d/utilities-modules/history/utilities-history-enhanced.ps1

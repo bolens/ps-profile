@@ -75,12 +75,10 @@ Describe 'lang-go.ps1 - Build-GoProject' {
         It 'Handles go build execution errors' {
             Set-TestCommandThrowingMock -CommandName 'go' -Message 'go: command failed'
 
-            try {
-                $result = Build-GoProject -ErrorAction SilentlyContinue
-            }
-            catch {
-                $result = $null
-            }
+                        $result = Build-GoProject -ErrorAction SilentlyContinue
+        }
+        catch {
+            $result = $null
 
             $result | Should -BeNullOrEmpty
         }
@@ -152,12 +150,10 @@ Describe 'lang-go.ps1 - Test-GoProject' {
         It 'Handles go test execution errors' {
             Set-TestCommandThrowingMock -CommandName 'go' -Message 'go: command failed'
 
-            try {
-                $result = Test-GoProject -ErrorAction SilentlyContinue
-            }
-            catch {
-                $result = $null
-            }
+                        $result = Test-GoProject -ErrorAction SilentlyContinue
+        }
+        catch {
+            $result = $null
 
             $result | Should -BeNullOrEmpty
         }

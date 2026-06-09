@@ -68,17 +68,15 @@ Describe 'Embedded install command core extended scenarios' {
             Remove-Item Function:\Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
 
-            try {
-                $command = Get-PythonPackageInstallCommandCore `
-                    -PackageNames @('requests') `
-                    -PythonCmd 'python3.12'
-                $command | Should -Match 'python3.12'
-                $command | Should -Match 'requests'
-            }
-            finally {
-                if ($null -ne $originalHint) {
-                    Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalHint.ScriptBlock -Force
-                }
+                        $command = Get-PythonPackageInstallCommandCore `
+                -PackageNames @('requests') `
+                -PythonCmd 'python3.12'
+            $command | Should -Match 'python3.12'
+            $command | Should -Match 'requests'
+        }
+        finally {
+            if ($null -ne $originalHint) {
+                Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalHint.ScriptBlock -Force
             }
         }
 

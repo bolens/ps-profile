@@ -36,17 +36,15 @@ Describe 'profile.d/ssh.ps1 extended scenarios' {
 
         $warnings = @()
         $previousWarningPreference = $WarningPreference
-        try {
-            $WarningPreference = 'Continue'
-            Add-SSHKeyIfNotLoaded 3>&1 | ForEach-Object {
-                if ($_ -is [System.Management.Automation.WarningRecord]) {
-                    $warnings += $_.Message
-                }
+                $WarningPreference = 'Continue'
+        Add-SSHKeyIfNotLoaded 3>&1 | ForEach-Object {
+            if ($_ -is [System.Management.Automation.WarningRecord]) {
+                $warnings += $_.Message
             }
         }
-        finally {
-            $WarningPreference = $previousWarningPreference
-        }
+    }
+    finally {
+        $WarningPreference = $previousWarningPreference
 
         $warnings -join ' ' | Should -Match 'Usage: Add-SSHKeyIfNotLoaded'
     }

@@ -91,4 +91,33 @@ Describe 'link-guide-drift.ps1 execution' {
         $result.ExitCode | Should -Not -Be 0
         $result.Output | Should -Match 'definitely-not-a-guide-xyz|Cannot find path|does not exist'
     }
+
+    It 'DryRun with Refresh reports the linking summary without modifying drift.lock' {
+        if (-not $script:DriftCliAvailable) {
+            Set-ItResult -Skipped -Because 'drift CLI is not installed'
+            return
+        }
+
+        $guidePath = Join-Path $script:TestRepoRoot 'docs' 'guides' 'TESTING.md'
+        $beforeLock = if (Test-Path -LiteralPath (Join-Path $script:TestRepoRoot 'drift.lock')) {
+            (Get-Item -LiteralPath (Join-Path $script:TestRepoRoot 'drift.lock')).LastWriteTimeUtc
+        }
+        else {
+            $null
+        }
+
+        $result = Invoke-LinkGuideDriftScript -ArgumentList @(
+            '-DryRun',
+            '-Refresh',
+            '-GuidePath', $guidePath
+        )
+
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'Drift guide linking summary:'
+
+        if ($null -ne $beforeLock) {
+            $afterLock = (Get-Item -LiteralPath (Join-Path $script:TestRepoRoot 'drift.lock')).LastWriteTimeUtc
+            $afterLock | Should -Be $beforeLock
+        }
+    }
 }

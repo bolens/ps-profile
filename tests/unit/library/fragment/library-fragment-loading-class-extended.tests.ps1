@@ -36,6 +36,15 @@ Describe 'FragmentDependencyTestResult extended scenarios' {
             }
         }
 
+        It 'Returns a success summary when dependency validation is marked valid' {
+            InModuleScope FragmentLoading {
+                $result = [FragmentDependencyTestResult]::new()
+                $result.Valid = $true
+
+                $result.ToString() | Should -Be 'All dependencies valid'
+            }
+        }
+
         It 'Detects missing dependency issues' {
             InModuleScope FragmentLoading {
                 $result = [FragmentDependencyTestResult]::new()

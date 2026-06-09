@@ -51,9 +51,6 @@ Describe 'Fragment cache path error extended scenarios' {
             }
             finally {
                 Pop-Location -ErrorAction SilentlyContinue
-                if (Test-Path -LiteralPath $tempRoot) {
-                    Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
-                }
             }
         }
     }

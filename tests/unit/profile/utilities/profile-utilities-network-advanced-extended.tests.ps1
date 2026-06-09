@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-utilities-network-advanced-extended.tests.ps1
-#>
+# ===============================================
+# profile-utilities-network-advanced-extended.tests.ps1
+# Execution tests for utilities-modules/network/utilities-network-advanced.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,42 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/utilities-modules/network/utilities-network-advanced.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
 }
+
+function script:Import-NetworkAdvancedModule {
+    Microsoft.PowerShell.Utility\Remove-Variable -Name 'NetworkUtilsLoaded' -Scope Global -ErrorAction SilentlyContinue
+    . (Join-Path $script:ProfileDir 'network-utils.ps1')
+}
+
 Describe 'profile.d/utilities-modules/network/utilities-network-advanced.ps1 extended scenarios' {
-    It 'Documents advanced network utilities with retry and timeout handling' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Advanced network utility functions'
-        $c | Should -Match 'error recovery and timeout handling'
+    It 'Registers advanced network helpers through network-utils.ps1' {
+        Import-NetworkAdvancedModule
+
+        Get-Command Invoke-WithRetry -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-HttpRequestWithRetry -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Test-NetworkConnectivity -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Resolve-HostWithRetry -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        $global:NetworkUtilsLoaded | Should -Be $true
     }
-    It 'Defines Invoke-WithRetry and Invoke-HttpRequestWithRetry helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Invoke-WithRetry'
-        $c | Should -Match 'Invoke-HttpRequestWithRetry'
-        $c | Should -Match 'Test-NetworkConnectivity'
-        $c | Should -Match 'NetworkUtilsLoaded'
+
+    It 'Invoke-WithRetry executes the supplied script block' {
+        Import-NetworkAdvancedModule
+
+        $result = Invoke-WithRetry -ScriptBlock { return 'network-retry-ok' }
+        $result | Should -Be 'network-retry-ok'
     }
-    It 'Imports Retry module and sets NetworkUtilsLoaded global flag' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Retry.psm1'
-        $c | Should -Match 'Resolve-HostWithRetry'
-        $c | Should -Match "Set-Variable -Name 'NetworkUtilsLoaded'"
+
+    It 'Skips re-initialization when advanced network utilities are already loaded' {
+        Import-NetworkAdvancedModule
+        $firstRetry = Get-Command Invoke-WithRetry -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'network-utils.ps1')
+
+        (Get-Command Invoke-WithRetry -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstRetry.ScriptBlock.ToString()
     }
 }

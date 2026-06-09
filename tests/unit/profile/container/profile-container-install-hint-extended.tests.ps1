@@ -36,16 +36,14 @@ Describe 'Container install hint extended scenarios' {
             Remove-Item Function:\Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
 
-            try {
-                Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
-                $hint = Get-ContainerEngineInstallHint
-                $hint | Should -Match 'docker'
-                $hint | Should -Match 'podman'
-            }
-            finally {
-                if ($null -ne $originalPlatformHint) {
-                    Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
-                }
+                        Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            $hint = Get-ContainerEngineInstallHint
+            $hint | Should -Match 'docker'
+            $hint | Should -Match 'podman'
+        }
+        finally {
+            if ($null -ne $originalPlatformHint) {
+                Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
             }
         }
 
@@ -68,13 +66,11 @@ Describe 'Container install hint extended scenarios' {
             Remove-Item Function:\Get-ContainerEngineInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-ContainerEngineInstallHint -Force -ErrorAction SilentlyContinue
 
-            try {
-                Get-ContainerInstallationCommand | Should -Match 'scoop install docker'
-            }
-            finally {
-                if ($null -ne $originalHint) {
-                    Set-Item -Path Function:\global:Get-ContainerEngineInstallHint -Value $originalHint.ScriptBlock -Force
-                }
+                        Get-ContainerInstallationCommand | Should -Match 'scoop install docker'
+        }
+        finally {
+            if ($null -ne $originalHint) {
+                Set-Item -Path Function:\global:Get-ContainerEngineInstallHint -Value $originalHint.ScriptBlock -Force
             }
         }
     }

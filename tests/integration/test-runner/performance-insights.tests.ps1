@@ -2,24 +2,22 @@
 
 Describe 'Performance Insights Integration Tests' {
     BeforeAll {
-        try {
-            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-            if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
-                throw "Get-TestPath returned null or empty value for ProfileDir"
-            }
-            if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-                throw "Profile directory not found at: $script:ProfileDir"
-            }
+                $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+        if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
+            throw "Get-TestPath returned null or empty value for ProfileDir"
         }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-            }
-            Write-Error "Failed to initialize performance insights tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
+            throw "Profile directory not found at: $script:ProfileDir"
         }
+    }
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize performance insights tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
 
     Context 'Performance insights functions' {
@@ -37,17 +35,15 @@ Describe 'Performance Insights Integration Tests' {
         }
 
         It 'Show-PerformanceInsights executes without error' {
-            try {
-                { Show-PerformanceInsights } | Should -Not -Throw -Because "Show-PerformanceInsights should execute without errors"
+                        { Show-PerformanceInsights } | Should -Not -Throw -Because "Show-PerformanceInsights should execute without errors"
+        }
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Category = $_.CategoryInfo.Category
             }
-            catch {
-                $errorDetails = @{
-                    Message  = $_.Exception.Message
-                    Category = $_.CategoryInfo.Category
-                }
-                Write-Error "Show-PerformanceInsights execution test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-                throw
-            }
+            Write-Error "Show-PerformanceInsights execution test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+            throw
         }
 
         It 'Test-PerformanceHealth function is available' {

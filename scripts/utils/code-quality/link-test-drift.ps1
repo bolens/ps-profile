@@ -785,6 +785,36 @@ if (-not (Get-Command drift -ErrorAction SilentlyContinue)) {
 }
 
 $knownBindings = Get-ExistingDriftBindings
+
+if ($Refresh) {
+    $testDocs = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    foreach ($line in Get-Content -LiteralPath $driftLockPath) {
+        if ($line -match '^(?<doc>tests/[^\s]+)\s+->\s+(?<target>.+?)\s+sig:') {
+            [void]$testDocs.Add($Matches.doc)
+        }
+    }
+
+    $removedOrphans = 0
+    foreach ($testDoc in ($testDocs | Sort-Object)) {
+        $testFullPath = Join-Path $repoRoot ($testDoc -replace '/', [IO.Path]::DirectorySeparatorChar)
+        if (Test-Path -LiteralPath $testFullPath) {
+            continue
+        }
+
+        foreach ($line in (Select-String -Path $driftLockPath -Pattern "^$([regex]::Escape($testDoc)) -> ")) {
+            $parts = $line.Line -split ' -> '
+            $target = ($parts[1] -replace ' sig:.*', '')
+            $null = & drift unlink $testDoc $target 2>&1
+            $knownBindings.Remove("$testDoc|$target")
+            $removedOrphans++
+        }
+    }
+
+    if ($removedOrphans -gt 0) {
+        Write-Host "Removed $removedOrphans orphaned test binding(s)"
+    }
+}
+
 $testFiles = if ($TestPath) {
     $TestPath | ForEach-Object {
         $resolved = if ([IO.Path]::IsPathRooted($_)) { $_ } else { Join-Path $repoRoot $_ }

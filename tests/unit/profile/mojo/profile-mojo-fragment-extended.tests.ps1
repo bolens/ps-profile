@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-mojo-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-mojo-fragment-extended.tests.ps1
+# Execution tests for mojo.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,46 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/mojo.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/mojo.ps1 extended scenarios' {
-    It 'Declares standard tier guarded by mojo availability' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'Test-CachedCommand mojo'
+    It 'Registers Mojo helpers when mojo is available' {
+        Set-TestCommandAvailabilityState -CommandName 'mojo' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'mojo.ps1')
+
+        Get-Command Invoke-MojoRun -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Build-MojoProgram -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command mojo-run -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Invoke-MojoRun and Build-MojoProgram helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Invoke-MojoRun'
-        $c | Should -Match 'Build-MojoProgram'
+
+    It 'Skips Mojo helper registration when mojo is unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'mojo' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        . (Join-Path $script:ProfileDir 'mojo.ps1')
+
+        Get-Command Invoke-MojoRun -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
     }
-    It 'Registers mojo-run and mojo-build aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'mojo-run'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'mojo-build'"
+
+    It 'Emits missing-tool warning when mojo is unavailable at load time' {
+        Set-TestCommandAvailabilityState -CommandName 'mojo' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('mojo', [ref]$null)
+        }
+
+        $output = & { . (Join-Path $script:ProfileDir 'mojo.ps1') } 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'mojo not found'
     }
 }

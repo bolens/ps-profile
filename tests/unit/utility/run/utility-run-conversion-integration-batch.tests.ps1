@@ -34,7 +34,6 @@ Describe 'run-conversion-integration-batch.ps1 execution' {
 
     It 'Fails when the conversion batch directory contains no test files' {
         $tempRoot = New-TestTempDirectory -Prefix 'conversion-batch-empty'
-        try {
             $conversionDir = Join-Path $tempRoot 'tests' 'integration' 'conversion' 'empty-batch'
             $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
             $null = New-Item -ItemType Directory -Path $conversionDir -Force
@@ -49,17 +48,10 @@ Describe 'run-conversion-integration-batch.ps1 execution' {
 
             $result.ExitCode | Should -Be 2
             $result.Output | Should -Match 'No \*\.tests\.ps1 files'
-        }
-        finally {
-            if (Test-Path -LiteralPath $tempRoot) {
-                Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Runs conversion tests in a single session using a stub Pester runner' {
         $tempRoot = New-TestTempDirectory -Prefix 'conversion-batch-stub'
-        try {
             $conversionDir = Join-Path $tempRoot 'tests' 'integration' 'conversion' 'stub-batch'
             $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
             $null = New-Item -ItemType Directory -Path $conversionDir -Force
@@ -84,17 +76,10 @@ exit 0
             $result.Output | Should -Match 'single session'
             $result.Output | Should -Match '1P / 0F / 0S'
             $result.Output | Should -Match 'All tests passed in batch'
-        }
-        finally {
-            if (Test-Path -LiteralPath $tempRoot) {
-                Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Runs conversion tests per-file using a stub Pester runner' {
         $tempRoot = New-TestTempDirectory -Prefix 'conversion-batch-perfile'
-        try {
             $conversionDir = Join-Path $tempRoot 'tests' 'integration' 'conversion' 'perfile-batch'
             $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
             $null = New-Item -ItemType Directory -Path $conversionDir -Force
@@ -120,17 +105,10 @@ exit 0
             $result.Output | Should -Match 'sample\.tests\.ps1'
             $result.Output | Should -Match '1P / 0F / 0S'
             $result.Output | Should -Match 'All tests passed in batch'
-        }
-        finally {
-            if (Test-Path -LiteralPath $tempRoot) {
-                Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Fails the batch when the stub Pester runner reports test failures' {
         $tempRoot = New-TestTempDirectory -Prefix 'conversion-batch-failure'
-        try {
             $conversionDir = Join-Path $tempRoot 'tests' 'integration' 'conversion' 'failing-batch'
             $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
             $null = New-Item -ItemType Directory -Path $conversionDir -Force
@@ -153,11 +131,5 @@ exit 1
             $result.ExitCode | Should -Be 1
             $result.Output | Should -Match 'Batch: failing-batch'
             $result.Output | Should -Match '0P / 1F / 0S|failed'
-        }
-        finally {
-            if (Test-Path -LiteralPath $tempRoot) {
-                Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

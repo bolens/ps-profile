@@ -20,6 +20,17 @@ BeforeAll {
     Import-Module (Join-Path $libPath 'utilities' 'EnvFile.psm1') -DisableNameChecking -Force
 
     $script:TempRoot = New-TestTempDirectory -Prefix 'EnvFileExtended'
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
+}
+
+function script:Enable-TestStructuredLogging {
+    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+        return
+    }
+
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
 }
 
 AfterAll {
@@ -90,6 +101,128 @@ COMMENTED_PAIR=kept
             }
             finally {
                 Remove-Item Env:\COMMENTED_PAIR -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Emits debug tracing when skipping existing variables at debug level 3' {
+            $envFile = Join-Path $script:TempRoot 'debug-skip.env'
+            'DEBUG_SKIP_VAR=file-value' | Set-Content -LiteralPath $envFile -Encoding UTF8
+            $env:DEBUG_SKIP_VAR = 'preset'
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                Load-EnvFile -EnvFilePath $envFile
+                $env:DEBUG_SKIP_VAR | Should -Be 'preset'
+            }
+            finally {
+                Remove-Item Env:\DEBUG_SKIP_VAR -ErrorAction SilentlyContinue
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Warns on load failures when ErrorAction is Continue and debug is enabled' {
+            Enable-TestStructuredLogging
+            $envFile = Join-Path $script:TempRoot 'continue-error.env'
+            'GOOD_VAR=ok' | Set-Content -LiteralPath $envFile -Encoding UTF8
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+
+            $global:EnvFileContinueTestPath = $envFile
+            try {
+                InModuleScope -ModuleName EnvFile {
+                    Mock Get-Content {
+                        throw 'env read failure probe'
+                    }
+
+                    { Load-EnvFile -EnvFilePath $global:EnvFileContinueTestPath -ErrorAction Continue } | Should -Not -Throw
+                }
+            }
+            finally {
+                Remove-Variable -Name EnvFileContinueTestPath -Scope Global -ErrorAction SilentlyContinue
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses manual path validation when Test-ValidPath is unavailable' {
+            Remove-Module Validation -ErrorAction SilentlyContinue -Force
+            $missingFile = Join-Path $script:TempRoot 'missing-manual.env'
+
+            try {
+                { Load-EnvFile -EnvFilePath $missingFile -ErrorAction Stop } | Should -Throw '*Environment file not found*'
+            }
+            finally {
+                Import-Module (Join-Path (Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists) 'core' 'Validation.psm1') -DisableNameChecking -Force
+            }
+        }
+    }
+
+    Context 'Initialize-EnvFiles' {
+        It 'Emits initialize tracing when PS_PROFILE_DEBUG is level 2' {
+            $repoRoot = Join-Path $script:TempRoot 'debug-init-repo'
+            New-Item -ItemType Directory -Path $repoRoot -Force | Out-Null
+            'INIT_DEBUG_VAR=loaded' | Set-Content -LiteralPath (Join-Path $repoRoot '.env') -Encoding UTF8
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '2'
+
+            try {
+                Initialize-EnvFiles -RepoRoot $repoRoot
+                $env:INIT_DEBUG_VAR | Should -Be 'loaded'
+            }
+            finally {
+                Remove-Item Env:\INIT_DEBUG_VAR -ErrorAction SilentlyContinue
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Detects repository root by walking parent directories for .git' {
+            $repoRoot = Join-Path $script:TempRoot 'walk-git-repo'
+            $nestedDir = Join-Path $repoRoot 'nested' 'deep'
+            New-Item -ItemType Directory -Path $nestedDir -Force | Out-Null
+            New-Item -ItemType File -Path (Join-Path $repoRoot '.git') -Force | Out-Null
+            'WALK_VAR=detected' | Set-Content -LiteralPath (Join-Path $repoRoot '.env') -Encoding UTF8
+
+            $previousLocation = Get-Location
+            try {
+                Set-Location -LiteralPath $nestedDir
+                Initialize-EnvFiles
+                $env:WALK_VAR | Should -Be 'detected'
+            }
+            finally {
+                Set-Location -LiteralPath $previousLocation.Path
+                Remove-Item Env:\WALK_VAR -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Returns early when the repository root cannot be validated' {
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '2'
+
+            try {
+                { Initialize-EnvFiles -RepoRoot (Join-Path $script:TempRoot 'missing-repo-dir') } | Should -Not -Throw
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
             }
         }
     }

@@ -10,9 +10,8 @@ function global:New-ScriptStandardsFixture {
         [switch]$IncludeDirectExit
     )
 
-    # Use system temp so Filter-Files -ExcludeTests does not skip fixtures under tests/test-data.
-    $repo = Join-Path ([System.IO.Path]::GetTempPath()) ('ScriptStandardsRepo-{0}' -f [System.Guid]::NewGuid())
-    New-Item -ItemType Directory -Path $repo -Force | Out-Null
+    # Outside tests/ so Filter-Files -ExcludeTests does not skip fixture scripts.
+    $repo = New-TestExternalTempDirectory -Prefix 'ScriptStandardsRepo'
     $scriptsDir = Join-Path $repo 'scripts' 'utils'
     New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
 
@@ -73,44 +72,22 @@ BeforeAll {
 Describe 'check-script-standards.ps1 execution' {
     It 'Passes when scripts only have informational findings' {
         $fixture = New-ScriptStandardsFixture
-        try {
-            Invoke-ScriptStandardsCheck -ScriptsPath $fixture.ScriptsPath | Select-Object -ExpandProperty ExitCode | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.RepositoryRoot) {
-                Remove-Item -LiteralPath $fixture.RepositoryRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        Invoke-ScriptStandardsCheck -ScriptsPath $fixture.ScriptsPath | Select-Object -ExpandProperty ExitCode | Should -Be 0
     }
 
     It 'Fails when a script uses a direct exit call' {
         $fixture = New-ScriptStandardsFixture -IncludeDirectExit
-        try {
-            $result = Invoke-ScriptStandardsCheck -ScriptsPath $fixture.ScriptsPath
+        $result = Invoke-ScriptStandardsCheck -ScriptsPath $fixture.ScriptsPath
 
-            $result.ExitCode | Should -BeIn @(1, 2)
-            $result.Output | Should -Match 'noncompliant|direct exit|exit call'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.RepositoryRoot) {
-                Remove-Item -LiteralPath $fixture.RepositoryRoot -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result.ExitCode | Should -BeIn @(1, 2)
+        $result.Output | Should -Match 'noncompliant|direct exit|exit call'
     }
 
     It 'Fails parameter validation when the requested path does not exist' {
         $missingPath = Join-Path (New-TestTempDirectory -Prefix 'ScriptStandardsMissingPath') 'does-not-exist'
-        try {
-            $result = Invoke-ScriptStandardsCheck -ScriptsPath $missingPath
+        $result = Invoke-ScriptStandardsCheck -ScriptsPath $missingPath
 
-            $result.ExitCode | Should -Not -Be 0
-            $result.Output | Should -Match 'Path does not exist|does not exist'
-        }
-        finally {
-            $parent = Split-Path -Parent $missingPath
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result.ExitCode | Should -Not -Be 0
+        $result.Output | Should -Match 'Path does not exist|does not exist'
     }
 }

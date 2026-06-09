@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-angular-fragment-extended.tests.ps1
-#>
+# ===============================================
+# profile-angular-fragment-extended.tests.ps1
+# Execution tests for angular.ps1 fragment behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,23 +14,39 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/angular.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'angular.ps1')
 }
+
 Describe 'profile.d/angular.ps1 extended scenarios' {
-    It 'Declares standard tier for Angular CLI helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Tier: standard'
-        $c | Should -Match 'PowerShell.Profile.Angular'
+    It 'Registers Angular CLI helpers and aliases' {
+        Get-Command Invoke-Angular -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command New-AngularApp -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command ng -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Invoke-Angular preferring npx @angular/cli' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Invoke-Angular'
-        $c | Should -Match '@angular/cli'
+
+    It 'Invoke-Angular warns when npx and ng are unavailable' {
+        Set-TestCommandAvailabilityState -CommandName 'npx' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'ng' -Available $false
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+        if ($global:MissingToolWarnings) {
+            $null = $global:MissingToolWarnings.TryRemove('@angular/cli', [ref]$null)
+        }
+
+        $output = Invoke-Angular --version 2>&1 3>&1 | Out-String
+        Assert-TestMissingToolWarning -Output $output -Pattern 'npx or ng not found'
     }
-    It 'Registers ng and ng-new aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'ng'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'ng-new'"
+
+    It 'Preserves existing angular helper bodies on repeated fragment loads' {
+        $firstAngular = Get-Command Invoke-Angular -ErrorAction Stop
+
+        . (Join-Path $script:ProfileDir 'angular.ps1')
+
+        (Get-Command Invoke-Angular -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstAngular.ScriptBlock.ToString()
     }
 }

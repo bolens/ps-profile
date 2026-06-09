@@ -68,28 +68,26 @@ Describe 'JWT Conversion Tests' {
             Get-Command ConvertTo-JwtFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             
             # Test conversion - should either succeed (if jsonwebtoken package is installed) or fail gracefully
-            try {
-                $jwtFile = Join-Path $TestDrive 'test.jwt'
-                ConvertTo-JwtFromJson -InputPath $tempFile -OutputPath $jwtFile -ErrorAction Stop 2>&1 | Out-Null
-                # If we get here, conversion succeeded (jsonwebtoken package is installed)
-                if ($jwtFile -and -not [string]::IsNullOrWhiteSpace($jwtFile) -and (Test-Path -LiteralPath $jwtFile)) {
-                    $jwtFile | Should -Exist
-                }
+                        $jwtFile = Join-Path $TestDrive 'test.jwt'
+            ConvertTo-JwtFromJson -InputPath $tempFile -OutputPath $jwtFile -ErrorAction Stop 2>&1 | Out-Null
+            # If we get here, conversion succeeded (jsonwebtoken package is installed)
+            if ($jwtFile -and -not [string]::IsNullOrWhiteSpace($jwtFile) -and (Test-Path -LiteralPath $jwtFile)) {
+                $jwtFile | Should -Exist
             }
-            catch {
-                $errorMessage = $_.Exception.Message
-                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-                
-                if ($errorMessage -match 'jsonwebtoken.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'jsonwebtoken') {
-                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'jsonwebtoken' -ToolType 'node-package'
-                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                    }
-                    elseif ($errorMessage -match 'jsonwebtoken' -or $fullError -match 'jsonwebtoken') {
-                        Write-Host "jsonwebtoken package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                        $errorMessage | Should -Match 'jsonwebtoken'
-                    }
+        }
+        catch {
+            $errorMessage = $_.Exception.Message
+            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+            if ($errorMessage -match 'jsonwebtoken.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'jsonwebtoken') {
+                $installCommand = Resolve-TestToolInstallCommand -ToolName 'jsonwebtoken' -ToolType 'node-package'
+                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                }
+                elseif ($errorMessage -match 'jsonwebtoken' -or $fullError -match 'jsonwebtoken') {
+                    Write-Host "jsonwebtoken package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                    $errorMessage | Should -Match 'jsonwebtoken'
                 }
             }
         }
@@ -138,13 +136,11 @@ Describe 'JWT Conversion Tests' {
             Set-Content -Path $tempFile -Value $payloadJson -NoNewline
 
             # Encode to JWT, then decode back
-            try {
-                ConvertTo-JwtFromJson -InputPath $tempFile -Secret 'test-secret'
-            }
-            catch {
-                Set-ItResult -Skipped -Because "JWT encoding failed (may require jsonwebtoken npm package): $_"
-                return
-            }
+                        ConvertTo-JwtFromJson -InputPath $tempFile -Secret 'test-secret'
+        }
+        catch {
+            Set-ItResult -Skipped -Because "JWT encoding failed (may require jsonwebtoken npm package): $_"
+            return
 
             $jwtFile = $tempFile -replace '\.json$', '.jwt'
             if (-not (Test-Path -LiteralPath $jwtFile) -or [string]::IsNullOrWhiteSpace((Get-Content -LiteralPath $jwtFile -Raw))) {
@@ -152,12 +148,10 @@ Describe 'JWT Conversion Tests' {
                 return
             }
 
-            try {
-                ConvertFrom-JwtToJson -InputPath $jwtFile
-            }
-            catch {
-                throw
-            }
+                        ConvertFrom-JwtToJson -InputPath $jwtFile
+        }
+        catch {
+            throw
 
             $decodedFile = $jwtFile -replace '\.jwt$', '.json'
             $decodedJson = Get-Content -LiteralPath $decodedFile -Raw | ConvertFrom-Json

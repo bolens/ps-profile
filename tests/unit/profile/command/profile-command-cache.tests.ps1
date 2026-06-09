@@ -84,14 +84,12 @@ Describe 'CommandCache helpers' {
     Context 'Test-CachedCommand availability' {
         It 'Detects registered commands' {
             $commandName = "HasCommandWrapper_$([Guid]::NewGuid().ToString('N'))"
-            try {
-                Set-Item -Path "Function:\global:$commandName" -Value { 'ok' } -Force
-                Test-CachedCommand -Name $commandName | Should -Be $true
-            }
-            finally {
-                Remove-Item -Path "Function:\global:$commandName" -Force -ErrorAction SilentlyContinue
-                Remove-TestCachedCommandCacheEntry -Name $commandName -ErrorAction SilentlyContinue | Out-Null
-            }
+                        Set-Item -Path "Function:\global:$commandName" -Value { 'ok' } -Force
+            Test-CachedCommand -Name $commandName | Should -Be $true
+        }
+        finally {
+            Remove-Item -Path "Function:\global:$commandName" -Force -ErrorAction SilentlyContinue
+            Remove-TestCachedCommandCacheEntry -Name $commandName -ErrorAction SilentlyContinue | Out-Null
         }
     }
 

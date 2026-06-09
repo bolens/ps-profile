@@ -73,6 +73,26 @@ Describe 'database-maintenance.ps1 execution' {
         $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
     }
 
+    It 'Accepts backup action without enum load errors' {
+        $result = Invoke-DatabaseMaintenanceScript -ArgumentList @('-Action', 'backup')
+
+        $result.Output | Should -Not -Match 'Unable to find type \[DatabaseAction\]'
+        if ($result.Output -match 'SqliteDatabase\.psm1 was not found') {
+            $result.ExitCode | Should -BeIn @(1, 2, 3)
+            return
+        }
+
+        $result.Output | Should -Match 'backup|Backup|database'
+        $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
+    }
+
+    It 'Accepts repair action without enum load errors' {
+        $result = Invoke-DatabaseMaintenanceScript -ArgumentList @('-Action', 'repair')
+
+        $result.Output | Should -Not -Match 'Unable to find type \[DatabaseAction\]'
+        $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
+    }
+
     It 'Rejects unknown maintenance actions' {
         $result = Invoke-DatabaseMaintenanceScript -ArgumentList @('-Action', 'definitely-not-a-db-action')
 

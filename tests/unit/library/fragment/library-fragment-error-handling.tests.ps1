@@ -96,19 +96,17 @@ Describe 'FragmentErrorHandling Module Functions' {
             Set-Content -Path $accessErrorPath -Value '# Test'
             
             # Try to make it inaccessible (may not work on all systems)
-            try {
-                $acl = Get-Acl $accessErrorPath
-                $acl.SetAccessRuleProtection($true, $false)
-                $acl.Access | ForEach-Object { $acl.RemoveAccessRule($_) }
-                Set-Acl $accessErrorPath $acl -ErrorAction SilentlyContinue
-                
-                $result = Invoke-FragmentSafely -FragmentName 'access-error' -FragmentPath $accessErrorPath
-                $result | Should -Be $false
-            }
-            catch {
-                # If we can't test access errors, just verify the function exists
-                Get-Command Invoke-FragmentSafely | Should -Not -BeNullOrEmpty
-            }
+                        $acl = Get-Acl $accessErrorPath
+            $acl.SetAccessRuleProtection($true, $false)
+            $acl.Access | ForEach-Object { $acl.RemoveAccessRule($_) }
+            Set-Acl $accessErrorPath $acl -ErrorAction SilentlyContinue
+            
+            $result = Invoke-FragmentSafely -FragmentName 'access-error' -FragmentPath $accessErrorPath
+            $result | Should -Be $false
+        }
+        catch {
+            # If we can't test access errors, just verify the function exists
+            Get-Command Invoke-FragmentSafely | Should -Not -BeNullOrEmpty
         }
 
         It 'Suppresses warnings when SuppressWarnings is specified' {
@@ -129,19 +127,17 @@ Describe 'FragmentErrorHandling Module Functions' {
 
         It 'Handles debug mode correctly' {
             $originalDebug = $env:PS_PROFILE_DEBUG
-            try {
-                $env:PS_PROFILE_DEBUG = '1'
-                $errorBlock = { throw 'Debug test error' }
-                $result = Invoke-FragmentSafely -FragmentName 'debug-test' -FragmentPath 'dummy.ps1' -ScriptBlock $errorBlock
-                $result | Should -Be $false
+                        $env:PS_PROFILE_DEBUG = '1'
+            $errorBlock = { throw 'Debug test error' }
+            $result = Invoke-FragmentSafely -FragmentName 'debug-test' -FragmentPath 'dummy.ps1' -ScriptBlock $errorBlock
+            $result | Should -Be $false
+        }
+        finally {
+            if ($originalDebug) {
+                $env:PS_PROFILE_DEBUG = $originalDebug
             }
-            finally {
-                if ($originalDebug) {
-                    $env:PS_PROFILE_DEBUG = $originalDebug
-                }
-                else {
-                    $env:PS_PROFILE_DEBUG = $null
-                }
+            else {
+                $env:PS_PROFILE_DEBUG = $null
             }
         }
     }
@@ -281,15 +277,13 @@ Describe 'FragmentErrorHandling Module Functions' {
         }
 
         It 'Includes script stack trace when available' {
-            try {
-                throw 'Test error for stack trace'
-            }
-            catch {
-                $errorInfo = Get-FragmentErrorInfo -ErrorRecord $_ -FragmentName 'test-fragment'
-                # Stack trace may or may not be available depending on context
-                if ($errorInfo.PSObject.Properties.Name -contains 'ScriptStackTrace') {
-                    $errorInfo.ScriptStackTrace | Should -Not -BeNullOrEmpty
-                }
+                        throw 'Test error for stack trace'
+        }
+        catch {
+            $errorInfo = Get-FragmentErrorInfo -ErrorRecord $_ -FragmentName 'test-fragment'
+            # Stack trace may or may not be available depending on context
+            if ($errorInfo.PSObject.Properties.Name -contains 'ScriptStackTrace') {
+                $errorInfo.ScriptStackTrace | Should -Not -BeNullOrEmpty
             }
         }
 
@@ -307,15 +301,13 @@ Describe 'FragmentErrorHandling Module Functions' {
         }
 
         It 'Handles error records with line numbers' {
-            try {
-                # Create an error with line number context
-                $null = Get-Item 'nonexistent-file-that-does-not-exist-12345.ps1' -ErrorAction Stop
-            }
-            catch {
-                $errorInfo = Get-FragmentErrorInfo -ErrorRecord $_ -FragmentName 'test-fragment'
-                $errorInfo | Should -Not -BeNullOrEmpty
-                $errorInfo.ErrorMessage | Should -Not -BeNullOrEmpty
-            }
+                        # Create an error with line number context
+            $null = Get-Item 'nonexistent-file-that-does-not-exist-12345.ps1' -ErrorAction Stop
+        }
+        catch {
+            $errorInfo = Get-FragmentErrorInfo -ErrorRecord $_ -FragmentName 'test-fragment'
+            $errorInfo | Should -Not -BeNullOrEmpty
+            $errorInfo.ErrorMessage | Should -Not -BeNullOrEmpty
         }
     }
 }

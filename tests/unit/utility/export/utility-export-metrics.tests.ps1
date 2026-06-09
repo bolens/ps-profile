@@ -36,7 +36,6 @@ BeforeAll {
 Describe 'export-metrics.ps1 execution' {
     It 'Exports metrics to a custom output path without enum load errors' {
         $outputPath = Join-Path (New-TestTempDirectory -Prefix 'ExportMetricsOut') 'metrics.json'
-        try {
             $result = Invoke-ExportMetricsScript -ArgumentList @('-OutputPath', $outputPath)
 
             $result.Output | Should -Not -Match 'Unable to find type \[OutputFormat\]'
@@ -44,13 +43,6 @@ Describe 'export-metrics.ps1 execution' {
             if ($result.ExitCode -eq 0) {
                 Test-Path -LiteralPath $outputPath | Should -BeTrue
             }
-        }
-        finally {
-            $parent = Split-Path -Parent $outputPath
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Rejects unsupported OutputFormat values' {
@@ -62,7 +54,6 @@ Describe 'export-metrics.ps1 execution' {
 
     It 'Exports metrics to CSV at a custom output path' {
         $outputPath = Join-Path (New-TestTempDirectory -Prefix 'ExportMetricsCsv') 'metrics.csv'
-        try {
             $result = Invoke-ExportMetricsScript -ArgumentList @(
                 '-OutputFormat', 'Csv',
                 '-OutputPath', $outputPath,
@@ -75,13 +66,6 @@ Describe 'export-metrics.ps1 execution' {
             if ((Get-Item -LiteralPath $outputPath).Length -gt 0) {
                 (Get-Content -LiteralPath $outputPath -Raw) | Should -Match 'MetricType|TotalFiles|,'
             }
-        }
-        finally {
-            $parent = Split-Path -Parent $outputPath
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Exports metrics as a human-readable table to stdout' {

@@ -37,13 +37,11 @@ catch {
 }
 '@ | Set-Content -LiteralPath $scriptPath -Encoding UTF8
 
-            try {
-                $null = pwsh -NoProfile -File $scriptPath 2>&1
-                $LASTEXITCODE | Should -Be 2
-            }
-            finally {
-                Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
-            }
+                        $null = pwsh -NoProfile -File $scriptPath 2>&1
+            $LASTEXITCODE | Should -Be 2
+        }
+        finally {
+            Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
         }
     }
 
@@ -61,14 +59,34 @@ function Exit-WithCode {
 Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message 'validation failed'
 '@ | Set-Content -LiteralPath $scriptPath -Encoding UTF8
 
-            try {
-                $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
-                $LASTEXITCODE | Should -Be 1
-                $output | Should -Match 'validation failed'
-            }
-            finally {
-                Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
-            }
+                        $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
+            $LASTEXITCODE | Should -Be 1
+            $output | Should -Match 'validation failed'
+        }
+        finally {
+            Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    Context 'ModuleImport bootstrap pattern' {
+        It 'Exits with setup error when ModuleImport.psm1 is missing from scripts/lib' {
+            $scriptPath = Join-Path $script:TempRoot 'missing-moduleimport.ps1'
+            @'
+$ErrorActionPreference = 'Stop'
+$moduleImportPath = Join-Path $PSScriptRoot 'lib' 'ModuleImport.psm1'
+if (-not (Test-Path -LiteralPath $moduleImportPath)) {
+    Write-Error "ModuleImport.psm1 not found at: $moduleImportPath"
+    exit 2
+}
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+'@ | Set-Content -LiteralPath $scriptPath -Encoding UTF8
+
+                        $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
+            $LASTEXITCODE | Should -BeIn @(1, 2)
+            $output | Should -Match 'ModuleImport\.psm1 not found'
+        }
+        finally {
+            Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
         }
     }
 }

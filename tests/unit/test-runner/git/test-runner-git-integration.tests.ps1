@@ -43,13 +43,11 @@ Describe 'TestGitIntegration Module' {
             }
 
             $tempDir = New-TestTempDirectory -Prefix 'NoGitRepo'
-            try {
-                $result = Get-GitChangedFiles -RepoRoot $tempDir
-                $result | Should -Be @()
-            }
-            finally {
-                Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+                        $result = Get-GitChangedFiles -RepoRoot $tempDir
+            $result | Should -Be @()
+        }
+        finally {
+            Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
         }
 
         It 'Includes untracked files when requested' {

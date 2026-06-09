@@ -24,87 +24,60 @@ BeforeAll {
 Describe 'psa_to_reviewdog.ps1 execution' {
     It 'Fails when the PSScriptAnalyzer report path does not exist' {
         $missingReport = Join-Path (New-TestTempDirectory -Prefix 'PsaReviewdogMissing') 'missing-report.json'
-        try {
-            $result = Invoke-TestScriptFile -ScriptPath $script:PsaToReviewdogScript -ArgumentList @(
-                '-ReportPath', $missingReport
-            )
-
-            $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'Report not found'
-        }
-        finally {
-            $parent = Split-Path -Parent $missingReport
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $result = Invoke-TestScriptFile -ScriptPath $script:PsaToReviewdogScript -ArgumentList @(
+            '-ReportPath', $missingReport
+        )
+                $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'Report not found'
     }
 
     It 'Converts a PSScriptAnalyzer JSON report into reviewdog rdjson output' {
         $workDir = New-TestTempDirectory -Prefix 'PsaReviewdogConvert'
         $reportPath = Join-Path $workDir 'psa-report.json'
         $outputPath = Join-Path $workDir 'psa_for_reviewdog.rdjson'
+        @(
+            [pscustomobject]@{
+                FilePath = 'scripts/test.ps1'
+                RuleName = 'PSUseApprovedVerbs'
+                Severity = 'Warning'
+                Message  = 'Test diagnostic message'
+                Line     = 4
+                Column   = 10
+            }
+        ) | ConvertTo-Json | Set-Content -LiteralPath $reportPath -Encoding UTF8
+                Push-Location $workDir
         try {
-            @(
-                [pscustomobject]@{
-                    FilePath = 'scripts/test.ps1'
-                    RuleName = 'PSUseApprovedVerbs'
-                    Severity = 'Warning'
-                    Message  = 'Test diagnostic message'
-                    Line     = 4
-                    Column   = 10
-                }
-            ) | ConvertTo-Json | Set-Content -LiteralPath $reportPath -Encoding UTF8
-
-            Push-Location $workDir
-            try {
-                $result = Invoke-TestScriptFile -ScriptPath $script:PsaToReviewdogScript -ArgumentList @(
-                    '-ReportPath', $reportPath
-                )
-
-                $result.ExitCode | Should -Be 0
-                $result.Output | Should -Match 'Converted 1 items'
-                Test-Path -LiteralPath $outputPath | Should -BeTrue
-                $converted = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
-                $converted.diagnostics.Count | Should -Be 1
-                $converted.diagnostics[0].severity | Should -Be 'WARNING'
-            }
-            finally {
-                Pop-Location
-            }
+            $result = Invoke-TestScriptFile -ScriptPath $script:PsaToReviewdogScript -ArgumentList @(
+                '-ReportPath', $reportPath
+            )
+                    $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Converted 1 items'
+            Test-Path -LiteralPath $outputPath | Should -BeTrue
+            $converted = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
+            $converted.diagnostics.Count | Should -Be 1
+            $converted.diagnostics[0].severity | Should -Be 'WARNING'
         }
         finally {
-            if (Test-Path -LiteralPath $workDir) {
-                Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
         }
     }
 
     It 'Converts an empty PSScriptAnalyzer report into reviewdog output with zero diagnostics' {
         $workDir = New-TestTempDirectory -Prefix 'PsaReviewdogEmpty'
         $reportPath = Join-Path $workDir 'empty-report.json'
+        '[]' | Set-Content -LiteralPath $reportPath -Encoding UTF8
+                Push-Location $workDir
         try {
-            '[]' | Set-Content -LiteralPath $reportPath -Encoding UTF8
-
-            Push-Location $workDir
-            try {
-                $result = Invoke-TestScriptFile -ScriptPath $script:PsaToReviewdogScript -ArgumentList @(
-                    '-ReportPath', $reportPath
-                )
-
-                $result.ExitCode | Should -Be 0
-                $result.Output | Should -Match 'Converted 0 items'
-                $converted = Get-Content -LiteralPath (Join-Path $workDir 'psa_for_reviewdog.rdjson') -Raw | ConvertFrom-Json
-                $converted.diagnostics.Count | Should -Be 0
-            }
-            finally {
-                Pop-Location
-            }
+            $result = Invoke-TestScriptFile -ScriptPath $script:PsaToReviewdogScript -ArgumentList @(
+                '-ReportPath', $reportPath
+            )
+                    $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'Converted 0 items'
+            $converted = Get-Content -LiteralPath (Join-Path $workDir 'psa_for_reviewdog.rdjson') -Raw | ConvertFrom-Json
+            $converted.diagnostics.Count | Should -Be 0
         }
         finally {
-            if (Test-Path -LiteralPath $workDir) {
-                Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
+            Pop-Location
         }
     }
 }

@@ -6,30 +6,24 @@ tests/integration/profile/updates.tests.ps1
 #>
 
 
-Describe 'Profile Updates Integration Tests' {
-    BeforeAll {
-        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        # Use test-data directory instead of system temp
-        $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-        $testDataRoot = Join-Path $repoRoot 'tests' 'test-data'
-        if ($testDataRoot -and -not [string]::IsNullOrWhiteSpace($testDataRoot) -and -not (Test-Path -LiteralPath $testDataRoot)) {
-            New-Item -ItemType Directory -Path $testDataRoot -Force | Out-Null
+BeforeAll {
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
+            . $testSupportPath
+            break
         }
-        $script:TestProfileDir = Join-Path $testDataRoot 'PesterTestProfileUpdates'
-        # Create test directory if it doesn't exist
-        if ($script:TestProfileDir -and -not [string]::IsNullOrWhiteSpace($script:TestProfileDir) -and -not (Test-Path -LiteralPath $script:TestProfileDir)) {
-            New-Item -ItemType Directory -Path $script:TestProfileDir -Force | Out-Null
-        }
-        $script:LastCheckFile = Join-Path $script:TestProfileDir '.profile-last-update-check'
-    }
-    
-    AfterAll {
-        # Clean up test directory
-        if ($script:TestProfileDir -and -not [string]::IsNullOrWhiteSpace($script:TestProfileDir) -and (Test-Path -LiteralPath $script:TestProfileDir)) {
-            Remove-Item -Path $script:TestProfileDir -Recurse -Force -ErrorAction SilentlyContinue
-        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
     }
 
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:TestProfileDir = New-TestTempDirectory -Prefix 'ProfileUpdates'
+    $script:LastCheckFile = Join-Path $script:TestProfileDir '.profile-last-update-check'
+}
+
+Describe 'Profile Updates Integration Tests' {
     Context 'Test-ProfileUpdates function' {
         BeforeAll {
             # Set test mode to allow the fragment to load even without Host.UI

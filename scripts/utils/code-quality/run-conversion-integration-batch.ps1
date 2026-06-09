@@ -4,9 +4,10 @@
     Runs conversion integration tests under a directory.
 
 .DESCRIPTION
-    By default runs all matching *.tests.ps1 files in a single Pester session (one
-    run-pester startup). Use -PerFile for per-file runs with individual pass/fail lines
-    (slower; useful when isolating a failing file).
+    Discovers *.tests.ps1 files recursively under the requested conversion subdirectory.
+    By default runs all matching files in a single Pester session (one run-pester startup).
+    Use -PerFile for per-file runs with individual pass/fail lines (slower; useful when
+    isolating a failing file).
 
 .PARAMETER RelativePath
     Path relative to tests/integration/conversion/ (default: data/compression).

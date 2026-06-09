@@ -24,26 +24,17 @@ BeforeAll {
 Describe 'analyze-coverage.ps1 execution' {
     It 'Exits successfully when no source or test files match the requested path' {
         $missingPath = Join-Path (New-TestTempDirectory -Prefix 'AnalyzeCoverageMissing') 'does-not-exist'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:AnalyzeCoverageScript -ArgumentList @(
                 '-Path', $missingPath
             )
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Path not found|No source files or test files'
-        }
-        finally {
-            $parent = Split-Path -Parent $missingPath
-            if (Test-Path -LiteralPath $parent) {
-                Remove-Item -LiteralPath $parent -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Writes coverage output under a custom OutputPath for a missing analysis path' {
         $outputDir = New-TestTempDirectory -Prefix 'AnalyzeCoverageOutput'
         $missingPath = Join-Path $outputDir 'missing-source'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:AnalyzeCoverageScript -ArgumentList @(
                 '-Path', $missingPath,
                 '-OutputPath', $outputDir
@@ -52,34 +43,20 @@ Describe 'analyze-coverage.ps1 execution' {
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Path not found|No source files or test files'
             Test-Path -LiteralPath $outputDir | Should -Be $true
-        }
-        finally {
-            if (Test-Path -LiteralPath $outputDir) {
-                Remove-Item -LiteralPath $outputDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Exits successfully when the analysis path exists but contains no PowerShell files' {
         $emptyDir = New-TestTempDirectory -Prefix 'AnalyzeCoverageEmptyDir'
-        try {
             $result = Invoke-TestScriptFile -ScriptPath $script:AnalyzeCoverageScript -ArgumentList @(
                 '-Path', $emptyDir
             )
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'No source files or test files|Path not found'
-        }
-        finally {
-            if (Test-Path -LiteralPath $emptyDir) {
-                Remove-Item -LiteralPath $emptyDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Runs coverage analysis for a matched source and unit test pair in an isolated repository' {
         $repo = New-TestTempDirectory -Prefix 'AnalyzeCoverageMatched'
-        try {
             $profileDir = Join-Path $repo 'profile.d'
             $unitDir = Join-Path $repo 'tests' 'unit'
             $codeQualityDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
@@ -122,11 +99,5 @@ Describe 'coverage fixture' {
             $result.ExitCode | Should -BeIn @(0, 1)
             $result.Output | Should -Match 'Coverage Analysis Summary'
             $result.Output | Should -Match 'coverage-fixture\.ps1|profile-coverage-fixture'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }

@@ -56,13 +56,11 @@ Describe 'Formatting fallback extended scenarios' {
             $funcName = "Test-FormattingNoArgs_$(Get-Random)"
             Set-Item -Path "Function:\global:$funcName" -Value { return 'no-args' } -Force
 
-            try {
-                Invoke-CommandWithFallback -CommandName $funcName -FallbackValue 'fallback' |
-                    Should -Be 'no-args'
-            }
-            finally {
-                Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
-            }
+                        Invoke-CommandWithFallback -CommandName $funcName -FallbackValue 'fallback' |
+                Should -Be 'no-args'
+        }
+        finally {
+            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
         }
     }
 

@@ -59,12 +59,10 @@ Describe 'Git Integration Tests' {
             New-Item -ItemType Directory -Path $nonGitDir -Force | Out-Null
 
             Push-Location $nonGitDir
-            try {
-                { gs } | Should -Not -Throw
-            }
-            finally {
-                Pop-Location
-            }
+                        { gs } | Should -Not -Throw
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Ensure-GitHelper is idempotent' {
@@ -160,13 +158,11 @@ Describe 'Git Integration Tests' {
             New-Item -ItemType Directory -Path $nonGitDir -Force | Out-Null
 
             Push-Location $nonGitDir
-            try {
-                $result = Test-GitRepositoryContext
-                $result | Should -Be $false
-            }
-            finally {
-                Pop-Location
-            }
+                        $result = Test-GitRepositoryContext
+            $result | Should -Be $false
+        }
+        finally {
+            Pop-Location
         }
 
         It 'Test-GitRepositoryHasCommits returns false in empty repo' {

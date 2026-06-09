@@ -33,6 +33,11 @@ Describe 'run-tools-integration-batch.ps1 extended scenarios' {
             $content = Get-Content -LiteralPath $script:ToolsBatchScript -Raw
             $content | Should -Match 'per-file'
         }
+
+        It 'Discovers test files recursively under the tools integration directory' {
+            $content = Get-Content -LiteralPath $script:ToolsBatchScript -Raw
+            $content | Should -Match "Get-ChildItem -Path \`$testDir -Filter '\*\.tests\.ps1' -File -Recurse"
+        }
     }
 
     Context 'Failure handling' {

@@ -62,5 +62,10 @@ Describe 'run-conversion-all-batch.ps1 extended scenarios' {
             $content = Get-Content -LiteralPath $script:ConversionAllBatch -Raw
             $content | Should -Match "'-NonInteractive'"
         }
+
+        It 'Discovers nested tests under data and media categories recursively' {
+            $content = Get-Content -LiteralPath $script:ConversionAllBatch -Raw
+            $content | Should -Match "Get-ChildItem -Path \`$sub\.FullName -Filter '\*\.tests\.ps1' -File -Recurse"
+        }
     }
 }

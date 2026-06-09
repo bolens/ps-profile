@@ -157,13 +157,11 @@ Describe 'TestExecution Module Tests' {
             $originalCI = $env:CI
             $env:CI = 'true'
 
-            try {
-                $env = Get-TestEnvironment
-                $env.IsCI | Should -Be $true
-            }
-            finally {
-                $env:CI = $originalCI
-            }
+                        $env = Get-TestEnvironment
+            $env.IsCI | Should -Be $true
+        }
+        finally {
+            $env:CI = $originalCI
         }
 
         It 'Detects available tools' {

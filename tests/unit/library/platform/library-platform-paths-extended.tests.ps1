@@ -34,13 +34,11 @@ Describe 'PlatformPaths extended scenarios' {
             $originalTemp = $env:TEMP
             $customTemp = Join-Path $script:TempRoot 'custom-temp'
 
-            try {
-                $env:TEMP = $customTemp
-                Get-TempDirectory | Should -Be $customTemp
-            }
-            finally {
-                $env:TEMP = $originalTemp
-            }
+                        $env:TEMP = $customTemp
+            Get-TempDirectory | Should -Be $customTemp
+        }
+        finally {
+            $env:TEMP = $originalTemp
         }
 
         It 'Uses TMPDIR when TEMP is not set' {
@@ -48,15 +46,13 @@ Describe 'PlatformPaths extended scenarios' {
             $originalTmpDir = $env:TMPDIR
             $customTmpDir = Join-Path $script:TempRoot 'custom-tmpdir'
 
-            try {
-                Remove-Item Env:TEMP -ErrorAction SilentlyContinue
-                $env:TMPDIR = $customTmpDir
-                Get-TempDirectory | Should -Be $customTmpDir
-            }
-            finally {
-                if ($null -ne $originalTemp) { $env:TEMP = $originalTemp }
-                $env:TMPDIR = $originalTmpDir
-            }
+                        Remove-Item Env:TEMP -ErrorAction SilentlyContinue
+            $env:TMPDIR = $customTmpDir
+            Get-TempDirectory | Should -Be $customTmpDir
+        }
+        finally {
+            if ($null -ne $originalTemp) { $env:TEMP = $originalTemp }
+            $env:TMPDIR = $originalTmpDir
         }
     }
 
@@ -65,26 +61,22 @@ Describe 'PlatformPaths extended scenarios' {
             $original = $env:XDG_CONFIG_HOME
             $customConfig = Join-Path $script:TempRoot 'xdg-config'
 
-            try {
-                $env:XDG_CONFIG_HOME = $customConfig
-                Get-ConfigDirectory | Should -Be $customConfig
-            }
-            finally {
-                $env:XDG_CONFIG_HOME = $original
-            }
+                        $env:XDG_CONFIG_HOME = $customConfig
+            Get-ConfigDirectory | Should -Be $customConfig
+        }
+        finally {
+            $env:XDG_CONFIG_HOME = $original
         }
 
         It 'Honors PS_PROFILE_CACHE_DIR override' {
             $original = $env:PS_PROFILE_CACHE_DIR
             $customCache = Join-Path $script:TempRoot 'profile-cache'
 
-            try {
-                $env:PS_PROFILE_CACHE_DIR = $customCache
-                Get-CacheDirectory | Should -Be $customCache
-            }
-            finally {
-                $env:PS_PROFILE_CACHE_DIR = $original
-            }
+                        $env:PS_PROFILE_CACHE_DIR = $customCache
+            Get-CacheDirectory | Should -Be $customCache
+        }
+        finally {
+            $env:PS_PROFILE_CACHE_DIR = $original
         }
 
         It 'Builds cache path under XDG_CACHE_HOME when no override exists' {

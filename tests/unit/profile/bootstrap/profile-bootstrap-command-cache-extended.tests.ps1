@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-bootstrap-command-cache-extended.tests.ps1
-#>
+# ===============================================
+# profile-bootstrap-command-cache-extended.tests.ps1
+# Execution tests for bootstrap/CommandCache.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,34 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/bootstrap/CommandCache.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:BootstrapDir = Join-Path $script:ProfileDir 'bootstrap'
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
+
 Describe 'profile.d/bootstrap/CommandCache.ps1 extended scenarios' {
-    It 'Documents command availability caching utilities' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Command availability caching utilities'
-        $c | Should -Match 'preferred function for command detection'
+    It 'Registers command cache helpers' {
+        Get-Command Test-CachedCommand -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-CachedExternalCommand -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Clear-TestCachedCommandCache -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Test-CachedCommand with CacheTTLMinutes parameter' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Test-CachedCommand'
-        $c | Should -Match 'CacheTTLMinutes'
-        $c | Should -Match 'Get-CachedExternalCommand'
+
+    It 'Test-CachedCommand returns false for non-existent commands' {
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        $missing = "MissingCmd_$([Guid]::NewGuid().ToString('N'))"
+        Test-CachedCommand -Name $missing | Should -Be $false
     }
-    It 'Provides cache management helpers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Clear-TestCachedCommandCache'
-        $c | Should -Match 'Remove-TestCachedCommandCacheEntry'
+
+    It 'Preserves command cache helper bodies on repeated module loads' {
+        $firstTest = Get-Command Test-CachedCommand -ErrorAction Stop
+
+        . (Join-Path $script:BootstrapDir 'CommandCache.ps1')
+
+        (Get-Command Test-CachedCommand -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstTest.ScriptBlock.ToString()
     }
 }

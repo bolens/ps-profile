@@ -30,7 +30,7 @@ function global:Invoke-ScanShallowHelp {
 
     Push-Location $FixtureDirectory
     try {
-        & pwsh -NoProfile -File $script:ScanShallowHelpScript -Path 'fixtures' -MinIssues $MinIssues 2>&1 | Out-String
+    & pwsh -NoProfile -File $script:ScanShallowHelpScript -Path 'fixtures' -MinIssues $MinIssues 2>&1 | Out-String
     }
     finally {
         Pop-Location
@@ -155,7 +155,6 @@ function Get-BeforeHelpFixture {
 Describe 'scan-shallow-help.ps1 execution' {
     It 'Reports shallow help issues for fixture functions with incomplete documentation' {
         $fixture = New-ShallowHelpFixtureDirectory
-        try {
             Set-Content -LiteralPath (Join-Path $fixture.FixturesDir 'shallow.ps1') -Value @'
 function Get-ShallowHelpFixture {
     <#
@@ -175,17 +174,10 @@ function Get-ShallowHelpFixture {
             $output | Should -Match 'Get-ShallowHelpFixture'
             $output | Should -Match 'synopsis-only|missing-parameter-docs|missing-examples'
             $output | Should -Match 'Total shallow \(1\+ issues\): [1-9]'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.Root) {
-                Remove-Item -LiteralPath $fixture.Root -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Reports zero shallow issues for fully documented fixture functions' {
         $fixture = New-ShallowHelpFixtureDirectory -Prefix 'ShallowHelpComplete'
-        try {
             Set-Content -LiteralPath (Join-Path $fixture.FixturesDir 'complete.ps1') -Value @'
 function Get-CompleteHelpFixture {
     <#
@@ -208,17 +200,10 @@ function Get-CompleteHelpFixture {
 
             $output | Should -Not -Match 'Get-CompleteHelpFixture'
             $output | Should -Match 'Total shallow \(1\+ issues\): 0'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.Root) {
-                Remove-Item -LiteralPath $fixture.Root -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Detects help blocks inside function bodies' {
         $fixture = New-ShallowHelpFixtureDirectory -Prefix 'ShallowHelpBody'
-        try {
             Set-Content -LiteralPath (Join-Path $fixture.FixturesDir 'body-help.ps1') -Value @'
 function Get-BodyHelpScanFixture {
     <#
@@ -237,17 +222,10 @@ function Get-BodyHelpScanFixture {
 
             $output | Should -Match 'Get-BodyHelpScanFixture'
             $output | Should -Match 'synopsis-only|missing-examples'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.Root) {
-                Remove-Item -LiteralPath $fixture.Root -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Skips Doc*.psm1 parser modules during scans' {
         $fixture = New-ShallowHelpFixtureDirectory -Prefix 'ShallowHelpDocSkip'
-        try {
             Set-Content -LiteralPath (Join-Path $fixture.FixturesDir 'DocHelpParser.psm1') -Value @'
 function Normalize-CommentHelpBlock {
     <#
@@ -266,17 +244,10 @@ function Normalize-CommentHelpBlock {
 
             $output | Should -Not -Match 'Normalize-CommentHelpBlock'
             $output | Should -Match 'Total shallow \(1\+ issues\): 0'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.Root) {
-                Remove-Item -LiteralPath $fixture.Root -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Skips enrichment utility scripts by filename during scans' {
         $fixture = New-ShallowHelpFixtureDirectory -Prefix 'ShallowHelpExclusion'
-        try {
             Set-Content -LiteralPath (Join-Path $fixture.FixturesDir 'enrich-missing-examples.ps1') -Value @'
 function Add-ExampleToHelpBlock {
     <#
@@ -295,24 +266,11 @@ function Add-ExampleToHelpBlock {
 
             $output | Should -Not -Match 'Add-ExampleToHelpBlock'
             $output | Should -Match 'Total shallow \(1\+ issues\): 0'
-        }
-        finally {
-            if (Test-Path -LiteralPath $fixture.Root) {
-                Remove-Item -LiteralPath $fixture.Root -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Reports zero shallow issues when the scan directory contains no PowerShell files' {
         $emptyDir = New-TestTempDirectory -Prefix 'ShallowHelpEmptyDir'
-        try {
-            $output = & pwsh -NoProfile -File $script:ScanShallowHelpScript -Path $emptyDir -MinIssues 1 2>&1 | Out-String
-            $output | Should -Match 'Total shallow \(1\+ issues\): 0'
-        }
-        finally {
-            if (Test-Path -LiteralPath $emptyDir) {
-                Remove-Item -LiteralPath $emptyDir -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
+        $output = & pwsh -NoProfile -File $script:ScanShallowHelpScript -Path $emptyDir -MinIssues 1 2>&1 | Out-String
+        $output | Should -Match 'Total shallow \(1\+ issues\): 0'
     }
 }

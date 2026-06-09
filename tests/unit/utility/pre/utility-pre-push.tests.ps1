@@ -61,56 +61,28 @@ BeforeAll {
 Describe 'pre-push.ps1 execution' {
     It 'Passes when validate-profile succeeds' {
         $repo = New-PrePushTestRepository -ValidateExitCode 0
-        try {
             Invoke-PrePushHook -RepositoryRoot $repo | Select-Object -ExpandProperty ExitCode | Should -Be 0
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Prints validate-profile status before completing successfully' {
         $repo = New-PrePushTestRepository -ValidateExitCode 0
-        try {
             $result = Invoke-PrePushHook -RepositoryRoot $repo
 
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'pre-push: running validate-profile'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Fails when validate-profile returns a non-zero exit code' {
         $repo = New-PrePushTestRepository -ValidateExitCode 1
-        try {
             $result = Invoke-PrePushHook -RepositoryRoot $repo
             $result.ExitCode | Should -BeIn @(1, 2)
             $result.Output | Should -Match 'validate-profile failed|pre-push: validate-profile failed'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 
     It 'Fails when validate-profile.ps1 is missing from the repository' {
         $repo = New-PrePushTestRepository -OmitValidateScript
-        try {
             $result = Invoke-PrePushHook -RepositoryRoot $repo
             $result.ExitCode | Should -BeIn @(1, 2, 3)
             $result.Output | Should -Match 'validate-profile|Cannot bind|not found|failed'
-        }
-        finally {
-            if (Test-Path -LiteralPath $repo) {
-                Remove-Item -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue
-            }
-        }
     }
 }
