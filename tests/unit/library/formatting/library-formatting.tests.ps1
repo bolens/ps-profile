@@ -22,11 +22,14 @@ AfterAll {
 }
 
 Describe 'Formatting Module Functions' {
+    BeforeEach {
+        Remove-TestFunction -Name @('Format-LocaleDate', 'Format-LocaleNumber')
+    }
+
     Context 'Format-DateWithFallback' {
         BeforeEach {
             $script:originalFormatLocaleDate = Get-Command Format-LocaleDate -ErrorAction SilentlyContinue
-            Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path Function:\Format-LocaleDate -Force -ErrorAction SilentlyContinue
+            Remove-TestFunction -Name 'Format-LocaleDate'
         }
         
         AfterEach {
@@ -35,8 +38,7 @@ Describe 'Formatting Module Functions' {
                 Set-Item -Path Function:\global:Format-LocaleDate -Value $script:originalFormatLocaleDate.ScriptBlock -Force
             }
             else {
-                # Remove Format-LocaleDate if it was created during tests
-                Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
+                Remove-TestFunction -Name 'Format-LocaleDate'
             }
         }
         
@@ -73,15 +75,6 @@ Describe 'Formatting Module Functions' {
             $result = Format-DateWithFallback -Date $date -Format 'yyyy-MM-dd'
             $result | Should -Match 'LOCALE:'
         }
-        finally {
-            # Clean up: if we created the mock, remove it; otherwise restore original
-            if ($script:createdMock) {
-                Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
-            }
-            elseif ($originalCmd) {
-                Set-Item -Path Function:\global:Format-LocaleDate -Value $originalCmd.ScriptBlock -Force
-            }
-        }
 
         It 'Uses fallback format when provided' {
             # Ensure Format-LocaleDate is not available for this test
@@ -89,8 +82,7 @@ Describe 'Formatting Module Functions' {
             $originalCmd = Get-Command Format-LocaleDate -ErrorAction SilentlyContinue
             if ($originalCmd) {
                 # Force removal - try multiple methods
-                Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
-                Remove-Item -Path Function:Format-LocaleDate -Force -ErrorAction SilentlyContinue
+                Remove-TestFunction -Name 'Format-LocaleDate'
                 # Wait a moment for removal to take effect
                 Start-Sleep -Milliseconds 10
                 # Verify it's actually removed
@@ -107,11 +99,6 @@ Describe 'Formatting Module Functions' {
             $result = Format-DateWithFallback -Date $date -Format 'invalid' -FallbackFormat 'yyyy-MM-dd'
             $result | Should -Match '2024-01-15'
         }
-        finally {
-            if ($originalCmd) {
-                Set-Item -Path Function:\global:Format-LocaleDate -Value $originalCmd.ScriptBlock -Force
-            }
-        }
 
         It 'Uses custom culture for fallback' {
             # Ensure Format-LocaleDate is not available for this test
@@ -119,8 +106,7 @@ Describe 'Formatting Module Functions' {
             $originalCmd = Get-Command Format-LocaleDate -ErrorAction SilentlyContinue
             if ($originalCmd) {
                 # Force removal - try multiple methods
-                Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
-                Remove-Item -Path Function:Format-LocaleDate -Force -ErrorAction SilentlyContinue
+                Remove-TestFunction -Name 'Format-LocaleDate'
                 # Wait a moment for removal to take effect
                 Start-Sleep -Milliseconds 10
             }
@@ -133,11 +119,6 @@ Describe 'Formatting Module Functions' {
             # Result should be '2024-01-15' regardless of whether Format-LocaleDate exists
             $result | Should -Match '2024-01-15'
         }
-        finally {
-            if ($originalCmd) {
-                Set-Item -Path Function:\global:Format-LocaleDate -Value $originalCmd.ScriptBlock -Force
-            }
-        }
     }
 
     Context 'Format-NumberWithFallback' {
@@ -148,23 +129,25 @@ Describe 'Formatting Module Functions' {
         }
 
         It 'Uses Format-LocaleNumber when available' {
-            # Create a mock Format-LocaleNumber function in global scope
-            $mockBody = {
+            try {
+                # Create a mock Format-LocaleNumber function in global scope
+                $mockBody = {
                 param([double]$Number, [string]$Format)
                 return "LOCALE:$($Number.ToString($Format))"
-            }
-            
-            $originalCmd = Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue
-            if (-not $originalCmd) {
+                }
+                
+                $originalCmd = Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue
+                if (-not $originalCmd) {
                 Set-Item -Path Function:\global:Format-LocaleNumber -Value $mockBody -Force
+                }
+                
+                $result = Format-NumberWithFallback -Number 1234.56 -Format 'N2'
+                $result | Should -Match 'LOCALE:'
             }
-            
-                        $result = Format-NumberWithFallback -Number 1234.56 -Format 'N2'
-            $result | Should -Match 'LOCALE:'
-        }
-        finally {
-            if (-not $originalCmd) {
-                Remove-Item -Path Function:\global:Format-LocaleNumber -Force -ErrorAction SilentlyContinue
+            finally {
+                if (-not $originalCmd) {
+                Remove-TestFunction -Name 'Format-LocaleNumber'
+                }
             }
         }
 
@@ -214,23 +197,25 @@ Describe 'Formatting Module Functions' {
         }
 
         It 'Handles hashtable arguments' {
-            $funcName = "Test-CommandWithParams_$(Get-Random)"
-            $funcBody = {
+            try {
+                $funcName = "Test-CommandWithParams_$(Get-Random)"
+                $funcBody = {
                 param([string]$Name, [int]$Count)
                 return "$Name-$Count"
-            }
-            Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
-            
-                        # Verify function exists
-            Get-Command $funcName -ErrorAction Stop | Should -Not -BeNullOrEmpty
-            
-            $result = Invoke-CommandWithFallback -CommandName $funcName `
+                }
+                Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
+                
+                # Verify function exists
+                Get-Command $funcName -ErrorAction Stop | Should -Not -BeNullOrEmpty
+                
+                $result = Invoke-CommandWithFallback -CommandName $funcName `
                 -Arguments @{ Name = 'test'; Count = 5 } `
                 -FallbackValue 'fallback'
-            $result | Should -Be 'test-5'
-        }
-        finally {
-            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+                $result | Should -Be 'test-5'
+            }
+            finally {
+                Remove-TestFunction -Name $funcName
+            }
         }
     }
 

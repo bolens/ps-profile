@@ -60,6 +60,14 @@ function global:Reset-TestCollectionsModule {
     Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
 }
 
+function global:Clear-CollectionsWrapperStubs {
+    Remove-TestFunction -Name @(
+        'Invoke-MakeGenericTypeWrapper'
+        'Invoke-CreateInstanceWrapper'
+        'Invoke-TypeConstructorWrapper'
+    )
+}
+
 Describe 'Collections Module Functions' {
     BeforeAll {
         try {
@@ -75,6 +83,7 @@ Describe 'Collections Module Functions' {
     }
 
     BeforeEach {
+        Clear-CollectionsWrapperStubs
         Reset-TestCollectionsModule
     }
 
@@ -667,8 +676,7 @@ Describe 'Collections Module Functions' {
             # Try to create a list with an invalid type string
             # The exception is caught and returns null
             # Ensure wrapper functions don't interfere
-            Remove-Item Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
-            Remove-Item Function:\Invoke-CreateInstanceWrapper -ErrorAction SilentlyContinue
+            Clear-CollectionsWrapperStubs
             Remove-Module Collections -ErrorAction SilentlyContinue -Force
             Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
             $result = New-TypedList -Type 'InvalidTypeNameThatDoesNotExist12345' -ErrorAction SilentlyContinue
@@ -679,8 +687,7 @@ Describe 'Collections Module Functions' {
             # Try to create a list with an empty type string
             # The exception is caught and returns null
             # Ensure wrapper functions don't interfere
-            Remove-Item Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
-            Remove-Item Function:\Invoke-CreateInstanceWrapper -ErrorAction SilentlyContinue
+            Clear-CollectionsWrapperStubs
             Remove-Module Collections -ErrorAction SilentlyContinue -Force
             Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
             $result = New-TypedList -Type '' -ErrorAction SilentlyContinue

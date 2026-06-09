@@ -74,12 +74,14 @@ Describe 'NodeJs Module Functions' {
             $testDir = Join-Path $script:TestDir 'fake-pnpm-home' 'node_modules'
             New-Item -ItemType Directory -Path $testDir -Force | Out-Null
             $original = $env:PNPM_HOME
-                        $env:PNPM_HOME = Split-Path $testDir -Parent
-            $result = Get-PnpmGlobalPath
-            $result | Should -Be $testDir
-        }
-        finally {
-            $env:PNPM_HOME = $original
+            try {
+                $env:PNPM_HOME = Split-Path $testDir -Parent
+                $result = Get-PnpmGlobalPath
+                $result | Should -Be $testDir
+            }
+            finally {
+                $env:PNPM_HOME = $original
+            }
         }
     }
 

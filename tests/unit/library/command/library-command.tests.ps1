@@ -29,6 +29,23 @@ AfterAll {
 }
 
 Describe 'Command Module Functions' {
+    BeforeEach {
+        Remove-TestFunction -Name @(
+            'Get-PythonPackageInstallRecommendation'
+            'Get-NodePackageInstallRecommendation'
+            'Get-PreferenceAwareInstallHint'
+            'Test-ValidString'
+            'Test-CachedCommand'
+            'Get-Platform'
+            'Import-Requirements'
+            'Get-RepoRoot'
+            'CommandFailureProbe'
+            'Test-FailingCommand'
+            'Test-ThrowingCommand'
+            'Test-ThrowingCommand2'
+        )
+    }
+
     Context 'Test-CommandAvailable' {
         It 'Returns true for existing commands' {
             $result = Test-CommandAvailable -CommandName 'Get-Command'
@@ -46,14 +63,16 @@ Describe 'Command Module Functions' {
         }
 
         It 'Returns true for functions' {
-            # Create a test function in global scope so Test-CachedCommand can find it
-            $funcName = "Test-TempFunction_$(Get-Random)"
-            Set-Item -Path "Function:\global:$funcName" -Value { } -Force
-                        $result = Test-CommandAvailable -CommandName $funcName
-            $result | Should -Be $true
-        }
-        finally {
-            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+            try {
+                # Create a test function in global scope so Test-CachedCommand can find it
+                $funcName = "Test-TempFunction_$(Get-Random)"
+                Set-Item -Path "Function:\global:$funcName" -Value { } -Force
+                $result = Test-CommandAvailable -CommandName $funcName
+                $result | Should -Be $true
+            }
+            finally {
+                Remove-TestFunction -Name $funcName
+            }
         }
 
         It 'Returns true for aliases' {
@@ -82,47 +101,51 @@ Describe 'Command Module Functions' {
         }
 
         It 'Uses Test-CachedCommand if available from profile' {
-            # Create a test command that Test-CachedCommand can find
-            $testCmdName = "TestCommand_$(Get-Random)"
-            Set-Item -Path "Function:\global:$testCmdName" -Value { } -Force
-            
-                        # Clear cache
-            if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
+            try {
+                # Create a test command that Test-CachedCommand can find
+                $testCmdName = "TestCommand_$(Get-Random)"
+                Set-Item -Path "Function:\global:$testCmdName" -Value { } -Force
+                
+                # Clear cache
+                if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
                 $cacheKey = if (Get-Command New-CacheKey -ErrorAction SilentlyContinue) {
-                    New-CacheKey -Prefix 'CommandAvailable' -Components $testCmdName
+                New-CacheKey -Prefix 'CommandAvailable' -Components $testCmdName
                 }
                 else {
-                    "CommandAvailable_$testCmdName"
+                "CommandAvailable_$testCmdName"
                 }
                 Clear-CachedValue -Key $cacheKey -ErrorAction SilentlyContinue
+                }
+                
+                # Test-CommandAvailable should use Test-CachedCommand if available
+                $result = Test-CommandAvailable -CommandName $testCmdName
+                $result | Should -Be $true
             }
-            
-            # Test-CommandAvailable should use Test-CachedCommand if available
-            $result = Test-CommandAvailable -CommandName $testCmdName
-            $result | Should -Be $true
-        }
-        finally {
-            Remove-Item -Path "Function:\global:$testCmdName" -Force -ErrorAction SilentlyContinue
+            finally {
+                Remove-TestFunction -Name $testCmdName
+            }
         }
 
         It 'Falls back to Get-Command when Test-CachedCommand is not available' {
-            # Ensure Test-CachedCommand is not available
-            $originalTestCachedCommand = Get-Command Test-CachedCommand -ErrorAction SilentlyContinue
-            if ($originalTestCachedCommand) {
-                Remove-Item -Path Function:\Test-CachedCommand -Force -ErrorAction SilentlyContinue
-            }
-            
-                        # Clear cache
-            if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
+            try {
+                # Ensure Test-CachedCommand is not available
+                $originalTestCachedCommand = Get-Command Test-CachedCommand -ErrorAction SilentlyContinue
+                if ($originalTestCachedCommand) {
+                Remove-TestFunction -Name 'Test-CachedCommand'
+                }
+                
+                # Clear cache
+                if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
                 Clear-CachedValue -Key 'CommandAvailable_Get-Process' -ErrorAction SilentlyContinue
+                }
+                
+                $result = Test-CommandAvailable -CommandName 'Get-Process'
+                $result | Should -Be $true
             }
-            
-            $result = Test-CommandAvailable -CommandName 'Get-Process'
-            $result | Should -Be $true
-        }
-        finally {
-            if ($originalTestCachedCommand) {
+            finally {
+                if ($originalTestCachedCommand) {
                 Set-Item -Path Function:\Test-CachedCommand -Value $originalTestCachedCommand.ScriptBlock -Force
+                }
             }
         }
 
@@ -166,43 +189,47 @@ Describe 'Command Module Functions' {
         }
 
         It 'Passes hashtable arguments to command' {
-            $funcName = "Test-CommandWithParams_$(Get-Random)"
-            $funcBody = {
+            try {
+                $funcName = "Test-CommandWithParams_$(Get-Random)"
+                $funcBody = {
                 param([string]$Name, [int]$Count)
                 return "$Name-$Count"
-            }
-            Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
-            
-                        # Verify function exists
-            Get-Command $funcName -ErrorAction Stop | Should -Not -BeNullOrEmpty
-            
-            $result = Invoke-CommandIfAvailable -CommandName $funcName `
+                }
+                Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
+                
+                # Verify function exists
+                Get-Command $funcName -ErrorAction Stop | Should -Not -BeNullOrEmpty
+                
+                $result = Invoke-CommandIfAvailable -CommandName $funcName `
                 -Arguments @{ Name = 'test'; Count = 5 } `
                 -FallbackValue 'fallback'
-            $result | Should -Be 'test-5'
-        }
-        finally {
-            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+                $result | Should -Be 'test-5'
+            }
+            finally {
+                Remove-TestFunction -Name $funcName
+            }
         }
 
         It 'Passes array arguments to command' {
-            $funcName = "Test-CommandWithArray_$(Get-Random)"
-            $funcBody = {
+            try {
+                $funcName = "Test-CommandWithArray_$(Get-Random)"
+                $funcBody = {
                 param([string[]]$Items)
                 return $Items -join ','
-            }
-            Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
-            
-                        # Verify function exists
-            Get-Command $funcName -ErrorAction Stop | Should -Not -BeNullOrEmpty
-            
-            $result = Invoke-CommandIfAvailable -CommandName $funcName `
+                }
+                Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
+                
+                # Verify function exists
+                Get-Command $funcName -ErrorAction Stop | Should -Not -BeNullOrEmpty
+                
+                $result = Invoke-CommandIfAvailable -CommandName $funcName `
                 -Arguments @('item1', 'item2') `
                 -FallbackValue 'fallback'
-            $result | Should -Be 'item1,item2'
-        }
-        finally {
-            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+                $result | Should -Be 'item1,item2'
+            }
+            finally {
+                Remove-TestFunction -Name $funcName
+            }
         }
 
         It 'Passes arguments to fallback scriptblock' {
@@ -213,29 +240,31 @@ Describe 'Command Module Functions' {
         }
 
         It 'Handles command execution errors gracefully' {
-            <#
-            .SYNOPSIS
+            try {
+                <#
+                .SYNOPSIS
                 Performs operations related to Test-FailingCommand.
-            
-            .DESCRIPTION
+                
+                .DESCRIPTION
                 Performs operations related to Test-FailingCommand.
-            
-            .OUTPUTS
+                
+                .OUTPUTS
                 object
-            #>
-            function Test-FailingCommand {
+                #>
+                function Test-FailingCommand {
                 throw 'Command failed'
-            }
-            
-            Set-Item -Path Function:\Test-FailingCommand -Value ${function:Test-FailingCommand} -Force
-            
-                        $result = Invoke-CommandIfAvailable -CommandName 'Test-FailingCommand' `
+                }
+                
+                Set-Item -Path Function:\Test-FailingCommand -Value ${function:Test-FailingCommand} -Force
+                
+                $result = Invoke-CommandIfAvailable -CommandName 'Test-FailingCommand' `
                 -FallbackValue 'fallback'
-            # Should fall back to fallback value on error
-            $result | Should -Be 'fallback'
-        }
-        finally {
-            Remove-Item -Path Function:\Test-FailingCommand -Force -ErrorAction SilentlyContinue
+                # Should fall back to fallback value on error
+                $result | Should -Be 'fallback'
+            }
+            finally {
+                Remove-TestFunction -Name 'Test-FailingCommand'
+            }
         }
 
         It 'Executes command without arguments' {
@@ -449,26 +478,28 @@ Describe 'Command Module Functions' {
         }
 
         It 'Uses fallback cache key when New-CacheKey is not available' {
-            # Temporarily remove CacheKey module if available
-            $originalCmd = Get-Command New-CacheKey -ErrorAction SilentlyContinue
-            if ($originalCmd) {
+            try {
+                # Temporarily remove CacheKey module if available
+                $originalCmd = Get-Command New-CacheKey -ErrorAction SilentlyContinue
+                if ($originalCmd) {
                 Remove-Module CacheKey -ErrorAction SilentlyContinue -Force
-            }
-            
-                        # Clear cache
-            if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
+                }
+                
+                # Clear cache
+                if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
                 Clear-CachedValue -Key 'CommandAvailable_Get-Command' -ErrorAction SilentlyContinue
+                }
+                
+                $result = Test-CommandAvailable -CommandName 'Get-Command'
+                $result | Should -Be $true
             }
-            
-            $result = Test-CommandAvailable -CommandName 'Get-Command'
-            $result | Should -Be $true
-        }
-        finally {
-            # Restore CacheKey module if it was available
-            if ($originalCmd) {
+            finally {
+                # Restore CacheKey module if it was available
+                if ($originalCmd) {
                 $cacheKeyPath = Join-Path $script:LibPath 'utilities' 'CacheKey.psm1'
                 if (Test-Path -Path $cacheKeyPath) {
-                    Import-Module $cacheKeyPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                Import-Module $cacheKeyPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                }
                 }
             }
         }
@@ -492,20 +523,41 @@ Describe 'Command Module Functions' {
 
     Context 'Invoke-CommandIfAvailable Additional Tests' {
         It 'Handles single object argument (not hashtable or array)' {
-            $funcName = "Test-SingleArg_$(Get-Random)"
-            $funcBody = {
+            try {
+                $funcName = "Test-SingleArg_$(Get-Random)"
+                $funcBody = {
                 param([string]$Value)
                 return "received-$Value"
-            }
-            Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
-            
-                        $result = Invoke-CommandIfAvailable -CommandName $funcName `
+                }
+                Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
+                
+                $result = Invoke-CommandIfAvailable -CommandName $funcName `
                 -Arguments 'test-value' `
                 -FallbackValue 'fallback'
-            $result | Should -Be 'received-test-value'
+                $result | Should -Be 'received-test-value'
+            }
+            finally {
+                Remove-TestFunction -Name $funcName
+            }
         }
-        finally {
-            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+
+        It 'Handles array arguments for available commands' {
+            try {
+                $funcName = "Test-ArrayArgs_$(Get-Random)"
+                $funcBody = {
+                    param([object[]]$Items)
+                    return ($Items -join '/')
+                }
+                Set-Item -Path "Function:\global:$funcName" -Value $funcBody -Force
+
+                $result = Invoke-CommandIfAvailable -CommandName $funcName `
+                    -Arguments @('segment-a', 'segment-b.txt') `
+                    -FallbackValue 'fallback'
+                $result | Should -Be 'segment-a/segment-b.txt'
+            }
+            finally {
+                Remove-TestFunction -Name $funcName
+            }
         }
 
         It 'Handles fallback scriptblock with single object argument' {
@@ -538,23 +590,25 @@ Describe 'Command Module Functions' {
 
     Context 'Test-CommandAvailable Additional Coverage' {
         It 'Uses Test-ValidString when Validation module is available' {
-            # Create a mock Test-ValidString function
-            $mockFunc = {
+            try {
+                # Create a mock Test-ValidString function
+                $mockFunc = {
                 param([string]$Value)
                 return $Value -match '^[a-zA-Z]'
+                }
+                Set-Item -Path "Function:\global:Test-ValidString" -Value $mockFunc -Force
+                
+                # Valid command name should pass validation
+                $result = Test-CommandAvailable -CommandName 'Get-Command'
+                $result | Should -Be $true
+                
+                # Invalid command name should fail validation
+                $result2 = Test-CommandAvailable -CommandName '123Invalid'
+                $result2 | Should -Be $false
             }
-            Set-Item -Path "Function:\global:Test-ValidString" -Value $mockFunc -Force
-            
-                        # Valid command name should pass validation
-            $result = Test-CommandAvailable -CommandName 'Get-Command'
-            $result | Should -Be $true
-            
-            # Invalid command name should fail validation
-            $result2 = Test-CommandAvailable -CommandName '123Invalid'
-            $result2 | Should -Be $false
-        }
-        finally {
-            Remove-Item -Path "Function:\global:Test-ValidString" -Force -ErrorAction SilentlyContinue
+            finally {
+                Remove-TestFunction -Name 'Test-ValidString'
+            }
         }
 
         It 'Uses cached value when available' {
@@ -580,22 +634,24 @@ Describe 'Command Module Functions' {
         }
 
         It 'Uses fallback cache key format when New-CacheKey is not available' {
-            # Temporarily remove CacheKey module
-            $originalCmd = Get-Command New-CacheKey -ErrorAction SilentlyContinue
-            if ($originalCmd) {
+            try {
+                # Temporarily remove CacheKey module
+                $originalCmd = Get-Command New-CacheKey -ErrorAction SilentlyContinue
+                if ($originalCmd) {
                 Remove-Module CacheKey -ErrorAction SilentlyContinue -Force
+                }
+                
+                # Should still work with fallback key format
+                $result = Test-CommandAvailable -CommandName 'Get-Process'
+                $result | Should -Be $true
             }
-            
-                        # Should still work with fallback key format
-            $result = Test-CommandAvailable -CommandName 'Get-Process'
-            $result | Should -Be $true
-        }
-        finally {
-            # Restore CacheKey module
-            if ($originalCmd) {
+            finally {
+                # Restore CacheKey module
+                if ($originalCmd) {
                 $cacheKeyPath = Join-Path $script:LibPath 'utilities' 'CacheKey.psm1'
                 if (Test-Path -Path $cacheKeyPath) {
-                    Import-Module $cacheKeyPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                Import-Module $cacheKeyPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                }
                 }
             }
         }
@@ -603,53 +659,59 @@ Describe 'Command Module Functions' {
 
     Context 'Resolve-InstallCommand Additional Coverage' {
         It 'Uses Get-Platform when available' {
-            # Create a mock Get-Platform function
-            $mockFunc = {
+            try {
+                # Create a mock Get-Platform function
+                $mockFunc = {
                 return @{ Name = 'Linux' }
-            }
-            Set-Item -Path "Function:\global:Get-Platform" -Value $mockFunc -Force
-            
-                        $installCommand = @{
+                }
+                Set-Item -Path "Function:\global:Get-Platform" -Value $mockFunc -Force
+                
+                $installCommand = @{
                 Windows = 'scoop install test'
                 Linux   = 'apt install test'
                 MacOS   = 'brew install test'
+                }
+                $result = Resolve-InstallCommand -InstallCommand $installCommand
+                $result | Should -Be 'apt install test'
             }
-            $result = Resolve-InstallCommand -InstallCommand $installCommand
-            $result | Should -Be 'apt install test'
-        }
-        finally {
-            Remove-Item -Path "Function:\global:Get-Platform" -Force -ErrorAction SilentlyContinue
+            finally {
+                Remove-TestFunction -Name 'Get-Platform'
+            }
         }
 
         It 'Handles recommendation function failure gracefully' {
-            # Create a mock recommendation function that throws
-            $mockFunc = {
+            try {
+                # Create a mock recommendation function that throws
+                $mockFunc = {
                 param([string[]]$PackageNames, [switch]$Global)
                 throw 'Test error'
+                }
+                Set-Item -Path "Function:\global:Get-NodePackageInstallRecommendation" -Value $mockFunc -Force
+                
+                # Should return original command when recommendation fails
+                $result = Resolve-InstallCommand -InstallCommand 'npm install -g testpackage'
+                $result | Should -Be 'npm install -g testpackage'
             }
-            Set-Item -Path "Function:\global:Get-NodePackageInstallRecommendation" -Value $mockFunc -Force
-            
-                        # Should return original command when recommendation fails
-            $result = Resolve-InstallCommand -InstallCommand 'npm install -g testpackage'
-            $result | Should -Be 'npm install -g testpackage'
-        }
-        finally {
-            Remove-Item -Path "Function:\global:Get-NodePackageInstallRecommendation" -Force -ErrorAction SilentlyContinue
+            finally {
+                Remove-TestFunction -Name 'Get-NodePackageInstallRecommendation'
+            }
         }
 
         It 'Handles recommendation function with PackageName parameter (singular)' {
-            # Create a mock recommendation function with singular parameter
-            $mockFunc = {
+            try {
+                # Create a mock recommendation function with singular parameter
+                $mockFunc = {
                 param([string]$PackageName, [switch]$Global)
                 return "mock install $PackageName"
+                }
+                Set-Item -Path "Function:\global:Get-PythonPackageInstallRecommendation" -Value $mockFunc -Force
+                
+                $result = Resolve-InstallCommand -InstallCommand 'pip install testpackage'
+                $result | Should -Match 'mock install'
             }
-            Set-Item -Path "Function:\global:Get-PythonPackageInstallRecommendation" -Value $mockFunc -Force
-            
-                        $result = Resolve-InstallCommand -InstallCommand 'pip install testpackage'
-            $result | Should -Match 'mock install'
-        }
-        finally {
-            Remove-Item -Path "Function:\global:Get-PythonPackageInstallRecommendation" -Force -ErrorAction SilentlyContinue
+            finally {
+                Remove-TestFunction -Name 'Get-PythonPackageInstallRecommendation'
+            }
         }
 
         It 'Extracts package name from complex npm command' {
@@ -716,31 +778,35 @@ Describe 'Command Module Functions' {
         }
 
         It 'Handles command execution error and falls back to value' {
-            function Test-ThrowingCommand {
+            try {
+                function Test-ThrowingCommand {
                 throw 'Test error'
-            }
-            Set-Item -Path Function:\Test-ThrowingCommand -Value ${function:Test-ThrowingCommand} -Force
-            
-                        $result = Invoke-CommandIfAvailable -CommandName 'Test-ThrowingCommand' `
+                }
+                Set-Item -Path Function:\Test-ThrowingCommand -Value ${function:Test-ThrowingCommand} -Force
+                
+                $result = Invoke-CommandIfAvailable -CommandName 'Test-ThrowingCommand' `
                 -FallbackValue 'fallback'
-            $result | Should -Be 'fallback'
-        }
-        finally {
-            Remove-Item -Path Function:\Test-ThrowingCommand -Force -ErrorAction SilentlyContinue
+                $result | Should -Be 'fallback'
+            }
+            finally {
+                Remove-TestFunction -Name 'Test-ThrowingCommand'
+            }
         }
 
         It 'Handles command execution error and falls back to scriptblock' {
-            function Test-ThrowingCommand2 {
+            try {
+                function Test-ThrowingCommand2 {
                 throw 'Test error'
-            }
-            Set-Item -Path Function:\Test-ThrowingCommand2 -Value ${function:Test-ThrowingCommand2} -Force
-            
-                        $result = Invoke-CommandIfAvailable -CommandName 'Test-ThrowingCommand2' `
+                }
+                Set-Item -Path Function:\Test-ThrowingCommand2 -Value ${function:Test-ThrowingCommand2} -Force
+                
+                $result = Invoke-CommandIfAvailable -CommandName 'Test-ThrowingCommand2' `
                 -FallbackScriptBlock { return 'scriptblock-fallback' }
-            $result | Should -Be 'scriptblock-fallback'
-        }
-        finally {
-            Remove-Item -Path Function:\Test-ThrowingCommand2 -Force -ErrorAction SilentlyContinue
+                $result | Should -Be 'scriptblock-fallback'
+            }
+            finally {
+                Remove-TestFunction -Name 'Test-ThrowingCommand2'
+            }
         }
     }
 }

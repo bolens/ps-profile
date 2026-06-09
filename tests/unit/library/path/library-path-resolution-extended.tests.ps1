@@ -888,6 +888,43 @@ Describe 'PathResolution extended scenarios' {
         }
     }
 
+    Context 'Get-ProfileDirectory cache key fallbacks' {
+        It 'Uses the fallback cache key format when New-CacheKey is unavailable' {
+            $originalCommand = Get-Command New-CacheKey -ErrorAction SilentlyContinue
+            Remove-Item -Path Function:New-CacheKey -ErrorAction SilentlyContinue -Force
+
+            try {
+                if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
+                    Clear-CachedValue -Key "ProfileDirectory_$PSScriptRoot" -ErrorAction SilentlyContinue
+                }
+
+                $profileDir = Get-ProfileDirectory -ScriptPath $PSScriptRoot
+                $profileDir | Should -Not -BeNullOrEmpty
+                (Split-Path -Leaf $profileDir) | Should -Be 'profile.d'
+                $profileDir | Should -Be (Join-Path (Get-RepoRoot -ScriptPath $PSScriptRoot) 'profile.d')
+            }
+            finally {
+                Remove-Item -Path Function:New-CacheKey -ErrorAction SilentlyContinue -Force
+                if ($originalCommand) {
+                    Set-Item -Path Function:\New-CacheKey -Value $originalCommand.ScriptBlock -Force
+                }
+            }
+        }
+    }
+
+    Context 'Get-RepoRoot scripts directory detection' {
+        It 'Skips scripts directories that are not repository roots' {
+            $outsideRoot = New-TestExternalTempDirectory -Prefix 'PathResolutionNonRepoScripts'
+            $scriptDir = Join-Path $outsideRoot 'scripts' 'nested'
+            New-Item -ItemType Directory -Path $scriptDir -Force | Out-Null
+
+            $scriptPath = Join-Path $scriptDir 'runner.ps1'
+            Set-Content -LiteralPath $scriptPath -Value '# runner' -Encoding UTF8
+
+            { Get-RepoRoot -ScriptPath $scriptPath } | Should -Throw '*Repository root not found*'
+        }
+    }
+
     Context 'PathResolution module initialization' {
         It 'Loads through manual import fallbacks when SafeImport is unavailable' {
             $isolatedDir = Join-Path $script:TempRoot 'path-isolated'

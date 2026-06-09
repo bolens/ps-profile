@@ -30,7 +30,18 @@ function global:Reset-CollectionsTestModule {
     Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
 }
 
+function global:Clear-CollectionsWrapperStubs {
+    Remove-TestFunction -Name @(
+        'Invoke-MakeGenericTypeWrapper'
+        'Invoke-CreateInstanceWrapper'
+        'Invoke-TypeConstructorWrapper'
+    )
+}
+
 Describe 'Collections extended scenarios' {
+    BeforeEach {
+        Clear-CollectionsWrapperStubs
+    }
     Context 'List factory independence' {
         It 'Returns distinct object lists on each call' {
             $first = New-ObjectList
@@ -147,8 +158,7 @@ Describe 'Collections extended scenarios' {
                 (New-TypedList -Type 'int') | Should -BeNullOrEmpty
             }
             finally {
-                Remove-Item Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
-                Remove-Item Function:\Invoke-TypeConstructorWrapper -ErrorAction SilentlyContinue
+                Clear-CollectionsWrapperStubs
                 Reset-CollectionsTestModule
 
                 if ($null -eq $originalFlag) {
@@ -199,7 +209,7 @@ Describe 'Collections extended scenarios' {
                 $result | Should -BeNullOrEmpty
             }
             finally {
-                Remove-Item Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
+                Clear-CollectionsWrapperStubs
                 Reset-CollectionsTestModule
             }
         }
@@ -220,7 +230,7 @@ Describe 'Collections extended scenarios' {
                 $result | Should -BeNullOrEmpty
             }
             finally {
-                Remove-Item Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
+                Clear-CollectionsWrapperStubs
                 Reset-CollectionsTestModule
 
                 if ($null -eq $originalFlag) {
@@ -242,9 +252,7 @@ Describe 'Collections extended scenarios' {
 
     Context 'Structured warning paths with bootstrap' {
         AfterEach {
-            Remove-Item Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
-            Remove-Item Function:\Invoke-CreateInstanceWrapper -ErrorAction SilentlyContinue
-            Remove-Item Function:\Invoke-TypeConstructorWrapper -ErrorAction SilentlyContinue
+            Clear-CollectionsWrapperStubs
             Reset-CollectionsTestModule
         }
 
@@ -426,8 +434,7 @@ Describe 'Collections extended scenarios' {
 
     Context 'String and typed list exception paths' {
         AfterEach {
-            Remove-Item Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
-            Remove-Item Function:\Invoke-TypeConstructorWrapper -ErrorAction SilentlyContinue
+            Clear-CollectionsWrapperStubs
             Reset-CollectionsTestModule
         }
 
@@ -447,7 +454,7 @@ Describe 'Collections extended scenarios' {
             Reset-CollectionsTestModule
             (New-StringList) | Should -BeNullOrEmpty
 
-            Remove-Item Function:\Invoke-TypeConstructorWrapper -ErrorAction SilentlyContinue
+            Remove-TestFunction -Name 'Invoke-TypeConstructorWrapper'
             function global:Invoke-MakeGenericTypeWrapper {
                 throw [System.InvalidOperationException]::new('forced typed list failure')
             }
@@ -490,9 +497,7 @@ Describe 'Collections extended scenarios' {
 
     Context 'Wrapper fallback paths' {
         AfterEach {
-            Remove-Item Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
-            Remove-Item Function:\Invoke-CreateInstanceWrapper -ErrorAction SilentlyContinue
-            Remove-Item Function:\Invoke-TypeConstructorWrapper -ErrorAction SilentlyContinue
+            Clear-CollectionsWrapperStubs
             Reset-CollectionsTestModule
         }
 
@@ -561,7 +566,7 @@ Describe 'Collections extended scenarios' {
                 Reset-CollectionsTestModule
                 (New-StringList) | Should -BeNullOrEmpty
 
-                Remove-Item Function:\Invoke-TypeConstructorWrapper -ErrorAction SilentlyContinue
+                Remove-TestFunction -Name 'Invoke-TypeConstructorWrapper'
                 function global:Invoke-MakeGenericTypeWrapper {
                     throw [System.InvalidOperationException]::new('forced typed list failure')
                 }
@@ -570,8 +575,7 @@ Describe 'Collections extended scenarios' {
                 (New-TypedList -Type 'int') | Should -BeNullOrEmpty
             }
             finally {
-                Remove-Item Function:\Invoke-TypeConstructorWrapper -ErrorAction SilentlyContinue
-                Remove-Item Function:\Invoke-MakeGenericTypeWrapper -ErrorAction SilentlyContinue
+                Clear-CollectionsWrapperStubs
                 Reset-CollectionsTestModule
             }
         }
@@ -591,7 +595,7 @@ Describe 'Collections extended scenarios' {
                 (New-StringList) | Should -BeNullOrEmpty
             }
             finally {
-                Remove-Item Function:\Invoke-TypeConstructorWrapper -ErrorAction SilentlyContinue
+                Clear-CollectionsWrapperStubs
                 Reset-CollectionsTestModule
 
                 if ($null -eq $originalFlag) {

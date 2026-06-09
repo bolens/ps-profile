@@ -1,42 +1,43 @@
 BeforeAll {
-    $current = Get-Item $PSScriptRoot
-    while ($null -ne $current) {
-        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
-        if (Test-Path -LiteralPath $testSupportPath) {
-            . $testSupportPath
-            break
+    try {
+        $current = Get-Item $PSScriptRoot
+        while ($null -ne $current) {
+            $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+            if (Test-Path -LiteralPath $testSupportPath) {
+                . $testSupportPath
+                break
+            }
+            if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+            $current = $current.Parent
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
-        $current = $current.Parent
-    }
         $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
-    if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
-        throw "Get-TestPath returned null or empty value for LibPath"
+        $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+        if ($null -eq $script:LibPath -or [string]::IsNullOrWhiteSpace($script:LibPath)) {
+            throw 'Get-TestPath returned null or empty value for LibPath'
+        }
+        if (-not (Test-Path -LiteralPath $script:LibPath)) {
+            throw "Library path not found at: $script:LibPath"
+        }
+
+        $script:ModulePath = Join-Path $script:LibPath 'runtime' 'Module.psm1'
+        if ($null -eq $script:ModulePath -or [string]::IsNullOrWhiteSpace($script:ModulePath)) {
+            throw 'ModulePath is null or empty'
+        }
+        if (-not (Test-Path -LiteralPath $script:ModulePath)) {
+            throw "Module module not found at: $script:ModulePath"
+        }
+
+        Import-Module $script:ModulePath -DisableNameChecking -ErrorAction Stop -Force
     }
-    if (-not (Test-Path -LiteralPath $script:LibPath)) {
-        throw "Library path not found at: $script:LibPath"
+    catch {
+        $errorDetails = @{
+            Message  = $_.Exception.Message
+            Type     = $_.Exception.GetType().FullName
+            Location = $_.InvocationInfo.ScriptLineNumber
+        }
+        Write-Error "Failed to initialize Module tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+        throw
     }
-    
-    $script:ModulePath = Join-Path $script:LibPath 'runtime' 'Module.psm1'
-    if ($null -eq $script:ModulePath -or [string]::IsNullOrWhiteSpace($script:ModulePath)) {
-        throw "ModulePath is null or empty"
-    }
-    if (-not (Test-Path -LiteralPath $script:ModulePath)) {
-        throw "Module module not found at: $script:ModulePath"
-    }
-    
-    # Import the module under test
-    Import-Module $script:ModulePath -DisableNameChecking -ErrorAction Stop -Force
-}
-catch {
-    $errorDetails = @{
-        Message  = $_.Exception.Message
-        Type     = $_.Exception.GetType().FullName
-        Location = $_.InvocationInfo.ScriptLineNumber
-    }
-    Write-Error "Failed to initialize Module tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-    throw
 }
 
 AfterAll {

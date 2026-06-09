@@ -3,6 +3,40 @@
 # Canonical TestSupport helpers restored between test files
 # ===============================================
 
+function Remove-TestFunction {
+    <#
+    .SYNOPSIS
+        Removes a test stub function from both session and global function drives.
+
+    .DESCRIPTION
+        PowerShell can expose the same global function as Function:\Name and
+        Function:\global:Name. Removing only one path leaves a leaked stub that
+        pollutes later tests in combined Pester runs.
+
+    .PARAMETER Name
+        Function name(s) to remove.
+
+    .EXAMPLE
+        Remove-TestFunction -Name 'Test-ValidString'
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [string[]]$Name
+    )
+
+    process {
+        foreach ($functionName in $Name) {
+            if ([string]::IsNullOrWhiteSpace($functionName)) {
+                continue
+            }
+
+            Remove-Item -Path "Function:\$functionName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$functionName" -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
 function Mark-TestCommandsUnavailable {
     [CmdletBinding()]
     param(
@@ -24,8 +58,7 @@ function Mark-TestCommandsUnavailable {
             $global:AssumedAvailableCommands = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
         }
 
-        Remove-Item -Path "Function:\$command" -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "Function:\global:$command" -Force -ErrorAction SilentlyContinue
+        Remove-TestFunction -Name $command
         Remove-Item -Path "Alias:\$command" -Force -ErrorAction SilentlyContinue
         Remove-Item -Path "Alias:\global:$command" -Force -ErrorAction SilentlyContinue
 

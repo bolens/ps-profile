@@ -1,4 +1,18 @@
 Describe 'Platform Module Functions' {
+    BeforeEach {
+        @(
+            'PS_PROFILE_PLATFORM_FORCE_NAME'
+            'PS_PROFILE_PLATFORM_FORCE_FALLBACK'
+            'PS_PROFILE_PLATFORM_FORCE_OS_PLATFORM'
+            'PS_PROFILE_PLATFORM_FORCE_UNAME'
+            'PS_PROFILE_PLATFORM_FORCE_NATURAL_WINDOWS'
+            'PS_PROFILE_PLATFORM_FORCE_NATURAL_MACOS'
+            'PS_PROFILE_PLATFORM_FORCE_NATURAL_FALLBACK'
+            'PS_PROFILE_PLATFORM_FORCE_LEGACY_ELSE'
+            'PS_PROFILE_PLATFORM_FORCE_FINAL_ELSE'
+        ) | ForEach-Object { Remove-Item "Env:$_" -ErrorAction SilentlyContinue }
+    }
+
     BeforeAll {
         $current = Get-Item $PSScriptRoot
         while ($null -ne $current) {
@@ -13,6 +27,10 @@ Describe 'Platform Module Functions' {
         # Import the Platform module (Common.psm1 no longer exists)
         $libPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
         Import-Module (Join-Path $libPath 'core' 'Platform.psm1') -DisableNameChecking -ErrorAction Stop
+    }
+
+    AfterAll {
+        Remove-Module Platform -ErrorAction SilentlyContinue -Force
     }
 
     Context 'Get-Platform' {

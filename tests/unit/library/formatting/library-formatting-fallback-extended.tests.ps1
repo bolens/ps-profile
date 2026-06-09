@@ -25,9 +25,13 @@ AfterAll {
 }
 
 Describe 'Formatting fallback extended scenarios' {
+    BeforeEach {
+        Remove-TestFunction -Name 'Format-LocaleDate'
+    }
+
     Context 'Format-DateWithFallback' {
         AfterEach {
-            Remove-Item Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
+            Remove-TestFunction -Name 'Format-LocaleDate'
         }
 
         It 'Falls back when Format-LocaleDate throws during formatting' {
@@ -56,11 +60,13 @@ Describe 'Formatting fallback extended scenarios' {
             $funcName = "Test-FormattingNoArgs_$(Get-Random)"
             Set-Item -Path "Function:\global:$funcName" -Value { return 'no-args' } -Force
 
-                        Invoke-CommandWithFallback -CommandName $funcName -FallbackValue 'fallback' |
-                Should -Be 'no-args'
-        }
-        finally {
-            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+            try {
+                Invoke-CommandWithFallback -CommandName $funcName -FallbackValue 'fallback' |
+                    Should -Be 'no-args'
+            }
+            finally {
+                Remove-TestFunction -Name $funcName
+            }
         }
     }
 

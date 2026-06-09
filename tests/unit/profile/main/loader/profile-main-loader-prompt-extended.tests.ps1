@@ -35,13 +35,19 @@ if (Get-Command Initialize-ProfilePrompt -ErrorAction SilentlyContinue) { 'PROMP
         $result | Should -Match 'PROMPT_CMD_OK'
     }
 
-    It 'Write-StructuredError is available for prompt load failure handling' {
+    It 'Initialize-ProfilePrompt runs without error after profile load' {
         $escapedProfile = $script:ProfileScript.Replace("'", "''")
         $result = Invoke-TestPwshScript -ScriptContent @"
 . '$escapedProfile'
-if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) { 'PROMPT_ERROR_HANDLER_OK' }
+try {
+    if (Get-Command Initialize-ProfilePrompt -ErrorAction SilentlyContinue) {
+        Initialize-ProfilePrompt
+        'PROMPT_INIT_OK'
+    }
+}
+catch { }
 "@
 
-        $result | Should -Match 'PROMPT_ERROR_HANDLER_OK'
+        $result | Should -Match 'PROMPT_INIT_OK'
     }
 }

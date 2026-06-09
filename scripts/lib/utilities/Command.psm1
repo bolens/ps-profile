@@ -13,6 +13,30 @@ scripts/lib/Command.psm1
     PowerShell Version: 3.0+
 #>
 
+function Test-CommandTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-CommandStructuredWarningAvailable {
+    if (Test-CommandTestEnvFlag -Name 'PS_PROFILE_COMMAND_DISABLE_STRUCTURED_WARNING') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
 # Import Cache module for caching support
 # Use SafeImport module if available, otherwise fall back to manual check
 if ($PSScriptRoot -and -not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -26,13 +50,32 @@ if ($PSScriptRoot -and -not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
     
     $cacheModulePath = Join-Path $PSScriptRoot 'Cache.psm1'
     if ($cacheModulePath -and -not [string]::IsNullOrWhiteSpace($cacheModulePath)) {
-        if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
-            $null = Import-ModuleSafely -ModulePath $cacheModulePath -ErrorAction SilentlyContinue
+        if ((Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) -and
+            -not (Test-CommandTestEnvFlag -Name 'PS_PROFILE_COMMAND_FORCE_MANUAL_CACHE_IMPORT')) {
+            if (Test-CommandTestEnvFlag -Name 'PS_PROFILE_COMMAND_FORCE_CACHE_IMPORT_ERROR') {
+                $importError = [System.InvalidOperationException]::new('forced cache import failure')
+                $debugLevel = 0
+                if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
+                    if ($debugLevel -ge 2) {
+                        Write-Verbose "[command.module-import] Failed to import Cache module: $($importError.Message). Caching features will be unavailable."
+                    }
+                    if ($debugLevel -ge 3) {
+                        Write-Host "  [command.module-import] Cache module import error details - Exception: $($importError.GetType().FullName), Message: $($importError.Message)" -ForegroundColor DarkGray
+                    }
+                }
+            }
+            else {
+                $null = Import-ModuleSafely -ModulePath $cacheModulePath -ErrorAction SilentlyContinue
+            }
         }
         else {
             # Fallback to manual validation
             if (Test-Path -LiteralPath $cacheModulePath) {
                 try {
+                    if (Test-CommandTestEnvFlag -Name 'PS_PROFILE_COMMAND_FORCE_CACHE_IMPORT_ERROR') {
+                        throw [System.InvalidOperationException]::new('forced cache import failure')
+                    }
+
                     Import-Module $cacheModulePath -ErrorAction Stop
                 }
                 catch {
@@ -316,8 +359,8 @@ function Resolve-InstallCommand {
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                     if ($debugLevel -ge 1) {
-                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                            Write-StructuredWarning -Message "Failed to get Python package recommendation: $($_.Exception.Message)" -OperationName 'command.package-recommendation' -Context @{
+                        if (Test-CommandStructuredWarningAvailable) {
+                            $null = Write-StructuredWarning -Message "Failed to get Python package recommendation: $($_.Exception.Message)" -OperationName 'command.package-recommendation' -Context @{
                                 PackageName     = $PackageName
                                 PlatformCommand = $platformCommand
                                 Error           = $_.Exception.Message
@@ -419,8 +462,8 @@ function Invoke-CommandIfAvailable {
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                 if ($debugLevel -ge 1) {
-                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "Failed to execute command '$CommandName': $($_.Exception.Message)" -OperationName 'command.execute' -Context @{
+                    if (Test-CommandStructuredWarningAvailable) {
+                        $null = Write-StructuredWarning -Message "Failed to execute command '$CommandName': $($_.Exception.Message)" -OperationName 'command.execute' -Context @{
                             CommandName = $CommandName
                             Arguments   = $Arguments
                             Error       = $_.Exception.Message
@@ -591,7 +634,8 @@ function Get-ToolInstallHint {
     }
     
     # Resolve install command for current platform
-    $installCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
+    $installCmd = if ((Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) -and
+        -not (Test-CommandTestEnvFlag -Name 'PS_PROFILE_COMMAND_FORCE_MANUAL_INSTALL_RESOLVE')) {
         Resolve-InstallCommand -InstallCommand $toolReq.InstallCommand -PackageName $ToolName
     }
     else {

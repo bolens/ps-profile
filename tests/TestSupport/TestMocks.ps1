@@ -60,8 +60,7 @@ function Reset-TestIsolationState {
 
     if (Get-Variable -Name 'TestRegisteredMockCommands' -Scope Global -ErrorAction SilentlyContinue) {
         foreach ($commandName in @($global:TestRegisteredMockCommands)) {
-            Remove-Item -Path "Function:\$commandName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path "Function:\global:$commandName" -Force -ErrorAction SilentlyContinue
+            Remove-TestFunction -Name $commandName
             Remove-Item -Path "Alias:\$commandName" -Force -ErrorAction SilentlyContinue
             Remove-Item -Path "Alias:\global:$commandName" -Force -ErrorAction SilentlyContinue
         }

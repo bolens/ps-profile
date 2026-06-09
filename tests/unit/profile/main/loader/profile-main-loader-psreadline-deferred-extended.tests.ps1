@@ -25,14 +25,14 @@ Describe 'Microsoft.PowerShell_profile.ps1 deferred PSReadLine loading extended 
         Test-Path -LiteralPath $script:PSReadLineFragment | Should -Be $true
     }
 
-    It 'Exposes Enable-PSReadLine after profile load without requiring early import' {
+    It 'Does not eagerly import PSReadLine during main profile startup' {
         $escapedProfile = $script:ProfileScript.Replace("'", "''")
         $result = Invoke-TestPwshScript -ScriptContent @"
 . '$escapedProfile'
-if (Get-Command Enable-PSReadLine -ErrorAction SilentlyContinue) { 'PSREADLINE_ENABLE_CMD_OK' }
+if (-not (Get-Module -Name PSReadLine -ErrorAction SilentlyContinue)) { 'PSREADLINE_DEFERRED_OK' }
 "@
 
-        $result | Should -Match 'PSREADLINE_ENABLE_CMD_OK'
+        $result | Should -Match 'PSREADLINE_DEFERRED_OK'
     }
 
     It 'Profile load completes before optional PSReadLine enablement' {
