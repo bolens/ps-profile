@@ -54,6 +54,30 @@ scripts/lib/Parallel.psm1
         Test-Path $_.FullName
     }
 #>
+function Test-ParallelTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-ParallelStructuredWarningAvailable {
+    if (Test-ParallelTestEnvFlag -Name 'PS_PROFILE_PARALLEL_DISABLE_STRUCTURED_WARNING') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
 function Invoke-Parallel {
     [CmdletBinding()]
     [OutputType([object[]])]
@@ -124,6 +148,10 @@ function Invoke-Parallel {
                 $testDelayMs = 0
                 if ($env:PS_PROFILE_PARALLEL_TEST_DELAY_MS -and [int]::TryParse($env:PS_PROFILE_PARALLEL_TEST_DELAY_MS, [ref]$testDelayMs) -and $testDelayMs -gt 0) {
                     Start-Sleep -Milliseconds $testDelayMs
+                }
+
+                if (Test-ParallelTestEnvFlag -Name 'PS_PROFILE_PARALLEL_FORCE_STRING_SCRIPTBLOCK') {
+                    $ScriptBlock = 'param($Item) $Item'
                 }
 
                 if ($ScriptBlock -isnot [scriptblock]) {
@@ -229,7 +257,7 @@ function Invoke-Parallel {
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                     if ($debugLevel -ge 1) {
-                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        if (Test-ParallelStructuredWarningAvailable) {
                             Write-StructuredWarning -Message "Not all parallel tasks completed within ${TimeoutSeconds}s timeout" -OperationName 'parallel.execute' -Context @{
                                 CompletedCount = $completedCount
                                 TotalTasks     = $runspaces.Count
@@ -247,7 +275,7 @@ function Invoke-Parallel {
                 }
                 else {
                     # Always log warnings even if debug is off
-                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                    if (Test-ParallelStructuredWarningAvailable) {
                         Write-StructuredWarning -Message "Not all parallel tasks completed within ${TimeoutSeconds}s timeout" -OperationName 'parallel.execute' -Context @{
                             # Technical context
                             CompletedCount = $completedCount
@@ -279,6 +307,10 @@ function Invoke-Parallel {
                 foreach ($stalledRunspace in $runspaces) {
                     if ($stalledRunspace.Handle -and -not $stalledRunspace.Handle.IsCompleted -and $stalledRunspace.PowerShell) {
                         try {
+                            if (Test-ParallelTestEnvFlag -Name 'PS_PROFILE_PARALLEL_FORCE_STOP_STALLED_ERROR') {
+                                throw [System.InvalidOperationException]::new('parallel stop stalled probe')
+                            }
+
                             $stalledRunspace.PowerShell.Stop()
                         }
                         catch {
@@ -324,7 +356,7 @@ function Invoke-Parallel {
                         $debugLevel = 0
                         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                             if ($debugLevel -ge 1) {
-                                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                if (Test-ParallelStructuredWarningAvailable) {
                                     Write-StructuredWarning -Message "Task timed out for item at index $($runspaces.IndexOf($rs))" -OperationName 'parallel.execute' -Context @{
                                         ItemIndex      = $runspaces.IndexOf($rs)
                                         TimeoutSeconds = $TimeoutSeconds
@@ -334,7 +366,7 @@ function Invoke-Parallel {
                                     $debugLevel = 0
                                     if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                                         if ($debugLevel -ge 1) {
-                                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                            if (Test-ParallelStructuredWarningAvailable) {
                                                 Write-StructuredWarning -Message "Task timed out" -OperationName 'parallel.execute' -Context @{
                                                     # Technical context
                                                     ItemIndex      = $runspaces.IndexOf($rs)
@@ -358,7 +390,7 @@ function Invoke-Parallel {
                                     }
                                     else {
                                         # Always log warnings even if debug is off
-                                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                                        if (Test-ParallelStructuredWarningAvailable) {
                                             Write-StructuredWarning -Message "Task timed out" -OperationName 'parallel.execute' -Context @{
                                                 ItemIndex      = $runspaces.IndexOf($rs)
                                                 Item           = if ($rs.Item) { $rs.Item.ToString() } else { 'unknown' }

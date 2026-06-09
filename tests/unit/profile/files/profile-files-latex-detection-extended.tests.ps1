@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-files-latex-detection-extended.tests.ps1
-#>
+# ===============================================
+# profile-files-latex-detection-extended.tests.ps1
+# Execution tests for files/LaTeXDetection.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,34 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/files/LaTeXDetection.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files/LaTeXDetection.ps1')
 }
+
 Describe 'profile.d/files/LaTeXDetection.ps1 extended scenarios' {
-    It 'Documents LaTeX engine detection for PDF conversions' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'LaTeX engine detection utilities'
-        $c | Should -Match 'pdf-engine'
+    It 'Registers LaTeX engine detection helpers' {
+        Get-Command Test-DocumentLatexEngineAvailable -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Ensure-DocumentLatexEngine -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Defines Test-DocumentLatexEngineAvailable with pdflatex and Scoop MiKTeX paths' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Test-DocumentLatexEngineAvailable'
-        $c | Should -Match "Test-CachedCommand 'pdflatex'"
-        $c | Should -Match 'SCOOP_GLOBAL'
+
+    It 'Test-DocumentLatexEngineAvailable returns pdflatex when stubbed available' {
+        Mark-TestCommandsUnavailable -CommandNames @('pdflatex', 'xelatex', 'luatex')
+        Set-TestCommandAvailabilityState -CommandName 'pdflatex' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        Test-DocumentLatexEngineAvailable | Should -Be 'pdflatex'
     }
-    It 'Defines Ensure-DocumentLatexEngine with missing-tool warnings' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Ensure-DocumentLatexEngine'
-        $c | Should -Match 'Invoke-MissingToolWarning'
-        $c | Should -Match 'miktex'
+
+    It 'Ensure-DocumentLatexEngine throws when no LaTeX engine is available' {
+        Mark-TestCommandsUnavailable -CommandNames @('pdflatex', 'xelatex', 'luatex')
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+
+        { Ensure-DocumentLatexEngine } | Should -Throw '*LaTeX engine*'
     }
 }

@@ -14,6 +14,38 @@ scripts/lib/FragmentConfig.psm1
     PowerShell Version: 3.0+
 #>
 
+function Test-FragmentConfigTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-FragmentConfigStructuredErrorAvailable {
+    if (Test-FragmentConfigTestEnvFlag -Name 'PS_PROFILE_FRAGMENT_CONFIG_DISABLE_STRUCTURED_ERROR') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredError -ErrorAction SilentlyContinue)
+}
+
+function Test-FragmentConfigStructuredWarningAvailable {
+    if (Test-FragmentConfigTestEnvFlag -Name 'PS_PROFILE_FRAGMENT_CONFIG_DISABLE_STRUCTURED_ERROR') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
 # Import CommonEnums first - needed by Validation which is used by SafeImport and PathResolution
 # CommonEnums must be imported before any module that uses FileSystemPathType enum
 # Use -Force and -Global to ensure types are available globally at parse time
@@ -41,7 +73,15 @@ if ($safeImportModulePath -and -not [string]::IsNullOrWhiteSpace($safeImportModu
 # Import JsonUtilities for JSON operations
 # JsonUtilities is in scripts/lib/utilities/, not scripts/lib/fragment/
 $jsonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utilities' 'JsonUtilities.psm1'
-if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+if (Test-FragmentConfigTestEnvFlag -Name 'PS_PROFILE_FRAGMENT_CONFIG_FORCE_JSON_IMPORT_FAILURE') {
+    $jsonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utilities' '__fragment_config_json_import_failure_probe__.psm1'
+}
+$loggingModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'Logging.psm1'
+if (Test-FragmentConfigTestEnvFlag -Name 'PS_PROFILE_FRAGMENT_CONFIG_FORCE_LOGGING_IMPORT_FAILURE') {
+    $loggingModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' '__fragment_config_logging_import_failure_probe__.psm1'
+}
+$forceManualModuleImport = Test-FragmentConfigTestEnvFlag -Name 'PS_PROFILE_FRAGMENT_CONFIG_FORCE_MANUAL_IMPORT'
+if (-not $forceManualModuleImport -and (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue)) {
     $null = Import-ModuleSafely -ModulePath $jsonModulePath -ErrorAction SilentlyContinue
 }
 else {
@@ -73,8 +113,7 @@ else {
 
 # Import Logging for consistent output
 # Logging is in scripts/lib/core/, not scripts/lib/fragment/
-$loggingModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'Logging.psm1'
-if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+if (-not $forceManualModuleImport -and (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue)) {
     $null = Import-ModuleSafely -ModulePath $loggingModulePath -ErrorAction SilentlyContinue
 }
 else {
@@ -271,7 +310,7 @@ function Get-FragmentConfig {
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                 if ($debugLevel -ge 1) {
-                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    if (Test-FragmentConfigStructuredErrorAvailable) {
                         Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-config.get' -Context @{
                             ConfigPath = $ConfigPath
                             ErrorType  = 'InvalidJSON'
@@ -288,7 +327,7 @@ function Get-FragmentConfig {
             }
             else {
                 # Always log critical errors even if debug is off
-                if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                if (Test-FragmentConfigStructuredErrorAvailable) {
                     Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-config.get' -Context @{
                         ConfigPath = $ConfigPath
                         ErrorType  = 'InvalidJSON'
@@ -367,7 +406,7 @@ function Get-FragmentConfig {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
             if ($debugLevel -ge 1) {
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                if (Test-FragmentConfigStructuredWarningAvailable) {
                     Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-config.get' -Context @{
                         ConfigPath = $ConfigPath
                         Error      = $_.Exception.Message
@@ -682,7 +721,14 @@ function Get-FragmentMetadata {
     }
 
     # Use Validation module if available
-    if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
+    $useValidation = if (Test-FragmentConfigTestEnvFlag -Name 'PS_PROFILE_FRAGMENT_CONFIG_SKIP_VALIDATION') {
+        $null
+    }
+    else {
+        Get-Command Test-ValidPath -ErrorAction SilentlyContinue
+    }
+
+    if ($useValidation) {
         if (-not (Test-ValidPath -Path $filePath -PathType File)) {
             return $metadata
         }
@@ -770,7 +816,7 @@ function Get-FragmentMetadata {
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
             if ($debugLevel -ge 1) {
                 $errorMessage = "Failed to parse fragment metadata from: $filePath"
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                if (Test-FragmentConfigStructuredWarningAvailable) {
                     Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-config.parse-metadata' -Context @{
                         FilePath   = $filePath
                         Error      = $_.Exception.Message

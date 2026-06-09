@@ -22,7 +22,10 @@ Describe 'DataFile Module Functions' {
             [object]$ReturnValue
         )
 
-        $script:OriginalGetCachedValueCommand = Get-Command Get-CachedValue -ErrorAction SilentlyContinue
+        Restore-TestGetCachedValue
+
+        $global:DataFileTest_OriginalGetCachedValueCommand = Get-Command Get-CachedValue -ErrorAction SilentlyContinue
+        $global:DataFileTest_StubReturnValue = $ReturnValue
 
         function global:Get-CachedValue {
             [CmdletBinding()]
@@ -39,21 +42,26 @@ Describe 'DataFile Module Functions' {
             )
 
             if ($PSBoundParameters.ContainsKey('Value') -or $Clear) {
-                if ($script:OriginalGetCachedValueCommand) {
-                    return & $script:OriginalGetCachedValueCommand @PSBoundParameters
+                $delegate = Get-Variable -Name DataFileTest_OriginalGetCachedValueCommand -Scope Global -ValueOnly -ErrorAction SilentlyContinue
+                if ($delegate) {
+                    return & $delegate @PSBoundParameters
                 }
             }
 
-            return $ReturnValue
+            return (Get-Variable -Name DataFileTest_StubReturnValue -Scope Global -ValueOnly -ErrorAction SilentlyContinue)
         }
     }
 
     function Restore-TestGetCachedValue {
+        $original = Get-Variable -Name DataFileTest_OriginalGetCachedValueCommand -Scope Global -ValueOnly -ErrorAction SilentlyContinue
+
         Remove-Item Function:\Get-CachedValue -Force -ErrorAction SilentlyContinue
         Remove-Item Function:\global:Get-CachedValue -Force -ErrorAction SilentlyContinue
+        Remove-Variable -Name DataFileTest_StubReturnValue -Scope Global -ErrorAction SilentlyContinue
+        Remove-Variable -Name DataFileTest_OriginalGetCachedValueCommand -Scope Global -ErrorAction SilentlyContinue
 
-        if ($script:OriginalGetCachedValueCommand) {
-            Set-Item -Path Function:\global:Get-CachedValue -Value $script:OriginalGetCachedValueCommand.ScriptBlock -Force
+        if ($original) {
+            Set-Item -Path Function:\global:Get-CachedValue -Value $original.ScriptBlock -Force
         }
     }
 
@@ -307,14 +315,8 @@ Describe 'DataFile Module Functions' {
         It 'Throws descriptive error for invalid file syntax' {
             $invalidFile = Join-Path $script:TestTempDir 'syntax-error.psd1'
             '{ invalid = syntax error }' | Set-Content -Path $invalidFile -Encoding UTF8
-            
-            { Import-CachedPowerShellDataFile -Path $invalidFile } | Should -Throw
-            # Verify error message contains expected text
-                        Import-CachedPowerShellDataFile -Path $invalidFile
-            throw "Expected exception was not thrown"
-        }
-        catch {
-            $_.Exception.Message | Should -Match 'Failed to import'
+
+            { Import-CachedPowerShellDataFile -Path $invalidFile } | Should -Throw '*Failed to import*'
         }
 
         It 'Handles file with only whitespace' {
@@ -360,24 +362,28 @@ Describe 'DataFile Module Functions' {
         }
 
         It 'Handles cache miss scenario' {
+            if (-not (Test-Path -LiteralPath $script:TestTempDir)) {
+                $script:TestTempDir = New-TestTempDirectory -Prefix 'DataFileTests'
+            }
+
+            $testFile = Join-Path $script:TestTempDir 'cache-miss-test.psd1'
+            $testData = @'
+@{
+    FreshValue = "not_cached"
+}
+'@
+            Set-Content -LiteralPath $testFile -Value $testData -Encoding UTF8 -Force
+            Test-Path -LiteralPath $testFile | Should -Be $true
+
             # Clear cache first if possible
             if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
                 $cacheKey = if (Get-Command New-FileCacheKey -ErrorAction SilentlyContinue) {
-                    $testFile = Join-Path $script:TestTempDir 'cache-miss-test.psd1'
                     New-FileCacheKey -FilePath $testFile -Prefix 'PowerShellDataFile'
                 }
                 if ($cacheKey) {
                     Clear-CachedValue -Key $cacheKey -ErrorAction SilentlyContinue
                 }
             }
-
-            $testData = @'
-@{
-    FreshValue = "not_cached"
-}
-'@
-            $testFile = Join-Path $script:TestTempDir 'cache-miss-test.psd1'
-            $testData | Set-Content -Path $testFile -Encoding UTF8
 
             $result = Import-CachedPowerShellDataFile -Path $testFile
             $result.FreshValue | Should -Be 'not_cached'
@@ -574,13 +580,15 @@ Describe 'DataFile Module Functions' {
             $testData | Set-Content -Path $testFile -Encoding UTF8
 
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            $result = Import-CachedPowerShellDataFile -Path $testFile -Verbose
-            $result | Should -Not -BeNullOrEmpty
-            $result.VerboseTest | Should -Be 'verbose-output'
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                $result = Import-CachedPowerShellDataFile -Path $testFile -Verbose
+                $result | Should -Not -BeNullOrEmpty
+                $result.VerboseTest | Should -Be 'verbose-output'
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
         It 'Tests cache hit with verbose output' {
@@ -599,12 +607,14 @@ Describe 'DataFile Module Functions' {
 
             # Second call should use cache (with verbose output)
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            $result2 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
-            $result2.CacheHitTest | Should -Be 'cached-verbose'
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                $result2 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
+                $result2.CacheHitTest | Should -Be 'cached-verbose'
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
         It 'Tests final safety check path' {
@@ -676,17 +686,19 @@ Describe 'DataFile Module Functions' {
             $testData | Set-Content -Path $testFile -Encoding UTF8
 
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            # First call - should show verbose output for import
-            $result1 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
-            $result1.AllVerboseTest | Should -Be 'all-verbose'
-            
-            # Second call - should show verbose output for cache hit
-            $result2 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
-            $result2.AllVerboseTest | Should -Be 'all-verbose'
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                # First call - should show verbose output for import
+                $result1 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
+                $result1.AllVerboseTest | Should -Be 'all-verbose'
+
+                # Second call - should show verbose output for cache hit
+                $result2 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
+                $result2.AllVerboseTest | Should -Be 'all-verbose'
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
         It 'Tests catch block path for invalid syntax' {
@@ -697,10 +709,6 @@ Describe 'DataFile Module Functions' {
 
             # This should throw, testing the catch block's else path (line 164-165)
             { Import-CachedPowerShellDataFile -Path $invalidFile } | Should -Throw
-                        Import-CachedPowerShellDataFile -Path $invalidFile
-        }
-        catch {
-            $_.Exception.Message | Should -Match 'Failed to import'
         }
 
         It 'Tests Get-Content catch block path' {
@@ -770,7 +778,7 @@ Describe 'DataFile Module Functions' {
             if (Get-Command Get-CachedValue -ErrorAction SilentlyContinue) {
                 Install-TestGetCachedValueStub -ReturnValue 'not-a-hashtable'
 
-                                $originalVerbosePreference = $VerbosePreference
+                $originalVerbosePreference = $VerbosePreference
                 try {
                     $VerbosePreference = 'Continue'
                     # This should trigger the non-hashtable path and re-import
@@ -781,10 +789,8 @@ Describe 'DataFile Module Functions' {
                 }
                 finally {
                     $VerbosePreference = $originalVerbosePreference
+                    Restore-TestGetCachedValue
                 }
-            }
-            finally {
-                Restore-TestGetCachedValue
             }
             else {
                 # If Get-CachedValue is not available, just verify normal import works
@@ -823,10 +829,6 @@ Describe 'DataFile Module Functions' {
             # This should throw, triggering the catch block
             # The Get-Content catch block checks exception message for 'empty|whitespace|no data|at line'
             { Import-CachedPowerShellDataFile -Path $testFile } | Should -Throw
-                        Import-CachedPowerShellDataFile -Path $testFile
-        }
-        catch {
-            $_.Exception.Message | Should -Match 'Failed to import'
         }
 
         It 'Tests missing Get-CachedValue command path' {
@@ -841,21 +843,23 @@ Describe 'DataFile Module Functions' {
 
             # Temporarily remove Cache module if available
             $originalCmd = Get-Command Get-CachedValue -ErrorAction SilentlyContinue
-            if ($originalCmd) {
-                Remove-Module Cache -ErrorAction SilentlyContinue -Force
+            try {
+                if ($originalCmd) {
+                    Remove-Module Cache -ErrorAction SilentlyContinue -Force
+                }
+
+                # Should work without cache
+                $result = Import-CachedPowerShellDataFile -Path $testFile
+                $result | Should -Not -BeNullOrEmpty
+                $result.NoCacheCommandTest | Should -Be 'no-cache-command'
             }
-            
-                        # Should work without cache
-            $result = Import-CachedPowerShellDataFile -Path $testFile
-            $result | Should -Not -BeNullOrEmpty
-            $result.NoCacheCommandTest | Should -Be 'no-cache-command'
-        }
-        finally {
-            # Restore Cache module if it was available
-            if ($originalCmd) {
-                $cachePath = Join-Path $script:libPath 'utilities' 'Cache.psm1'
-                if (Test-Path -Path $cachePath) {
-                    Import-Module $cachePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+            finally {
+                # Restore Cache module if it was available
+                if ($originalCmd) {
+                    $cachePath = Join-Path $script:libPath 'utilities' 'Cache.psm1'
+                    if (Test-Path -Path $cachePath) {
+                        Import-Module $cachePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                    }
                 }
             }
         }
@@ -872,23 +876,25 @@ Describe 'DataFile Module Functions' {
             # Temporarily remove Cache module if available
             $originalCmd = Get-Command Set-CachedValue -ErrorAction SilentlyContinue
             $originalGetCached = Get-Command Get-CachedValue -ErrorAction SilentlyContinue
-            if ($originalCmd -or $originalGetCached) {
-                Remove-Module Cache -ErrorAction SilentlyContinue -Force
+            try {
+                if ($originalCmd -or $originalGetCached) {
+                    Remove-Module Cache -ErrorAction SilentlyContinue -Force
+                }
+
+                # Should return empty hashtable even without Set-CachedValue
+                # The function should handle empty hashtable files in the catch block
+                $result = Import-CachedPowerShellDataFile -Path $testFile
+                $result | Should -Not -Be $null
+                $result | Should -BeOfType [hashtable]
+                $result.Count | Should -Be 0
             }
-            
-                        # Should return empty hashtable even without Set-CachedValue
-            # The function should handle empty hashtable files in the catch block
-            $result = Import-CachedPowerShellDataFile -Path $testFile
-            $result | Should -Not -Be $null
-            $result | Should -BeOfType [hashtable]
-            $result.Count | Should -Be 0
-        }
-        finally {
-            # Restore Cache module if it was available
-            if ($originalCmd -or $originalGetCached) {
-                $cachePath = Join-Path $script:libPath 'utilities' 'Cache.psm1'
-                if (Test-Path -Path $cachePath) {
-                    Import-Module $cachePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+            finally {
+                # Restore Cache module if it was available
+                if ($originalCmd -or $originalGetCached) {
+                    $cachePath = Join-Path $script:libPath 'utilities' 'Cache.psm1'
+                    if (Test-Path -Path $cachePath) {
+                        Import-Module $cachePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                    }
                 }
             }
         }
@@ -905,21 +911,23 @@ Describe 'DataFile Module Functions' {
 
             # Temporarily remove CacheKey module if available
             $originalCmd = Get-Command New-FileCacheKey -ErrorAction SilentlyContinue
-            if ($originalCmd) {
-                Remove-Module CacheKey -ErrorAction SilentlyContinue -Force
+            try {
+                if ($originalCmd) {
+                    Remove-Module CacheKey -ErrorAction SilentlyContinue -Force
+                }
+
+                # Should work with fallback cache key generation
+                $result = Import-CachedPowerShellDataFile -Path $testFile
+                $result | Should -Not -BeNullOrEmpty
+                $result.FallbackKeyTest | Should -Be 'fallback-key-gen'
             }
-            
-                        # Should work with fallback cache key generation
-            $result = Import-CachedPowerShellDataFile -Path $testFile
-            $result | Should -Not -BeNullOrEmpty
-            $result.FallbackKeyTest | Should -Be 'fallback-key-gen'
-        }
-        finally {
-            # Restore CacheKey module if it was available
-            if ($originalCmd) {
-                $cacheKeyPath = Join-Path $libPath 'utilities' 'CacheKey.psm1'
-                if (Test-Path -Path $cacheKeyPath) {
-                    Import-Module $cacheKeyPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+            finally {
+                # Restore CacheKey module if it was available
+                if ($originalCmd) {
+                    $cacheKeyPath = Join-Path $libPath 'utilities' 'CacheKey.psm1'
+                    if (Test-Path -Path $cacheKeyPath) {
+                        Import-Module $cacheKeyPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                    }
                 }
             }
         }
@@ -938,7 +946,7 @@ Describe 'DataFile Module Functions' {
             if (Get-Command Get-CachedValue -ErrorAction SilentlyContinue) {
                 Install-TestGetCachedValueStub -ReturnValue 'not-a-hashtable'
 
-                                $originalVerbosePreference = $VerbosePreference
+                $originalVerbosePreference = $VerbosePreference
                 try {
                     $VerbosePreference = 'Continue'
                     # This should trigger the non-hashtable verbose path and re-import
@@ -949,10 +957,8 @@ Describe 'DataFile Module Functions' {
                 }
                 finally {
                     $VerbosePreference = $originalVerbosePreference
+                    Restore-TestGetCachedValue
                 }
-            }
-            finally {
-                Restore-TestGetCachedValue
             }
             else {
                 # If Get-CachedValue is not available, just verify normal import works
@@ -973,19 +979,21 @@ Describe 'DataFile Module Functions' {
             $testData | Set-Content -Path $testFile -Encoding UTF8
 
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            # First call - should show verbose output for import (lines 116, 128)
-            $result1 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
-            $result1 | Should -Not -BeNullOrEmpty
-            $result1.AllImportVerboseTest | Should -Be 'all-import-verbose'
-            
-            # Second call - should show verbose output for cache hit (line 103)
-            $result2 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
-            $result2 | Should -Not -BeNullOrEmpty
-            $result2.AllImportVerboseTest | Should -Be 'all-import-verbose'
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                # First call - should show verbose output for import (lines 116, 128)
+                $result1 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
+                $result1 | Should -Not -BeNullOrEmpty
+                $result1.AllImportVerboseTest | Should -Be 'all-import-verbose'
+
+                # Second call - should show verbose output for cache hit (line 103)
+                $result2 = Import-CachedPowerShellDataFile -Path $testFile -Verbose
+                $result2 | Should -Not -BeNullOrEmpty
+                $result2.AllImportVerboseTest | Should -Be 'all-import-verbose'
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
 
         It 'Tests Test-ValidPath path when Validation module available' {
@@ -995,11 +1003,7 @@ Describe 'DataFile Module Functions' {
             
             # If Test-ValidPath is available, it should be used
             if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
-                { Import-CachedPowerShellDataFile -Path $nonExistentFile } | Should -Throw
-                                Import-CachedPowerShellDataFile -Path $nonExistentFile
-            }
-            catch {
-                $_.Exception.Message | Should -Match 'File not found'
+                { Import-CachedPowerShellDataFile -Path $nonExistentFile } | Should -Throw '*File not found*'
             }
             else {
                 # Fallback path should still work
@@ -1017,10 +1021,6 @@ Describe 'DataFile Module Functions' {
             # This should throw, triggering the catch block
             # The nested catch block checks exception message for 'empty|whitespace|no data|at line'
             { Import-CachedPowerShellDataFile -Path $testFile } | Should -Throw
-                        Import-CachedPowerShellDataFile -Path $testFile
-        }
-        catch {
-            $_.Exception.Message | Should -Match 'Failed to import'
         }
 
         It 'Tests verbose output for final safety check' {
@@ -1034,15 +1034,17 @@ Describe 'DataFile Module Functions' {
             $testData | Set-Content -Path $testFile -Encoding UTF8
 
             $originalVerbosePreference = $VerbosePreference
-                        $VerbosePreference = 'Continue'
-            # This should hit the final safety check (though it won't change the result)
-            $result = Import-CachedPowerShellDataFile -Path $testFile -Verbose
-            $result | Should -Not -BeNullOrEmpty
-            $result | Should -BeOfType [hashtable]
-            $result.FinalSafetyVerboseTest | Should -Be 'final-safety-verbose'
-        }
-        finally {
-            $VerbosePreference = $originalVerbosePreference
+            try {
+                $VerbosePreference = 'Continue'
+                # This should hit the final safety check (though it won't change the result)
+                $result = Import-CachedPowerShellDataFile -Path $testFile -Verbose
+                $result | Should -Not -BeNullOrEmpty
+                $result | Should -BeOfType [hashtable]
+                $result.FinalSafetyVerboseTest | Should -Be 'final-safety-verbose'
+            }
+            finally {
+                $VerbosePreference = $originalVerbosePreference
+            }
         }
     }
 }

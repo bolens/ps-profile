@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-files-module-registry-media-extended.tests.ps1
-#>
+# ===============================================
+# profile-files-module-registry-media-extended.tests.ps1
+# Execution tests for Ensure-FileConversion-Media registry entries
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,34 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/files-module-registry.ps1'
-}
-Describe 'profile.d/files-module-registry.ps1 Ensure-FileConversion-Media registry extended scenarios' {
-    It 'Maps Ensure-FileConversion-Media to media modules' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match '''Ensure-FileConversion-Media'''
-        $c | Should -Match 'conversion-modules/media'
-    }
-    It 'Registers image and audio conversion modules' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'conversion-modules/media/images'
-        $c | Should -Match "File = 'flac.ps1'"
-        $c | Should -Match "File = 'pdf.ps1'"
-    }
-    It 'Registers color conversion modules ending with convert' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "File = 'named.ps1'"
-        $c | Should -Match "File = 'parse.ps1'"
-        $c | Should -Match "File = 'convert.ps1'"
-    }
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
 }
 
+Describe 'profile.d/files-module-registry.ps1 Ensure-FileConversion-Media registry extended scenarios' {
+    It 'Maps Ensure-FileConversion-Media to media conversion modules' {
+        $entries = $script:FileConversionModuleRegistry['Ensure-FileConversion-Media']
+        ($entries | Where-Object { $_.Dir -like 'conversion-modules/media*' }).Count | Should -BeGreaterThan 10
+    }
+
+    It 'Includes image audio PDF and color conversion modules' {
+        $files = $script:FileConversionModuleRegistry['Ensure-FileConversion-Media'] | ForEach-Object { $_.File }
+        $files | Should -Contain 'common.ps1'
+        $files | Should -Contain 'flac.ps1'
+        $files | Should -Contain 'pdf.ps1'
+        $files | Should -Contain 'named.ps1'
+        $files | Should -Contain 'parse.ps1'
+        $files | Should -Contain 'convert.ps1'
+    }
+
+    It 'Load-EnsureModules loads media conversion module initializers' {
+        Load-EnsureModules -EnsureFunctionName 'Ensure-FileConversion-Media' -BaseDir $script:ProfileDir
+
+        Get-Command Initialize-FileConversion-MediaImagesCommon -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Initialize-FileConversion-MediaAudioCommon -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Initialize-FileConversion-MediaPdf -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Initialize-FileConversion-MediaColorsConvert -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+}

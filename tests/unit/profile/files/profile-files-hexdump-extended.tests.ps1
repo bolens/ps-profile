@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-files-hexdump-extended.tests.ps1
-#>
+# ===============================================
+# profile-files-hexdump-extended.tests.ps1
+# Execution tests for files-modules/inspection/files-hexdump.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,41 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/files-modules/inspection/files-hexdump.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:TestTempRoot = New-TestTempDirectory -Prefix 'ProfileFilesHexDump'
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'files.ps1')
 }
+
+function script:Reset-FileUtilitiesState {
+    Set-Variable -Name FileUtilitiesInitialized -Scope Global -Value $false -Force
+}
+
 Describe 'profile.d/files-modules/inspection/files-hexdump.ps1 extended scenarios' {
-    It 'Documents hex dump utilities for binary file inspection' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'File hex dump utility functions'
-        $c | Should -Match 'hexadecimal representation of files'
+    BeforeEach {
+        Reset-FileUtilitiesState
     }
-    It 'Defines Initialize-FileUtilities-HexDump using Format-Hex' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Initialize-FileUtilities-HexDump'
-        $c | Should -Match 'Get-HexDump'
-        $c | Should -Match 'Format-Hex'
+
+    It 'Registers Get-HexDump through Ensure-FileUtilities' {
+        Ensure-FileUtilities
+
+        Get-Command Get-HexDump -ErrorAction Stop | Should -Not -BeNullOrEmpty
+
+        $alias = Get-Alias hex-dump -ErrorAction SilentlyContinue
+        if ($alias) {
+            $alias.ResolvedCommandName | Should -Be 'Get-HexDump'
+        }
     }
-    It 'Registers hex-dump alias targeting Get-HexDump' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'hex-dump'"
-        $c | Should -Match "Target 'Get-HexDump'"
+
+    It 'Get-HexDump produces hex output for file contents' {
+        $tempFile = Join-Path $script:TestTempRoot 'hexdump.txt'
+        Set-Content -Path $tempFile -Value 'AB' -NoNewline
+
+        $result = Get-HexDump -Path $tempFile
+
+        $result | Should -Not -BeNullOrEmpty
+        $result.ToString() | Should -Match '41\s+42'
     }
 }

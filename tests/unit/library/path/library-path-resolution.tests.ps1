@@ -1,4 +1,5 @@
 BeforeAll {
+    try {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
         $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
@@ -39,8 +40,8 @@ BeforeAll {
     $script:TestScriptPath = Get-TestScriptPath -RelativePath 'scripts/utils/test.ps1' -StartPath $PSScriptRoot
     $script:TestScriptCreated = $true
     $script:TempRoot = New-TestTempDirectory -Prefix 'PathResolutionTests'
-}
-catch {
+    }
+    catch {
     $errorDetails = @{
         Message  = $_.Exception.Message
         Type     = $_.Exception.GetType().FullName
@@ -48,6 +49,7 @@ catch {
     }
     Write-Error "Failed to initialize PathResolution tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
     throw
+    }
 }
 
 AfterAll {
@@ -103,12 +105,14 @@ Describe 'PathResolution Module Functions' {
             $checksDir = Join-Path $script:RepoRoot 'scripts' 'checks'
             if ($checksDir -and (Test-Path -LiteralPath $checksDir)) {
                 $checksScriptPath = Join-Path $checksDir 'test.ps1'
-                Set-Content -Path $checksScriptPath -Value '# Test' -ErrorAction SilentlyContinue
-                                $result = Get-RepoRoot -ScriptPath $checksScriptPath
-                $result | Should -Be $script:RepoRoot
-            }
-            finally {
-                Remove-Item -Path $checksScriptPath -Force -ErrorAction SilentlyContinue
+                try {
+                    Set-Content -Path $checksScriptPath -Value '# Test' -ErrorAction SilentlyContinue
+                    $result = Get-RepoRoot -ScriptPath $checksScriptPath
+                    $result | Should -Be $script:RepoRoot
+                }
+                finally {
+                    Remove-Item -Path $checksScriptPath -Force -ErrorAction SilentlyContinue
+                }
             }
         }
 
@@ -234,13 +238,13 @@ Describe 'PathResolution Module Functions' {
             if ($exitCodesPath -and (Test-Path -LiteralPath $exitCodesPath)) {
                 Import-Module $exitCodesPath -DisableNameChecking -ErrorAction SilentlyContinue -Force
 
-                $tempScript = New-NoRepoScriptPath
-                                # This will exit the script, so we can't test it directly
-                # But we can verify the function structure is correct
-                Get-Command Get-RepoRootSafe | Should -Not -BeNullOrEmpty
-            }
-            finally {
-                Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
+                try {
+                    $tempScript = New-NoRepoScriptPath
+                    Get-Command Get-RepoRootSafe | Should -Not -BeNullOrEmpty
+                }
+                finally {
+                    Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
+                }
             }
         }
 

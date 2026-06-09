@@ -18,6 +18,30 @@ scripts/lib/DataFile.psm1
 # Enable strict mode for enhanced error checking
 Set-StrictMode -Version Latest
 
+function Test-DataFileTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-DataFileStructuredErrorAvailable {
+    if (Test-DataFileTestEnvFlag -Name 'PS_PROFILE_DATAFILE_DISABLE_STRUCTURED_ERROR') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredError -ErrorAction SilentlyContinue)
+}
+
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
 $safeImportModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'SafeImport.psm1'
@@ -27,7 +51,8 @@ if ($safeImportModulePath -and -not [string]::IsNullOrWhiteSpace($safeImportModu
 
 # Import Cache module for caching support
 $cacheModulePath = Join-Path $PSScriptRoot 'Cache.psm1'
-if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+$forceManualModuleImport = Test-DataFileTestEnvFlag -Name 'PS_PROFILE_DATAFILE_FORCE_MANUAL_IMPORT'
+if (-not $forceManualModuleImport -and (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue)) {
     Import-ModuleSafely -ModulePath $cacheModulePath -ErrorAction SilentlyContinue
 }
 else {
@@ -77,7 +102,8 @@ function Import-CachedPowerShellDataFile {
     $result = $null
 
     # Use Validation module if available
-    if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
+    if (-not (Test-DataFileTestEnvFlag -Name 'PS_PROFILE_DATAFILE_SKIP_VALIDATION') -and
+        (Get-Command Test-ValidPath -ErrorAction SilentlyContinue)) {
         if (-not (Test-ValidPath -Path $Path -PathType File)) {
             throw "File not found: $Path"
         }
@@ -198,7 +224,7 @@ function Import-CachedPowerShellDataFile {
         }
         else {
             $errorMsg = "Failed to import PowerShell data file $Path`: $($_.Exception.Message)"
-            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+            if (Test-DataFileStructuredErrorAvailable) {
                 Write-StructuredError -ErrorRecord $_ -OperationName 'data-file.import' -Context @{
                     data_file_path = $Path
                     error_message  = $errorMsg

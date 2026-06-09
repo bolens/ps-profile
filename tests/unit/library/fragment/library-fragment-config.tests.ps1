@@ -156,22 +156,36 @@ Describe 'Get-CurrentEnvironmentFragments' {
         Set-Content -Path $configPath -Value $configJson
 
         $originalEnv = $env:PS_PROFILE_ENVIRONMENT
-                $env:PS_PROFILE_ENVIRONMENT = 'minimal'
-        $fragments = Get-CurrentEnvironmentFragments -ProfileDir $tempProfileDir
-        $fragments | Should -Contain 'bootstrap'
-        $fragments | Should -Contain 'env'
-    }
-    finally {
-        $env:PS_PROFILE_ENVIRONMENT = $originalEnv
+        try {
+            $env:PS_PROFILE_ENVIRONMENT = 'minimal'
+            $fragments = Get-CurrentEnvironmentFragments -ProfileDir $tempProfileDir
+            $fragments | Should -Contain 'bootstrap'
+            $fragments | Should -Contain 'env'
+        }
+        finally {
+            if ($null -eq $originalEnv) {
+                Remove-Item Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_ENVIRONMENT = $originalEnv
+            }
+        }
     }
 
     It 'Returns null when environment is not set' {
         $originalEnv = $env:PS_PROFILE_ENVIRONMENT
-                $env:PS_PROFILE_ENVIRONMENT = $null
-        $fragments = Get-CurrentEnvironmentFragments
-        $fragments | Should -BeNullOrEmpty
-    }
-    finally {
-        $env:PS_PROFILE_ENVIRONMENT = $originalEnv
+        try {
+            Remove-Item Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
+            $fragments = Get-CurrentEnvironmentFragments
+            $fragments | Should -BeNullOrEmpty
+        }
+        finally {
+            if ($null -eq $originalEnv) {
+                Remove-Item Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_ENVIRONMENT = $originalEnv
+            }
+        }
     }
 }

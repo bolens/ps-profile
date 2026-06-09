@@ -20,14 +20,17 @@ BeforeAll {
     . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
 }
 
-function script:Import-NetworkAdvancedModule {
+function script:Reset-NetworkAdvancedModuleState {
     Microsoft.PowerShell.Utility\Remove-Variable -Name 'NetworkUtilsLoaded' -Scope Global -ErrorAction SilentlyContinue
-    . (Join-Path $script:ProfileDir 'network-utils.ps1')
 }
 
 Describe 'profile.d/utilities-modules/network/utilities-network-advanced.ps1 extended scenarios' {
+    BeforeEach {
+        Reset-NetworkAdvancedModuleState
+    }
+
     It 'Registers advanced network helpers through network-utils.ps1' {
-        Import-NetworkAdvancedModule
+        . (Join-Path $script:ProfileDir 'network-utils.ps1')
 
         Get-Command Invoke-WithRetry -ErrorAction Stop | Should -Not -BeNullOrEmpty
         Get-Command Invoke-HttpRequestWithRetry -ErrorAction Stop | Should -Not -BeNullOrEmpty
@@ -37,14 +40,14 @@ Describe 'profile.d/utilities-modules/network/utilities-network-advanced.ps1 ext
     }
 
     It 'Invoke-WithRetry executes the supplied script block' {
-        Import-NetworkAdvancedModule
+        . (Join-Path $script:ProfileDir 'network-utils.ps1')
 
         $result = Invoke-WithRetry -ScriptBlock { return 'network-retry-ok' }
         $result | Should -Be 'network-retry-ok'
     }
 
     It 'Skips re-initialization when advanced network utilities are already loaded' {
-        Import-NetworkAdvancedModule
+        . (Join-Path $script:ProfileDir 'network-utils.ps1')
         $firstRetry = Get-Command Invoke-WithRetry -ErrorAction Stop
 
         . (Join-Path $script:ProfileDir 'network-utils.ps1')

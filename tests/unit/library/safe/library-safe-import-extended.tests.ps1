@@ -56,6 +56,14 @@ Describe 'SafeImport extended scenarios' {
             Get-ModulePath -ModulePath '   ' | Should -BeNullOrEmpty
         }
 
+        It 'Returns null when ModulePath is null' {
+            Get-ModulePath -ModulePath $null | Should -BeNullOrEmpty
+        }
+
+        It 'Returns null when path normalization throws during GetFullPath' {
+            Get-ModulePath -ModulePath ([string]::new([char]0)) -MustExist:$false | Should -BeNullOrEmpty
+        }
+
         It 'Returns null when MustExist is true and the module file is missing' {
             Get-ModulePath -ModulePath (Join-Path $script:TempDir 'MissingModule.psm1') | Should -BeNullOrEmpty
         }
@@ -137,6 +145,13 @@ Export-ModuleMember -Function 'Get-ExtendedImportValue'
             Import-ModuleSafely -ModulePath $brokenModule -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
         }
 
+        It 'Returns null when module initialization throws and Required is false' {
+            $throwsModule = Join-Path $script:TempDir 'ThrowsOnLoad.psm1'
+            Set-Content -LiteralPath $throwsModule -Value 'throw "load failed"' -Encoding UTF8
+
+            Import-ModuleSafely -ModulePath $throwsModule -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+        }
+
         It 'Throws when import fails and ErrorAction is Stop' {
             $brokenModule = Join-Path $script:TempDir 'BrokenImportStop.psm1'
             Set-Content -LiteralPath $brokenModule -Value 'this is not valid module syntax {{{' -Encoding UTF8
@@ -158,11 +173,20 @@ Export-ModuleMember -Function 'Get-ExtendedImportValue'
             Get-Command Get-ExtendedImportValue -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
         }
 
-        It 'Imports modules using non-string path objects' {
+        It 'Returns null when path normalization fails during Get-ModulePath' {
+            Get-ModulePath -ModulePath '::invalid-rooted-path::' | Should -BeNullOrEmpty
+        }
+
+        It 'Imports using stringified object paths in the success path' {
             $fileInfo = Get-Item -LiteralPath $script:ModuleFile
             $module = Import-ModuleSafely -ModulePath $fileInfo -ErrorAction Stop
 
             $module.Name | Should -Be 'ExtendedImport'
+        }
+
+        It 'Throws when Required is true and a string module path is missing' {
+            { Import-ModuleSafely -ModulePath (Join-Path $script:TempDir 'MissingRequired.psm1') -Required $true } |
+                Should -Throw '*Module path is invalid or does not exist*'
         }
     }
 
@@ -204,6 +228,44 @@ Export-ModuleMember -Function 'Get-ExtendedImportValue'
                 Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force
                 Import-Module (Join-Path $script:LibPath 'core' 'SafeImport.psm1') -DisableNameChecking -Force
                 Remove-Item -LiteralPath $tempCore -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Exercises manual Test-ModulePath validation when Validation was never loaded' {
+            $tempCore = New-TestTempDirectory -Prefix 'SafeImportManualValidation'
+            Get-ChildItem -LiteralPath (Join-Path $script:LibPath 'core') -Filter '*.psm1' |
+                Where-Object { $_.Name -ne 'Validation.psm1' } |
+                Copy-Item -Destination $tempCore -Force
+
+            $tempDir = New-TestTempDirectory -Prefix 'SafeImportManualValidationModule'
+            $moduleFile = Join-Path $tempDir 'ManualModule.psm1'
+            Set-Content -LiteralPath $moduleFile -Value '# manual validation module' -Encoding UTF8
+            $throwsOnLoad = Join-Path $tempDir 'ThrowsOnLoad.psm1'
+            Set-Content -LiteralPath $throwsOnLoad -Value 'throw "load failed"' -Encoding UTF8
+
+            Remove-Module SafeImport, CommonEnums, Validation -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:\Test-ValidPath -ErrorAction SilentlyContinue -Force
+
+            try {
+                Import-Module (Join-Path $tempCore 'SafeImport.psm1') -DisableNameChecking -Force
+                Get-Command Test-ValidPath -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+
+                Test-ModulePath -ModulePath $null | Should -Be $false
+                Test-ModulePath -ModulePath '   ' | Should -Be $false
+                Test-ModulePath -ModulePath $moduleFile | Should -Be $true
+
+                $fileInfo = Get-Item -LiteralPath $moduleFile
+                Test-ModulePath -ModulePath $fileInfo | Should -Be $true
+                Test-ModulePath -ModulePath (Join-Path $tempDir 'MissingManual.psm1') | Should -Be $false
+
+                Get-ModulePath -ModulePath ([string]::new([char]0)) -MustExist:$false | Should -BeNullOrEmpty
+                Import-ModuleSafely -ModulePath $throwsOnLoad -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            }
+            finally {
+                Remove-Module SafeImport -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force
+                Import-Module (Join-Path $script:LibPath 'core' 'SafeImport.psm1') -DisableNameChecking -Force
+                Remove-Item -LiteralPath $tempCore, $tempDir -Recurse -Force -ErrorAction SilentlyContinue
             }
         }
 
@@ -305,10 +367,35 @@ Export-ModuleMember -Function 'Get-ExtendedImportValue'
     Context 'Test-ModulePath without Validation helpers' {
         BeforeEach {
             Remove-Module Validation -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:\Test-ValidPath -ErrorAction SilentlyContinue -Force
         }
 
         AfterEach {
             Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force
+        }
+
+        It 'Returns false for null module paths in manual validation mode' {
+            Remove-Module Validation -ErrorAction SilentlyContinue -Force
+            Get-Command Test-ValidPath -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+
+            try {
+                Test-ModulePath -ModulePath $null | Should -Be $false
+            }
+            finally {
+                Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force
+            }
+        }
+
+        It 'Returns false for whitespace-only paths in manual validation mode' {
+            Remove-Module Validation -ErrorAction SilentlyContinue -Force
+            Get-Command Test-ValidPath -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+
+            try {
+                Test-ModulePath -ModulePath '   ' | Should -Be $false
+            }
+            finally {
+                Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force
+            }
         }
 
         It 'Accepts non-string module path objects in Get-ModulePath' {
@@ -327,10 +414,12 @@ Export-ModuleMember -Function 'Get-ExtendedImportValue'
         }
 
         It 'Falls back to manual path validation when Test-ValidPath is unavailable' {
-
             $tempDir = New-TestTempDirectory -Prefix 'SafeImportManual'
             $moduleFile = Join-Path $tempDir 'ManualModule.psm1'
             Set-Content -LiteralPath $moduleFile -Value '# manual' -Encoding UTF8
+
+            Remove-Module Validation -ErrorAction SilentlyContinue -Force
+            Get-Command Test-ValidPath -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
 
             try {
                 Test-ModulePath -ModulePath $moduleFile | Should -Be $true
@@ -338,6 +427,7 @@ Export-ModuleMember -Function 'Get-ExtendedImportValue'
             }
             finally {
                 Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+                Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force
             }
         }
 
@@ -346,12 +436,28 @@ Export-ModuleMember -Function 'Get-ExtendedImportValue'
             $moduleFile = Join-Path $tempDir 'ManualObjectModule.psm1'
             Set-Content -LiteralPath $moduleFile -Value '# manual object' -Encoding UTF8
 
+            Remove-Module Validation -ErrorAction SilentlyContinue -Force
+            Get-Command Test-ValidPath -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+
             try {
                 $fileInfo = Get-Item -LiteralPath $moduleFile
                 Test-ModulePath -ModulePath $fileInfo | Should -Be $true
             }
             finally {
                 Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+                Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force
+            }
+        }
+
+        It 'Returns false for missing files in manual validation mode' {
+            Remove-Module Validation -ErrorAction SilentlyContinue -Force
+            Get-Command Test-ValidPath -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+
+            try {
+                Test-ModulePath -ModulePath (Join-Path (Get-Location).Path 'missing-manual-module.psm1') | Should -Be $false
+            }
+            finally {
+                Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force
             }
         }
     }

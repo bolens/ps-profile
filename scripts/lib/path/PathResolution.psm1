@@ -14,6 +14,38 @@ scripts/lib/PathResolution.psm1
 # Enable strict mode for enhanced error checking
 Set-StrictMode -Version Latest
 
+function Test-PathResolutionTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-PathResolutionStructuredErrorAvailable {
+    if (Test-PathResolutionTestEnvFlag -Name 'PS_PROFILE_PATH_DISABLE_STRUCTURED_ERROR') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredError -ErrorAction SilentlyContinue)
+}
+
+function Test-PathResolutionExitWithCodeAvailable {
+    if (Test-PathResolutionTestEnvFlag -Name 'PS_PROFILE_PATH_DISABLE_EXIT_WITH_CODE') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Exit-WithCode -ErrorAction SilentlyContinue)
+}
+
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
 $safeImportModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'SafeImport.psm1'
@@ -23,7 +55,8 @@ if ($safeImportModulePath -and -not [string]::IsNullOrWhiteSpace($safeImportModu
 
 # Import Cache module for caching support
 $cacheModulePath = Join-Path $PSScriptRoot 'Cache.psm1'
-if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+$forceManualModuleImport = Test-PathResolutionTestEnvFlag -Name 'PS_PROFILE_PATH_FORCE_MANUAL_IMPORT'
+if (-not $forceManualModuleImport -and (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue)) {
     # Import-ModuleSafely has ErrorAction as a parameter, don't pass it explicitly to avoid duplicate
     Import-ModuleSafely -ModulePath $cacheModulePath
 }
@@ -36,7 +69,7 @@ else {
 
 # Import ErrorHandling module if available for consistent error action preference handling
 $errorHandlingModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'ErrorHandling.psm1'
-if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+if (-not $forceManualModuleImport -and (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue)) {
     # Import-ModuleSafely has ErrorAction as a parameter, don't pass it explicitly to avoid duplicate
     Import-ModuleSafely -ModulePath $errorHandlingModulePath -DisableNameChecking
 }
@@ -93,7 +126,12 @@ function Get-RepoRoot {
 
     # Normalize script path to absolute path (handles relative paths and ".." components)
     # Use Validation module if available
-    $useValidation = Get-Command Test-ValidPath -ErrorAction SilentlyContinue
+    $useValidation = if (Test-PathResolutionTestEnvFlag -Name 'PS_PROFILE_PATH_SKIP_VALIDATION') {
+        $null
+    }
+    else {
+        Get-Command Test-ValidPath -ErrorAction SilentlyContinue
+    }
     
     $resolvedScriptPath = if ($useValidation) {
         if (Test-ValidPath -Path $ScriptPath -PathType File) {
@@ -331,7 +369,7 @@ function Get-RepoRootSafe {
 
         if ($ExitOnError) {
             # Try to use Exit-WithCode if ExitCodes module is available
-            if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
+            if (Test-PathResolutionExitWithCodeAvailable) {
                 if (Get-Variable EXIT_SETUP_ERROR -ErrorAction SilentlyContinue) {
                     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
                 }
@@ -344,7 +382,7 @@ function Get-RepoRootSafe {
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                     if ($debugLevel -ge 1) {
-                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        if (Test-PathResolutionStructuredErrorAvailable) {
                             Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
                                 script_path   = $ScriptPath
                                 exit_on_error = $true
@@ -361,7 +399,7 @@ function Get-RepoRootSafe {
                 }
                 else {
                     # Always log critical errors even if debug is off
-                    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                    if (Test-PathResolutionStructuredErrorAvailable) {
                         Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
                             script_path   = $ScriptPath
                             exit_on_error = $true
@@ -386,7 +424,7 @@ function Get-RepoRootSafe {
                     $debugLevel = 0
                     if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                         if ($debugLevel -ge 1) {
-                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            if (Test-PathResolutionStructuredErrorAvailable) {
                                 Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
                                     script_path  = $ScriptPath
                                     error_action = 'Continue'
@@ -403,7 +441,7 @@ function Get-RepoRootSafe {
                     }
                     else {
                         # Always log critical errors even if debug is off
-                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        if (Test-PathResolutionStructuredErrorAvailable) {
                             Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
                                 script_path  = $ScriptPath
                                 error_action = 'Continue'
@@ -419,7 +457,7 @@ function Get-RepoRootSafe {
                     $debugLevel = 0
                     if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                         if ($debugLevel -ge 1) {
-                            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                            if (Test-PathResolutionStructuredErrorAvailable) {
                                 Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
                                     script_path  = $ScriptPath
                                     error_action = $errorActionPreference
@@ -436,7 +474,7 @@ function Get-RepoRootSafe {
                     }
                     else {
                         # Always log critical errors even if debug is off
-                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        if (Test-PathResolutionStructuredErrorAvailable) {
                             Write-StructuredError -ErrorRecord $_ -OperationName 'path-resolution.repo-root' -Context @{
                                 script_path  = $ScriptPath
                                 error_action = $errorActionPreference

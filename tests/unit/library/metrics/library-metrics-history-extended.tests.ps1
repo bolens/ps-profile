@@ -16,7 +16,9 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
     Import-Module (Join-Path $script:LibPath 'metrics' 'MetricsHistory.psm1') -DisableNameChecking -Force
 
     $script:TempDir = New-TestTempDirectory -Prefix 'MetricsHistoryExtended'
@@ -35,11 +37,22 @@ BeforeAll {
 }
 
 AfterAll {
+    Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+    Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
     Remove-Module MetricsHistory -ErrorAction SilentlyContinue -Force
 
     if ($script:TempDir -and (Test-Path -LiteralPath $script:TempDir)) {
         Remove-Item -LiteralPath $script:TempDir -Recurse -Force -ErrorAction SilentlyContinue
     }
+}
+
+function script:Enable-TestStructuredLogging {
+    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+        return
+    }
+
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
 }
 
 Describe 'MetricsHistory extended scenarios' {
@@ -94,6 +107,131 @@ Describe 'MetricsHistory extended scenarios' {
             }
 
             $result.Count | Should -Be 0
+        }
+
+        It 'Emits verbose tracing when PS_PROFILE_DEBUG is level 2' {
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $originalVerbose = $VerbosePreference
+            $env:PS_PROFILE_DEBUG = '2'
+            $VerbosePreference = 'Continue'
+
+            try {
+                $result = Get-HistoricalMetrics -HistoryPath $script:HistoryDir
+                $result.Count | Should -BeGreaterThan 0
+            }
+            finally {
+                $VerbosePreference = $originalVerbose
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Emits level 3 tracing when Limit is applied' {
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                $result = Get-HistoricalMetrics -HistoryPath $script:HistoryDir -Limit 2
+                $result.Count | Should -Be 2
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses Write-StructuredWarning when snapshot JSON cannot be parsed' {
+            Enable-TestStructuredLogging
+
+            $mixedDir = Join-Path $script:TempDir 'structured-invalid-history'
+            New-Item -ItemType Directory -Path $mixedDir -Force | Out-Null
+            @{
+                Timestamp  = '2024-02-10T00:00:00Z'
+                TotalFiles = 5
+            } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $mixedDir 'metrics-valid.json') -Encoding UTF8
+            Set-Content -LiteralPath (Join-Path $mixedDir 'metrics-invalid.json') -Value '{ bad-json' -Encoding UTF8
+
+            { Get-HistoricalMetrics -HistoryPath $mixedDir } | Should -Not -Throw
+        }
+
+        It 'Warns with Write-Warning when snapshot JSON cannot be parsed without structured logging' {
+            $mixedDir = Join-Path $script:TempDir 'warning-invalid-history'
+            New-Item -ItemType Directory -Path $mixedDir -Force | Out-Null
+            @{
+                Timestamp  = '2024-02-11T00:00:00Z'
+                TotalFiles = 6
+            } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $mixedDir 'metrics-valid.json') -Encoding UTF8
+            Set-Content -LiteralPath (Join-Path $mixedDir 'metrics-invalid.json') -Value '{ bad-json' -Encoding UTF8
+
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+
+            try {
+                $result = Get-HistoricalMetrics -HistoryPath $mixedDir
+                $result.Count | Should -Be 1
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses structured warnings when debug is explicitly disabled' {
+            Enable-TestStructuredLogging
+
+            $mixedDir = Join-Path $script:TempDir 'structured-debug-off-history'
+            New-Item -ItemType Directory -Path $mixedDir -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $mixedDir 'metrics-invalid.json') -Value '{ bad-json' -Encoding UTF8
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '0'
+
+            try {
+                { Get-HistoricalMetrics -HistoryPath $mixedDir } | Should -Not -Throw
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Warns at debug level 1 when snapshot JSON cannot be parsed without structured logging' {
+            $mixedDir = Join-Path $script:TempDir 'debug1-invalid-history'
+            New-Item -ItemType Directory -Path $mixedDir -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $mixedDir 'metrics-invalid.json') -Value '{ bad-json' -Encoding UTF8
+
+            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                { Get-HistoricalMetrics -HistoryPath $mixedDir } | Should -Not -Throw
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
         }
     }
 }

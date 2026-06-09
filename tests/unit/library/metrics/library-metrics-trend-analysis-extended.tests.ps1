@@ -16,11 +16,24 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
+    $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
     Import-Module (Join-Path $script:LibPath 'metrics' 'MetricsTrendAnalysis.psm1') -DisableNameChecking -Force
 }
 
+function script:Enable-TestStructuredLogging {
+    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+        return
+    }
+
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
+}
+
 AfterAll {
+    Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+    Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
     Remove-Module MetricsTrendAnalysis -ErrorAction SilentlyContinue -Force
 }
 
@@ -81,6 +94,79 @@ Describe 'MetricsTrendAnalysis extended scenarios' {
             )
 
             { Get-MetricsTrend -HistoricalData $historicalData -MetricName 'TotalFiles' } | Should -Not -Throw
+        }
+
+        It 'Returns Decreasing for strongly declining series' {
+            $historicalData = @(
+                @{ Timestamp = '2024-03-01T00:00:00Z'; TotalFiles = 100 }
+                @{ Timestamp = '2024-03-02T00:00:00Z'; TotalFiles = 20 }
+            )
+
+            $result = Get-MetricsTrend -HistoricalData $historicalData -MetricName 'TotalFiles'
+
+            if ($result.GrowthRate -lt -5) {
+                $result.TrendDirection | Should -Be 'Decreasing'
+            }
+        }
+
+        It 'Returns zero growth rate when the first value is zero' {
+            $historicalData = @(
+                @{ Timestamp = '2024-03-01T00:00:00Z'; TotalFiles = 0 }
+                @{ Timestamp = '2024-03-02T00:00:00Z'; TotalFiles = 10 }
+            )
+
+            $result = Get-MetricsTrend -HistoricalData $historicalData -MetricName 'TotalFiles'
+            $result.GrowthRate | Should -Be 0
+        }
+
+        It 'Returns InsufficientData when the Days filter removes too many points' {
+            $historicalData = @(
+                @{ Timestamp = (Get-Date).AddDays(-30).ToString('o'); TotalFiles = 10 }
+                @{ Timestamp = (Get-Date).AddDays(-25).ToString('o'); TotalFiles = 20 }
+            )
+
+            $result = Get-MetricsTrend -HistoricalData $historicalData -MetricName 'TotalFiles' -Days 7
+            $result.TrendDirection | Should -Be 'InsufficientData'
+        }
+
+        It 'Skips null historical entries and still analyzes valid points' {
+            $historicalData = @(
+                $null
+                @{ Timestamp = '2024-03-01T00:00:00Z'; TotalFiles = 10 }
+                @{ Timestamp = '2024-03-02T00:00:00Z'; TotalFiles = 20 }
+            )
+
+            $result = Get-MetricsTrend -HistoricalData $historicalData -MetricName 'TotalFiles'
+            $result.DataPoints | Should -Be 2
+        }
+
+        It 'Uses Write-StructuredWarning for insufficient data when structured logging is enabled' {
+            Enable-TestStructuredLogging
+
+            { Get-MetricsTrend -HistoricalData @(@{ Timestamp = '2024-03-01T00:00:00Z'; TotalFiles = 1 }) -MetricName 'TotalFiles' } |
+                Should -Not -Throw
+        }
+
+        It 'Emits level 3 tracing when PS_PROFILE_DEBUG is enabled' {
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                $result = Get-MetricsTrend -HistoricalData @(
+                    @{ Timestamp = (Get-Date).AddDays(-2).ToString('o'); TotalFiles = 10 }
+                    @{ Timestamp = (Get-Date).AddDays(-1).ToString('o'); TotalFiles = 15 }
+                ) -MetricName 'TotalFiles' -Days 30
+
+                $result.TrendDirection | Should -Not -Be 'InsufficientData'
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
         }
     }
 }

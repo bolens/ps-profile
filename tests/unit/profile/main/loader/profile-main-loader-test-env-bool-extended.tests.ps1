@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-main-loader-test-env-bool-extended.tests.ps1
-#>
+# ===============================================
+# profile-main-loader-test-env-bool-extended.tests.ps1
+# Execution tests for Microsoft.PowerShell_profile.ps1 Test-EnvBool behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,39 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
 }
+
 Describe 'Microsoft.PowerShell_profile.ps1 Test-EnvBool fallback extended scenarios' {
-    It 'Documents inline Test-EnvBool fallback helper' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'function Test-EnvBool'
-        $c | Should -Match 'normalize boolean environment variables'
-        $c | Should -Match '''1'', ''true'''
+    It 'Test-EnvBool is available after profile load' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if (Get-Command Test-EnvBool -ErrorAction SilentlyContinue) { 'ENVBOOL_CMD_OK' }
+"@
+
+        $result | Should -Match 'ENVBOOL_CMD_OK'
     }
-    It 'Uses Test-EnvBool for parallel loading flag' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'PS_PROFILE_PARALLEL_LOADING'
-        $c | Should -Match 'enableParallelLoading = Test-EnvBool'
+
+    It 'Test-EnvBool treats true-like values as enabled' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if ((Test-EnvBool -Value 'true') -and (Test-EnvBool -Value '1')) { 'ENVBOOL_TRUE_OK' }
+"@
+
+        $result | Should -Match 'ENVBOOL_TRUE_OK'
     }
-    It 'Treats empty env values as false' {
-        $c = Get-Content -LiteralPath $script:ProfileScript -Raw
-        $c | Should -Match 'IsNullOrWhiteSpace'
-        $c | Should -Match 'return .+false'
-        $c | Should -Match 'ToLowerInvariant'
+
+    It 'Test-EnvBool treats empty and false-like values as disabled' {
+        $escapedProfile = $script:ProfileScript.Replace("'", "''")
+        $result = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if ((-not (Test-EnvBool -Value '')) -and (-not (Test-EnvBool -Value '0')) -and (-not (Test-EnvBool -Value 'false'))) { 'ENVBOOL_FALSE_OK' }
+"@
+
+        $result | Should -Match 'ENVBOOL_FALSE_OK'
     }
 }

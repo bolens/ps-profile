@@ -7,7 +7,17 @@
 #>
 
 BeforeAll {
-    $modulePath = Join-Path $PSScriptRoot '..' '..' 'scripts' 'lib' 'core' 'Retry.psm1'
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
+            . $testSupportPath
+            break
+        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
+    }
+    $modulePath = Join-Path (Get-TestRepoRoot -StartPath $PSScriptRoot) 'scripts/lib/core/Retry.psm1'
     Import-Module $modulePath -Force -DisableNameChecking
 }
 
@@ -48,13 +58,15 @@ Describe 'Invoke-WithRetry' {
         }
 
         $script:attempt = 0
-                Invoke-WithRetry -ScriptBlock {
-            $script:attempt++
-            throw 'Fail'
-        } -MaxRetries 2 -RetryDelaySeconds 1 -ExponentialBackoff -OnRetry $onRetry -ErrorAction SilentlyContinue
-    }
-    catch {
-        # Expected to fail
+        try {
+            Invoke-WithRetry -ScriptBlock {
+                $script:attempt++
+                throw 'Fail'
+            } -MaxRetries 2 -RetryDelaySeconds 1 -ExponentialBackoff -OnRetry $onRetry -ErrorAction SilentlyContinue
+        }
+        catch {
+            # Expected to fail
+        }
 
         $script:onRetryCalled | Should -Be $true
         $script:delays.Count | Should -BeGreaterOrEqual 1
@@ -65,26 +77,28 @@ Describe 'Invoke-WithRetry' {
     }
 
     It 'Uses linear backoff when specified' {
-        $delays = @()
+        $script:delays = @()
         $onRetry = {
             param($Attempt, $MaxRetries, $DelaySeconds, $Exception)
             $script:delays += $DelaySeconds
         }
 
-        $attempt = 0
-                Invoke-WithRetry -ScriptBlock {
-            $script:attempt++
-            throw 'Fail'
-        } -MaxRetries 2 -RetryDelaySeconds 1 -LinearBackoff -OnRetry $onRetry -ErrorAction SilentlyContinue
-    }
-    catch {
-        # Expected to fail
-
-        if ($delays.Count -ge 1) {
-            $delays[0] | Should -Be 1
+        $script:attempt = 0
+        try {
+            Invoke-WithRetry -ScriptBlock {
+                $script:attempt++
+                throw 'Fail'
+            } -MaxRetries 2 -RetryDelaySeconds 1 -LinearBackoff -OnRetry $onRetry -ErrorAction SilentlyContinue
         }
-        if ($delays.Count -ge 2) {
-            $delays[1] | Should -Be 2
+        catch {
+            # Expected to fail
+        }
+
+        if ($script:delays.Count -ge 1) {
+            $script:delays[0] | Should -Be 1
+        }
+        if ($script:delays.Count -ge 2) {
+            $script:delays[1] | Should -Be 2
         }
     }
 
@@ -114,23 +128,24 @@ Describe 'Invoke-WithRetry' {
     }
 
     It 'Respects MaxDelaySeconds cap' {
-        $delays = @()
+        $script:delays = @()
         $onRetry = {
             param($Attempt, $MaxRetries, $DelaySeconds, $Exception)
             $script:delays += $DelaySeconds
         }
 
-        $attempt = 0
-                Invoke-WithRetry -ScriptBlock {
-            $script:attempt++
-            throw 'Fail'
-        } -MaxRetries 5 -RetryDelaySeconds 100 -ExponentialBackoff -MaxDelaySeconds 10 -OnRetry $onRetry -ErrorAction SilentlyContinue
-    }
-    catch {
-        # Expected to fail
+        $script:attempt = 0
+        try {
+            Invoke-WithRetry -ScriptBlock {
+                $script:attempt++
+                throw 'Fail'
+            } -MaxRetries 5 -RetryDelaySeconds 100 -ExponentialBackoff -MaxDelaySeconds 10 -OnRetry $onRetry -ErrorAction SilentlyContinue
+        }
+        catch {
+            # Expected to fail
+        }
 
-        # All delays should be capped at 10 seconds
-        foreach ($delay in $delays) {
+        foreach ($delay in $script:delays) {
             $delay | Should -BeLessOrEqual 10
         }
     }

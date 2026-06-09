@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-files-module-registry-load-ensure-extended.tests.ps1
-#>
+# ===============================================
+# profile-files-module-registry-load-ensure-extended.tests.ps1
+# Execution tests for Load-EnsureModules deferred loading behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,26 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/files-module-registry.ps1'
-}
-Describe 'profile.d/files-module-registry.ps1 Load-EnsureModules extended scenarios' {
-    It 'Documents Load-EnsureModules deferred loading helper' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'function Load-EnsureModules'
-        $c | Should -Match 'modules are only loaded when their Ensure function is called'
-    }
-    It 'Uses Import-FragmentModule when standardized loading is available' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Import-FragmentModule'
-        $c | Should -Match '-CacheResults'
-        $c | Should -Match 'FileConversionModuleRegistry'
-    }
-    It 'Falls back to Invoke-GlobalProfileScript when import helper is missing' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Invoke-GlobalProfileScript'
-        $c | Should -Match 'Test-ModulePath'
-        $c | Should -Match 'failedCount'
-    }
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
 }
 
+Describe 'profile.d/files-module-registry.ps1 Load-EnsureModules extended scenarios' {
+    It 'Registers Load-EnsureModules deferred loading helper' {
+        Get-Command Load-EnsureModules -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Load-EnsureModules loads git modules from the registry' {
+        Load-EnsureModules -EnsureFunctionName 'Ensure-Git' -BaseDir $script:ProfileDir
+
+        Get-Command Invoke-GitCommand -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Invoke-GitStatus -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Load-EnsureModules can be called repeatedly without error' {
+        { Load-EnsureModules -EnsureFunctionName 'Ensure-Git' -BaseDir $script:ProfileDir } | Should -Not -Throw
+        { Load-EnsureModules -EnsureFunctionName 'Ensure-Git' -BaseDir $script:ProfileDir } | Should -Not -Throw
+    }
+}

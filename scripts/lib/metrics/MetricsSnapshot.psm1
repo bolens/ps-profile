@@ -8,6 +8,38 @@ scripts/lib/MetricsSnapshot.psm1
     Provides functions for saving metrics snapshots for historical tracking.
 #>
 
+function Test-MetricsSnapshotTestEnvFlag {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        return $false
+    }
+
+    $normalized = $value.Trim().ToLowerInvariant()
+    return $normalized -eq '1' -or $normalized -eq 'true'
+}
+
+function Test-MetricsSnapshotStructuredWarningAvailable {
+    if (Test-MetricsSnapshotTestEnvFlag -Name 'PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+}
+
+function Test-MetricsSnapshotStructuredErrorAvailable {
+    if (Test-MetricsSnapshotTestEnvFlag -Name 'PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR') {
+        return $false
+    }
+
+    return $null -ne (Get-Command Write-StructuredError -ErrorAction SilentlyContinue)
+}
+
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
 $safeImportModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'SafeImport.psm1'
@@ -15,12 +47,13 @@ if ($safeImportModulePath -and -not [string]::IsNullOrWhiteSpace($safeImportModu
     Import-Module $safeImportModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
 
-# Import dependencies (Path.psm1 barrel file - import submodule directly)
-$pathResolutionModulePath = Join-Path $PSScriptRoot 'PathResolution.psm1'
-$fileSystemModulePath = Join-Path $PSScriptRoot 'FileSystem.psm1'
-$jsonUtilitiesModulePath = Join-Path $PSScriptRoot 'JsonUtilities.psm1'
+# Import dependencies from sibling library directories
+$pathResolutionModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'path' 'PathResolution.psm1'
+$fileSystemModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'file' 'FileSystem.psm1'
+$jsonUtilitiesModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'utilities' 'JsonUtilities.psm1'
 
-if (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue) {
+$forceManualModuleImport = Test-MetricsSnapshotTestEnvFlag -Name 'PS_PROFILE_METRICS_SNAPSHOT_FORCE_MANUAL_IMPORT'
+if (-not $forceManualModuleImport -and (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue)) {
     Import-ModuleSafely -ModulePath $pathResolutionModulePath -DisableNameChecking -ErrorAction SilentlyContinue
     Import-ModuleSafely -ModulePath $fileSystemModulePath -DisableNameChecking -ErrorAction SilentlyContinue
     Import-ModuleSafely -ModulePath $jsonUtilitiesModulePath -DisableNameChecking -ErrorAction SilentlyContinue
@@ -149,7 +182,7 @@ function Save-MetricsSnapshot {
                 }
             }
             catch {
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                if (Test-MetricsSnapshotStructuredWarningAvailable) {
                     Write-StructuredWarning -Message "Failed to load code metrics" -OperationName 'metrics-snapshot.save' -Context @{
                         code_metrics_file = $codeMetricsFile
                         error_message     = $_.Exception.Message
@@ -168,7 +201,7 @@ function Save-MetricsSnapshot {
                     }
                     else {
                         # Always log warnings even if debug is off
-                        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        if (Test-MetricsSnapshotStructuredWarningAvailable) {
                             Write-StructuredWarning -Message "Failed to load code metrics" -OperationName 'metrics-snapshot.save' -Context @{
                                 # Technical context
                                 code_metrics_file    = $codeMetricsFile
@@ -199,7 +232,7 @@ function Save-MetricsSnapshot {
                 $snapshot.PerformanceMetrics = Get-Content -Path $performanceFile -Raw | ConvertFrom-Json
             }
             catch {
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                if (Test-MetricsSnapshotStructuredWarningAvailable) {
                     Write-StructuredWarning -Message "Failed to load performance metrics" -OperationName 'metrics-snapshot.save' -Context @{
                         performance_file = $performanceFile
                         error_message    = $_.Exception.Message
@@ -240,7 +273,7 @@ function Save-MetricsSnapshot {
     }
     catch {
         $errorMsg = "Failed to save metrics snapshot: $($_.Exception.Message)"
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+        if (Test-MetricsSnapshotStructuredErrorAvailable) {
             Write-StructuredError -ErrorRecord $_ -OperationName 'metrics-snapshot.save' -Context @{
                 snapshot_path = $snapshotPath
                 error_message = $errorMsg
@@ -252,7 +285,7 @@ function Save-MetricsSnapshot {
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                     if ($debugLevel -ge 1) {
-                        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                        if (Test-MetricsSnapshotStructuredErrorAvailable) {
                             Write-StructuredError -ErrorRecord $_ -OperationName 'metrics-snapshot.save' -Context @{
                                 # Technical context
                                 snapshot_path               = $snapshotPath

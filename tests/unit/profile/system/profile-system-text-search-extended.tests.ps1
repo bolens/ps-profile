@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-system-text-search-extended.tests.ps1
-#>
+# ===============================================
+# profile-system-text-search-extended.tests.ps1
+# Execution tests for system/TextSearch.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,24 +14,43 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/system/TextSearch.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    $script:TestTempRoot = New-TestTempDirectory -Prefix 'ProfileSystemTextSearch'
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'system.ps1')
 }
+
+function script:Reset-SystemFragmentState {
+    Set-Variable -Name 'SystemInitialized' -Scope Global -Value $false -Force
+}
+
 Describe 'profile.d/system/TextSearch.ps1 extended scenarios' {
-    It 'Documents text search utilities as grep equivalent' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Text search utilities'
-        $c | Should -Match "Unix 'grep' equivalent"
+    BeforeEach {
+        Reset-SystemFragmentState
+        Ensure-System
     }
-    It 'Defines Find-String with Select-String and Invoke-WithWideEvent' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Find-String'
-        $c | Should -Match 'Select-String'
-        $c | Should -Match 'textsearch.find-string'
+
+    It 'Registers Find-String through Ensure-System' {
+        Get-Command Find-String -ErrorAction Stop | Should -Not -BeNullOrEmpty
+
+        $pgrepAlias = Get-Alias pgrep -ErrorAction SilentlyContinue
+        if ($pgrepAlias) {
+            $pgrepAlias.ResolvedCommandName | Should -Be 'Find-String'
+        }
     }
-    It 'Registers pgrep alias targeting Find-String' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'pgrep'"
-        $c | Should -Match "Target 'Find-String'"
+
+    It 'Find-String matches patterns in a file path' {
+        $tempFile = Join-Path $script:TestTempRoot 'grep-target.txt'
+        Set-Content -Path $tempFile -Value "alpha`nneedle-here`nomega" -NoNewline
+
+        $matches = @(Find-String -Pattern 'needle' -Path $tempFile)
+        $matches.Count | Should -BeGreaterThan 0
+        $matches[0].Line | Should -Match 'needle-here'
+    }
+
+    It 'Find-String returns early when pattern is missing' {
+        { Find-String -Path $script:TestTempRoot } | Should -Not -Throw
     }
 }

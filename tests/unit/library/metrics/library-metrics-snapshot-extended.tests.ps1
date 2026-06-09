@@ -300,6 +300,25 @@ Describe 'MetricsSnapshot extended scenarios' {
             }
         }
 
+        It 'Detects the repository root from the current directory when Get-RepoRoot is unavailable' {
+            $repoRoot = Join-Path $script:TempDir 'detected-git-repo-no-command'
+            New-Item -ItemType Directory -Path (Join-Path $repoRoot '.git') -Force | Out-Null
+            $outputDir = Join-Path $repoRoot 'history'
+
+            Remove-Item -Path Function:Get-RepoRoot -ErrorAction SilentlyContinue -Force
+            $previousLocation = Get-Location
+
+            try {
+                Set-Location -LiteralPath $repoRoot
+                $snapshotPath = Save-MetricsSnapshot -OutputPath $outputDir
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                Set-Location -LiteralPath $previousLocation.Path
+                Import-Module (Join-Path $script:LibPath 'path' 'PathResolution.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+            }
+        }
+
         It 'Detects the repository root from the current directory when Get-RepoRoot throws' {
             $repoRoot = Join-Path $script:TempDir 'detected-git-repo'
             New-Item -ItemType Directory -Path (Join-Path $repoRoot '.git') -Force | Out-Null
@@ -729,6 +748,278 @@ Describe 'MetricsSnapshot extended scenarios' {
             finally {
                 Set-Location -LiteralPath $previousLocation.Path
                 Remove-Item -Path Function:Get-RepoRoot -ErrorAction SilentlyContinue -Force
+            }
+        }
+    }
+
+    Context 'MetricsSnapshot test environment hooks' {
+        It 'Loads dependencies through manual import fallbacks when forced' {
+            $originalFlag = $env:PS_PROFILE_METRICS_SNAPSHOT_FORCE_MANUAL_IMPORT
+            $env:PS_PROFILE_METRICS_SNAPSHOT_FORCE_MANUAL_IMPORT = '1'
+
+            Get-Module MetricsSnapshot, PathResolution, FileSystem, JsonUtilities, SafeImport -All |
+                Remove-Module -Force -ErrorAction SilentlyContinue
+
+            try {
+                Import-Module (Join-Path $script:LibPath 'metrics' 'MetricsSnapshot.psm1') -DisableNameChecking -Force
+                Get-Command Save-MetricsSnapshot -ErrorAction Stop | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                Remove-Module MetricsSnapshot -ErrorAction SilentlyContinue -Force
+                if ($null -eq $originalFlag) {
+                    Remove-Item Env:PS_PROFILE_METRICS_SNAPSHOT_FORCE_MANUAL_IMPORT -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_METRICS_SNAPSHOT_FORCE_MANUAL_IMPORT = $originalFlag
+                }
+
+                Import-Module (Join-Path $script:LibPath 'path' 'PathResolution.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+                Import-Module (Join-Path $script:LibPath 'file' 'FileSystem.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+                Import-Module (Join-Path $script:LibPath 'utilities' 'JsonUtilities.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+                Import-Module (Join-Path $script:LibPath 'metrics' 'MetricsSnapshot.psm1') -DisableNameChecking -Force
+            }
+        }
+
+        It 'Uses Write-Error for save failures when structured logging is disabled via env flag' {
+            $repoRoot = Join-Path $script:TempDir 'env-save-error-repo'
+            $historyDir = Join-Path $repoRoot 'history'
+            New-Item -ItemType Directory -Path $historyDir -Force | Out-Null
+
+            function global:Set-Content {
+                [CmdletBinding()]
+                param(
+                    [Parameter(Mandatory)]
+                    [Alias('Path')]
+                    [string[]]$LiteralPath,
+
+                    [Parameter(ValueFromPipeline)]
+                    [object]$Value,
+
+                    [string]$Encoding
+                )
+
+                if ($LiteralPath -match 'env-save-error-repo[\\/]history[\\/]metrics-') {
+                    throw 'env save failure probe'
+                }
+
+                Microsoft.PowerShell.Management\Set-Content @PSBoundParameters
+            }
+
+            $originalStructuredFlag = $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = '1'
+            $env:PS_PROFILE_DEBUG = '1'
+
+            try {
+                { Save-MetricsSnapshot -OutputPath $historyDir -RepoRoot $repoRoot } |
+                    Should -Throw '*Failed to save metrics snapshot*'
+            }
+            finally {
+                Remove-Item -Path Function:Set-Content -ErrorAction SilentlyContinue -Force
+
+                if ($null -eq $originalStructuredFlag) {
+                    Remove-Item Env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = $originalStructuredFlag
+                }
+
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses Write-Warning for performance metrics failures when structured logging is disabled via env flag' {
+            $repoRoot = Join-Path $script:TempDir 'env-performance-warning-repo'
+            $dataDir = Join-Path $repoRoot 'scripts' 'data'
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            Set-Content -LiteralPath (Join-Path $dataDir 'performance-baseline.json') -Value '{ bad-json }' -Encoding UTF8
+
+            $originalStructuredFlag = $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = '1'
+            $env:PS_PROFILE_DEBUG = '1'
+
+            try {
+                $snapshotPath = Get-SnapshotPathFromOutput -Output @(Save-MetricsSnapshot -OutputPath (Join-Path $repoRoot 'history') -IncludePerformanceMetrics -RepoRoot $repoRoot)
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                if ($null -eq $originalStructuredFlag) {
+                    Remove-Item Env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = $originalStructuredFlag
+                }
+
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses Write-Error for save failures when structured logging and debug output are disabled' {
+            $repoRoot = Join-Path $script:TempDir 'env-save-error-no-debug-repo'
+            $historyDir = Join-Path $repoRoot 'history'
+            New-Item -ItemType Directory -Path $historyDir -Force | Out-Null
+
+            function global:Set-Content {
+                [CmdletBinding()]
+                param(
+                    [Parameter(Mandatory)]
+                    [Alias('Path')]
+                    [string[]]$LiteralPath,
+
+                    [Parameter(ValueFromPipeline)]
+                    [object]$Value,
+
+                    [string]$Encoding
+                )
+
+                if ($LiteralPath -match 'env-save-error-no-debug-repo[\\/]history[\\/]metrics-') {
+                    throw 'env save failure no-debug probe'
+                }
+
+                Microsoft.PowerShell.Management\Set-Content @PSBoundParameters
+            }
+
+            $originalStructuredFlag = $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = '1'
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+
+            try {
+                { Save-MetricsSnapshot -OutputPath $historyDir -RepoRoot $repoRoot } |
+                    Should -Throw '*Failed to save metrics snapshot*'
+            }
+            finally {
+                Remove-Item -Path Function:Set-Content -ErrorAction SilentlyContinue -Force
+                if ($null -eq $originalStructuredFlag) {
+                    Remove-Item Env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = $originalStructuredFlag
+                }
+
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses Write-Warning for code metrics failures when structured logging and debug output are disabled' {
+            $repoRoot = Join-Path $script:TempDir 'env-code-metrics-no-debug-repo'
+            $dataDir = Join-Path $repoRoot 'scripts' 'data'
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            @{ TotalFiles = 2 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $dataDir 'code-metrics.json') -Encoding UTF8
+
+            function global:Read-JsonFile {
+                param([string]$Path)
+                throw 'env structured-disabled no-debug code metrics probe'
+            }
+
+            $originalStructuredFlag = $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = '1'
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+
+            try {
+                $snapshotPath = Get-SnapshotPathFromOutput -Output @(Save-MetricsSnapshot -OutputPath (Join-Path $repoRoot 'history') -IncludeCodeMetrics -RepoRoot $repoRoot)
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                Remove-Item -Path Function:Read-JsonFile -ErrorAction SilentlyContinue -Force
+                if ($null -eq $originalStructuredFlag) {
+                    Remove-Item Env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = $originalStructuredFlag
+                }
+
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Emits code metrics load diagnostics at debug level 3 when structured logging is disabled via env flag' {
+            $repoRoot = Join-Path $script:TempDir 'env-code-metrics-debug3-repo'
+            $dataDir = Join-Path $repoRoot 'scripts' 'data'
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            @{ TotalFiles = 2 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $dataDir 'code-metrics.json') -Encoding UTF8
+
+            function global:Read-JsonFile {
+                param([string]$Path)
+                throw 'env structured-disabled code metrics debug3 probe'
+            }
+
+            $originalStructuredFlag = $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = '1'
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                $snapshotPath = Get-SnapshotPathFromOutput -Output @(Save-MetricsSnapshot -OutputPath (Join-Path $repoRoot 'history') -IncludeCodeMetrics -RepoRoot $repoRoot)
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                Remove-Item -Path Function:Read-JsonFile -ErrorAction SilentlyContinue -Force
+                if ($null -eq $originalStructuredFlag) {
+                    Remove-Item Env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = $originalStructuredFlag
+                }
+
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses Write-Warning for code metrics failures when structured logging is disabled via env flag' {
+            $repoRoot = Join-Path $script:TempDir 'env-code-metrics-warning-repo'
+            $dataDir = Join-Path $repoRoot 'scripts' 'data'
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+            @{ TotalFiles = 2 } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $dataDir 'code-metrics.json') -Encoding UTF8
+
+            function global:Read-JsonFile {
+                param([string]$Path)
+                throw 'env structured-disabled code metrics probe'
+            }
+
+            $originalStructuredFlag = $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR
+            $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = '1'
+
+            try {
+                $snapshotPath = Get-SnapshotPathFromOutput -Output @(Save-MetricsSnapshot -OutputPath (Join-Path $repoRoot 'history') -IncludeCodeMetrics -RepoRoot $repoRoot)
+                Test-Path -LiteralPath $snapshotPath | Should -Be $true
+            }
+            finally {
+                Remove-Item -Path Function:Read-JsonFile -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'utilities' 'JsonUtilities.psm1') -DisableNameChecking -Force
+                if ($null -eq $originalStructuredFlag) {
+                    Remove-Item Env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_METRICS_SNAPSHOT_DISABLE_STRUCTURED_ERROR = $originalStructuredFlag
+                }
             }
         }
     }

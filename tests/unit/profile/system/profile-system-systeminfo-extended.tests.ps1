@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-system-systeminfo-extended.tests.ps1
-#>
+# ===============================================
+# profile-system-systeminfo-extended.tests.ps1
+# Execution tests for system/SystemInfo.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,26 +14,43 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/system/SystemInfo.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'system.ps1')
 }
+
+function script:Reset-SystemFragmentState {
+    Set-Variable -Name 'SystemInitialized' -Scope Global -Value $false -Force
+}
+
 Describe 'profile.d/system/SystemInfo.ps1 extended scenarios' {
-    It 'Documents system information utilities with Unix equivalents' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'System information utilities'
-        $c | Should -Match "Unix 'which' equivalent"
+    BeforeEach {
+        Reset-SystemFragmentState
+        Ensure-System
     }
-    It 'Defines Get-CommandInfo, Get-DiskUsage, and Get-TopProcesses' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Get-CommandInfo'
-        $c | Should -Match 'Get-DiskUsage'
-        $c | Should -Match 'Get-TopProcesses'
-        $c | Should -Match 'Get-PSDrive'
+
+    It 'Registers system information helpers through Ensure-System' {
+        Get-Command Get-CommandInfo -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-DiskUsage -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-TopProcesses -ErrorAction Stop | Should -Not -BeNullOrEmpty
+
+        $whichAlias = Get-Alias which -ErrorAction SilentlyContinue
+        if ($whichAlias) {
+            $whichAlias.ResolvedCommandName | Should -Be 'Get-CommandInfo'
+        }
     }
-    It 'Registers which, df, and htop aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-AgentModeAlias -Name 'which'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'df'"
-        $c | Should -Match "Set-AgentModeAlias -Name 'htop'"
+
+    It 'Get-CommandInfo resolves built-in commands' {
+        $command = Get-CommandInfo Get-Process
+        $command | Should -Not -BeNullOrEmpty
+        $command.Name | Should -Be 'Get-Process'
+    }
+
+    It 'Get-DiskUsage returns filesystem drive information' {
+        $usage = @(Get-DiskUsage)
+        $usage.Count | Should -BeGreaterThan 0
+        $usage[0].PSObject.Properties.Name | Should -Contain 'Name'
     }
 }

@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-files-registry-loader-extended.tests.ps1
-#>
+# ===============================================
+# profile-files-registry-loader-extended.tests.ps1
+# Execution tests for files.ps1 registry loader behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,51 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/files.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
-Describe 'profile.d/files.ps1 files-module-registry loader extended scenarios' {
-    It 'Loads files-module-registry via Import-FragmentModule' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'files-module-registry.ps1'
-        $c | Should -Match 'Import-FragmentModule'
-    }
-    It 'Dot-sources registry when standardized loading is unavailable' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'moduleRegistryPath'
-        $c | Should -Match '\. \$moduleRegistryPath'
-    }
-    It 'Defers conversion data documents media and specialized initializers' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Ensure-FileConversion-Data'
-        $c | Should -Match 'Ensure-FileConversion-Documents'
-        $c | Should -Match 'Ensure-FileConversion-Media'
+
+function script:Reset-FilesFragmentState {
+    foreach ($flagName in @(
+            'FileUtilitiesInitialized'
+            'FileConversionDataInitialized'
+            'FileConversionDocumentsInitialized'
+            'FileConversionMediaInitialized'
+            'FileConversionSpecializedInitialized'
+            'DevToolsInitialized'
+        )) {
+        Set-Variable -Name $flagName -Scope Global -Value $false -Force
     }
 }
 
+Describe 'profile.d/files.ps1 files-module-registry loader extended scenarios' {
+    BeforeEach {
+        Reset-FilesFragmentState
+    }
+
+    It 'Loads files-module-registry and registers Ensure-FileUtilities' {
+        . (Join-Path $script:ProfileDir 'files.ps1')
+
+        Get-Command Ensure-FileUtilities -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Ensure-FileConversion-Data -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Ensure-FileConversion-Documents -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Registers LaTeX detection helpers through files.ps1' {
+        . (Join-Path $script:ProfileDir 'files.ps1')
+
+        Get-Command Test-DocumentLatexEngineAvailable -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Ensure-DocumentLatexEngine -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Allows repeated Ensure-FileUtilities calls without losing commands' {
+        . (Join-Path $script:ProfileDir 'files.ps1')
+
+        Ensure-FileUtilities
+        Ensure-FileUtilities
+
+        Get-Command Get-FileHashValue -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-FileSize -ErrorAction Stop | Should -Not -BeNullOrEmpty
+    }
+}

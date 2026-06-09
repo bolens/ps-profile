@@ -16,21 +16,23 @@ BeforeAll {
     }
 
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:UtilitiesModulesDir = Join-Path $script:ProfileDir 'utilities-modules'
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
     . (Join-Path $script:ProfileDir 'utilities.ps1')
     Ensure-Utilities
 }
 
-function script:Import-EnhancedHistoryModule {
+function script:Reset-HistoryEnhancedModuleState {
     Microsoft.PowerShell.Utility\Remove-Variable -Name 'EnhancedHistoryLoaded' -Scope Global -ErrorAction SilentlyContinue
-    . (Join-Path $script:ProfileDir 'history-enhanced.ps1')
 }
 
 Describe 'profile.d/utilities-modules/history/utilities-history-enhanced.ps1 extended scenarios' {
+    BeforeEach {
+        Reset-HistoryEnhancedModuleState
+    }
+
     It 'Registers enhanced history helpers through history-enhanced.ps1' {
-        Import-EnhancedHistoryModule
+        . (Join-Path $script:ProfileDir 'history-enhanced.ps1')
 
         Get-Command Find-HistoryFuzzy -ErrorAction Stop | Should -Not -BeNullOrEmpty
         Get-Command Find-HistoryQuick -ErrorAction Stop | Should -Not -BeNullOrEmpty
@@ -43,18 +45,24 @@ Describe 'profile.d/utilities-modules/history/utilities-history-enhanced.ps1 ext
         }
     }
 
-    It 'Find-HistoryFuzzy warns when no search pattern is provided' {
-        Import-EnhancedHistoryModule
+    It 'Find-HistoryFuzzy returns early when no search pattern is provided' {
+        . (Join-Path $script:ProfileDir 'history-enhanced.ps1')
 
-        $warnings = $null
-        Find-HistoryFuzzy -WarningVariable warnings -WarningAction Continue | Out-Null
-        ($warnings | ForEach-Object {
-                if ($_ -is [System.Management.Automation.WarningRecord]) { $_.Message } else { "$_" }
-            }) -join ' ' | Should -Match 'search pattern'
+        Register-TestGetHistoryStub -ReturnValue @(
+            [PSCustomObject]@{
+                Id                 = 1
+                CommandLine        = 'Get-Process'
+                StartExecutionTime = Get-Date
+            }
+        )
+
+        Find-HistoryFuzzy -Pattern '' -WarningAction SilentlyContinue | Out-Null
+
+        Assert-TestGetHistoryInvoked -Times 0
     }
 
     It 'Skips re-initialization when enhanced history is already loaded' {
-        Import-EnhancedHistoryModule
+        . (Join-Path $script:ProfileDir 'history-enhanced.ps1')
         $firstFuzzy = Get-Command Find-HistoryFuzzy -ErrorAction Stop
 
         . (Join-Path $script:ProfileDir 'history-enhanced.ps1')

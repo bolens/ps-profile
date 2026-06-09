@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-files-listing-extended.tests.ps1
-#>
+# ===============================================
+# profile-files-listing-extended.tests.ps1
+# Execution tests for files-modules/navigation/files-listing.ps1 behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,27 +14,44 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/files-modules/navigation/files-listing.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+
+    Set-TestCommandAvailabilityState -CommandName 'eza' -Available $false
+    Set-TestCommandAvailabilityState -CommandName 'bat' -Available $false
+    if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+        Clear-TestCachedCommandCache | Out-Null
+    }
 }
+
 Describe 'profile.d/files-modules/navigation/files-listing.ps1 extended scenarios' {
-    It 'Documents directory listing utilities with eza support' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'File listing utility functions'
-        $c | Should -Match 'Directory listing with eza support'
+    BeforeEach {
+        . (Join-Path $script:ProfileDir 'files-modules/navigation/files-listing.ps1')
     }
-    It 'Defines Ensure-FileListing lazy initializer preferring eza' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Ensure-FileListing'
-        $c | Should -Match 'Get-ChildItemDetailed'
-        $c | Should -Match 'Test-CachedCommand eza'
-        $c | Should -Match 'Get-DirectoryTree'
+
+    It 'Registers Ensure-FileListing and detailed listing helpers' {
+        Get-Command Ensure-FileListing -ErrorAction Stop | Should -Not -BeNullOrEmpty
+
+        Ensure-FileListing
+
+        Get-Command Get-ChildItemDetailed -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-ChildItemAll -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Get-DirectoryTree -ErrorAction Stop | Should -Not -BeNullOrEmpty
     }
-    It 'Registers ll, la, lx, tree, and bat-cat listing aliases' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match "Set-Alias -Name ll"
-        $c | Should -Match "Set-Alias -Name la"
-        $c | Should -Match "Set-Alias -Name tree"
-        $c | Should -Match 'Show-FileContent'
+
+    It 'Registers ll alias targeting Get-ChildItemDetailed when available' {
+        Ensure-FileListing
+
+        $alias = Get-Alias ll -ErrorAction SilentlyContinue
+        if ($alias) {
+            $alias.ResolvedCommandName | Should -Be 'Get-ChildItemDetailed'
+        }
+    }
+
+    It 'Get-ChildItemDetailed lists directory contents without error' {
+        Ensure-FileListing
+
+        { Get-ChildItemDetailed -Path $script:ProfileDir | Out-Null } | Should -Not -Throw
     }
 }

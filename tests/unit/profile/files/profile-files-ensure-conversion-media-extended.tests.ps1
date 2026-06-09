@@ -1,6 +1,8 @@
-<#
-tests/unit/profile-files-ensure-conversion-media-extended.tests.ps1
-#>
+# ===============================================
+# profile-files-ensure-conversion-media-extended.tests.ps1
+# Execution tests for files.ps1 Ensure-FileConversion-Media behavior
+# ===============================================
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -12,25 +14,45 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:Fragment = Join-Path $script:TestRepoRoot 'profile.d/files.ps1'
+
+    $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
+    . (Join-Path $script:ProfileDir 'files-module-registry.ps1')
+    . (Join-Path $script:ProfileDir 'files.ps1')
 }
+
+function script:Reset-FileConversionMediaState {
+    Set-Variable -Name FileConversionMediaInitialized -Scope Global -Value $false -Force
+}
+
 Describe 'profile.d/files.ps1 Ensure-FileConversion-Media extended scenarios' {
-    It 'Documents lazy media format conversion initializer' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'function Ensure-FileConversion-Media'
-        $c | Should -Match 'media format conversion utility functions on first use'
+    BeforeEach {
+        Reset-FileConversionMediaState
     }
-    It 'Initializes image and audio modules in dependency order' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Initialize-FileConversion-MediaImagesCommon'
-        $c | Should -Match 'Initialize-FileConversion-MediaAudioCommon'
-        $c | Should -Match 'Initialize-FileConversion-MediaPdf'
+
+    It 'Registers media conversion helpers through Ensure-FileConversion-Media' {
+        Ensure-FileConversion-Media
+
+        Get-Command Convert-Color -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Parse-Color -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        Get-Command Merge-Pdf -ErrorAction Stop | Should -Not -BeNullOrEmpty
+        $global:FileConversionMediaInitialized | Should -Be $true
     }
-    It 'Initializes color conversion modules ending with parse and convert' {
-        $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'Initialize-FileConversion-MediaColorsNamed'
-        $c | Should -Match 'Initialize-FileConversion-MediaColorsParse'
-        $c | Should -Match 'FileConversionMediaInitialized'
+
+    It 'Convert-Color transforms named colors after Ensure-FileConversion-Media' {
+        Ensure-FileConversion-Media
+
+        $result = Convert-Color -Color 'red' -ToFormat 'hex'
+        $result | Should -Match '#'
+    }
+
+    It 'Skips re-initialization when media conversion is already loaded' {
+        Ensure-FileConversion-Media
+        $firstColor = Get-Command Convert-Color -ErrorAction Stop
+
+        Ensure-FileConversion-Media
+
+        (Get-Command Convert-Color -ErrorAction Stop).ScriptBlock.ToString() |
+            Should -Be $firstColor.ScriptBlock.ToString()
     }
 }
