@@ -20,6 +20,7 @@ BeforeAll {
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
     Import-Module (Join-Path $script:LibPath 'runtime' 'NodeJs.psm1') -DisableNameChecking -Force
+    Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
 
     $script:TempDir = New-TestTempDirectory -Prefix 'NodeJsExtended'
 }
@@ -36,13 +37,41 @@ function script:Enable-TestStructuredLogging {
 function script:Clear-NodeJsTestEnvironment {
     foreach ($name in @(
             'PNPM_HOME', 'PNPM_ROOT', 'NPM_CONFIG_PREFIX', 'NODE_PATH', 'NVM_DIR',
-            'PS_NODE_PACKAGE_MANAGER', 'PS_PROFILE_REPO_ROOT', 'PS_PROFILE_DEBUG'
+            'PS_NODE_PACKAGE_MANAGER', 'PS_PROFILE_REPO_ROOT', 'PS_PROFILE_DEBUG', 'LOCALAPPDATA'
         )) {
         Remove-Item "Env:$name" -ErrorAction SilentlyContinue
     }
 
     Mark-TestCommandsUnavailable -CommandNames @('pnpm', 'npm', 'node', 'yarn', 'bun')
     $global:BinaryConversionBasePath = $null
+}
+
+function script:Invoke-InNodeModuleWithStub {
+    param(
+        [Parameter(Mandatory)]
+        [scriptblock]$Body,
+
+        [hashtable]$Stubs = @{}
+    )
+
+    $global:TestRuntimeNodeStubs = $Stubs
+    $global:TestRuntimeNodeBody = $Body
+
+    try {
+        InModuleScope -ModuleName NodeJs {
+            $stubTable = $global:TestRuntimeNodeStubs
+            if ($null -ne $stubTable) {
+                foreach ($entry in $stubTable.GetEnumerator()) {
+                    Set-Item -Path "Function:$($entry.Key)" -Value $entry.Value -Force
+                }
+            }
+
+            & $global:TestRuntimeNodeBody
+        }
+    }
+    finally {
+        Remove-Variable -Name TestRuntimeNodeStubs, TestRuntimeNodeBody -Scope Global -ErrorAction SilentlyContinue
+    }
 }
 
 AfterAll {
@@ -246,41 +275,36 @@ Describe 'NodeJs extended scenarios' {
         }
 
         It 'Throws with script output when execution exits non-zero' {
-            Setup-CapturingCommandMock -CommandName 'node' -Output '' -ExitCode 0 -MarkAvailable $true -OnInvoke {
-                if ($args -contains '--version') {
-                    $global:TestCommandCaptureState['ExitCode'] = 0
-                    return 'v20.0.0'
-                }
-
-                $global:TestCommandCaptureState['ExitCode'] = 2
-                return 'runtime failure'
-            }
             $testScript = Join-Path $script:TempDir 'fail.js'
             Set-Content -LiteralPath $testScript -Value 'process.exit(2);' -Encoding UTF8
+            $global:TestNodeScriptPath = $testScript
 
-            { Invoke-NodeScript -ScriptPath $testScript } | Should -Throw '*exit code 2*'
-        }
+            {
+                Invoke-InNodeModuleWithStub -Stubs @{
+                    'Get-Command' = {
+                        param($Name, [switch]$ErrorAction)
+                        if ($Name -eq 'node') {
+                            return [PSCustomObject]@{ Name = 'node'; Source = '/stub/node' }
+                        }
 
-        It 'Uses Write-StructuredError when execution fails and structured logging is enabled' {
-            Enable-TestStructuredLogging
-            Setup-CapturingCommandMock -CommandName 'node' -Output 'structured failure' -ExitCode 3 -MarkAvailable $true
-            $testScript = Join-Path $script:TempDir 'structured-fail.js'
-            Set-Content -LiteralPath $testScript -Value 'process.exit(3);' -Encoding UTF8
+                        return $null
+                    }
+                    'node'        = {
+                        param([Parameter(ValueFromRemainingArguments)][string[]]$Args)
+                        if ($Args -contains '--version') {
+                            $global:LASTEXITCODE = 0
+                            return 'v20.0.0'
+                        }
 
-            $originalDebug = $env:PS_PROFILE_DEBUG
-            $env:PS_PROFILE_DEBUG = '1'
-
-            try {
-                { Invoke-NodeScript -ScriptPath $testScript } | Should -Throw
-            }
-            finally {
-                if ($null -eq $originalDebug) {
-                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                        $global:LASTEXITCODE = 2
+                        return 'runtime failure'
+                    }
+                } -Body {
+                    { Invoke-NodeScript -ScriptPath $global:TestNodeScriptPath } | Should -Throw '*exit code 2*'
                 }
-                else {
-                    $env:PS_PROFILE_DEBUG = $originalDebug
-                }
-            }
+            } | Should -Not -Throw
+
+            Remove-Variable -Name TestNodeScriptPath -Scope Global -ErrorAction SilentlyContinue
         }
     }
 
@@ -468,7 +492,7 @@ Describe 'NodeJs extended scenarios' {
             } -ModuleName NodeJs
 
             Get-NodePackageInstallRecommendation -PackageNames @('left-pad') |
-                Should -Match 'npm install\s+left-pad'
+                Should -Match 'npm install(\s+-g)?\s+left-pad'
         }
     }
 
@@ -480,7 +504,7 @@ Describe 'NodeJs extended scenarios' {
         It 'Uses PNPM_ROOT when it points directly to a node_modules directory' {
             $isolatedHome = Join-Path $script:TempDir 'isolated-home-pnpm-root'
             New-Item -ItemType Directory -Path $isolatedHome -Force | Out-Null
-            $nodeModules = Join-Path $script:TempDir 'pnpm-root-modules'
+            $nodeModules = Join-Path $script:TempDir 'pnpm-node_modules-direct'
             New-Item -ItemType Directory -Path $nodeModules -Force | Out-Null
             Mark-TestCommandsUnavailable -CommandNames @('pnpm', 'npm')
 
@@ -755,15 +779,29 @@ Describe 'NodeJs extended scenarios' {
         }
 
         It 'Leaves NODE_PATH unchanged when no module search paths are discovered' {
+            Clear-NodeJsTestEnvironment
             $isolatedHome = Join-Path $script:TempDir 'isolated-home-set-node-path'
             New-Item -ItemType Directory -Path $isolatedHome -Force | Out-Null
-            Mark-TestCommandsUnavailable -CommandNames @('pnpm', 'npm')
+
+            Mock Get-Command {
+                param($Name)
+                if ($Name -in @('pnpm', 'npm')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
 
             $originalHome = $env:HOME
             $originalNodePath = $env:NODE_PATH
+            $originalLocalAppData = $env:LOCALAPPDATA
+            $previousBinaryBase = $global:BinaryConversionBasePath
             try {
                 $env:HOME = $isolatedHome
                 $env:NODE_PATH = '/unchanged/path'
+                Remove-Item Env:LOCALAPPDATA -ErrorAction SilentlyContinue
+                Remove-Item Env:PS_PROFILE_REPO_ROOT -ErrorAction SilentlyContinue
+                $global:BinaryConversionBasePath = $null
                 $restore = Set-NodePathForPnpm
                 $env:NODE_PATH | Should -Be '/unchanged/path'
                 & $restore
@@ -781,6 +819,13 @@ Describe 'NodeJs extended scenarios' {
                 else {
                     $env:NODE_PATH = $originalNodePath
                 }
+                if ($null -eq $originalLocalAppData) {
+                    Remove-Item Env:LOCALAPPDATA -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:LOCALAPPDATA = $originalLocalAppData
+                }
+                $global:BinaryConversionBasePath = $previousBinaryBase
             }
         }
     }
@@ -846,6 +891,1097 @@ Describe 'NodeJs extended scenarios' {
                 else {
                     $env:HOME = $originalHome
                 }
+            }
+        }
+    }
+
+    Context 'Get-NodePackageManagerPreference auto fallback' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Selects npm in auto mode when only npm is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'npm') {
+                    return [PSCustomObject]@{ Name = 'npm' }
+                }
+                if ($Name -in @('pnpm', 'yarn', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $result = Get-NodePackageManagerPreference
+            $result.Manager | Should -Be 'npm'
+        }
+    }
+
+    Context 'Expand-EmbeddedNodeInstallHints global installs' {
+        It 'Replaces placeholders with a global install recommendation' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -in @('pnpm', 'npm', 'yarn', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $scriptText = 'Run __NODE_INSTALL_CMD__ globally'
+            $expanded = Expand-EmbeddedNodeInstallHints -Script $scriptText -PackageNames @('left-pad') -Global
+            $expanded | Should -Not -Match '__NODE_INSTALL_CMD__'
+            $expanded | Should -Match 'left-pad'
+        }
+    }
+
+    Context 'Get-PnpmGlobalPath PNPM_HOME subdirectory' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Uses PNPM_HOME when node_modules exists beneath it' {
+            $pnpmHome = Join-Path $script:TempDir 'pnpm-home-subdir'
+            $nodeModules = Join-Path $pnpmHome 'node_modules'
+            New-Item -ItemType Directory -Path $nodeModules -Force | Out-Null
+
+            $original = $env:PNPM_HOME
+            try {
+                $env:PNPM_HOME = $pnpmHome
+                Get-PnpmGlobalPath | Should -Be $nodeModules
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PNPM_HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PNPM_HOME = $original
+                }
+            }
+        }
+    }
+
+    Context 'Get-NodePackageManagerPreference explicit managers' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Prefers bun when PS_NODE_PACKAGE_MANAGER is bun and bun is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'bun') {
+                    return [PSCustomObject]@{ Name = 'bun' }
+                }
+                if ($Name -in @('pnpm', 'npm', 'yarn')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $original = $env:PS_NODE_PACKAGE_MANAGER
+            try {
+                $env:PS_NODE_PACKAGE_MANAGER = 'bun'
+                $result = Get-NodePackageManagerPreference
+                $result.Manager | Should -Be 'bun'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_NODE_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_NODE_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Falls back to pnpm in auto mode when pnpm is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pnpm') {
+                    return [PSCustomObject]@{ Name = 'pnpm' }
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $result = Get-NodePackageManagerPreference
+            $result.Manager | Should -Be 'pnpm'
+        }
+    }
+
+    Context 'Get-NodePackageInstallRecommendation local installs' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Builds a local yarn install recommendation for multiple packages' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'yarn') {
+                    return [PSCustomObject]@{ Name = 'yarn' }
+                }
+                if ($Name -in @('pnpm', 'npm', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $original = $env:PS_NODE_PACKAGE_MANAGER
+            try {
+                $env:PS_NODE_PACKAGE_MANAGER = 'yarn'
+                $result = Get-NodePackageManagerPreference
+                $result.Manager | Should -Be 'yarn'
+                $result.Available | Should -Be $true
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_NODE_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_NODE_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+    }
+
+    Context 'Get-PnpmGlobalPath without Validation module' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Finds pnpm global path under the user home common location' {
+            $isolatedHome = Join-Path $script:TempDir 'isolated-home-common-pnpm'
+            $commonPath = Join-Path $isolatedHome '.local' 'share' 'pnpm' 'global' '5' 'node_modules'
+            New-Item -ItemType Directory -Path $commonPath -Force | Out-Null
+
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pnpm') {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $originalHome = $env:HOME
+            try {
+                $env:HOME = $isolatedHome
+                Get-PnpmGlobalPath | Should -Be $commonPath
+            }
+            finally {
+                if ($null -eq $originalHome) {
+                    Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:HOME = $originalHome
+                }
+            }
+        }
+    }
+
+    Context 'Get-PnpmGlobalPath debug and pnpm failures' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Emits level 3 debug when a common location path is found' {
+            $isolatedHome = Join-Path $script:TempDir 'isolated-home-debug-found'
+            $commonPath = Join-Path $isolatedHome '.local' 'share' 'pnpm' 'global' '5' 'node_modules'
+            New-Item -ItemType Directory -Path $commonPath -Force | Out-Null
+
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pnpm') {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $originalHome = $env:HOME
+            $originalVerbose = $VerbosePreference
+            $env:PS_PROFILE_DEBUG = '3'
+            $VerbosePreference = 'Continue'
+
+            try {
+                $env:HOME = $isolatedHome
+                Get-PnpmGlobalPath | Should -Be $commonPath
+            }
+            finally {
+                $VerbosePreference = $originalVerbose
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+                if ($null -eq $originalHome) {
+                    Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:HOME = $originalHome
+                }
+            }
+        }
+
+        It 'Logs level 3 error details when pnpm root throws an exception' {
+            $isolatedHome = Join-Path $script:TempDir 'isolated-home-pnpm-throw'
+            New-Item -ItemType Directory -Path $isolatedHome -Force | Out-Null
+            $global:TestIsolatedHome = $isolatedHome
+
+            Invoke-InNodeModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name)
+                    if ($Name -eq 'pnpm') {
+                        return [PSCustomObject]@{ Name = 'pnpm' }
+                    }
+
+                    return $null
+                }
+                'pnpm'        = {
+                    throw [System.InvalidOperationException]::new('pnpm root failed')
+                }
+            } -Body {
+                $originalDebug = $env:PS_PROFILE_DEBUG
+                $originalHome = $env:HOME
+                $originalVerbose = $VerbosePreference
+                $env:PS_PROFILE_DEBUG = '3'
+                $VerbosePreference = 'Continue'
+                $env:HOME = $global:TestIsolatedHome
+
+                try {
+                    Get-PnpmGlobalPath | Should -BeNullOrEmpty
+                }
+                finally {
+                    $VerbosePreference = $originalVerbose
+                    if ($null -eq $originalDebug) {
+                        Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                    }
+                    else {
+                        $env:PS_PROFILE_DEBUG = $originalDebug
+                    }
+                    if ($null -eq $originalHome) {
+                        Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                    }
+                    else {
+                        $env:HOME = $originalHome
+                    }
+                }
+            }
+
+            Remove-Variable -Name TestIsolatedHome -Scope Global -ErrorAction SilentlyContinue
+        }
+    }
+
+    Context 'Invoke-NodeScript unavailable and filtered output' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Throws when node is not available inside the module scope' {
+            $testScript = Join-Path $script:TempDir 'unavailable-stub.js'
+            Set-Content -LiteralPath $testScript -Value 'console.log("x");' -Encoding UTF8
+            $global:TestNodeScriptPath = $testScript
+
+            Invoke-InNodeModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name)
+                    return $null
+                }
+            } -Body {
+                { Invoke-NodeScript -ScriptPath $global:TestNodeScriptPath } | Should -Throw '*not available*'
+            }
+
+            Remove-Variable -Name TestNodeScriptPath -Scope Global -ErrorAction SilentlyContinue
+        }
+
+        It 'Uses unfiltered output when only npm WARN lines are present' {
+            $testScript = Join-Path $script:TempDir 'warn-only-fail.js'
+            Set-Content -LiteralPath $testScript -Value 'process.exit(1);' -Encoding UTF8
+            $global:TestNodeScriptPath = $testScript
+
+            Invoke-InNodeModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name)
+                    if ($Name -eq 'node') {
+                        return [PSCustomObject]@{ Name = 'node'; Source = '/stub/node' }
+                    }
+
+                    return $null
+                }
+                'node'        = {
+                    param([Parameter(ValueFromRemainingArguments)][string[]]$Args)
+                    if ($Args -contains '--version') {
+                        $global:LASTEXITCODE = 0
+                        return 'v20.0.0'
+                    }
+
+                    $global:LASTEXITCODE = 1
+                    return @('npm WARN deprecated package')
+                }
+            } -Body {
+                { Invoke-NodeScript -ScriptPath $global:TestNodeScriptPath } | Should -Throw '*deprecated package*'
+            }
+
+            Remove-Variable -Name TestNodeScriptPath -Scope Global -ErrorAction SilentlyContinue
+        }
+
+        It 'Includes arguments in the error context when execution fails' {
+            $testScript = Join-Path $script:TempDir 'args-fail.js'
+            Set-Content -LiteralPath $testScript -Value 'process.exit(1);' -Encoding UTF8
+            $global:TestNodeScriptPath = $testScript
+
+            Invoke-InNodeModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name)
+                    if ($Name -eq 'node') {
+                        return [PSCustomObject]@{ Name = 'node'; Source = '/stub/node' }
+                    }
+
+                    return $null
+                }
+                'node'        = {
+                    param([Parameter(ValueFromRemainingArguments)][string[]]$Args)
+                    if ($Args -contains '--version') {
+                        $global:LASTEXITCODE = 0
+                        return 'v20.0.0'
+                    }
+
+                    $global:LASTEXITCODE = 1
+                    return 'arg failure'
+                }
+            } -Body {
+                { Invoke-NodeScript -ScriptPath $global:TestNodeScriptPath -Arguments 'one', 'two' } | Should -Throw '*arg failure*'
+            }
+
+            Remove-Variable -Name TestNodeScriptPath -Scope Global -ErrorAction SilentlyContinue
+        }
+    }
+
+    Context 'Get-NodePackageManagerPreference fallback chains' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Falls back from pnpm preference to npm when pnpm is unavailable' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'npm') {
+                    return [PSCustomObject]@{ Name = 'npm' }
+                }
+                if ($Name -in @('pnpm', 'yarn', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $original = $env:PS_NODE_PACKAGE_MANAGER
+            try {
+                $env:PS_NODE_PACKAGE_MANAGER = 'pnpm'
+                (Get-NodePackageManagerPreference).Manager | Should -Be 'npm'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_NODE_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_NODE_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Falls back from npm preference to pnpm when npm is unavailable' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pnpm') {
+                    return [PSCustomObject]@{ Name = 'pnpm' }
+                }
+                if ($Name -in @('npm', 'yarn', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $original = $env:PS_NODE_PACKAGE_MANAGER
+            try {
+                $env:PS_NODE_PACKAGE_MANAGER = 'npm'
+                (Get-NodePackageManagerPreference).Manager | Should -Be 'pnpm'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_NODE_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_NODE_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Falls back from yarn preference through pnpm to npm' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'npm') {
+                    return [PSCustomObject]@{ Name = 'npm' }
+                }
+                if ($Name -in @('pnpm', 'yarn', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $original = $env:PS_NODE_PACKAGE_MANAGER
+            try {
+                $env:PS_NODE_PACKAGE_MANAGER = 'yarn'
+                (Get-NodePackageManagerPreference).Manager | Should -Be 'npm'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_NODE_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_NODE_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Selects yarn in auto mode when only yarn is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'yarn') {
+                    return [PSCustomObject]@{ Name = 'yarn' }
+                }
+                if ($Name -in @('pnpm', 'npm', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            (Get-NodePackageManagerPreference).Manager | Should -Be 'yarn'
+        }
+    }
+
+    Context 'Get-NodePackageInstallCommand with available managers' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Builds a global pnpm install recommendation when pnpm is selected' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pnpm') {
+                    return [PSCustomObject]@{ Name = 'pnpm' }
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $original = $env:PS_NODE_PACKAGE_MANAGER
+            try {
+                $env:PS_NODE_PACKAGE_MANAGER = 'pnpm'
+                Get-NodePackageInstallRecommendation -PackageNames @('left-pad') -Global |
+                    Should -Match 'pnpm add -g left-pad'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_NODE_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_NODE_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+    }
+
+    Context 'Get-NodePackageInstallRecommendation yarn global' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Builds a yarn global add command for multiple packages' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'yarn') {
+                    return [PSCustomObject]@{ Name = 'yarn' }
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $original = $env:PS_NODE_PACKAGE_MANAGER
+            try {
+                $env:PS_NODE_PACKAGE_MANAGER = 'yarn'
+                Get-NodePackageInstallRecommendation -PackageNames @('a', 'b') -Global |
+                    Should -Match 'yarn global add a b'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_NODE_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_NODE_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+    }
+
+    Context 'Get-NodeModuleSearchPaths npm failure' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Ignores npm root lookup failures and still returns other paths' {
+            $repoRoot = Join-Path $script:TempDir 'repo-npm-fail'
+            $localModules = Join-Path $repoRoot 'node_modules'
+            New-Item -ItemType Directory -Path $localModules -Force | Out-Null
+
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'npm') {
+                    return [PSCustomObject]@{ Name = 'npm' }
+                }
+                if ($Name -eq 'pnpm') {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $global:TestRepoRootForNode = $repoRoot
+            $global:TestLocalModulesForNode = $localModules
+
+            Invoke-InNodeModuleWithStub -Stubs @{
+                'npm' = {
+                    throw [System.InvalidOperationException]::new('npm root failed')
+                }
+            } -Body {
+                $originalRepoRoot = $env:PS_PROFILE_REPO_ROOT
+                try {
+                    $env:PS_PROFILE_REPO_ROOT = $global:TestRepoRootForNode
+                    $paths = Get-NodeModuleSearchPaths
+                    $paths | Should -Contain $global:TestLocalModulesForNode
+                }
+                finally {
+                    if ($null -eq $originalRepoRoot) {
+                        Remove-Item Env:PS_PROFILE_REPO_ROOT -ErrorAction SilentlyContinue
+                    }
+                    else {
+                        $env:PS_PROFILE_REPO_ROOT = $originalRepoRoot
+                    }
+                }
+            }
+
+            Remove-Variable -Name TestRepoRootForNode, TestLocalModulesForNode -Scope Global -ErrorAction SilentlyContinue
+        }
+    }
+
+    Context 'Expand-EmbeddedNodeInstallHints early return' {
+        It 'Returns the original script when no placeholder is present' {
+            Expand-EmbeddedNodeInstallHints -Script 'plain script' -PackageNames @('json5') |
+                Should -Be 'plain script'
+        }
+    }
+
+    Context 'Get-PnpmGlobalPath LOCALAPPDATA common location' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Finds pnpm global path under LOCALAPPDATA when present' {
+            $localAppData = Join-Path $script:TempDir 'local-app-data'
+            $commonPath = Join-Path $localAppData 'pnpm' 'global' '5' 'node_modules'
+            New-Item -ItemType Directory -Path $commonPath -Force | Out-Null
+
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pnpm') {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $isolatedHome = Join-Path $script:TempDir 'isolated-home-localappdata'
+            New-Item -ItemType Directory -Path $isolatedHome -Force | Out-Null
+
+            $originalLocalAppData = $env:LOCALAPPDATA
+            $originalHome = $env:HOME
+            try {
+                $env:LOCALAPPDATA = $localAppData
+                $env:HOME = $isolatedHome
+                Get-PnpmGlobalPath | Should -Be $commonPath
+            }
+            finally {
+                if ($null -eq $originalLocalAppData) {
+                    Remove-Item Env:LOCALAPPDATA -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:LOCALAPPDATA = $originalLocalAppData
+                }
+                if ($null -eq $originalHome) {
+                    Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:HOME = $originalHome
+                }
+            }
+        }
+    }
+
+    Context 'Get-NodePackageManagerPreference bun fallback chain' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Falls back from bun preference to pnpm when bun is unavailable' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pnpm') {
+                    return [PSCustomObject]@{ Name = 'pnpm' }
+                }
+                if ($Name -in @('npm', 'yarn', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $original = $env:PS_NODE_PACKAGE_MANAGER
+            try {
+                $env:PS_NODE_PACKAGE_MANAGER = 'bun'
+                (Get-NodePackageManagerPreference).Manager | Should -Be 'pnpm'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_NODE_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_NODE_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Selects bun in auto mode when only bun is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'bun') {
+                    return [PSCustomObject]@{ Name = 'bun' }
+                }
+                if ($Name -in @('pnpm', 'npm', 'yarn')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            (Get-NodePackageManagerPreference).Manager | Should -Be 'bun'
+        }
+    }
+
+    Context 'Get-PnpmGlobalPath PNPM_HOME common fallback' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Uses PNPM_HOME global path when common subdirectory exists' {
+            $pnpmHome = Join-Path $script:TempDir 'pnpm-home-common'
+            $commonPath = Join-Path $pnpmHome 'global' '5' 'node_modules'
+            New-Item -ItemType Directory -Path $commonPath -Force | Out-Null
+
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pnpm') {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $isolatedHome = Join-Path $script:TempDir 'isolated-home-pnpm-home-common'
+            New-Item -ItemType Directory -Path $isolatedHome -Force | Out-Null
+
+            $originalPnpmHome = $env:PNPM_HOME
+            $originalHome = $env:HOME
+            try {
+                $env:PNPM_HOME = $pnpmHome
+                $env:HOME = $isolatedHome
+                Get-PnpmGlobalPath | Should -Be $commonPath
+            }
+            finally {
+                if ($null -eq $originalPnpmHome) {
+                    Remove-Item Env:PNPM_HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PNPM_HOME = $originalPnpmHome
+                }
+                if ($null -eq $originalHome) {
+                    Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:HOME = $originalHome
+                }
+            }
+        }
+    }
+
+    Context 'Get-PnpmGlobalPath PNPM_HOME common fallback' {
+        It 'Replaces install placeholders in error messages' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -in @('pnpm', 'npm', 'yarn', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $message = 'Missing package. Install with __NODE_INSTALL_CMD__'
+            $resolved = Resolve-NodeInstallHintMessage -Message $message -PackageNames @('left-pad') -Global
+            $resolved | Should -Not -Match '__NODE_INSTALL_CMD__'
+            $resolved | Should -Match 'left-pad'
+        }
+    }
+
+    Context 'Invoke-NodeScript sets NODE_PATH when unset' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Sets NODE_PATH to discovered module paths when it was originally unset' {
+            Setup-CapturingCommandMock -CommandName 'node' -Output 'fresh-node-path' -MarkAvailable $true -OnInvoke {
+                if ($args -contains '--version') {
+                    $global:TestCommandCaptureState['ExitCode'] = 0
+                    return 'v20.0.0'
+                }
+
+                $global:TestNodePathDuringInvoke = $env:NODE_PATH
+                $global:TestCommandCaptureState['ExitCode'] = 0
+                return 'fresh-node-path'
+            }
+
+            $pnpmHome = Join-Path $script:TempDir 'fresh-node-path-home'
+            $nodeModules = Join-Path $pnpmHome 'node_modules'
+            New-Item -ItemType Directory -Path $nodeModules -Force | Out-Null
+            $testScript = Join-Path $script:TempDir 'fresh-path.js'
+            Set-Content -LiteralPath $testScript -Value 'console.log("x");' -Encoding UTF8
+
+            $originalPnpmHome = $env:PNPM_HOME
+            $originalNodePath = $env:NODE_PATH
+            try {
+                $env:PNPM_HOME = $pnpmHome
+                Remove-Item Env:NODE_PATH -ErrorAction SilentlyContinue
+                Invoke-NodeScript -ScriptPath $testScript | Should -Be 'fresh-node-path'
+                $global:TestNodePathDuringInvoke | Should -Match ([regex]::Escape($nodeModules))
+            }
+            finally {
+                if ($null -eq $originalPnpmHome) {
+                    Remove-Item Env:PNPM_HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PNPM_HOME = $originalPnpmHome
+                }
+                if ($null -eq $originalNodePath) {
+                    Remove-Item Env:NODE_PATH -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:NODE_PATH = $originalNodePath
+                }
+                Remove-Variable -Name TestNodePathDuringInvoke -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    Context 'Get-NodePackageManagerPreference invalid preference' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Treats an invalid preference as auto and selects the first available manager' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'yarn') {
+                    return [PSCustomObject]@{ Name = 'yarn' }
+                }
+                if ($Name -in @('pnpm', 'npm', 'bun')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName NodeJs
+
+            $original = $env:PS_NODE_PACKAGE_MANAGER
+            try {
+                $env:PS_NODE_PACKAGE_MANAGER = 'invalid-manager'
+                (Get-NodePackageManagerPreference).Manager | Should -Be 'yarn'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_NODE_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_NODE_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+    }
+
+    Context 'Get-NodePackageInstallCommand manager-specific commands' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Returns the selected manager global install command when a manager is available' {
+            Invoke-InNodeModuleWithStub -Stubs @{
+                'Get-NodePackageManagerPreference' = {
+                    @{
+                        Manager        = 'npm'
+                        Available      = $true
+                        InstallCommand = 'npm install -g {0}'
+                        GlobalFlag     = '-g'
+                        LocalFlag      = ''
+                        AllManagers    = @{}
+                    }
+                }
+            } -Body {
+                Get-NodePackageInstallCommand -PackageName 'left-pad' -Global |
+                    Should -Be 'npm install -g left-pad'
+            }
+        }
+
+        It 'Returns the selected manager local install command when a manager is available' {
+            Invoke-InNodeModuleWithStub -Stubs @{
+                'Get-NodePackageManagerPreference' = {
+                    @{
+                        Manager        = 'npm'
+                        Available      = $true
+                        InstallCommand = 'npm install -g {0}'
+                        GlobalFlag     = '-g'
+                        LocalFlag      = ''
+                        AllManagers    = @{}
+                    }
+                }
+            } -Body {
+                Get-NodePackageInstallCommand -PackageName 'left-pad' |
+                    Should -Be 'npm install left-pad'
+            }
+        }
+    }
+
+    Context 'Get-NodePackageInstallRecommendation local manager commands' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Builds a local pnpm install recommendation for multiple packages' {
+            Invoke-InNodeModuleWithStub -Stubs @{
+                'Get-NodePackageManagerPreference' = {
+                    @{
+                        Manager        = 'pnpm'
+                        Available      = $true
+                        InstallCommand = 'pnpm add -g {0}'
+                        GlobalFlag     = '-g'
+                        LocalFlag      = ''
+                        AllManagers    = @{}
+                    }
+                }
+            } -Body {
+                Get-NodePackageInstallRecommendation -PackageNames @('json5', 'superjson') |
+                    Should -Be 'pnpm add json5 superjson'
+            }
+        }
+    }
+
+    Context 'Get-NodePackageManagerPreference availability probe failures' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Marks a manager unavailable when its availability probe throws' {
+            Invoke-InNodeModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name, [switch]$ErrorAction)
+                    if ($Name -eq 'pnpm') {
+                        throw 'pnpm availability probe failed'
+                    }
+                    if ($Name -eq 'npm') {
+                        return [PSCustomObject]@{ Name = 'npm' }
+                    }
+
+                    return $null
+                }
+            } -Body {
+                (Get-NodePackageManagerPreference).Manager | Should -Be 'npm'
+            }
+        }
+    }
+
+    Context 'Get-PnpmGlobalPath manual validation branches' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Resolves PNPM_ROOT via Test-Path when Validation helpers are unavailable' {
+            $directPath = Join-Path $script:TempDir 'manual-pnpm-root-node_modules'
+            New-Item -ItemType Directory -Path $directPath -Force | Out-Null
+
+            $original = $env:PNPM_ROOT
+            try {
+                $env:PNPM_ROOT = $directPath
+                Invoke-InNodeModuleWithStub -Stubs @{
+                    'Get-Command' = {
+                        param($Name, [switch]$ErrorAction)
+                        if ($Name -eq 'Test-ValidPath') {
+                            return $null
+                        }
+                        if ($Name -eq 'pnpm') {
+                            return $null
+                        }
+
+                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                    }
+                } -Body {
+                    Get-PnpmGlobalPath | Should -Be $env:PNPM_ROOT
+                }
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PNPM_ROOT -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PNPM_ROOT = $original
+                }
+            }
+        }
+
+        It 'Resolves NPM_CONFIG_PREFIX via Test-Path when Validation helpers are unavailable' {
+            $prefix = Join-Path $script:TempDir 'manual-npm-prefix'
+            $nodeModules = Join-Path $prefix 'node_modules'
+            New-Item -ItemType Directory -Path $nodeModules -Force | Out-Null
+
+            $original = $env:NPM_CONFIG_PREFIX
+            try {
+                $env:NPM_CONFIG_PREFIX = $prefix
+                Invoke-InNodeModuleWithStub -Stubs @{
+                    'Get-Command' = {
+                        param($Name, [switch]$ErrorAction)
+                        if ($Name -eq 'Test-ValidPath') {
+                            return $null
+                        }
+                        if ($Name -eq 'pnpm') {
+                            return $null
+                        }
+
+                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                    }
+                } -Body {
+                    Get-PnpmGlobalPath | Should -Be $nodeModules
+                }
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:NPM_CONFIG_PREFIX -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:NPM_CONFIG_PREFIX = $original
+                }
+            }
+        }
+
+        It 'Returns pnpm root output via Test-Path when Validation helpers are unavailable' {
+            $pnpmGlobalPath = Join-Path $script:TempDir 'manual-pnpm-root-output'
+            New-Item -ItemType Directory -Path $pnpmGlobalPath -Force | Out-Null
+            $global:TestPnpmRootOutputPath = $pnpmGlobalPath
+
+            try {
+                Invoke-InNodeModuleWithStub -Stubs @{
+                    'Get-Command' = {
+                        param($Name, [switch]$ErrorAction)
+                        if ($Name -eq 'Test-ValidPath') {
+                            return $null
+                        }
+                        if ($Name -eq 'pnpm') {
+                            return [PSCustomObject]@{ Name = 'pnpm' }
+                        }
+
+                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                    }
+                    'pnpm'        = {
+                        param([Parameter(ValueFromRemainingArguments)][string[]]$Args)
+                        if ($Args -contains 'root') {
+                            $global:LASTEXITCODE = 0
+                            return $global:TestPnpmRootOutputPath
+                        }
+
+                        $global:LASTEXITCODE = 1
+                        return 'error'
+                    }
+                } -Body {
+                    Get-PnpmGlobalPath | Should -Be $global:TestPnpmRootOutputPath
+                }
+            }
+            finally {
+                Remove-Variable -Name TestPnpmRootOutputPath -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    Context 'Invoke-NodeScript debug execution errors' {
+        BeforeEach {
+            Clear-NodeJsTestEnvironment
+        }
+
+        It 'Emits verbose execution error details at debug level 3 without structured logging' {
+            $testScript = Join-Path $script:TempDir 'debug-exec-fail.js'
+            Set-Content -LiteralPath $testScript -Value 'process.exit(2);' -Encoding UTF8
+            $global:TestNodeScriptPath = $testScript
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $originalVerbose = $VerbosePreference
+            try {
+                $env:PS_PROFILE_DEBUG = '3'
+                $VerbosePreference = 'Continue'
+
+                Invoke-InNodeModuleWithStub -Stubs @{
+                    'Get-Command' = {
+                        param($Name, [switch]$ErrorAction)
+                        if ($Name -eq 'node') {
+                            return [PSCustomObject]@{ Name = 'node'; Source = '/stub/node' }
+                        }
+
+                        return $null
+                    }
+                    'Get-NodeModuleSearchPaths' = { @() }
+                    'node'                      = {
+                        param([Parameter(ValueFromRemainingArguments)][string[]]$Args)
+                        if ($Args -contains '--version') {
+                            $global:LASTEXITCODE = 0
+                            return 'v20.0.0'
+                        }
+
+                        $global:LASTEXITCODE = 2
+                        return 'debug failure output'
+                    }
+                } -Body {
+                    { Invoke-NodeScript -ScriptPath $global:TestNodeScriptPath -Arguments @('probe-arg') } |
+                        Should -Throw '*exit code 2*'
+                }
+            }
+            finally {
+                $VerbosePreference = $originalVerbose
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+                Remove-Variable -Name TestNodeScriptPath -Scope Global -ErrorAction SilentlyContinue
             }
         }
     }

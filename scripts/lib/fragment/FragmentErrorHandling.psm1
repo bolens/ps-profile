@@ -117,7 +117,7 @@ function Invoke-FragmentSafely {
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                     if ($debugLevel -ge 1) {
                         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                            Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-error-handling.load' -Context @{
+                            $null = Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-error-handling.load' -Context @{
                                 FragmentName = $FragmentName
                                 FragmentPath = $FragmentPath
                                 ErrorType    = 'FileNotFound'
@@ -140,6 +140,13 @@ function Invoke-FragmentSafely {
 
             # Validate file is readable before attempting to load
             try {
+                if ($env:PS_PROFILE_FRAGMENT_ERROR_FORCE_GET_ITEM_FAIL -and (
+                        $env:PS_PROFILE_FRAGMENT_ERROR_FORCE_GET_ITEM_FAIL.Trim().ToLowerInvariant() -eq '1' -or
+                        $env:PS_PROFILE_FRAGMENT_ERROR_FORCE_GET_ITEM_FAIL.Trim().ToLowerInvariant() -eq 'true') -and
+                    $FragmentPath -like '*force-get-item-fail*') {
+                    throw [System.IO.IOException]::new('forced get-item failure probe')
+                }
+
                 $fileInfo = Get-Item $FragmentPath -ErrorAction Stop
                 if (-not $fileInfo) {
                     throw "Unable to get file information"
@@ -153,7 +160,7 @@ function Invoke-FragmentSafely {
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                     if ($debugLevel -ge 1) {
                         if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                            Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-error-handling.load' -Context @{
+                            $null = Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-error-handling.load' -Context @{
                                 FragmentName = $FragmentName
                                 FragmentPath = $FragmentPath
                                 ErrorType    = 'FileAccessError'
@@ -234,7 +241,7 @@ function Invoke-FragmentSafely {
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
             if ($debugLevel -ge 1) {
                 if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                    Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-error-handling.load' -Context @{
+                    $null = Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-error-handling.load' -Context @{
                         FragmentName    = $FragmentName
                         FragmentPath    = $FragmentPath
                         ErrorType       = $errorContext.ErrorType
@@ -274,7 +281,7 @@ function Invoke-FragmentSafely {
             }
             elseif (-not $suppressFragmentWarning -and $debugLevel -ge 1) {
                 if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-error-handling.load' -Context @{
+                    $null = Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-error-handling.load' -Context @{
                         FragmentName = $FragmentName
                         FragmentPath = $FragmentPath
                         ErrorType    = $errorContext.ErrorType
@@ -291,7 +298,7 @@ function Invoke-FragmentSafely {
         elseif (-not $suppressFragmentWarning) {
             # Even without debug, show warning if not suppressed
             if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-error-handling.load' -Context @{
+                $null = Write-StructuredWarning -Message $errorMessage -OperationName 'fragment-error-handling.load' -Context @{
                     FragmentName = $FragmentName
                     FragmentPath = $FragmentPath
                     ErrorType    = $errorContext.ErrorType

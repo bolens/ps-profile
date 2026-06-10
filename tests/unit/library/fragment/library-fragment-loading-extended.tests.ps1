@@ -757,6 +757,7 @@ Describe 'FragmentLoading extended scenarios' {
         }
 
         It 'Uses Write-Warning when Read-FileContent fails during dependency parsing' {
+            try {
             $fragmentPath = Join-Path $script:TempDir 'read-filecontent-deps.ps1'
             Set-Content -LiteralPath $fragmentPath -Value '# Dependencies: bootstrap' -Encoding UTF8
             $originalDebug = $env:PS_PROFILE_DEBUG
@@ -769,14 +770,15 @@ Describe 'FragmentLoading extended scenarios' {
             }
 
                         Get-FragmentDependencies -FragmentFile $fragmentPath | Should -Be @()
-        }
-        finally {
+            }
+            finally {
             Remove-Item -Path Function:Read-FileContent -ErrorAction SilentlyContinue -Force
             if ($null -eq $originalDebug) {
                 Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
             }
             else {
                 $env:PS_PROFILE_DEBUG = $originalDebug
+            }
             }
         }
 
@@ -1319,6 +1321,7 @@ Describe 'FragmentLoading extended scenarios' {
         }
 
         It 'Parses Requires and Dependencies comments when direct scriptblock mode is enabled' {
+            try {
             $requiresPath = Join-Path $script:TempDir 'direct-requires.ps1'
             $depsPath = Join-Path $script:TempDir 'direct-deps.ps1'
             Set-Content -LiteralPath $requiresPath -Value "#Requires -Fragment 'bootstrap'" -Encoding UTF8
@@ -1335,10 +1338,11 @@ Describe 'FragmentLoading extended scenarios' {
                 ($parsed | Where-Object { $_.FragmentName -eq 'direct-deps' }).Dependencies |
                     Should -Contain 'env'
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Returns parse metadata for empty and unreadable files in direct scriptblock mode' {
@@ -1371,6 +1375,7 @@ Describe 'FragmentLoading extended scenarios' {
         }
 
         It 'Returns error metadata for whitespace file paths in a parallel batch' {
+            try {
             $global:TestParallelParsePaths = @('   ')
 
                         InModuleScope -ModuleName FragmentLoading {
@@ -1379,12 +1384,14 @@ Describe 'FragmentLoading extended scenarios' {
                 $parsed.Count | Should -BeGreaterThan 0
                 [string]::IsNullOrWhiteSpace($parsed[0].FragmentName) | Should -Be $true
             }
-        }
-        finally {
+            }
+            finally {
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Uses Write-Warning for scriptblock errors when structured logging is unavailable' {
+            try {
             $path = Join-Path $script:TempDir '51-scriptblock-warning.ps1'
             Set-Content -LiteralPath $path -Value '#Requires -Fragment ''unclosed' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -1397,14 +1404,15 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
                 Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
             }
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
+            }
             }
         }
 
@@ -1422,6 +1430,7 @@ Describe 'FragmentLoading extended scenarios' {
         }
 
         It 'Reports scriptblock errors from parallel parsing when debug is enabled' {
+            try {
             $previousDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '1'
             $path = Join-Path $script:TempDir '50-scriptblock-error.ps1'
@@ -1432,8 +1441,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
                 Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
@@ -1441,9 +1450,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Parses both Requires and Dependencies declarations in one file' {
+            try {
             $path = Join-Path $script:TempDir 'combo-deps.ps1'
             Set-Content -LiteralPath $path -Value @'
 #Requires -Fragment 'bootstrap'
@@ -1459,12 +1470,14 @@ Describe 'FragmentLoading extended scenarios' {
                 $parsed[0].Dependencies | Should -Contain 'bootstrap'
                 $parsed[0].Dependencies | Should -Contain 'env'
             }
-        }
-        finally {
+            }
+            finally {
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Returns fragment metadata for empty file content' {
+            try {
             $path = Join-Path $script:TempDir 'empty-parallel-parse.ps1'
             Set-Content -LiteralPath $path -Value '' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -1476,12 +1489,14 @@ Describe 'FragmentLoading extended scenarios' {
                 $parsed[0].FragmentName | Should -Be 'empty-parallel-parse'
                 @($parsed[0].Dependencies).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Parses comma-separated dependency lists from comment lines' {
+            try {
             $path = Join-Path $script:TempDir 'comma-deps-parallel.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap, env, utilities' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -1494,12 +1509,14 @@ Describe 'FragmentLoading extended scenarios' {
                 $parsed[0].Dependencies | Should -Contain 'env'
                 $parsed[0].Dependencies | Should -Contain 'utilities'
             }
-        }
-        finally {
+            }
+            finally {
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Parses valid and missing files in the same parallel batch' {
+            try {
             $validPath = Join-Path $script:TempDir 'valid-parallel-parse.ps1'
             $missingPath = Join-Path $script:TempDir 'missing-batch-parse.ps1'
             Set-Content -LiteralPath $validPath -Value "#Requires -Fragment 'bootstrap'" -Encoding UTF8
@@ -1510,9 +1527,10 @@ Describe 'FragmentLoading extended scenarios' {
                 @($results | Where-Object { $_.FragmentName -eq 'valid-parallel-parse' }).Count |
                     Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Times out when runspace parsing exceeds the configured timeout window' {
@@ -1775,6 +1793,7 @@ Describe 'FragmentLoading extended scenarios' {
         }
 
         It 'Returns an empty array when parallel parse setup fails in the outer catch block' {
+            try {
             $path = Join-Path $script:TempDir 'force-setup-error.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -1785,14 +1804,15 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousForce) {
                 Remove-Item Env:PS_PROFILE_PARALLEL_PARSE_FORCE_SETUP_ERROR -ErrorAction SilentlyContinue
             }
             else {
                 $env:PS_PROFILE_PARALLEL_PARSE_FORCE_SETUP_ERROR = $previousForce
+            }
             }
         }
 
@@ -1910,6 +1930,7 @@ Describe 'FragmentLoading extended scenarios' {
         }
 
         It 'Emits scriptblock error diagnostics at debug level 3' {
+            try {
             $path = Join-Path $script:TempDir '52-scriptblock-debug.ps1'
             Set-Content -LiteralPath $path -Value '#Requires -Fragment ''unclosed' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -1920,8 +1941,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
                 Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
@@ -1929,9 +1950,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records PowerShell stream errors with structured logging at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'emit-ps-error.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -1946,8 +1969,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $parsed.Count | Should -BeGreaterThan 0
                 $parsed[0].FragmentName | Should -Be 'emit-ps-error'
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -1956,9 +1979,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-Error for PowerShell stream errors when debug is disabled and structured logging is unavailable' {
+            try {
             $path = Join-Path $script:TempDir 'emit-ps-error-no-debug.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -1974,8 +1999,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $parsed.Count | Should -BeGreaterThan 0
                 $parsed[0].FragmentName | Should -Be 'emit-ps-error-no-debug'
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -1984,9 +2009,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Emits PowerShell stream error diagnostics at debug level 3' {
+            try {
             $path = Join-Path $script:TempDir 'emit-ps-error-debug3.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -1998,8 +2025,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2008,9 +2035,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-Error for BeginInvoke failures when structured logging is unavailable' {
+            try {
             $path = Join-Path $script:TempDir 'begininvoke-error.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2024,8 +2053,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2034,9 +2063,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Emits BeginInvoke failure diagnostics at debug level 3' {
+            try {
             $path = Join-Path $script:TempDir 'begininvoke-error-debug3.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2048,8 +2079,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2058,9 +2089,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Handles post-processing result errors at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'force-process-result.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2075,8 +2108,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $parsed.Count | Should -BeGreaterThan 0
                 $parsed[0].FragmentName | Should -Be 'force-process-result'
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2085,9 +2118,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Emits post-processing result error diagnostics at debug level 3' {
+            try {
             $path = Join-Path $script:TempDir 'force-process-result.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2099,8 +2134,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2109,9 +2144,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Warns when only some parse tasks complete before the global timeout window' {
+            try {
             $fastPath = Join-Path $script:TempDir 'fast-parse.ps1'
             $slowPath = Join-Path $script:TempDir 'slow-parse.ps1'
             Set-Content -LiteralPath $fastPath -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2128,8 +2165,8 @@ Describe 'FragmentLoading extended scenarios' {
             }
             $sw.Stop()
             $sw.ElapsedMilliseconds | Should -BeLessThan 5000
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2138,9 +2175,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-Error for setup runspace failures when structured logging is unavailable' {
+            try {
             $path = Join-Path $script:TempDir 'setup-runspace-error.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2154,8 +2193,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2164,9 +2203,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records process runspace failures with structured logging at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'process-runspace-error.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2179,8 +2220,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2189,9 +2230,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records EndInvoke failures with structured logging at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'endinvoke-error.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2204,8 +2247,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2214,9 +2257,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-Error for EndInvoke failures when structured logging is unavailable' {
+            try {
             $path = Join-Path $script:TempDir 'endinvoke-error-write.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2230,8 +2275,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2240,9 +2285,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-Error for process runspace failures when structured logging is unavailable' {
+            try {
             $path = Join-Path $script:TempDir 'process-runspace-error-write.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2256,8 +2303,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2266,9 +2313,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-Error for AddArgument failures when structured logging is unavailable' {
+            try {
             $path = Join-Path $script:TempDir 'addargument-error.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2282,8 +2331,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2292,9 +2341,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records dispose failures with structured logging at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'dispose-error.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2307,8 +2358,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2317,9 +2368,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records timeout result add failures with structured logging at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'force-timeout-add.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2332,8 +2385,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterOrEqual 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2342,9 +2395,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-StructuredError for error result add failures when debug is disabled' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'error-result-add.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2357,8 +2412,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterOrEqual 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2367,9 +2422,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-StructuredError for PowerShell stream errors when debug is disabled' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'emit-ps-error-structured-off.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2382,8 +2439,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2392,9 +2449,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records AddScript failures with structured logging at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'addscript-structured.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2407,8 +2466,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2417,9 +2476,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records AddArgument failures with structured logging at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'addargument-structured.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2432,8 +2493,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2442,9 +2503,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records setup runspace failures with structured logging at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'setup-runspace-structured.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2457,8 +2520,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2467,9 +2530,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records BeginInvoke null-handle failures with structured logging at debug level 1' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'begininvoke-null.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2482,8 +2547,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2492,9 +2557,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Records runspace list add failures with structured logging at debug level 3' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'add-runspaces-structured.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2507,8 +2574,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2517,9 +2584,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Emits stalled runspace stop diagnostics at debug level 3' {
+            try {
             $path = Join-Path $script:TempDir 'stop-stalled-debug3.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2531,8 +2600,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterOrEqual 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2541,9 +2610,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-Error for AddScript failures when structured logging is unavailable' {
+            try {
             $path = Join-Path $script:TempDir 'addscript-error.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2557,8 +2628,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2567,9 +2638,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Uses Write-Warning for global parse timeouts at debug level 1 without structured logging' {
+            try {
             $path = Join-Path $script:TempDir 'global-timeout-warning.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
             $global:TestParallelParsePaths = @($path)
@@ -2583,8 +2656,8 @@ Describe 'FragmentLoading extended scenarios' {
                 $results = Invoke-ParallelDependencyParsing -FilePaths $global:TestParallelParsePaths
                 @($results).Count | Should -BeGreaterThan 0
             }
-        }
-        finally {
+            }
+            finally {
             Restore-ParallelParseTestEnvironment
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
             if ($null -eq $previousDebug) {
@@ -2593,9 +2666,11 @@ Describe 'FragmentLoading extended scenarios' {
             else {
                 $env:PS_PROFILE_DEBUG = $previousDebug
             }
+            }
         }
 
         It 'Reports scriptblock read failures when locked files block readers' {
+            try {
             Enable-TestStructuredLogging
             $path = Join-Path $script:TempDir 'locked-parallel-parse.ps1'
             Set-Content -LiteralPath $path -Value '# Dependencies: bootstrap' -Encoding UTF8
@@ -2613,10 +2688,11 @@ Describe 'FragmentLoading extended scenarios' {
                 $parsed[0].FragmentName | Should -Be 'locked-parallel-parse'
                 @($parsed[0].Dependencies).Count | Should -Be 0
             }
-        }
-        finally {
+            }
+            finally {
             $fileStream.Dispose()
             Remove-Variable -Name TestParallelParsePaths -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
     }

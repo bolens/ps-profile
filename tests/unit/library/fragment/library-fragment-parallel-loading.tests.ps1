@@ -32,10 +32,12 @@ AfterAll {
 
 Describe 'FragmentParallelLoading Module' {
     Context 'Invoke-FragmentsInParallel' {
-        It 'Rejects an empty fragment array at parameter binding' {
-            {
-                Invoke-FragmentsInParallel -FragmentFiles @() -ProfileFragmentRoot $script:FragmentDir
-            } | Should -Throw '*empty array*'
+        It 'Returns an empty result for an empty fragment array' {
+            $result = Invoke-FragmentsInParallel -FragmentFiles @() -ProfileFragmentRoot $script:FragmentDir
+
+            $result.SuccessCount | Should -Be 0
+            $result.FailureCount | Should -Be 0
+            $result.UsedParallel | Should -Be $false
         }
 
         It 'Loads multiple fragments and reports succeeded fragment names' {

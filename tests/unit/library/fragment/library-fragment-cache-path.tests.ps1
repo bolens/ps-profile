@@ -5,16 +5,28 @@ tests/unit/library-fragment-cache-path.tests.ps1
     Unit tests for FragmentCachePath helpers.
 #>
 
-Describe 'Fragment cache path helpers' {
-    BeforeAll {
-        $script:FragmentCachePathModule = Join-Path $PSScriptRoot '..\..\scripts\lib\fragment\FragmentCachePath.psm1'
-        if (-not (Test-Path -LiteralPath $script:FragmentCachePathModule)) {
-            throw "FragmentCachePath module not found at: $script:FragmentCachePathModule"
+BeforeAll {
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
+            . $testSupportPath
+            break
         }
-
-        Import-Module $script:FragmentCachePathModule -DisableNameChecking -Force
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
     }
 
+    $libPath = Join-Path (Get-TestRepoRoot -StartPath $PSScriptRoot) 'scripts/lib'
+    Import-Module (Join-Path $libPath 'core/PlatformPaths.psm1') -DisableNameChecking -Force
+    Import-Module (Join-Path $libPath 'fragment/FragmentCachePath.psm1') -DisableNameChecking -Force
+}
+
+AfterAll {
+    Remove-Module FragmentCachePath, PlatformPaths -ErrorAction SilentlyContinue -Force
+}
+
+Describe 'Fragment cache path helpers' {
     It 'Get-FragmentCacheDbPath returns a database path' {
         $dbPath = Get-FragmentCacheDbPath
         $dbPath | Should -Not -BeNullOrEmpty

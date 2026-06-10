@@ -16,11 +16,10 @@ BeforeAll {
     # Import Cache module first (dependency)
     $cachePath = Join-Path $script:LibPath 'utilities' 'Cache.psm1'
     if (Test-Path -Path $cachePath) {
-        Import-Module $cachePath -DisableNameChecking -ErrorAction SilentlyContinue -Force
+        Import-TestLibraryModule -ModulePath $cachePath
     }
-    
-    # Import the module under test
-    Import-Module $script:CommandPath -DisableNameChecking -ErrorAction Stop -Force
+
+    Import-TestLibraryModule -ModulePath $script:CommandPath
 }
 
 AfterAll {
@@ -30,20 +29,7 @@ AfterAll {
 
 Describe 'Command Module Functions' {
     BeforeEach {
-        Remove-TestFunction -Name @(
-            'Get-PythonPackageInstallRecommendation'
-            'Get-NodePackageInstallRecommendation'
-            'Get-PreferenceAwareInstallHint'
-            'Test-ValidString'
-            'Test-CachedCommand'
-            'Get-Platform'
-            'Import-Requirements'
-            'Get-RepoRoot'
-            'CommandFailureProbe'
-            'Test-FailingCommand'
-            'Test-ThrowingCommand'
-            'Test-ThrowingCommand2'
-        )
+        Clear-CommandTestStubs
     }
 
     Context 'Test-CommandAvailable' {

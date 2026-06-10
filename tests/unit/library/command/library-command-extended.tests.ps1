@@ -21,18 +21,18 @@ BeforeAll {
     $script:CommandPath = Join-Path $script:LibPath 'utilities' 'Command.psm1'
 
     if (Test-Path -LiteralPath $script:CachePath) {
-        Import-Module $script:CachePath -DisableNameChecking -Force
+        Import-TestLibraryModule -ModulePath $script:CachePath
     }
 
-    Import-Module $script:CommandPath -DisableNameChecking -Force
+    Import-TestLibraryModule -ModulePath $script:CommandPath
 }
 
 function global:Reset-CommandTestModule {
-    Remove-Module Command -ErrorAction SilentlyContinue -Force
     if (Test-Path -LiteralPath $script:CachePath) {
-        Import-Module $script:CachePath -DisableNameChecking -Force
+        Import-TestLibraryModule -ModulePath $script:CachePath -RemoveExisting
     }
-    Import-Module $script:CommandPath -DisableNameChecking -Force
+
+    Import-TestLibraryModule -ModulePath $script:CommandPath -RemoveExisting
 }
 
 function global:Get-CommandAvailabilityCacheKey {
@@ -52,21 +52,6 @@ function global:Clear-CommandAvailabilityCache {
         $cacheKey = Get-CommandAvailabilityCacheKey -CommandName $CommandName
         Clear-CachedValue -Key $cacheKey -ErrorAction SilentlyContinue
     }
-}
-
-function global:Clear-CommandTestStubs {
-    Remove-TestFunction -Name @(
-        'Test-CachedCommand'
-        'Test-ValidString'
-        'Get-PreferenceAwareInstallHint'
-        'Get-PythonPackageInstallRecommendation'
-        'Get-NodePackageInstallRecommendation'
-        'Get-Platform'
-        'Import-Requirements'
-        'Get-RepoRoot'
-        'CommandFailureProbe'
-        'Import-ModuleSafely'
-    )
 }
 
 function global:Remove-PreferenceAwareInstallHintStub {
@@ -132,7 +117,7 @@ Describe 'Command extended scenarios' {
     Context 'Test-CommandAvailable advanced paths' {
         AfterEach {
             Clear-CommandTestStubs
-            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            Clear-LibraryTestEnvironmentVariables
             Clear-CommandAvailabilityCache -CommandName 'Get-Process'
             Reset-CommandTestModule
         }
@@ -176,7 +161,7 @@ Describe 'Command extended scenarios' {
     Context 'Resolve-InstallCommand platform overrides' {
         AfterEach {
             Clear-CommandTestStubs
-            Remove-Item Env:PS_PROFILE_PLATFORM_FORCE_NAME -ErrorAction SilentlyContinue
+            Clear-LibraryTestEnvironmentVariables
         }
 
         It 'Selects Windows install commands when platform is forced to Windows' {
@@ -310,12 +295,7 @@ Describe 'Command extended scenarios' {
         }
 
         AfterEach {
-            Remove-Item Env:PS_PROFILE_COMMAND_DISABLE_STRUCTURED_WARNING -ErrorAction SilentlyContinue
-            Remove-Item Env:PS_PROFILE_COMMAND_FORCE_CACHE_IMPORT_ERROR -ErrorAction SilentlyContinue
-            Remove-Item Env:PS_PROFILE_COMMAND_FORCE_MANUAL_CACHE_IMPORT -ErrorAction SilentlyContinue
-            Remove-Item Env:PS_PROFILE_COMMAND_FORCE_MANUAL_INSTALL_RESOLVE -ErrorAction SilentlyContinue
-            Remove-Item Env:PS_PROFILE_PLATFORM_FORCE_NAME -ErrorAction SilentlyContinue
-            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            Clear-LibraryTestEnvironmentVariables
             Clear-CommandTestStubs
             Clear-CommandAvailabilityCache -CommandName 'Get-Process'
             Reset-CommandTestModule

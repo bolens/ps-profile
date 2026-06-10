@@ -131,17 +131,19 @@ Describe 'FragmentErrorHandling Module Functions' {
 
         It 'Handles debug mode correctly' {
             $originalDebug = $env:PS_PROFILE_DEBUG
-                        $env:PS_PROFILE_DEBUG = '1'
-            $errorBlock = { throw 'Debug test error' }
-            $result = Invoke-FragmentSafely -FragmentName 'debug-test' -FragmentPath 'dummy.ps1' -ScriptBlock $errorBlock
-            $result | Should -Be $false
-        }
-        finally {
-            if ($originalDebug) {
-                $env:PS_PROFILE_DEBUG = $originalDebug
+            try {
+                $env:PS_PROFILE_DEBUG = '1'
+                $errorBlock = { throw 'Debug test error' }
+                $result = Invoke-FragmentSafely -FragmentName 'debug-test' -FragmentPath 'dummy.ps1' -ScriptBlock $errorBlock
+                $result | Should -Be $false
             }
-            else {
-                $env:PS_PROFILE_DEBUG = $null
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
             }
         }
     }
@@ -281,13 +283,14 @@ Describe 'FragmentErrorHandling Module Functions' {
         }
 
         It 'Includes script stack trace when available' {
-                        throw 'Test error for stack trace'
-        }
-        catch {
-            $errorInfo = Get-FragmentErrorInfo -ErrorRecord $_ -FragmentName 'test-fragment'
-            # Stack trace may or may not be available depending on context
-            if ($errorInfo.PSObject.Properties.Name -contains 'ScriptStackTrace') {
-                $errorInfo.ScriptStackTrace | Should -Not -BeNullOrEmpty
+            try {
+                throw 'Test error for stack trace'
+            }
+            catch {
+                $errorInfo = Get-FragmentErrorInfo -ErrorRecord $_ -FragmentName 'test-fragment'
+                if ($errorInfo.PSObject.Properties.Name -contains 'ScriptStackTrace') {
+                    $errorInfo.ScriptStackTrace | Should -Not -BeNullOrEmpty
+                }
             }
         }
 
@@ -305,13 +308,14 @@ Describe 'FragmentErrorHandling Module Functions' {
         }
 
         It 'Handles error records with line numbers' {
-                        # Create an error with line number context
-            $null = Get-Item 'nonexistent-file-that-does-not-exist-12345.ps1' -ErrorAction Stop
-        }
-        catch {
-            $errorInfo = Get-FragmentErrorInfo -ErrorRecord $_ -FragmentName 'test-fragment'
-            $errorInfo | Should -Not -BeNullOrEmpty
-            $errorInfo.ErrorMessage | Should -Not -BeNullOrEmpty
+            try {
+                $null = Get-Item 'nonexistent-file-that-does-not-exist-12345.ps1' -ErrorAction Stop
+            }
+            catch {
+                $errorInfo = Get-FragmentErrorInfo -ErrorRecord $_ -FragmentName 'test-fragment'
+                $errorInfo | Should -Not -BeNullOrEmpty
+                $errorInfo.ErrorMessage | Should -Not -BeNullOrEmpty
+            }
         }
     }
 }

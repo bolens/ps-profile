@@ -20,6 +20,7 @@ BeforeAll {
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
     Import-Module (Join-Path $script:LibPath 'runtime' 'Python.psm1') -DisableNameChecking -Force
+    Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
 
     $script:TempDir = New-TestTempDirectory -Prefix 'PythonExtended'
     $script:IsolatedPythonCwd = Join-Path $script:TempDir 'isolated-python-cwd'
@@ -132,6 +133,11 @@ AfterAll {
 }
 
 Describe 'Python extended scenarios' {
+    AfterEach {
+        Import-Module (Join-Path $script:LibPath 'runtime' 'Python.psm1') -DisableNameChecking -Force
+        Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+    }
+
     Context 'Get-PythonPath environment hooks' {
         BeforeEach {
             Clear-PythonTestEnvironment
@@ -218,9 +224,9 @@ Describe 'Python extended scenarios' {
             }
         }
 
-        It 'Returns null and emits warnings when no Python can be detected' {
+        It 'Returns null when no Python can be detected in an isolated environment' {
             Clear-PythonTestEnvironment
-            Enable-TestStructuredLogging
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
             Mock Get-Command {
                 param($Name)
                 if ($Name -in @('python', 'python3', 'py')) {
@@ -230,21 +236,9 @@ Describe 'Python extended scenarios' {
                 return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
             } -ModuleName Python
 
-            $originalDebug = $env:PS_PROFILE_DEBUG
-            $env:PS_PROFILE_DEBUG = '1'
-
-            try {
-                Get-PythonPath -RepoRoot (Join-Path $script:TempDir 'empty-no-python-root') |
-                    Should -BeNullOrEmpty
-            }
-            finally {
-                if ($null -eq $originalDebug) {
-                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
-                }
-                else {
-                    $env:PS_PROFILE_DEBUG = $originalDebug
-                }
-            }
+            $pythonPath = Get-PythonPath -RepoRoot (Join-Path $script:TempDir 'empty-no-python-root') |
+                Select-Object -Last 1
+            $pythonPath | Should -BeNullOrEmpty
         }
 
         It 'Detects repository root from a .git directory when RepoRoot is omitted' {
@@ -368,7 +362,6 @@ Describe 'Python extended scenarios' {
                 $global:TestCommandCaptureState['ExitCode'] = 2
                 return 'ERROR: boom'
             }
-            Enable-TestStructuredLogging
             $originalDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '1'
             $global:TestPythonScriptPath = $testScript
@@ -604,7 +597,7 @@ Describe 'Python extended scenarios' {
 
             InModuleScope -ModuleName Python {
                 Get-PythonPackageInstallRecommendation -PackageNames @('requests') |
-                    Should -Match 'pip install\s+requests'
+                    Should -Match 'pip install(\s+--user)?\s+requests'
             }
         }
     }
@@ -1086,6 +1079,1081 @@ Describe 'Python extended scenarios' {
             $expanded = Expand-EmbeddedPythonInstallHints -Script $scriptText -PackageNames @('requests') -Global
             $expanded | Should -Not -Match '__PYTHON_INSTALL_CMD__'
             $expanded | Should -Match 'requests'
+        }
+    }
+
+    Context 'Get-PythonPath repo and runtime fallbacks' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Uses repository venv python when RepoRoot contains a .venv directory' {
+            $repoRoot = Join-Path $script:TempDir 'repo-with-venv'
+            $venvBin = Join-Path $repoRoot '.venv' 'bin'
+            New-Item -ItemType Directory -Path $venvBin -Force | Out-Null
+            $fakePython = Join-Path $venvBin 'python'
+            Set-Content -LiteralPath $fakePython -Value '#!/bin/sh'
+
+            Get-PythonPath -RepoRoot $repoRoot | Should -Be $fakePython
+        }
+
+        It 'Falls back to python when python3 is unavailable' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'python3') {
+                    return $null
+                }
+                if ($Name -eq 'python') {
+                    return [PSCustomObject]@{ Name = 'python' }
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            Get-PythonPath -RepoRoot (Join-Path $script:TempDir 'python-only-root') | Should -Be 'python'
+        }
+    }
+
+    Context 'Library preference unavailable paths' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Returns unavailable dataframe defaults when neither library is installed' {
+            $fakePython = New-FakePythonExecutable -PackageExitCodes @{ pandas = 1; polars = 1 }
+            $result = Get-DataFrameLibraryPreference -PythonCmd $fakePython
+            $result.Available | Should -Be $false
+        }
+
+        It 'Auto-selects pip in manager preference when uv is unavailable but pip exists' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pip') {
+                    return [PSCustomObject]@{ Name = 'pip' }
+                }
+                if ($Name -in @('uv', 'conda', 'poetry', 'pipenv')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $result = Get-PythonPackageManagerPreference
+            $result.Manager | Should -Be 'pip'
+        }
+    }
+
+    Context 'Get-PythonPackageManagerPreference explicit managers' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Prefers pipenv when PS_PYTHON_PACKAGE_MANAGER is pipenv and pipenv is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pipenv') {
+                    return [PSCustomObject]@{ Name = 'pipenv' }
+                }
+                if ($Name -in @('uv', 'pip', 'conda', 'poetry')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $original = $env:PS_PYTHON_PACKAGE_MANAGER
+            try {
+                $env:PS_PYTHON_PACKAGE_MANAGER = 'pipenv'
+                $result = Get-PythonPackageManagerPreference
+                $result.Manager | Should -Be 'pipenv'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PYTHON_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PYTHON_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Falls back to uv in auto mode when uv is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'uv') {
+                    return [PSCustomObject]@{ Name = 'uv' }
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $result = Get-PythonPackageManagerPreference
+            $result.Manager | Should -Be 'uv'
+            $result.Available | Should -Be $true
+        }
+    }
+
+    Context 'Scientific and parquet preference branches' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Selects netcdf4 in auto mode when only netCDF4 is available' {
+            $fakePython = New-FakePythonExecutable -PackageExitCodes @{
+                xarray  = 1
+                netCDF4 = 0
+                h5py    = 1
+            }
+            $result = Get-ScientificLibraryPreference -PythonCmd $fakePython
+            $result.Library | Should -Be 'netcdf4'
+        }
+
+        It 'Selects fastparquet when pyarrow is unavailable and fastparquet is installed' {
+            $fakePython = New-FakePythonExecutable -PackageExitCodes @{ pyarrow = 1; fastparquet = 0 }
+            $result = Get-ParquetLibraryPreference -PythonCmd $fakePython
+            $result.Library | Should -Be 'fastparquet'
+        }
+
+        It 'Returns install recommendation using pip fallback for multiple packages' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -in @('uv', 'pip', 'conda', 'poetry', 'pipenv')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            InModuleScope -ModuleName Python {
+                Get-PythonPackageInstallRecommendation -PackageNames @('numpy', 'pandas') -Global |
+                    Should -Match 'numpy'
+            }
+        }
+    }
+
+    Context 'Invoke-PythonScript validation fallback' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+            Remove-Module Validation -ErrorAction SilentlyContinue -Force
+        }
+
+        AfterEach {
+            Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+        }
+
+        It 'Throws when the script path does not exist using manual validation' {
+            $missingScript = Join-Path $script:TempDir 'missing-manual-validation.py'
+            { Invoke-PythonScript -ScriptPath $missingScript } | Should -Throw '*not found*'
+        }
+    }
+
+    Context 'Get-PythonPath runtime and warning paths' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Returns py when PS_PYTHON_RUNTIME is py and py is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'py') {
+                    return [PSCustomObject]@{ Name = 'py' }
+                }
+                if ($Name -in @('python', 'python3')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $original = $env:PS_PYTHON_RUNTIME
+            try {
+                $env:PS_PYTHON_RUNTIME = 'py'
+                Get-PythonPath | Should -Be 'py'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PYTHON_RUNTIME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PYTHON_RUNTIME = $original
+                }
+            }
+        }
+
+        It 'Emits a warning when Python cannot be detected at debug level 1' {
+            $isolatedRepo = Join-Path $script:TempDir 'no-python-warning-repo'
+            New-Item -ItemType Directory -Path $isolatedRepo -Force | Out-Null
+
+            Invoke-InPythonModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name, $ErrorAction)
+                    if ($Name -in @('python', 'python3', 'py', 'Write-StructuredWarning', 'Write-StructuredError')) {
+                        return $null
+                    }
+
+                    return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                }
+            } -Body {
+                $originalDebug = $env:PS_PROFILE_DEBUG
+                $env:PS_PROFILE_DEBUG = '1'
+
+                try {
+                    @(Get-PythonPath -RepoRoot $isolatedRepo) | Where-Object { $_ -is [string] } | Should -BeNullOrEmpty
+                }
+                finally {
+                    if ($null -eq $originalDebug) {
+                        Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                    }
+                    else {
+                        $env:PS_PROFILE_DEBUG = $originalDebug
+                    }
+                }
+            }
+        }
+
+        It 'Emits level 3 debug when no Python is found via environment variables' {
+            $isolatedRepo = Join-Path $script:TempDir 'no-python-debug-repo'
+            New-Item -ItemType Directory -Path $isolatedRepo -Force | Out-Null
+
+            Invoke-InPythonModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name, $ErrorAction)
+                    if ($Name -in @('python', 'python3', 'py', 'Write-StructuredWarning', 'Write-StructuredError')) {
+                        return $null
+                    }
+
+                    return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                }
+            } -Body {
+                $originalDebug = $env:PS_PROFILE_DEBUG
+                $env:PS_PROFILE_DEBUG = '3'
+
+                try {
+                    @(Get-PythonPath -RepoRoot $isolatedRepo) | Where-Object { $_ -is [string] } | Should -BeNullOrEmpty
+                }
+                finally {
+                    if ($null -eq $originalDebug) {
+                        Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                    }
+                    else {
+                        $env:PS_PROFILE_DEBUG = $originalDebug
+                    }
+                }
+            }
+        }
+    }
+
+    Context 'Get-PythonPackageManagerPreference fallback chains' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Falls back from uv preference to pip when uv is unavailable' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pip') {
+                    return [PSCustomObject]@{ Name = 'pip' }
+                }
+                if ($Name -in @('uv', 'conda', 'poetry', 'pipenv')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $original = $env:PS_PYTHON_PACKAGE_MANAGER
+            try {
+                $env:PS_PYTHON_PACKAGE_MANAGER = 'uv'
+                (Get-PythonPackageManagerPreference).Manager | Should -Be 'pip'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PYTHON_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PYTHON_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Falls back from pip preference to uv when pip is unavailable' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'uv') {
+                    return [PSCustomObject]@{ Name = 'uv' }
+                }
+                if ($Name -in @('pip', 'conda', 'poetry', 'pipenv')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $original = $env:PS_PYTHON_PACKAGE_MANAGER
+            try {
+                $env:PS_PYTHON_PACKAGE_MANAGER = 'pip'
+                (Get-PythonPackageManagerPreference).Manager | Should -Be 'uv'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PYTHON_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PYTHON_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Falls back from conda preference through uv to pip' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pip') {
+                    return [PSCustomObject]@{ Name = 'pip' }
+                }
+                if ($Name -in @('uv', 'conda', 'poetry', 'pipenv')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $original = $env:PS_PYTHON_PACKAGE_MANAGER
+            try {
+                $env:PS_PYTHON_PACKAGE_MANAGER = 'conda'
+                (Get-PythonPackageManagerPreference).Manager | Should -Be 'pip'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PYTHON_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PYTHON_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Selects conda in auto mode when only conda is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'conda') {
+                    return [PSCustomObject]@{ Name = 'conda' }
+                }
+                if ($Name -in @('uv', 'pip', 'poetry', 'pipenv')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            (Get-PythonPackageManagerPreference).Manager | Should -Be 'conda'
+        }
+    }
+
+    Context 'Get-PythonPackageInstallCommand with available managers' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Builds a global uv install recommendation with system flag' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'uv') {
+                    return [PSCustomObject]@{ Name = 'uv' }
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $original = $env:PS_PYTHON_PACKAGE_MANAGER
+            try {
+                $env:PS_PYTHON_PACKAGE_MANAGER = 'uv'
+                InModuleScope -ModuleName Python {
+                    Get-PythonPackageInstallRecommendation -PackageNames @('numpy') -Global |
+                        Should -Match 'uv pip install numpy --system'
+                }
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PYTHON_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PYTHON_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Builds a local pip install recommendation with user flag' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pip') {
+                    return [PSCustomObject]@{ Name = 'pip' }
+                }
+                if ($Name -eq 'uv') {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $original = $env:PS_PYTHON_PACKAGE_MANAGER
+            try {
+                $env:PS_PYTHON_PACKAGE_MANAGER = 'pip'
+                InModuleScope -ModuleName Python {
+                    Get-PythonPackageInstallRecommendation -PackageNames @('numpy') |
+                        Should -Match 'pip install numpy --user'
+                }
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PYTHON_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PYTHON_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+    }
+
+    Context 'Invoke-PythonScript extended execution paths' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Returns output on successful execution with debug level 3 enabled' {
+            $testScript = Join-Path $script:TempDir 'debug-success.py'
+            Set-Content -LiteralPath $testScript -Value 'print("ok")' -Encoding UTF8
+            Setup-CapturingCommandMock -CommandName 'mock-python-debug' -Output 'debug-success' -OnInvoke {
+                if ($args -contains '--version') {
+                    $global:TestCommandCaptureState['ExitCode'] = 0
+                    return 'Python 3.11.0'
+                }
+
+                $global:TestCommandCaptureState['ExitCode'] = 0
+                return 'debug-success'
+            }
+            $global:TestPythonScriptPath = $testScript
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $originalVerbose = $VerbosePreference
+            try {
+                $env:PS_PROFILE_DEBUG = '3'
+                $VerbosePreference = 'Continue'
+                Invoke-InPythonModuleWithStub -Stubs @{
+                    'Get-PythonPath' = { 'mock-python-debug' }
+                } -Body {
+                    Invoke-PythonScript -ScriptPath $global:TestPythonScriptPath | Should -Be 'debug-success'
+                }
+            }
+            finally {
+                $VerbosePreference = $originalVerbose
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+                Remove-Variable -Name TestPythonScriptPath -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Throws when Python is not available and structured logging is enabled' {
+            $testScript = Join-Path $script:TempDir 'no-python.py'
+            Set-Content -LiteralPath $testScript -Value 'print("x")' -Encoding UTF8
+            $global:TestPythonScriptPath = $testScript
+
+            try {
+                Invoke-InPythonModuleWithStub -Stubs @{
+                    'Get-PythonPath' = { $null }
+                } -Body {
+                    { Invoke-PythonScript -ScriptPath $global:TestPythonScriptPath } | Should -Throw '*not available*'
+                }
+            }
+            finally {
+                Remove-Variable -Name TestPythonScriptPath -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Throws with full output when only WARNING lines are present' {
+            $testScript = Join-Path $script:TempDir 'warning-only-fail.py'
+            Set-Content -LiteralPath $testScript -Value 'pass' -Encoding UTF8
+            Setup-CapturingCommandMock -CommandName 'mock-python-warn-only' -Output @('WARNING: only noise') -OnInvoke {
+                if ($args -contains '--version') {
+                    $global:TestCommandCaptureState['ExitCode'] = 0
+                    return 'Python 3.11.0'
+                }
+
+                $global:TestCommandCaptureState['ExitCode'] = 1
+                return @('WARNING: only noise')
+            }
+            $global:TestPythonScriptPath = $testScript
+
+            try {
+                Invoke-InPythonModuleWithStub -Stubs @{
+                    'Get-PythonPath' = { 'mock-python-warn-only' }
+                } -Body {
+                    { Invoke-PythonScript -ScriptPath $global:TestPythonScriptPath } |
+                        Should -Throw '*only noise*'
+                }
+            }
+            finally {
+                Remove-Variable -Name TestPythonScriptPath -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    Context 'Library preference fallback branches' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Falls back to polars when pandas preference is set but pandas is unavailable' {
+            $fakePython = New-FakePythonExecutable -PackageExitCodes @{ pandas = 1; polars = 0 }
+            $original = $env:PS_DATA_FRAME_LIB
+            try {
+                $env:PS_DATA_FRAME_LIB = 'pandas'
+                $result = Get-DataFrameLibraryPreference -PythonCmd $fakePython
+                $result.Library | Should -Be 'polars'
+                $result.Available | Should -Be $true
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_DATA_FRAME_LIB -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_DATA_FRAME_LIB = $original
+                }
+            }
+        }
+
+        It 'Falls back to pyarrow when fastparquet preference is set but fastparquet is unavailable' {
+            $fakePython = New-FakePythonExecutable -PackageExitCodes @{ pyarrow = 0; fastparquet = 1 }
+            $original = $env:PS_PARQUET_LIB
+            try {
+                $env:PS_PARQUET_LIB = 'fastparquet'
+                $result = Get-ParquetLibraryPreference -PythonCmd $fakePython
+                $result.Library | Should -Be 'pyarrow'
+                $result.Available | Should -Be $true
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PARQUET_LIB -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PARQUET_LIB = $original
+                }
+            }
+        }
+
+        It 'Falls back to netcdf4 when xarray preference is set but xarray is unavailable' {
+            $fakePython = New-FakePythonExecutable -PackageExitCodes @{
+                xarray  = 1
+                netCDF4 = 0
+                h5py    = 1
+            }
+            $original = $env:PS_SCIENTIFIC_LIB
+            try {
+                $env:PS_SCIENTIFIC_LIB = 'xarray'
+                $result = Get-ScientificLibraryPreference -PythonCmd $fakePython
+                $result.Library | Should -Be 'netcdf4'
+                $result.Available | Should -Be $true
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_SCIENTIFIC_LIB -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_SCIENTIFIC_LIB = $original
+                }
+            }
+        }
+    }
+
+    Context 'Expand-EmbeddedPythonInstallHints and Resolve-PythonInstallHintMessage' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Returns the original script when no placeholder is present' {
+            Expand-EmbeddedPythonInstallHints -Script 'plain python script' -PackageNames @('numpy') |
+                Should -Be 'plain python script'
+        }
+
+        It 'Replaces placeholders with a global install recommendation using uv' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'uv') {
+                    return [PSCustomObject]@{ Name = 'uv' }
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $original = $env:PS_PYTHON_PACKAGE_MANAGER
+            try {
+                $env:PS_PYTHON_PACKAGE_MANAGER = 'uv'
+                $expanded = Expand-EmbeddedPythonInstallHints -Script 'Run __PYTHON_INSTALL_CMD__' -PackageNames @('numpy') -Global
+                $expanded | Should -Not -Match '__PYTHON_INSTALL_CMD__'
+                $expanded | Should -Match 'numpy'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PYTHON_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PYTHON_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Returns the original message when Resolve-PythonInstallHintMessage has no placeholder' {
+            Resolve-PythonInstallHintMessage -Message 'no hint' -PackageNames @('numpy') |
+                Should -Be 'no hint'
+        }
+    }
+
+    Context 'Get-PythonPath additional runtime branches' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Returns python when PS_PYTHON_RUNTIME is python and python is available' {
+            Invoke-InPythonModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name)
+                    if ($Name -eq 'python') {
+                        return [PSCustomObject]@{ Name = 'python' }
+                    }
+                    if ($Name -in @('python3', 'py')) {
+                        return $null
+                    }
+
+                    return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                }
+            } -Body {
+                $original = $env:PS_PYTHON_RUNTIME
+                try {
+                    $env:PS_PYTHON_RUNTIME = 'python'
+                    Get-PythonPath | Should -Be 'python'
+                }
+                finally {
+                    if ($null -eq $original) {
+                        Remove-Item Env:PS_PYTHON_RUNTIME -ErrorAction SilentlyContinue
+                    }
+                    else {
+                        $env:PS_PYTHON_RUNTIME = $original
+                    }
+                }
+            }
+        }
+
+        It 'Returns py in auto mode when only py is available' {
+            Invoke-InPythonModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name)
+                    if ($Name -eq 'py') {
+                        return [PSCustomObject]@{ Name = 'py' }
+                    }
+                    if ($Name -in @('python3', 'python')) {
+                        return $null
+                    }
+
+                    return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                }
+            } -Body {
+                Get-PythonPath | Should -Be 'py'
+            }
+        }
+
+        It 'Uses repository venv python when RepoRoot parameter contains a .venv directory' {
+            $repoRoot = Join-Path $script:TempDir 'script-scope-repo'
+            $venvBin = Join-Path $repoRoot '.venv' 'bin'
+            New-Item -ItemType Directory -Path $venvBin -Force | Out-Null
+            $fakePython = Join-Path $venvBin 'python'
+            Set-Content -LiteralPath $fakePython -Value '#!/bin/sh' -Encoding UTF8
+
+            $global:TestScriptScopeRepoRoot = $repoRoot
+            $global:TestScriptScopeFakePython = $fakePython
+
+            Invoke-InPythonModuleWithStub -Stubs @{
+                'Get-Command' = {
+                    param($Name)
+                    if ($Name -in @('python', 'python3', 'py')) {
+                        return $null
+                    }
+
+                    return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                }
+            } -Body {
+                Get-PythonPath -RepoRoot $global:TestScriptScopeRepoRoot |
+                    Should -Be $global:TestScriptScopeFakePython
+            }
+
+            Remove-Variable -Name TestScriptScopeRepoRoot, TestScriptScopeFakePython -Scope Global -ErrorAction SilentlyContinue
+        }
+    }
+
+    Context 'Get-PythonPackageManagerPreference poetry and pipenv chains' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Falls back from poetry preference through uv to pip' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pip') {
+                    return [PSCustomObject]@{ Name = 'pip' }
+                }
+                if ($Name -in @('uv', 'conda', 'poetry', 'pipenv')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            $original = $env:PS_PYTHON_PACKAGE_MANAGER
+            try {
+                $env:PS_PYTHON_PACKAGE_MANAGER = 'poetry'
+                (Get-PythonPackageManagerPreference).Manager | Should -Be 'pip'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PYTHON_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PYTHON_PACKAGE_MANAGER = $original
+                }
+            }
+        }
+
+        It 'Selects pipenv in auto mode when only pipenv is available' {
+            Mock Get-Command {
+                param($Name)
+                if ($Name -eq 'pipenv') {
+                    return [PSCustomObject]@{ Name = 'pipenv' }
+                }
+                if ($Name -in @('uv', 'pip', 'conda', 'poetry')) {
+                    return $null
+                }
+
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName Python
+
+            (Get-PythonPackageManagerPreference).Manager | Should -Be 'pipenv'
+        }
+    }
+
+    Context 'Library preference catch and unavailable paths' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Treats dataframe probe failures as unavailable libraries' {
+            $throwingPython = Join-Path $script:TempDir 'throwing-python.sh'
+            Set-Content -LiteralPath $throwingPython -Value @(
+                '#!/bin/sh'
+                'exit 1'
+            ) -Encoding UTF8 -NoNewline
+            if ($IsLinux -or $IsMacOS) {
+                & chmod +x $throwingPython
+            }
+
+            $result = Get-DataFrameLibraryPreference -PythonCmd $throwingPython
+            $result.Available | Should -Be $false
+        }
+
+        It 'Returns unavailable parquet defaults when PythonCmd probe throws' {
+            $throwingPython = Join-Path $script:TempDir 'throwing-parquet-python.sh'
+            Set-Content -LiteralPath $throwingPython -Value @(
+                '#!/bin/sh'
+                'exit 1'
+            ) -Encoding UTF8 -NoNewline
+            if ($IsLinux -or $IsMacOS) {
+                & chmod +x $throwingPython
+            }
+
+            $result = Get-ParquetLibraryPreference -PythonCmd $throwingPython
+            $result.Available | Should -Be $false
+        }
+
+        It 'Returns unavailable scientific defaults when PythonCmd probe throws' {
+            $throwingPython = Join-Path $script:TempDir 'throwing-scientific-python.sh'
+            Set-Content -LiteralPath $throwingPython -Value @(
+                '#!/bin/sh'
+                'exit 1'
+            ) -Encoding UTF8 -NoNewline
+            if ($IsLinux -or $IsMacOS) {
+                & chmod +x $throwingPython
+            }
+
+            $result = Get-ScientificLibraryPreference -PythonCmd $throwingPython
+            $result.Available | Should -Be $false
+        }
+    }
+
+    Context 'Get-PythonPath script-scope RepoRoot variables' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Uses script RepoRoot when the RepoRoot parameter is omitted' {
+            $repoRoot = Join-Path $script:TempDir 'script-var-repo-root'
+            $venvBin = Join-Path $repoRoot '.venv' 'bin'
+            New-Item -ItemType Directory -Path $venvBin -Force | Out-Null
+            $fakePython = Join-Path $venvBin 'python'
+            Set-Content -LiteralPath $fakePython -Value '#!/bin/sh' -Encoding UTF8
+
+            $global:TestScriptRepoRoot = $repoRoot
+            $global:TestScriptFakePython = $fakePython
+
+            InModuleScope -ModuleName Python {
+                Set-Variable -Name RepoRoot -Value $global:TestScriptRepoRoot -Scope Script -Force
+                Set-Item -Path Function:Get-Command -Value {
+                    param($Name, $ErrorAction)
+                    if ($Name -in @('python', 'python3', 'py')) {
+                        return $null
+                    }
+
+                    return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                } -Force
+
+                Get-PythonPath | Should -Be $global:TestScriptFakePython
+            }
+
+            Remove-Variable -Name TestScriptRepoRoot, TestScriptFakePython -Scope Global -ErrorAction SilentlyContinue
+        }
+
+        It 'Derives RepoRoot from script BootstrapRoot when RepoRoot is omitted' {
+            $repoRoot = Join-Path $script:TempDir 'bootstrap-derived-repo'
+            $profileDir = Join-Path $repoRoot 'profile.d'
+            $bootstrapRoot = Join-Path $profileDir 'bootstrap'
+            $venvBin = Join-Path $profileDir '.venv' 'bin'
+            New-Item -ItemType Directory -Path $venvBin -Force | Out-Null
+            New-Item -ItemType Directory -Path $bootstrapRoot -Force | Out-Null
+            $fakePython = Join-Path $venvBin 'python'
+            Set-Content -LiteralPath $fakePython -Value '#!/bin/sh' -Encoding UTF8
+
+            $global:TestBootstrapRoot = $bootstrapRoot
+            $global:TestBootstrapFakePython = $fakePython
+
+            InModuleScope -ModuleName Python {
+                Set-Variable -Name BootstrapRoot -Value $global:TestBootstrapRoot -Scope Script -Force
+                Set-Item -Path Function:Get-Command -Value {
+                    param($Name, $ErrorAction)
+                    if ($Name -in @('python', 'python3', 'py')) {
+                        return $null
+                    }
+
+                    return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                } -Force
+
+                Get-PythonPath | Should -Be $global:TestBootstrapFakePython
+            }
+
+            Remove-Variable -Name TestBootstrapRoot, TestBootstrapFakePython -Scope Global -ErrorAction SilentlyContinue
+        }
+    }
+
+    Context 'Get-PythonPath manual validation env branches' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Resolves PYTHON_HOME via Test-Path when Validation helpers are unavailable' {
+            $pythonHome = Join-Path $script:TempDir 'manual-python-home'
+            $pythonExe = Join-Path $pythonHome 'bin' 'python'
+            New-Item -ItemType Directory -Path (Split-Path -Parent $pythonExe) -Force | Out-Null
+            Set-Content -LiteralPath $pythonExe -Value '#!/bin/sh' -Encoding UTF8
+
+            $original = $env:PYTHON_HOME
+            try {
+                $env:PYTHON_HOME = $pythonHome
+                Invoke-InPythonModuleWithStub -Stubs @{
+                    'Get-Command' = {
+                        param($Name, $ErrorAction)
+                        if ($Name -eq 'Test-ValidPath') {
+                            return $null
+                        }
+                        if ($Name -in @('python', 'python3', 'py')) {
+                            return $null
+                        }
+
+                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                    }
+                } -Body {
+                    Get-PythonPath -RepoRoot (Join-Path $script:TempDir 'manual-python-home-repo') |
+                        Should -Be $pythonExe
+                }
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PYTHON_HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PYTHON_HOME = $original
+                }
+            }
+        }
+
+        It 'Resolves VIRTUAL_ENV via Test-Path when Validation helpers are unavailable' {
+            $venvRoot = Join-Path $script:TempDir 'manual-virtual-env'
+            $pythonExe = Join-Path $venvRoot 'bin' 'python'
+            New-Item -ItemType Directory -Path (Split-Path -Parent $pythonExe) -Force | Out-Null
+            Set-Content -LiteralPath $pythonExe -Value '#!/bin/sh' -Encoding UTF8
+
+            $original = $env:VIRTUAL_ENV
+            try {
+                $env:VIRTUAL_ENV = $venvRoot
+                Invoke-InPythonModuleWithStub -Stubs @{
+                    'Get-Command' = {
+                        param($Name, $ErrorAction)
+                        if ($Name -eq 'Test-ValidPath') {
+                            return $null
+                        }
+                        if ($Name -in @('python', 'python3', 'py')) {
+                            return $null
+                        }
+
+                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                    }
+                } -Body {
+                    Get-PythonPath -RepoRoot (Join-Path $script:TempDir 'manual-venv-repo') |
+                        Should -Be $pythonExe
+                }
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:VIRTUAL_ENV -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:VIRTUAL_ENV = $original
+                }
+            }
+        }
+    }
+
+    Context 'Invoke-PythonScript extended debug and failure paths' {
+        BeforeEach {
+            Clear-PythonTestEnvironment
+        }
+
+        It 'Logs level 3 details when Python is unavailable during script invocation' {
+            $isolatedRepo = Join-Path $script:TempDir 'invoke-no-python-repo'
+            $testScript = Join-Path $script:TempDir 'invoke-no-python.py'
+            New-Item -ItemType Directory -Path $isolatedRepo -Force | Out-Null
+            Set-Content -LiteralPath $testScript -Value 'print("x")' -Encoding UTF8
+            $global:TestPythonScriptPath = $testScript
+            $global:TestPythonRepoRoot = $isolatedRepo
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            try {
+                $env:PS_PROFILE_DEBUG = '3'
+                Invoke-InPythonModuleWithStub -Stubs @{
+                    'Get-PythonPath' = { $null }
+                    'Get-Command'    = {
+                        param($Name, $ErrorAction)
+                        if ($Name -in @('Write-StructuredError', 'Write-StructuredWarning')) {
+                            return $null
+                        }
+                        if ($Name -in @('python', 'python3', 'py')) {
+                            return $null
+                        }
+
+                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                    }
+                } -Body {
+                    { Invoke-PythonScript -ScriptPath $global:TestPythonScriptPath -RepoRoot $global:TestPythonRepoRoot } |
+                        Should -Throw '*Python is not available*'
+                }
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+                Remove-Variable -Name TestPythonScriptPath, TestPythonRepoRoot -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Logs level 3 details when script execution fails without output' {
+            $testScript = Join-Path $script:TempDir 'invoke-silent-fail.py'
+            Set-Content -LiteralPath $testScript -Value 'raise SystemExit(4)' -Encoding UTF8
+            $global:TestPythonScriptPath = $testScript
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            try {
+                $env:PS_PROFILE_DEBUG = '3'
+                Setup-CapturingCommandMock -CommandName 'mock-silent-python' -Output '' -ExitCode 0 -OnInvoke {
+                    if ($args -contains '--version') {
+                        $global:TestCommandCaptureState['ExitCode'] = 0
+                        return 'Python 3.11.0'
+                    }
+
+                    $global:TestCommandCaptureState['ExitCode'] = 4
+                    return ''
+                }
+
+                Invoke-InPythonModuleWithStub -Stubs @{
+                    'Get-PythonPath' = { 'mock-silent-python' }
+                    'Get-Command'    = {
+                        param($Name, $ErrorAction)
+                        if ($Name -in @('Write-StructuredError', 'Write-StructuredWarning')) {
+                            return $null
+                        }
+
+                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                    }
+                } -Body {
+                    { Invoke-PythonScript -ScriptPath $global:TestPythonScriptPath } |
+                        Should -Throw '*no output*'
+                }
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+                Remove-Variable -Name TestPythonScriptPath -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Logs level 3 details when the Python version check fails' {
+            $testScript = Join-Path $script:TempDir 'invoke-version-fail.py'
+            Set-Content -LiteralPath $testScript -Value 'print("x")' -Encoding UTF8
+            $global:TestPythonScriptPath = $testScript
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            try {
+                $env:PS_PROFILE_DEBUG = '3'
+                Setup-CapturingCommandMock -CommandName 'mock-version-fail-python' -Output 'broken' -ExitCode 1
+
+                Invoke-InPythonModuleWithStub -Stubs @{
+                    'Get-PythonPath' = { 'mock-version-fail-python' }
+                    'Get-Command'    = {
+                        param($Name, $ErrorAction)
+                        if ($Name -in @('Write-StructuredError', 'Write-StructuredWarning')) {
+                            return $null
+                        }
+
+                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+                    }
+                } -Body {
+                    { Invoke-PythonScript -ScriptPath $global:TestPythonScriptPath } |
+                        Should -Throw '*failed to execute*'
+                }
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+                Remove-Variable -Name TestPythonScriptPath -Scope Global -ErrorAction SilentlyContinue
+            }
         }
     }
 }

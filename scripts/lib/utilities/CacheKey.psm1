@@ -93,7 +93,7 @@ function New-CacheKey {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                $null = Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
                         [System.ArgumentException]::new("Prefix cannot be null or empty"),
                         'CacheKey.InvalidPrefix',
                         [System.Management.Automation.ErrorCategory]::InvalidArgument,
@@ -185,7 +185,7 @@ function New-CacheKey {
             Write-Host "  [cache-key.process]   - Is [Array]: $($Item -is [Array])" -ForegroundColor DarkGray
             Write-Host "  [cache-key.process]   - Is ICollection: $($Item -is [System.Collections.ICollection])" -ForegroundColor DarkGray
             Write-Host "  [cache-key.process]   - Is IEnumerable: $($Item -is [System.Collections.IEnumerable])" -ForegroundColor DarkGray
-            if ($null -ne $Item.Count) {
+            if ($Item -is [System.Collections.ICollection]) {
                 Write-Host "  [cache-key.process]   - Count: $($Item.Count)" -ForegroundColor DarkGray
             }
         }
@@ -290,7 +290,7 @@ function New-CacheKey {
         }
         
         if ($debugEnabled) {
-            Write-Host "  [cache-key.process] Final result count: $($result.Count), Values: [$($result -join ', ')]" -ForegroundColor DarkGray
+            Write-Host "  [cache-key.process] Final result count: $(@($result).Count), Values: [$($result -join ', ')]" -ForegroundColor DarkGray
         }
         
         return @($result)
@@ -351,7 +351,7 @@ function New-CacheKey {
             }
             $processed = Process-Component -Item $component
             if ($debugEnabled) {
-                Write-Host "  [cache-key.new] Processed result count: $($processed.Count), Values: [$($processed -join ', ')]" -ForegroundColor DarkGray
+                Write-Host "  [cache-key.new] Processed result count: $(@($processed).Count), Values: [$($processed -join ', ')]" -ForegroundColor DarkGray
             }
             if (@($processed).Count -gt 0) {
                 $sanitizedComponents += $processed
@@ -451,7 +451,7 @@ function New-FileCacheKey {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                $null = Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
                         [System.ArgumentException]::new("FilePath cannot be null or empty"),
                         'CacheKey.InvalidFilePath',
                         [System.Management.Automation.ErrorCategory]::InvalidArgument,
@@ -475,7 +475,7 @@ function New-FileCacheKey {
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                 if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                    $null = Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
                             [System.IO.FileNotFoundException]::new("File not found: $FilePath"),
                             'CacheKey.FileNotFound',
                             [System.Management.Automation.ErrorCategory]::ObjectNotFound,
@@ -498,7 +498,7 @@ function New-FileCacheKey {
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                 if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                    Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                    $null = Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
                             [System.IO.FileNotFoundException]::new("File not found: $FilePath"),
                             'CacheKey.FileNotFound',
                             [System.Management.Automation.ErrorCategory]::ObjectNotFound,
@@ -536,7 +536,7 @@ function New-FileCacheKey {
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                 if ($debugLevel -ge 1) {
                     if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "Failed to generate file hash, using modification time" -OperationName 'cache-key.file' -Context @{
+                        $null = Write-StructuredWarning -Message "Failed to generate file hash, using modification time" -OperationName 'cache-key.file' -Context @{
                             FilePath  = $FilePath
                             Algorithm = $HashAlgorithm
                             Error     = $_.Exception.Message
@@ -613,7 +613,7 @@ function New-DirectoryCacheKey {
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                $null = Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
                         [System.ArgumentException]::new("DirectoryPath cannot be null or empty"),
                         'CacheKey.InvalidDirectoryPath',
                         [System.Management.Automation.ErrorCategory]::InvalidArgument,

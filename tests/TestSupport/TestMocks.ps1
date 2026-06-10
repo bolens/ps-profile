@@ -58,6 +58,26 @@ function Reset-TestIsolationState {
         Clear-TestCommandAvailabilityStub
     }
 
+    if (Get-Command Clear-CommandTestStubs -ErrorAction SilentlyContinue) {
+        Clear-CommandTestStubs
+    }
+
+    if (Get-Command Clear-CollectionsWrapperStubs -ErrorAction SilentlyContinue) {
+        Clear-CollectionsWrapperStubs
+    }
+
+    if (Get-Command Clear-DispatcherTestStubs -ErrorAction SilentlyContinue) {
+        Clear-DispatcherTestStubs
+    }
+
+    if (Get-Command Clear-LibraryTestEnvironmentVariables -ErrorAction SilentlyContinue) {
+        Clear-LibraryTestEnvironmentVariables
+    }
+
+    if (Get-Command Clear-RuntimeTestGlobals -ErrorAction SilentlyContinue) {
+        Clear-RuntimeTestGlobals
+    }
+
     if (Get-Variable -Name 'TestRegisteredMockCommands' -Scope Global -ErrorAction SilentlyContinue) {
         foreach ($commandName in @($global:TestRegisteredMockCommands)) {
             Remove-TestFunction -Name $commandName

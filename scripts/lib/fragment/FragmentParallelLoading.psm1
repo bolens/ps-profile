@@ -83,6 +83,7 @@ function Invoke-FragmentsInParallel {
     [OutputType([hashtable])]
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [System.IO.FileInfo[]]$FragmentFiles,
 
         [string]$ProfileFragmentRoot,
@@ -130,7 +131,7 @@ function Invoke-FragmentsInParallel {
             
             if ($hasDebug -and $debugLevel -ge 2) {
                 if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Failed to load single fragment: $($fragment.BaseName)" -OperationName 'fragment-parallel-loading.single' -Context @{
+                    $null = Write-StructuredWarning -Message "Failed to load single fragment: $($fragment.BaseName)" -OperationName 'fragment-parallel-loading.single' -Context @{
                         FragmentName = $fragment.BaseName
                         Error        = $_.Exception.Message
                         ErrorType    = $_.Exception.GetType().FullName
@@ -160,9 +161,16 @@ function Invoke-FragmentsInParallel {
     $errors = [System.Collections.Generic.List[System.Management.Automation.ErrorRecord]]::new()
     $succeededFragments = [System.Collections.Generic.List[string]]::new()
     $failedFragments = [System.Collections.Generic.List[hashtable]]::new()  # List of @{Name=string; Error=string}
+    $failedFragmentNamesSet = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     $parallelSucceeded = $false
 
     try {
+        if ($env:PS_PROFILE_PARALLEL_LOAD_FORCE_POOL_ERROR -and (
+                $env:PS_PROFILE_PARALLEL_LOAD_FORCE_POOL_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                $env:PS_PROFILE_PARALLEL_LOAD_FORCE_POOL_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+            throw [System.InvalidOperationException]::new('parallel load pool error probe')
+        }
+
         # Create runspace pool
         $runspacePool = [runspacefactory]::CreateRunspacePool(1, $ThrottleLimit)
         $runspacePool.Open()
@@ -177,6 +185,21 @@ function Invoke-FragmentsInParallel {
             )
 
             try {
+                if ($env:PS_PROFILE_PARALLEL_LOAD_FORCE_RUNSPACE_FAIL -and (
+                        $env:PS_PROFILE_PARALLEL_LOAD_FORCE_RUNSPACE_FAIL.Trim().ToLowerInvariant() -eq '1' -or
+                        $env:PS_PROFILE_PARALLEL_LOAD_FORCE_RUNSPACE_FAIL.Trim().ToLowerInvariant() -eq 'true') -and
+                    $FragmentName -like '*runspace-fail*') {
+                    return @{
+                        FragmentName = $FragmentName
+                        Success      = $false
+                        Error        = [System.Management.Automation.ErrorRecord]::new(
+                            [System.InvalidOperationException]::new('runspace failure probe'),
+                            'ParallelRunspaceFailureProbe',
+                            [System.Management.Automation.ErrorCategory]::InvalidOperation,
+                            $FragmentPath)
+                    }
+                }
+
                 # Set ProfileFragmentRoot if provided
                 if ($ProfileFragmentRootValue) {
                     $global:ProfileFragmentRoot = $ProfileFragmentRootValue
@@ -242,8 +265,27 @@ function Invoke-FragmentsInParallel {
             }
         }
 
+        $useInlineTestExecution = $false
+        if ($env:PS_PROFILE_PARALLEL_LOAD_TEST_INLINE -and (
+                $env:PS_PROFILE_PARALLEL_LOAD_TEST_INLINE.Trim().ToLowerInvariant() -eq '1' -or
+                $env:PS_PROFILE_PARALLEL_LOAD_TEST_INLINE.Trim().ToLowerInvariant() -eq 'true')) {
+            $useInlineTestExecution = $true
+        }
+
         # Start all fragments in parallel
         foreach ($fragment in $FragmentFiles) {
+            if ($useInlineTestExecution) {
+                $inlineResult = & $scriptBlock $fragment.FullName $fragment.BaseName $ProfileFragmentRoot $BootstrapFragmentPath
+                $runspaces += @{
+                    PowerShell   = $null
+                    Handle       = [pscustomobject]@{ IsCompleted = $true }
+                    Fragment     = $fragment
+                    IsInline     = $true
+                    InlineResult = $inlineResult
+                }
+                continue
+            }
+
             $powershell = [PowerShell]::Create()
             $powershell.RunspacePool = $runspacePool
             $null = $powershell.AddScript($scriptBlock)
@@ -256,6 +298,7 @@ function Invoke-FragmentsInParallel {
                 PowerShell = $powershell
                 Handle     = $handle
                 Fragment   = $fragment
+                IsInline   = $false
             }
         }
 
@@ -264,12 +307,26 @@ function Invoke-FragmentsInParallel {
         $baseTimeout = 30
         $additionalTimeout = [Math]::Max(0, ($FragmentFiles.Count - 10) * 5)
         $totalTimeoutSeconds = $baseTimeout + $additionalTimeout
-        $totalTimeoutMs = $totalTimeoutSeconds * 1000  # Convert to milliseconds
+        $parsedTimeoutMs = 0
+        if ($env:PS_PROFILE_PARALLEL_LOAD_TIMEOUT_MS -and [int]::TryParse($env:PS_PROFILE_PARALLEL_LOAD_TIMEOUT_MS, [ref]$parsedTimeoutMs) -and $parsedTimeoutMs -gt 0) {
+            $totalTimeoutMs = $parsedTimeoutMs
+            $totalTimeoutSeconds = [Math]::Max(1, [int][Math]::Ceiling($parsedTimeoutMs / 1000.0))
+        }
+        else {
+            $totalTimeoutMs = $totalTimeoutSeconds * 1000  # Convert to milliseconds
+        }
+
+        if ($env:PS_PROFILE_PARALLEL_LOAD_FORCE_POLL_TIMEOUT -and (
+                $env:PS_PROFILE_PARALLEL_LOAD_FORCE_POLL_TIMEOUT.Trim().ToLowerInvariant() -eq '1' -or
+                $env:PS_PROFILE_PARALLEL_LOAD_FORCE_POLL_TIMEOUT.Trim().ToLowerInvariant() -eq 'true')) {
+            $totalTimeoutMs = 1
+            $totalTimeoutSeconds = 1
+        }
         
         # Record start time for timeout calculation
         $startTime = Get-Date
         
-        $allCompleted = $true
+        $allCompleted = $false
         $completedCount = 0
         $timedOutFragments = [System.Collections.Generic.List[string]]::new()
         
@@ -278,23 +335,36 @@ function Invoke-FragmentsInParallel {
         $pollIntervalMs = 100  # Check every 100ms
         $elapsedMs = 0
         
-        while ($elapsedMs -lt $totalTimeoutMs) {
-            $completedCount = 0
+        if ($env:PS_PROFILE_PARALLEL_LOAD_FORCE_TIMEOUT -and (
+                $env:PS_PROFILE_PARALLEL_LOAD_FORCE_TIMEOUT.Trim().ToLowerInvariant() -eq '1' -or
+                $env:PS_PROFILE_PARALLEL_LOAD_FORCE_TIMEOUT.Trim().ToLowerInvariant() -eq 'true')) {
+            $allCompleted = $false
             foreach ($rs in $runspaces) {
-                if ($rs.Handle.IsCompleted) {
-                    $completedCount++
+                if (-not $rs.Handle.IsCompleted) {
+                    $timedOutFragments.Add($rs.Fragment.BaseName)
                 }
             }
-            
-            # All fragments completed
-            if ($completedCount -eq $runspaces.Count) {
-                $allCompleted = $true
-                break
+            $completedCount = $runspaces.Count - $timedOutFragments.Count
+        }
+        else {
+            while ($elapsedMs -lt $totalTimeoutMs) {
+                $completedCount = 0
+                foreach ($rs in $runspaces) {
+                    if ($rs.Handle.IsCompleted) {
+                        $completedCount++
+                    }
+                }
+
+                # All fragments completed
+                if ($completedCount -eq $runspaces.Count) {
+                    $allCompleted = $true
+                    break
+                }
+
+                # Sleep and check again
+                Start-Sleep -Milliseconds $pollIntervalMs
+                $elapsedMs += $pollIntervalMs
             }
-            
-            # Sleep and check again
-            Start-Sleep -Milliseconds $pollIntervalMs
-            $elapsedMs += $pollIntervalMs
         }
         
         # Check for timed out fragments
@@ -321,7 +391,7 @@ function Invoke-FragmentsInParallel {
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                 if ($debugLevel -ge 1) {
                     if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "Parallel loading timeout: Only $completedCount of $($FragmentFiles.Count) fragments completed within ${totalTimeoutSeconds}s timeout. $timeoutDetails" -OperationName 'fragment-parallel-loading.execute' -Context @{
+                        $null = Write-StructuredWarning -Message "Parallel loading timeout: Only $completedCount of $($FragmentFiles.Count) fragments completed within ${totalTimeoutSeconds}s timeout. $timeoutDetails" -OperationName 'fragment-parallel-loading.execute' -Context @{
                             CompletedCount    = $completedCount
                             TotalFragments    = $FragmentFiles.Count
                             TimeoutSeconds    = $totalTimeoutSeconds
@@ -340,7 +410,7 @@ function Invoke-FragmentsInParallel {
             else {
                 # Always log warnings even if debug is off
                 if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Parallel loading timeout: Only $completedCount of $($FragmentFiles.Count) fragments completed within ${totalTimeoutSeconds}s timeout. $timeoutDetails" -OperationName 'fragment-parallel-loading.execute' -Context @{
+                    $null = Write-StructuredWarning -Message "Parallel loading timeout: Only $completedCount of $($FragmentFiles.Count) fragments completed within ${totalTimeoutSeconds}s timeout. $timeoutDetails" -OperationName 'fragment-parallel-loading.execute' -Context @{
                         # Technical context
                         CompletedCount    = $completedCount
                         TotalFragments    = $FragmentFiles.Count
@@ -362,7 +432,18 @@ function Invoke-FragmentsInParallel {
             # Collect results
             foreach ($rs in $runspaces) {
                 try {
-                    $result = $rs.PowerShell.EndInvoke($rs.Handle)
+                    if ($rs.IsInline) {
+                        $result = $rs.InlineResult
+                    }
+                    elseif ($env:PS_PROFILE_PARALLEL_LOAD_FORCE_ENDINVOKE_FAIL -and (
+                            $env:PS_PROFILE_PARALLEL_LOAD_FORCE_ENDINVOKE_FAIL.Trim().ToLowerInvariant() -eq '1' -or
+                            $env:PS_PROFILE_PARALLEL_LOAD_FORCE_ENDINVOKE_FAIL.Trim().ToLowerInvariant() -eq 'true') -and
+                        $rs.Fragment.BaseName -like '*endinvoke-fail*') {
+                        throw [System.InvalidOperationException]::new('endinvoke failure probe')
+                    }
+                    else {
+                        $result = $rs.PowerShell.EndInvoke($rs.Handle)
+                    }
                     if ($result -and $result.Success) {
                         $successCount++
                         $succeededFragments.Add($rs.Fragment.BaseName)
@@ -403,7 +484,7 @@ function Invoke-FragmentsInParallel {
                     
                     if ($hasDebug -and $debugLevel -ge 2) {
                         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                            Write-StructuredWarning -Message "Failed to collect result for fragment: $($rs.Fragment.BaseName)" -OperationName 'fragment-parallel-loading.collect' -Context @{
+                            $null = Write-StructuredWarning -Message "Failed to collect result for fragment: $($rs.Fragment.BaseName)" -OperationName 'fragment-parallel-loading.collect' -Context @{
                                 FragmentName = $rs.Fragment.BaseName
                                 Error        = $_.Exception.Message
                                 ErrorType    = $_.Exception.GetType().FullName
@@ -412,7 +493,9 @@ function Invoke-FragmentsInParallel {
                     }
                 }
                 finally {
-                    $rs.PowerShell.Dispose()
+                    if ($rs.PowerShell) {
+                        $rs.PowerShell.Dispose()
+                    }
                 }
             }
 
@@ -433,6 +516,13 @@ function Invoke-FragmentsInParallel {
                 # This happens silently (no individual messages) since we already showed batch message
                 foreach ($fragment in $FragmentFiles) {
                     try {
+                        if ($env:PS_PROFILE_PARALLEL_LOAD_FORCE_REEXEC_FAIL -and (
+                                $env:PS_PROFILE_PARALLEL_LOAD_FORCE_REEXEC_FAIL.Trim().ToLowerInvariant() -eq '1' -or
+                                $env:PS_PROFILE_PARALLEL_LOAD_FORCE_REEXEC_FAIL.Trim().ToLowerInvariant() -eq 'true') -and
+                            $fragment.BaseName -like '*reexec-fail*') {
+                            throw [System.InvalidOperationException]::new('parallel reexec failure probe')
+                        }
+
                         $debugLevel = 0
                         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
                             # Level 2 already logged above, this is redundant - remove or keep for consistency
@@ -469,7 +559,7 @@ function Invoke-FragmentsInParallel {
                     if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                         if ($debugLevel -ge 1) {
                             if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                                Write-StructuredWarning -Message "Parallel loading failed: $successCount succeeded, $failureCount failed out of $($FragmentFiles.Count) fragments. Falling back to sequential." -OperationName 'fragment-parallel-loading.execute' -Context @{
+                                $null = Write-StructuredWarning -Message "Parallel loading failed: $successCount succeeded, $failureCount failed out of $($FragmentFiles.Count) fragments. Falling back to sequential." -OperationName 'fragment-parallel-loading.execute' -Context @{
                                     SuccessCount    = $successCount
                                     FailureCount    = $failureCount
                                     TotalFragments  = $FragmentFiles.Count
@@ -482,13 +572,14 @@ function Invoke-FragmentsInParallel {
                         }
                         # Level 3: Log detailed failure information
                         if ($debugLevel -ge 3) {
-                            Write-Host "  [fragment-parallel-loading.execute] Failure details - SuccessCount: $successCount, FailureCount: $failureCount, Total: $($FragmentFiles.Count), Failed: $($failedFragments | ForEach-Object { $_.Name } | Select-Object -First 5 -join ', ')" -ForegroundColor DarkGray
+                            $failedFragmentPreview = ($failedFragments | ForEach-Object { $_.Name } | Select-Object -First 5) -join ', '
+                            Write-Host "  [fragment-parallel-loading.execute] Failure details - SuccessCount: $successCount, FailureCount: $failureCount, Total: $($FragmentFiles.Count), Failed: $failedFragmentPreview" -ForegroundColor DarkGray
                         }
                     }
                     else {
                         # Always log warnings even if debug is off
                         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                            Write-StructuredWarning -Message "Parallel loading failed: $successCount succeeded, $failureCount failed out of $($FragmentFiles.Count) fragments. Falling back to sequential." -OperationName 'fragment-parallel-loading.execute' -Context @{
+                            $null = Write-StructuredWarning -Message "Parallel loading failed: $successCount succeeded, $failureCount failed out of $($FragmentFiles.Count) fragments. Falling back to sequential." -OperationName 'fragment-parallel-loading.execute' -Context @{
                                 # Technical context
                                 SuccessCount       = $successCount
                                 FailureCount       = $failureCount
@@ -516,7 +607,7 @@ function Invoke-FragmentsInParallel {
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                     if ($debugLevel -ge 1) {
                         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                            Write-StructuredWarning -Message "Parallel loading timeout: Not all fragments completed within timeout period" -OperationName 'fragment-parallel-loading.execute' -Context @{
+                            $null = Write-StructuredWarning -Message "Parallel loading timeout: Not all fragments completed within timeout period" -OperationName 'fragment-parallel-loading.execute' -Context @{
                                 CompletedCount = $completedCount
                                 TotalFragments = $FragmentFiles.Count
                                 TimeoutSeconds = $totalTimeoutSeconds
@@ -534,10 +625,12 @@ function Invoke-FragmentsInParallel {
             }
             foreach ($rs in $runspaces) {
                 try {
-                    if (-not $rs.Handle.IsCompleted) {
-                        $rs.PowerShell.Stop()
+                    if ($rs.PowerShell) {
+                        if (-not $rs.Handle.IsCompleted) {
+                            $rs.PowerShell.Stop()
+                        }
+                        $rs.PowerShell.Dispose()
                     }
-                    $rs.PowerShell.Dispose()
                 }
                 catch {
                     # Ignore cleanup errors but log them at debug level 3
@@ -567,7 +660,7 @@ function Invoke-FragmentsInParallel {
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 1) {
                 if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                    Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-parallel-loading.execute' -Context @{
+                    $null = Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-parallel-loading.execute' -Context @{
                         FragmentFiles = $FragmentFiles.Count
                         ErrorMessage  = $errorMessage
                         ErrorDetails  = $errorDetails
@@ -580,7 +673,7 @@ function Invoke-FragmentsInParallel {
             else {
                 # Always log critical errors even if debug is off
                 if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                    Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-parallel-loading.execute' -Context @{
+                    $null = Write-StructuredError -ErrorRecord $_ -OperationName 'fragment-parallel-loading.execute' -Context @{
                         # Technical context
                         FragmentFiles         = $FragmentFiles.Count
                         FragmentNames         = $FragmentFiles | ForEach-Object { $_.BaseName }

@@ -18,7 +18,7 @@ BeforeAll {
     }
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:CollectionsPath = Join-Path $script:LibPath 'utilities' 'Collections.psm1'
-    Import-Module $script:CollectionsPath -DisableNameChecking -Force
+    Import-TestLibraryModule -ModulePath $script:CollectionsPath
 }
 
 AfterAll {
@@ -26,16 +26,7 @@ AfterAll {
 }
 
 function global:Reset-CollectionsTestModule {
-    Remove-Module Collections -ErrorAction SilentlyContinue -Force
-    Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-}
-
-function global:Clear-CollectionsWrapperStubs {
-    Remove-TestFunction -Name @(
-        'Invoke-MakeGenericTypeWrapper'
-        'Invoke-CreateInstanceWrapper'
-        'Invoke-TypeConstructorWrapper'
-    )
+    Import-TestLibraryModule -ModulePath $script:CollectionsPath -RemoveExisting
 }
 
 Describe 'Collections extended scenarios' {

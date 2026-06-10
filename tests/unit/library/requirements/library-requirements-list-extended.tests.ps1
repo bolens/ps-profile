@@ -102,9 +102,162 @@ fd
             $packages | Should -Contain 'fd'
         }
 
+        It 'Loads apt packages from the linux requirements manifest' {
+            $repoRoot = Join-Path $script:TempRoot 'linux-apt-repo'
+            $linuxFile = Join-Path $repoRoot 'requirements' 'linux.txt'
+            New-Item -ItemType Directory -Path (Split-Path $linuxFile) -Force | Out-Null
+            @'
+# --- apt
+fd-find
+jq
+
+# --- pacman
+fd
+
+# --- dnf
+gh
+'@ | Set-Content -LiteralPath $linuxFile -Encoding UTF8
+
+            $packages = @(Get-SystemRequirementsPackages -RepoRoot $repoRoot -PackageManager 'apt')
+
+            $packages | Should -Contain 'fd-find'
+            $packages | Should -Contain 'jq'
+            $packages | Should -Not -Contain 'fd'
+        }
+
+        It 'Loads pacman packages from the linux requirements manifest' {
+            $repoRoot = Join-Path $script:TempRoot 'linux-pacman-repo'
+            $linuxFile = Join-Path $repoRoot 'requirements' 'linux.txt'
+            New-Item -ItemType Directory -Path (Split-Path $linuxFile) -Force | Out-Null
+            @'
+# --- apt
+fd-find
+
+# --- pacman
+fd
+github-cli
+
+# --- dnf
+gh
+'@ | Set-Content -LiteralPath $linuxFile -Encoding UTF8
+
+            $packages = @(Get-SystemRequirementsPackages -RepoRoot $repoRoot -PackageManager 'pacman')
+
+            $packages | Should -Contain 'fd'
+            $packages | Should -Contain 'github-cli'
+        }
+
         It 'Returns an empty array for unsupported package managers' {
             $packages = @(Get-SystemRequirementsPackages -RepoRoot $script:TempRoot -PackageManager 'winget')
             @($packages).Count | Should -Be 0
+        }
+    }
+
+    Context 'Get-SystemPackageManagerKind' {
+        AfterEach {
+            Remove-Item Env:PS_SYSTEM_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+            if (Get-Command Clear-CommandTestStubs -ErrorAction SilentlyContinue) {
+                Clear-CommandTestStubs
+            }
+        }
+
+        It 'Honors PS_SYSTEM_PACKAGE_MANAGER when the command exists' {
+            Setup-CapturingCommandMock -CommandName 'apt-get' -Output ''
+            $env:PS_SYSTEM_PACKAGE_MANAGER = 'apt'
+
+            Get-SystemPackageManagerKind | Should -Be 'apt'
+        }
+
+        It 'Returns null when the preferred package manager command is unavailable' {
+            $env:PS_SYSTEM_PACKAGE_MANAGER = 'zypper'
+            Remove-TestFunction -Name @('zypper')
+
+            Get-SystemPackageManagerKind | Should -BeNullOrEmpty
+        }
+
+        It 'Detects scoop when scoop is available on PATH' {
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output 'scoop help'
+            $env:PS_SYSTEM_PACKAGE_MANAGER = 'scoop'
+
+            Get-SystemPackageManagerKind | Should -Be 'scoop'
+        }
+
+        It 'Detects dnf when yum is available on PATH' {
+            Setup-CapturingCommandMock -CommandName 'yum' -Output 'yum help'
+            $env:PS_SYSTEM_PACKAGE_MANAGER = 'yum'
+
+            Get-SystemPackageManagerKind | Should -Be 'dnf'
+        }
+    }
+
+    Context 'Get-SystemRequirementsPackages dnf section' {
+        It 'Loads dnf packages from the linux requirements manifest' {
+            $repoRoot = Join-Path $script:TempRoot 'linux-dnf-repo'
+            $linuxFile = Join-Path $repoRoot 'requirements' 'linux.txt'
+            New-Item -ItemType Directory -Path (Split-Path $linuxFile) -Force | Out-Null
+            @'
+# --- apt
+fd-find
+
+# --- pacman
+fd
+
+# --- dnf
+gh
+curl
+'@ | Set-Content -LiteralPath $linuxFile -Encoding UTF8
+
+            $packages = @(Get-SystemRequirementsPackages -RepoRoot $repoRoot -PackageManager 'dnf')
+
+            $packages | Should -Contain 'gh'
+            $packages | Should -Contain 'curl'
+        }
+    }
+
+    Context 'Missing manifest files' {
+        It 'Throws when python requirements file is missing' {
+            $missing = Join-Path $script:TempRoot 'missing-python.txt'
+            { Get-PythonRequirementsFromFile -Path $missing } | Should -Throw '*Requirements file not found*'
+        }
+
+        It 'Throws when linux requirements file is missing' {
+            $missing = Join-Path $script:TempRoot 'missing-linux.txt'
+            { Get-LinuxRequirementsFromFile -Path $missing -Section 'apt' } | Should -Throw '*Requirements file not found*'
+        }
+
+        It 'Throws when package.json is missing' {
+            $missing = Join-Path $script:TempRoot 'missing-package.json'
+            { Get-NpmRequirementsFromPackageJson -Path $missing } | Should -Throw '*package.json not found*'
+        }
+    }
+
+    Context 'Get-SystemPackageInstallCommand edge cases' {
+        It 'Returns an empty string when no package names are provided' {
+            Get-SystemPackageInstallCommand -PackageNames @() -PackageManager 'apt' | Should -Be ''
+        }
+    }
+
+    Context 'Get-SystemRequirementsPackages auto detection' {
+        AfterEach {
+            Remove-Item Env:PS_SYSTEM_PACKAGE_MANAGER -ErrorAction SilentlyContinue
+            if (Get-Command Clear-CommandTestStubs -ErrorAction SilentlyContinue) {
+                Clear-CommandTestStubs
+            }
+        }
+
+        It 'Loads scoop packages when scoop is the detected package manager' {
+            Setup-CapturingCommandMock -CommandName 'scoop' -Output 'scoop help'
+            $env:PS_SYSTEM_PACKAGE_MANAGER = 'scoop'
+
+            $repoRoot = Join-Path $script:TempRoot 'auto-scoop-repo'
+            $scoopFile = Join-Path $repoRoot 'requirements' 'scoop.txt'
+            New-Item -ItemType Directory -Path (Split-Path $scoopFile) -Force | Out-Null
+            Set-Content -LiteralPath $scoopFile -Value "bat`nfd" -Encoding UTF8
+
+            $packages = @(Get-SystemRequirementsPackages -RepoRoot $repoRoot)
+
+            $packages | Should -Contain 'bat'
+            $packages | Should -Contain 'fd'
         }
     }
 }

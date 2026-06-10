@@ -84,7 +84,7 @@ function Test-PerformanceRegression {
 
     if ($metricsHash.Count -eq 0) {
         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-            Write-StructuredWarning -Message "CurrentMetrics is empty" -OperationName 'performance-regression.test' -Context @{
+            $null = Write-StructuredWarning -Message "CurrentMetrics is empty" -OperationName 'performance-regression.test' -Context @{
                 baseline_file  = $BaselineFile
                 operation_name = $OperationName
             } -Code 'EmptyMetrics'
@@ -103,7 +103,7 @@ function Test-PerformanceRegression {
             else {
                 # Always log warnings even if debug is off
                 if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "CurrentMetrics is empty" -OperationName 'performance-regression.test' -Context @{
+                    $null = Write-StructuredWarning -Message "CurrentMetrics is empty" -OperationName 'performance-regression.test' -Context @{
                         # Technical context
                         baseline_file  = $BaselineFile
                         operation_name = $OperationName
@@ -179,7 +179,7 @@ function Test-PerformanceRegression {
     }
     catch {
         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-            Write-StructuredWarning -Message "Failed to load baseline" -OperationName 'performance-regression.test' -Context @{
+            $null = Write-StructuredWarning -Message "Failed to load baseline" -OperationName 'performance-regression.test' -Context @{
                 baseline_file  = $BaselineFile
                 operation_name = $OperationName
                 error_message  = $_.Exception.Message
@@ -199,7 +199,7 @@ function Test-PerformanceRegression {
             else {
                 # Always log warnings even if debug is off
                 if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Failed to load baseline" -OperationName 'performance-regression.test' -Context @{
+                    $null = Write-StructuredWarning -Message "Failed to load baseline" -OperationName 'performance-regression.test' -Context @{
                         # Technical context
                         baseline_file  = $BaselineFile
                         operation_name = $OperationName

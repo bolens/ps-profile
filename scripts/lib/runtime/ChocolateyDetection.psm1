@@ -106,8 +106,9 @@ function Get-ChocolateyRoot {
     )
     
     foreach ($envVar in $chocoEnvVars) {
-        if (Get-Variable -Name "env:$envVar" -ErrorAction SilentlyContinue) {
-            $candidate = (Get-Variable -Name "env:$envVar" -ErrorAction SilentlyContinue).Value
+        $envItem = Get-Item -Path "Env:\$envVar" -ErrorAction SilentlyContinue
+        if ($null -ne $envItem) {
+            $candidate = $envItem.Value
             if ($candidate -and -not [string]::IsNullOrWhiteSpace($candidate)) {
                 # If it points to a subdirectory, try to get the parent
                 $testPath = $candidate
@@ -351,7 +352,7 @@ function Test-ChocolateyInstalled {
             }
             if ($hasDebug) {
                 if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Chocolatey root found but 'choco' command not available" -OperationName 'chocolatey-detection.test-installed' -Context @{
+                    $null = Write-StructuredWarning -Message "Chocolatey root found but 'choco' command not available" -OperationName 'chocolatey-detection.test-installed' -Context @{
                         choco_root = $chocoRoot
                     } -Code 'ChocoCommandNotFound'
                 }

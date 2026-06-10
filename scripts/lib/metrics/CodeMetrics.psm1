@@ -164,6 +164,19 @@ function Get-CodeMetrics {
         $fileAdded = $false
         
         try {
+            if ($env:PS_PROFILE_CODE_METRICS_FORCE_READ_FAIL -and (
+                    $env:PS_PROFILE_CODE_METRICS_FORCE_READ_FAIL.Trim().ToLowerInvariant() -eq '1' -or
+                    $env:PS_PROFILE_CODE_METRICS_FORCE_READ_FAIL.Trim().ToLowerInvariant() -eq 'true') -and
+                $script.BaseName -like '*force-read-fail*') {
+                $probeMessage = if ($env:PS_PROFILE_CODE_METRICS_FORCE_READ_MSG) {
+                    $env:PS_PROFILE_CODE_METRICS_FORCE_READ_MSG
+                }
+                else {
+                    'forced code metrics read failure probe'
+                }
+                throw [System.IO.IOException]::new($probeMessage)
+            }
+
             # Use FileContent module if available
             $content = if (Get-Command Read-FileContent -ErrorAction SilentlyContinue) {
                 Read-FileContent -Path $script.FullName -ErrorAction Stop
@@ -287,7 +300,7 @@ function Get-CodeMetrics {
             # Also clean up repetitive patterns like multiple semicolons
             $errorMsg = $errorMsg -replace ';{3,}', ';'
             if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-metrics.analyze' -Context @{
+                $null = Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-metrics.analyze' -Context @{
                     script_path   = $script.FullName
                     error_message = $errorMsg
                 } -Code 'ScriptAnalysisFailed'
@@ -299,7 +312,7 @@ function Get-CodeMetrics {
                     if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                         if ($debugLevel -ge 1) {
                             if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                                Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-metrics.analyze' -Context @{
+                                $null = Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-metrics.analyze' -Context @{
                                     # Technical context
                                     script_path   = $script.FullName
                                     script_name   = $script.Name
@@ -324,7 +337,7 @@ function Get-CodeMetrics {
                     else {
                         # Always log warnings even if debug is off
                         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                            Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-metrics.analyze' -Context @{
+                            $null = Write-StructuredWarning -Message "Failed to analyze script" -OperationName 'code-metrics.analyze' -Context @{
                                 script_path   = $script.FullName
                                 script_name   = $script.Name
                                 error_message = $errorMsg

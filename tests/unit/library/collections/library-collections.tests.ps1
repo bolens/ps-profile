@@ -27,8 +27,7 @@ BeforeAll {
             throw "Collections module not found at: $script:CollectionsPath"
         }
 
-        Remove-Module Collections -ErrorAction SilentlyContinue -Force
-        Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
+        Import-TestLibraryModule -ModulePath $script:CollectionsPath -RemoveExisting
 
         $funcs = Get-Command -Module Collections -ErrorAction SilentlyContinue
         if (-not $funcs -or $funcs.Count -eq 0) {
@@ -56,16 +55,7 @@ AfterAll {
 }
 
 function global:Reset-TestCollectionsModule {
-    Remove-Module Collections -ErrorAction SilentlyContinue -Force
-    Import-Module $script:CollectionsPath -DisableNameChecking -ErrorAction Stop -Force
-}
-
-function global:Clear-CollectionsWrapperStubs {
-    Remove-TestFunction -Name @(
-        'Invoke-MakeGenericTypeWrapper'
-        'Invoke-CreateInstanceWrapper'
-        'Invoke-TypeConstructorWrapper'
-    )
+    Import-TestLibraryModule -ModulePath $script:CollectionsPath -RemoveExisting
 }
 
 Describe 'Collections Module Functions' {

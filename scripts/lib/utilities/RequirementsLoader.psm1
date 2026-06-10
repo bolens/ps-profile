@@ -171,7 +171,7 @@ function Import-Requirements {
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
                 if ($debugLevel -ge 1) {
                     if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "Failed to load modular requirements" -OperationName 'requirements-loader.import' -Context @{
+                        $null = Write-StructuredWarning -Message "Failed to load modular requirements" -OperationName 'requirements-loader.import' -Context @{
                             requirements_loader_path = $requirementsLoaderPath
                             repo_root = $RepoRoot
                             error_message = $_.Exception.Message
@@ -189,7 +189,7 @@ function Import-Requirements {
             else {
                 # Always log warnings even if debug is off
                 if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Failed to load modular requirements" -OperationName 'requirements-loader.import' -Context @{
+                    $null = Write-StructuredWarning -Message "Failed to load modular requirements" -OperationName 'requirements-loader.import' -Context @{
                         # Technical context
                         requirements_loader_path = $requirementsLoaderPath
                         repo_root = $RepoRoot
@@ -214,7 +214,7 @@ function Import-Requirements {
     if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
         if ($debugLevel -ge 1) {
             if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-                Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+                $null = Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
                     [System.Exception]::new($errorMsg),
                     'RequirementsLoaderNotFound',
                     [System.Management.Automation.ErrorCategory]::ObjectNotFound,
@@ -242,7 +242,7 @@ function Import-Requirements {
     else {
         # Always log critical errors even if debug is off
         if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
+            $null = Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
                 [System.Exception]::new($errorMsg),
                 'RequirementsLoaderNotFound',
                 [System.Management.Automation.ErrorCategory]::ObjectNotFound,

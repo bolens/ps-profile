@@ -13,6 +13,8 @@ BeforeAll {
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:RequirementsLoaderPath = Join-Path $script:LibPath 'utilities' 'RequirementsLoader.psm1'
     
+    Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+    
     # Import Cache module first (dependency)
     $cachePath = Join-Path $script:LibPath 'utilities' 'Cache.psm1'
     if (Test-Path $cachePath) {
@@ -150,13 +152,15 @@ Describe 'RequirementsLoader Module Functions' {
             # Change to a subdirectory and test detection
             $subDir = Join-Path $testRepoRoot 'subdir'
             New-Item -ItemType Directory -Path $subDir -Force | Out-Null
-            
-            Push-Location $subDir
-                        $result = Import-Requirements
-            $result | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            Pop-Location
+
+            try {
+                Push-Location $subDir
+                $result = Import-Requirements
+                $result | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Handles loader script errors gracefully' {

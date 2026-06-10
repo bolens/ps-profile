@@ -34,7 +34,31 @@ function Test-CommandStructuredWarningAvailable {
         return $false
     }
 
-    return $null -ne (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue)
+    return $null -ne (Get-SessionScopedCommand -Name 'Write-StructuredWarning')
+}
+
+function Get-SessionScopedCommand {
+    <#
+    .SYNOPSIS
+        Resolves a command from the current or global session scope.
+
+    .DESCRIPTION
+        Library modules imported into Pester's local scope cannot always see helper
+        commands from other modules. Falling back to the global scope keeps
+        Test-CommandAvailable and Resolve-InstallCommand working in combined runs.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Name
+    )
+
+    $command = Get-Command -Name $Name -ErrorAction SilentlyContinue
+    if ($command) {
+        return $command
+    }
+
+    return Get-Command -Name $Name -Scope Global -ErrorAction SilentlyContinue
 }
 
 # Import Cache module for caching support
@@ -131,7 +155,7 @@ function Test-CommandAvailable {
     }
 
     # Validate command name using Validation module if available
-    if (Get-Command Test-ValidString -ErrorAction SilentlyContinue) {
+    if (Get-SessionScopedCommand -Name 'Test-ValidString') {
         if (-not (Test-ValidString -Value $CommandName)) {
             return $false
         }
@@ -140,14 +164,14 @@ function Test-CommandAvailable {
     # Check cache first (cache for 5 minutes)
     # Use CacheKey module if available for consistent key generation
     $debugLevel = 0
-    $cacheKey = if (Get-Command New-CacheKey -ErrorAction SilentlyContinue) {
+    $cacheKey = if (Get-SessionScopedCommand -Name 'New-CacheKey') {
         # New-CacheKey expects Components to be an array, wrap single string in array
         New-CacheKey -Prefix 'CommandAvailable' -Components @($CommandName)
     }
     else {
         "CommandAvailable_$CommandName"
     }
-    if (Get-Command Get-CachedValue -ErrorAction SilentlyContinue) {
+    if (Get-SessionScopedCommand -Name 'Get-CachedValue') {
         $cachedResult = Get-CachedValue -Key $cacheKey
         if ($null -ne $cachedResult) {
             # Level 3: Log cache hit
@@ -159,9 +183,9 @@ function Test-CommandAvailable {
     }
 
     # Use Test-CachedCommand if available from profile (more efficient)
-    if ((Test-Path Function:Test-CachedCommand) -or (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue)) {
+    if (Get-SessionScopedCommand -Name 'Test-CachedCommand') {
         $result = Test-CachedCommand $CommandName
-        if (Get-Command Set-CachedValue -ErrorAction SilentlyContinue) {
+        if (Get-SessionScopedCommand -Name 'Set-CachedValue') {
             Set-CachedValue -Key $cacheKey -Value $result -ExpirationSeconds 300
         }
         # Level 2: Log command availability check result
@@ -178,7 +202,7 @@ function Test-CommandAvailable {
     # Fallback: use Get-Command
     $command = Get-Command -Name $CommandName -ErrorAction SilentlyContinue
     $result = $null -ne $command
-    if (Get-Command Set-CachedValue -ErrorAction SilentlyContinue) {
+    if (Get-SessionScopedCommand -Name 'Set-CachedValue') {
         Set-CachedValue -Key $cacheKey -Value $result -ExpirationSeconds 300
     }
     # Level 2: Log command availability check result
@@ -248,8 +272,13 @@ function Resolve-InstallCommand {
     }
     
     # Get platform
-    $platform = if (Get-Command Get-Platform -ErrorAction SilentlyContinue) {
-        (Get-Platform).Name
+    $forcedPlatformName = [Environment]::GetEnvironmentVariable('PS_PROFILE_PLATFORM_FORCE_NAME')
+    $platformCmdlet = Get-SessionScopedCommand -Name 'Get-Platform'
+    $platform = if (-not [string]::IsNullOrWhiteSpace($forcedPlatformName)) {
+        $forcedPlatformName.Trim()
+    }
+    elseif ($platformCmdlet) {
+        (& $platformCmdlet).Name
     }
     elseif ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
         'Windows'

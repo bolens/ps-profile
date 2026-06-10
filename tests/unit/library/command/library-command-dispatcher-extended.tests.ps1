@@ -19,8 +19,8 @@ BeforeAll {
 
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $fragmentLib = Join-Path $script:RepoRoot 'scripts' 'lib' 'fragment'
-    Import-Module (Join-Path $fragmentLib 'FragmentCommandRegistry.psm1') -DisableNameChecking -Force
-    Import-Module (Join-Path $fragmentLib 'CommandDispatcher.psm1') -DisableNameChecking -Force
+    Import-TestLibraryModule -ModulePath (Join-Path $fragmentLib 'FragmentCommandRegistry.psm1')
+    Import-TestLibraryModule -ModulePath (Join-Path $fragmentLib 'CommandDispatcher.psm1')
 }
 
 AfterAll {
@@ -28,9 +28,7 @@ AfterAll {
         Unregister-CommandDispatcher | Out-Null
     }
 
-    Remove-Item Function:\Load-FragmentForCommand -ErrorAction SilentlyContinue -Force
-    Remove-Item Function:\Invoke-WithWideEvent -ErrorAction SilentlyContinue -Force
-    Remove-Item Function:\DispatcherExtendedTestCmd -ErrorAction SilentlyContinue -Force
+    Clear-DispatcherTestStubs
     Remove-Module CommandDispatcher, FragmentCommandRegistry -ErrorAction SilentlyContinue -Force
 }
 
@@ -44,11 +42,8 @@ Describe 'CommandDispatcher extended scenarios' {
 
     AfterEach {
         Unregister-CommandDispatcher -ErrorAction SilentlyContinue | Out-Null
-        Remove-Item Function:\Load-FragmentForCommand -ErrorAction SilentlyContinue -Force
-        Remove-Item Function:\Invoke-WithWideEvent -ErrorAction SilentlyContinue -Force
-        Remove-Item Function:\DispatcherExtendedTestCmd -ErrorAction SilentlyContinue -Force
-        Remove-Item Env:PS_PROFILE_AUTO_LOAD_TIMEOUT -ErrorAction SilentlyContinue
-        Remove-Item Env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
+        Clear-DispatcherTestStubs
+        Clear-LibraryTestEnvironmentVariables
     }
 
     Context 'Auto-load configuration helpers' {
@@ -119,7 +114,7 @@ Describe 'CommandDispatcher extended scenarios' {
 
         It 'Uses the direct dispatch path when Invoke-WithWideEvent is unavailable' {
             Register-FragmentCommand -CommandName 'DispatcherExtendedTestCmd' -FragmentName 'bootstrap' -CommandType 'Function' | Out-Null
-            Remove-Item Function:\Invoke-WithWideEvent -ErrorAction SilentlyContinue -Force
+            Remove-TestFunction -Name 'Invoke-WithWideEvent'
 
             function global:Load-FragmentForCommand {
                 param([string]$CommandName)

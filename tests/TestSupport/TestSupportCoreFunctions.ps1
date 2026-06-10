@@ -142,3 +142,166 @@ function Import-ProfileFragmentWithShadowedCommands {
         }
     }
 }
+
+function Import-TestLibraryModule {
+    <#
+    .SYNOPSIS
+        Imports a library module into the global session for Pester-safe visibility.
+
+    .DESCRIPTION
+        Pester loads test modules in a local scope. Importing library dependencies
+        globally keeps helper commands such as Get-CachedValue visible inside modules
+        under test during combined runs.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ModulePath,
+
+        [switch]$RemoveExisting
+    )
+
+    if ($RemoveExisting -and $ModulePath) {
+        $moduleName = [System.IO.Path]::GetFileNameWithoutExtension($ModulePath)
+        if (-not [string]::IsNullOrWhiteSpace($moduleName)) {
+            Remove-Module -Name $moduleName -ErrorAction SilentlyContinue -Force
+        }
+    }
+
+    Import-Module -Name $ModulePath -DisableNameChecking -Global -Force -ErrorAction Stop
+}
+
+function Clear-CommandTestStubs {
+    <#
+    .SYNOPSIS
+        Removes command-module test stubs that leak across combined Pester runs.
+    #>
+    [CmdletBinding()]
+    param()
+
+    Remove-TestFunction -Name @(
+        'Test-CachedCommand'
+        'Test-ValidString'
+        'Get-PreferenceAwareInstallHint'
+        'Get-PythonPackageInstallRecommendation'
+        'Get-NodePackageInstallRecommendation'
+        'Get-Platform'
+        'Import-Requirements'
+        'Get-RepoRoot'
+        'CommandFailureProbe'
+        'Import-ModuleSafely'
+        'Test-FailingCommand'
+        'Test-ThrowingCommand'
+        'Test-ThrowingCommand2'
+    )
+}
+
+function Clear-CollectionsWrapperStubs {
+    <#
+    .SYNOPSIS
+        Removes Collections reflection wrapper stubs created during unit tests.
+    #>
+    [CmdletBinding()]
+    param()
+
+    Remove-TestFunction -Name @(
+        'Invoke-MakeGenericTypeWrapper'
+        'Invoke-CreateInstanceWrapper'
+        'Invoke-TypeConstructorWrapper'
+    )
+}
+
+function Clear-DispatcherTestStubs {
+    <#
+    .SYNOPSIS
+        Removes CommandDispatcher test doubles from the global function drive.
+    #>
+    [CmdletBinding()]
+    param()
+
+    Remove-TestFunction -Name @(
+        'Load-FragmentForCommand'
+        'Invoke-WithWideEvent'
+        'DispatcherExtendedTestCmd'
+    )
+}
+
+function Clear-LibraryTestEnvironmentVariables {
+    <#
+    .SYNOPSIS
+        Clears environment variables commonly mutated by library unit tests.
+    #>
+    [CmdletBinding()]
+    param(
+        [string[]]$AdditionalNames
+    )
+
+    $names = @(
+        'PS_PROFILE_DEBUG'
+        'PS_PROFILE_PLATFORM_FORCE_NAME'
+        'PS_PROFILE_COMMAND_DISABLE_STRUCTURED_WARNING'
+        'PS_PROFILE_COMMAND_FORCE_CACHE_IMPORT_ERROR'
+        'PS_PROFILE_COMMAND_FORCE_MANUAL_CACHE_IMPORT'
+        'PS_PROFILE_COMMAND_FORCE_MANUAL_INSTALL_RESOLVE'
+        'PS_PROFILE_AUTO_LOAD_FRAGMENTS'
+        'PS_PROFILE_AUTO_LOAD_TIMEOUT'
+        'PYTHON'
+        'PYTHON_HOME'
+        'PYTHON_ROOT'
+        'VIRTUAL_ENV'
+        'CONDA_PREFIX'
+        'PS_PYTHON_RUNTIME'
+        'PS_DATA_FRAME_LIB'
+        'PS_PYTHON_PACKAGE_MANAGER'
+        'PS_PARQUET_LIB'
+        'PS_SCIENTIFIC_LIB'
+        'PNPM_HOME'
+        'PNPM_ROOT'
+        'NPM_CONFIG_PREFIX'
+        'NODE_PATH'
+        'NVM_DIR'
+        'PS_NODE_PACKAGE_MANAGER'
+        'PS_PROFILE_REPO_ROOT'
+        'LOCALAPPDATA'
+    )
+
+    if ($AdditionalNames) {
+        $names = @($names + $AdditionalNames) | Select-Object -Unique
+    }
+
+    foreach ($name in $names) {
+        Remove-Item -Path "Env:$name" -ErrorAction SilentlyContinue
+    }
+}
+
+function Clear-RuntimeTestGlobals {
+    <#
+    .SYNOPSIS
+        Clears global state mutated by Python and NodeJs runtime unit tests.
+    #>
+    [CmdletBinding()]
+    param()
+
+    $global:BinaryConversionBasePath = $null
+
+    if (Get-Command Mark-TestCommandsUnavailable -ErrorAction SilentlyContinue) {
+        Mark-TestCommandsUnavailable -CommandNames @(
+            'python', 'python3', 'py', 'pip', 'uv', 'conda', 'poetry', 'pipenv',
+            'pnpm', 'npm', 'node', 'yarn', 'bun'
+        )
+    }
+}
+
+function Reset-TestLibraryModule {
+    <#
+    .SYNOPSIS
+        Reimports a library module globally for isolated test resets.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ModulePath
+    )
+
+    Import-TestLibraryModule -ModulePath $ModulePath -RemoveExisting
+}

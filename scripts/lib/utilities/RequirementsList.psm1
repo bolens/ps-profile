@@ -442,6 +442,7 @@ function Get-SystemPackageInstallCommand {
     [OutputType([string])]
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [string[]]$PackageNames,
 
         [Parameter(Mandatory)]
