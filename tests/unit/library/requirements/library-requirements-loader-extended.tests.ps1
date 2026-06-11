@@ -31,15 +31,6 @@ function script:Clear-RequirementsLoaderTestEnvironment {
     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 AfterAll {
     Clear-RequirementsLoaderTestEnvironment
     Remove-Module RequirementsLoader, DataFile, CacheKey, Cache -ErrorAction SilentlyContinue -Force

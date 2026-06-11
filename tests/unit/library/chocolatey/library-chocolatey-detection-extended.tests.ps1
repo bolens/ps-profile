@@ -42,23 +42,6 @@ function script:Clear-ChocolateyTestEnvironment {
     }
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    function global:Write-StructuredWarning {
-        param(
-            [string]$Message,
-            [string]$OperationName,
-            [hashtable]$Context,
-            [string]$Code
-        )
-
-        return $null
-    }
-}
-
 AfterAll {
     Clear-ChocolateyTestEnvironment
     if ($script:TempDir -and (Test-Path -LiteralPath $script:TempDir)) {

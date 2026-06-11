@@ -46,15 +46,6 @@ AfterAll {
     }
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 Describe 'MetricsHistory extended scenarios' {
     Context 'Get-HistoricalMetrics' {
         It 'Returns exactly one snapshot when Limit is 1' {

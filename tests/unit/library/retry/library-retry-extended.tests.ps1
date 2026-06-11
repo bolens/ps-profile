@@ -22,15 +22,6 @@ BeforeAll {
     Import-Module (Join-Path $script:LibPath 'core' 'Retry.psm1') -DisableNameChecking -Force
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 AfterAll {
     Remove-Module Retry -ErrorAction SilentlyContinue -Force
 }

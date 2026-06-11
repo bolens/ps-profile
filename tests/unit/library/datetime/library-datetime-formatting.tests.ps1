@@ -323,24 +323,25 @@ Describe 'DateTimeFormatting Module Functions' {
         }
 
         It 'Uses Format-LocaleDate when available' {
-            # Create a mock Format-LocaleDate function in global scope
             $mockBody = {
                 param([DateTime]$Date, [string]$Format)
                 return "LOCALE:$($Date.ToString($Format))"
             }
-            
+
             $originalCmd = Get-Command Format-LocaleDate -ErrorAction SilentlyContinue
             if (-not $originalCmd) {
                 Set-Item -Path Function:\global:Format-LocaleDate -Value $mockBody -Force
             }
-            
-                        $date = Get-Date '2024-01-15 14:30:00'
-            $result = Format-DateTimeHuman -DateTime $date -Format 'yyyy-MM-dd'
-            $result | Should -Match 'LOCALE:'
-        }
-        finally {
-            if (-not $originalCmd) {
-                Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
+
+            try {
+                $date = Get-Date '2024-01-15 14:30:00'
+                $result = Format-DateTimeHuman -DateTime $date -Format 'yyyy-MM-dd'
+                $result | Should -Match 'LOCALE:'
+            }
+            finally {
+                if (-not $originalCmd) {
+                    Remove-Item -Path Function:\global:Format-LocaleDate -Force -ErrorAction SilentlyContinue
+                }
             }
         }
     }

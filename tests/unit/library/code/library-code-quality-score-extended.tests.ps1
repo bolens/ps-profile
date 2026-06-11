@@ -22,20 +22,15 @@ BeforeAll {
     Import-Module (Join-Path $script:LibPath 'metrics' 'CodeQualityScore.psm1') -DisableNameChecking -Force
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 AfterAll {
     Remove-Module CodeQualityScore -ErrorAction SilentlyContinue -Force
 }
 
 Describe 'CodeQualityScore extended scenarios' {
+    BeforeEach {
+        Enable-TestStructuredLogging
+    }
+
     Context 'Get-CodeQualityScore' {
         It 'Produces a higher score for clean metrics with strong coverage' {
             $metrics = [PSCustomObject]@{
@@ -375,6 +370,92 @@ Describe 'CodeQualityScore extended scenarios' {
             $denseDensity = (Get-CodeQualityScore -CodeMetrics $dense).ComponentScores.FunctionDensity
 
             $denseDensity | Should -BeLessThan $balancedDensity
+        }
+
+        It 'Warns with Write-Warning when a required metric is missing and structured logging is unavailable' {
+            $metrics = [PSCustomObject]@{
+                TotalLines      = 100
+                TotalFunctions  = 5
+                TotalComplexity = 10
+            }
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+            Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
+
+            try {
+                { Get-CodeQualityScore -CodeMetrics $metrics } | Should -Throw '*DuplicateFunctions*'
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Emits verbose missing-property details when PS_PROFILE_DEBUG is level 3 without structured logging' {
+            $metrics = [PSCustomObject]@{
+                TotalLines      = 100
+                TotalFunctions  = 5
+                TotalComplexity = 10
+            }
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+            Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
+
+            try {
+                { Get-CodeQualityScore -CodeMetrics $metrics } | Should -Throw '*DuplicateFunctions*'
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses structured warnings for missing properties when debug is disabled' {
+            Enable-TestStructuredLogging
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+
+            $metrics = [PSCustomObject]@{
+                TotalLines      = 100
+                TotalFunctions  = 5
+                TotalComplexity = 10
+            }
+
+            { Get-CodeQualityScore -CodeMetrics $metrics } | Should -Throw '*DuplicateFunctions*'
+        }
+
+        It 'Warns when CoveragePercent is missing and debug level 3 is enabled without structured logging' {
+            $metrics = [PSCustomObject]@{
+                TotalLines         = 100
+                TotalFunctions     = 5
+                TotalComplexity    = 10
+                DuplicateFunctions = 0
+                AverageLinesPerFile = 100
+            }
+            $coverage = [PSCustomObject]@{ TotalLines = 50 }
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+            Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
+
+            try {
+                $result = Get-CodeQualityScore -CodeMetrics $metrics -TestCoverage $coverage
+                $result.ComponentScores.Coverage | Should -Be 0
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
         }
     }
 }

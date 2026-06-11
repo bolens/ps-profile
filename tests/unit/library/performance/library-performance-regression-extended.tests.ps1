@@ -33,23 +33,6 @@ function script:Clear-PerformanceRegressionTestEnvironment {
     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    function global:Write-StructuredWarning {
-        param(
-            [string]$Message,
-            [string]$OperationName,
-            [hashtable]$Context,
-            [string]$Code
-        )
-
-        return $null
-    }
-}
-
 AfterAll {
     Clear-PerformanceRegressionTestEnvironment
     Remove-Module PerformanceRegression, JsonUtilities -ErrorAction SilentlyContinue -Force

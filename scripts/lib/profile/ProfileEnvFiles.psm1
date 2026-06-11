@@ -32,7 +32,7 @@ function Initialize-ProfileEnvFiles {
     
     if ($envFileModuleExists) {
         try {
-            Import-Module $envFileModule -DisableNameChecking -ErrorAction SilentlyContinue
+            Import-Module $envFileModule -DisableNameChecking -ErrorAction SilentlyContinue -Force
             if (Get-Command Initialize-EnvFiles -ErrorAction SilentlyContinue) {
                 # Use -Overwrite to ensure .env file values override any existing (even empty) environment variables
                 Initialize-EnvFiles -RepoRoot $ProfileDir -Overwrite -ErrorAction SilentlyContinue

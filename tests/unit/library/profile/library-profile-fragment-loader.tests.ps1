@@ -57,13 +57,15 @@ Describe 'ProfileFragmentLoader helpers' {
         It 'Returns false for missing module paths' {
             $global:TestReloadModulePath = Join-Path $script:TempDir 'missing.psm1'
 
-                        InModuleScope -ModuleName ProfileFragmentLoader {
-                Test-AndReloadModuleIfChanged -ModulePath $global:TestReloadModulePath -ModuleName 'MissingModule' |
-                    Should -Be $false
+            try {
+                InModuleScope -ModuleName ProfileFragmentLoader {
+                    Test-AndReloadModuleIfChanged -ModulePath $global:TestReloadModulePath -ModuleName 'MissingModule' |
+                        Should -Be $false
+                }
             }
-        }
-        finally {
-            Remove-Variable -Name TestReloadModulePath -Scope Global -ErrorAction SilentlyContinue
+            finally {
+                Remove-Variable -Name TestReloadModulePath -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Caches write time on first inspection without forcing reload' {

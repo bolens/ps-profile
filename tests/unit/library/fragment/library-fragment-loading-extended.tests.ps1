@@ -32,15 +32,6 @@ BeforeAll {
     $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 function script:Get-FragmentTierResult {
     param([object]$FragmentFile)
 

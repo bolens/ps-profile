@@ -42,15 +42,6 @@ function script:Clear-ParallelLoadTestEnvironment {
     }
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 AfterAll {
     Clear-ParallelLoadTestEnvironment
     Remove-Module FragmentParallelLoading -ErrorAction SilentlyContinue -Force

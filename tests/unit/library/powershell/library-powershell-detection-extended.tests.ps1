@@ -55,5 +55,37 @@ Describe 'PowerShellDetection extended scenarios' {
             $result | Should -Not -BeNullOrEmpty
             $result | Should -Not -Match '[\\/]'
         }
+
+        It 'Returns pwsh when PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION requests core' {
+            $original = $env:PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION
+            try {
+                $env:PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION = 'core'
+                Get-PowerShellExecutable | Should -Be 'pwsh'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION = $original
+                }
+            }
+        }
+
+        It 'Returns powershell when PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION requests desktop' {
+            $original = $env:PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION
+            try {
+                $env:PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION = 'desktop'
+                Get-PowerShellExecutable | Should -Be 'powershell'
+            }
+            finally {
+                if ($null -eq $original) {
+                    Remove-Item Env:PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION = $original
+                }
+            }
+        }
     }
 }

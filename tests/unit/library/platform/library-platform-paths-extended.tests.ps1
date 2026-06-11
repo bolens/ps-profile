@@ -345,6 +345,43 @@ XDG_DOWNLOAD_DIR="$HOME/Downloads"
             }
         }
 
+        It 'Uses LOCALAPPDATA for data directory when XDG_DATA_HOME is unset' {
+            $originalXdgData = $env:XDG_DATA_HOME
+            $originalLocal = $env:LOCALAPPDATA
+            $customLocal = Join-Path $script:TempRoot 'local-data-root'
+
+            try {
+                Remove-Item Env:XDG_DATA_HOME -ErrorAction SilentlyContinue
+                $env:LOCALAPPDATA = $customLocal
+
+                Get-DataDirectory -ApplicationName 'profile-data' |
+                    Should -Be (Join-Path $customLocal 'profile-data')
+            }
+            finally {
+                $env:XDG_DATA_HOME = $originalXdgData
+                if ($null -eq $originalLocal) {
+                    Remove-Item Env:LOCALAPPDATA -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:LOCALAPPDATA = $originalLocal
+                }
+            }
+        }
+
+        It 'Returns data root without application suffix when ApplicationName is omitted' {
+            $originalXdgData = $env:XDG_DATA_HOME
+            $customDataRoot = Join-Path $script:TempRoot 'bare-data-root'
+
+            try {
+                Remove-Item Env:LOCALAPPDATA -ErrorAction SilentlyContinue
+                $env:XDG_DATA_HOME = $customDataRoot
+                Get-DataDirectory | Should -Be $customDataRoot
+            }
+            finally {
+                $env:XDG_DATA_HOME = $originalXdgData
+            }
+        }
+
         It 'Uses the Windows AppData layout for Wrangler config paths' {
             $originalAppData = $env:APPDATA
             $originalXdg = $env:XDG_CONFIG_HOME

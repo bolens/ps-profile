@@ -61,7 +61,7 @@ function Get-MetricsTrend {
         foreach ($data in $HistoricalData) {
             if ($null -eq $data) {
                 if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "HistoricalData array contains null value" -OperationName 'metrics-trend-analysis.analyze' -Context @{
+                    $null = Write-StructuredWarning -Message "HistoricalData array contains null value" -OperationName 'metrics-trend-analysis.analyze' -Context @{
                         data_count = $HistoricalData.Count
                     } -Code 'NullDataValue'
                 }
@@ -79,7 +79,7 @@ function Get-MetricsTrend {
                     else {
                         # Always log warnings even if debug is off
                         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                            Write-StructuredWarning -Message "HistoricalData array contains null value" -OperationName 'metrics-trend-analysis.analyze' -Context @{
+                            $null = Write-StructuredWarning -Message "HistoricalData array contains null value" -OperationName 'metrics-trend-analysis.analyze' -Context @{
                                 # Technical context
                                 data_count = $HistoricalData.Count
                                 metric_name = $MetricName
@@ -101,7 +101,7 @@ function Get-MetricsTrend {
 
     if ($HistoricalData.Count -lt 2) {
         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-            Write-StructuredWarning -Message "Insufficient data for trend analysis" -OperationName 'metrics-trend-analysis.analyze' -Context @{
+            $null = Write-StructuredWarning -Message "Insufficient data for trend analysis" -OperationName 'metrics-trend-analysis.analyze' -Context @{
                 data_points = $HistoricalData.Count
                 metric_name = $MetricName
             } -Code 'InsufficientData'
@@ -120,7 +120,7 @@ function Get-MetricsTrend {
             else {
                 # Always log warnings even if debug is off
                 if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Insufficient data for trend analysis" -OperationName 'metrics-trend-analysis.analyze' -Context @{
+                    $null = Write-StructuredWarning -Message "Insufficient data for trend analysis" -OperationName 'metrics-trend-analysis.analyze' -Context @{
                         # Technical context
                         data_points = $HistoricalData.Count
                         metric_name = $MetricName

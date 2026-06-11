@@ -22,6 +22,10 @@ AfterAll {
 }
 
 Describe 'MetricsTrendAnalysis Module Functions' {
+    BeforeEach {
+        Enable-TestStructuredLogging
+    }
+
     Context 'Get-MetricsTrend' {
         It 'Returns InsufficientData for empty array' {
             $result = Get-MetricsTrend -HistoricalData @() -MetricName 'TotalFiles'

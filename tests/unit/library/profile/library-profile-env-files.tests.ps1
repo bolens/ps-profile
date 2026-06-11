@@ -38,6 +38,10 @@ Describe 'ProfileEnvFiles Module' {
     Context 'Initialize-ProfileEnvFiles' {
         BeforeEach {
             Clear-TestStartProcessCapture
+            Remove-TestFunction -Name 'Initialize-EnvFiles'
+            Get-Module -Name EnvFile -ErrorAction SilentlyContinue | ForEach-Object {
+                Remove-Module $_.Name -Force -ErrorAction SilentlyContinue
+            }
         }
 
         AfterEach {

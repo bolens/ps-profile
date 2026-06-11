@@ -35,11 +35,14 @@ AfterAll {
 Describe 'ProfileEnvFiles extended scenarios' {
     BeforeEach {
         Clear-TestStartProcessCapture
+        Enable-TestStructuredLogging
         Remove-Item Env:\TEST_PROFILE_ENV_OVERWRITE -ErrorAction SilentlyContinue
         Remove-Item Env:\TEST_PROFILE_ENV_NO_DOTENV -ErrorAction SilentlyContinue
+        Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
         Get-Module -Name EnvFile -ErrorAction SilentlyContinue | ForEach-Object {
             Remove-Module $_.Name -Force -ErrorAction SilentlyContinue
         }
+        Remove-TestFunction -Name 'Initialize-EnvFiles'
     }
 
     function script:Install-EnvFileStub {
@@ -97,6 +100,123 @@ Export-ModuleMember -Function Initialize-EnvFiles
 '@
 
             { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir } | Should -Not -Throw
+        }
+
+        It 'Emits verbose output at debug level 2 when env files exist' {
+            Install-EnvFileStub @'
+function Initialize-EnvFiles {
+    param([string]$RepoRoot, [switch]$Overwrite)
+}
+Export-ModuleMember -Function Initialize-EnvFiles
+'@
+            Set-Content -LiteralPath (Join-Path $script:TempDir '.env') -Value 'TEST_KEY=value' -Encoding UTF8
+            Set-Content -LiteralPath (Join-Path $script:TempDir '.env.local') -Value 'TEST_LOCAL=value' -Encoding UTF8
+            $env:PS_PROFILE_DEBUG = '2'
+
+            { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir -Verbose } | Should -Not -Throw
+        }
+
+        It 'Emits detailed output at debug level 3' {
+            Install-EnvFileStub @'
+function Initialize-EnvFiles {
+    param([string]$RepoRoot, [switch]$Overwrite)
+}
+Export-ModuleMember -Function Initialize-EnvFiles
+'@
+            $env:PS_PROFILE_DEBUG = '3'
+
+            { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir } | Should -Not -Throw
+        }
+
+        It 'Uses structured warning when Initialize-EnvFiles is missing after import' {
+            Set-Content -LiteralPath (Join-Path $script:StubUtilitiesDir 'EnvFile.psm1') -Value @'
+function Get-EnvFileStubMarker { return 'loaded' }
+Export-ModuleMember -Function Get-EnvFileStubMarker
+'@ -Encoding UTF8
+            $env:PS_PROFILE_DEBUG = '1'
+
+            { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir } | Should -Not -Throw
+        }
+
+        It 'Uses level 3 details when Initialize-EnvFiles is missing after import' {
+            Set-Content -LiteralPath (Join-Path $script:StubUtilitiesDir 'EnvFile.psm1') -Value @'
+function Get-EnvFileStubMarker { return 'loaded' }
+Export-ModuleMember -Function Get-EnvFileStubMarker
+'@ -Encoding UTF8
+            $env:PS_PROFILE_DEBUG = '3'
+
+            { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir } | Should -Not -Throw
+        }
+
+        It 'Uses plain Write-Warning when Initialize-EnvFiles is missing and debug is off' {
+            Disable-TestStructuredLogging
+            Set-Content -LiteralPath (Join-Path $script:StubUtilitiesDir 'EnvFile.psm1') -Value @'
+function Get-EnvFileStubMarker { return 'loaded' }
+Export-ModuleMember -Function Get-EnvFileStubMarker
+'@ -Encoding UTF8
+
+            $warnings = $null
+            { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir -WarningVariable warnings } | Should -Not -Throw
+            @($warnings).Count | Should -BeGreaterThan 0
+        }
+
+        It 'Uses structured warning when env file import throws' {
+            Set-Content -LiteralPath (Join-Path $script:StubUtilitiesDir 'EnvFile.psm1') -Value @'
+function Initialize-EnvFiles {
+    throw 'env import probe'
+}
+Export-ModuleMember -Function Initialize-EnvFiles
+'@ -Encoding UTF8
+            $env:PS_PROFILE_DEBUG = '1'
+
+            { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir } | Should -Not -Throw
+        }
+
+        It 'Uses plain Write-Warning when env file import throws without debug' {
+            Disable-TestStructuredLogging
+            Set-Content -LiteralPath (Join-Path $script:StubUtilitiesDir 'EnvFile.psm1') -Value @'
+function Initialize-EnvFiles {
+    throw 'env import probe'
+}
+Export-ModuleMember -Function Initialize-EnvFiles
+'@ -Encoding UTF8
+
+            $warnings = $null
+            { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir -WarningVariable warnings } | Should -Not -Throw
+            @($warnings).Count | Should -BeGreaterThan 0
+        }
+
+        It 'Uses structured warning when env file import throws at debug level 3' {
+            Set-Content -LiteralPath (Join-Path $script:StubUtilitiesDir 'EnvFile.psm1') -Value @'
+function Initialize-EnvFiles {
+    throw 'env import probe level 3'
+}
+Export-ModuleMember -Function Initialize-EnvFiles
+'@ -Encoding UTF8
+            $env:PS_PROFILE_DEBUG = '3'
+
+            { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir } | Should -Not -Throw
+        }
+
+        It 'Uses structured warning when env file import throws without debug output' {
+            Set-Content -LiteralPath (Join-Path $script:StubUtilitiesDir 'EnvFile.psm1') -Value @'
+function Initialize-EnvFiles {
+    throw 'env import probe no debug'
+}
+Export-ModuleMember -Function Initialize-EnvFiles
+'@ -Encoding UTF8
+            Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+
+            { Initialize-ProfileEnvFiles -ProfileDir $script:TempDir } | Should -Not -Throw
+        }
+
+        It 'Logs module path details when the EnvFile module is missing at debug level 3' {
+            $missingDir = New-TestTempDirectory -Prefix 'ProfileEnvFilesMissingModule'
+            $env:PS_PROFILE_DEBUG = '3'
+
+            { Initialize-ProfileEnvFiles -ProfileDir $missingDir } | Should -Not -Throw
+
+            Remove-Item -LiteralPath $missingDir -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 }

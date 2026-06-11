@@ -48,23 +48,6 @@ function script:Clear-CodeMetricsTestEnvironment {
     Remove-Item Env:PS_PROFILE_CODE_METRICS_FORCE_READ_MSG -ErrorAction SilentlyContinue
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    function global:Write-StructuredWarning {
-        param(
-            [string]$Message,
-            [string]$OperationName,
-            [hashtable]$Context,
-            [string]$Code
-        )
-
-        return $null
-    }
-}
-
 AfterAll {
     Clear-CodeMetricsTestEnvironment
     Remove-Module CodeMetrics, FileSystem, AstParsing, FileContent, Collections -ErrorAction SilentlyContinue -Force

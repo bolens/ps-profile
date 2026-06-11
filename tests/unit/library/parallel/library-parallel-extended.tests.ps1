@@ -22,15 +22,6 @@ BeforeAll {
     Import-Module (Join-Path $script:LibPath 'parallel' 'Parallel.psm1') -DisableNameChecking -Force
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 function script:Get-InvokeParallelTaskResults {
     param([object[]]$Output)
 

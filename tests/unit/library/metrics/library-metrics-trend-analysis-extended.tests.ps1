@@ -22,15 +22,6 @@ BeforeAll {
     Import-Module (Join-Path $script:LibPath 'metrics' 'MetricsTrendAnalysis.psm1') -DisableNameChecking -Force
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 AfterAll {
     Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
     Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
@@ -38,6 +29,10 @@ AfterAll {
 }
 
 Describe 'MetricsTrendAnalysis extended scenarios' {
+    BeforeEach {
+        Enable-TestStructuredLogging
+    }
+
     Context 'Get-MetricsTrend' {
         It 'Returns Stable for minimally changing series' {
             $historicalData = @(
@@ -166,6 +161,77 @@ Describe 'MetricsTrendAnalysis extended scenarios' {
                 else {
                     $env:PS_PROFILE_DEBUG = $originalDebug
                 }
+            }
+        }
+
+        It 'Uses plain Write-Warning for insufficient data when structured logging is disabled' {
+            Disable-TestStructuredLogging
+
+            $warnings = $null
+            { Get-MetricsTrend -HistoricalData @(@{ Timestamp = '2024-03-01T00:00:00Z'; TotalFiles = 1 }) -MetricName 'TotalFiles' -WarningVariable warnings } |
+                Should -Not -Throw
+            @($warnings).Count | Should -BeGreaterThan 0
+        }
+
+        It 'Uses debug-level warning for insufficient data when structured logging is disabled' {
+            Disable-TestStructuredLogging
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '1'
+
+            try {
+                $warnings = $null
+                { Get-MetricsTrend -HistoricalData @(@{ Timestamp = '2024-03-01T00:00:00Z'; TotalFiles = 1 }) -MetricName 'TotalFiles' -WarningVariable warnings } |
+                    Should -Not -Throw
+                @($warnings).Count | Should -BeGreaterThan 0
+            }
+            finally {
+                if ($null -eq $originalDebug) { Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue }
+                else { $env:PS_PROFILE_DEBUG = $originalDebug }
+            }
+        }
+
+        It 'Uses plain Write-Warning for null historical entries when structured logging is disabled' {
+            Disable-TestStructuredLogging
+
+            $warnings = $null
+            { Get-MetricsTrend -HistoricalData @($null, @{ Timestamp = '2024-03-01T00:00:00Z'; TotalFiles = 10 }, @{ Timestamp = '2024-03-02T00:00:00Z'; TotalFiles = 20 }) -MetricName 'TotalFiles' -WarningVariable warnings } |
+                Should -Not -Throw
+            @($warnings).Count | Should -BeGreaterThan 0
+        }
+
+        It 'Emits level 3 null-value tracing when debug is enabled without structured logging' {
+            Disable-TestStructuredLogging
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                $result = Get-MetricsTrend -HistoricalData @(
+                    $null
+                    @{ Timestamp = '2024-03-01T00:00:00Z'; TotalFiles = 10 }
+                    @{ Timestamp = '2024-03-02T00:00:00Z'; TotalFiles = 20 }
+                ) -MetricName 'TotalFiles'
+
+                $result.DataPoints | Should -Be 2
+            }
+            finally {
+                if ($null -eq $originalDebug) { Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue }
+                else { $env:PS_PROFILE_DEBUG = $originalDebug }
+            }
+        }
+
+        It 'Emits verbose output at debug level 2 during trend analysis' {
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '2'
+
+            try {
+                { Get-MetricsTrend -HistoricalData @(
+                    @{ Timestamp = '2024-03-01T00:00:00Z'; TotalFiles = 10 }
+                    @{ Timestamp = '2024-03-02T00:00:00Z'; TotalFiles = 20 }
+                ) -MetricName 'TotalFiles' -Verbose } | Should -Not -Throw
+            }
+            finally {
+                if ($null -eq $originalDebug) { Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue }
+                else { $env:PS_PROFILE_DEBUG = $originalDebug }
             }
         }
     }

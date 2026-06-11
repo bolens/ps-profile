@@ -28,12 +28,22 @@ function Get-PowerShellExecutable {
     [OutputType([string])]
     param()
 
+    $forcedEdition = [Environment]::GetEnvironmentVariable('PS_PROFILE_POWERSHELL_DETECTION_FORCE_EDITION')
+    if (-not [string]::IsNullOrWhiteSpace($forcedEdition)) {
+        $normalized = $forcedEdition.Trim().ToLowerInvariant()
+        if ($normalized -in @('desktop', 'windows', 'win', 'powershell', 'windows powershell')) {
+            return 'powershell'
+        }
+        if ($normalized -in @('core', 'pwsh', 'powershell core')) {
+            return 'pwsh'
+        }
+    }
+
     if ($PSVersionTable.PSEdition -eq 'Core') {
         return 'pwsh'
     }
-    else {
-        return 'powershell'
-    }
+
+    return 'powershell'
 }
 
 Export-ModuleMember -Function Get-PowerShellExecutable

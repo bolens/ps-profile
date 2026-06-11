@@ -36,15 +36,6 @@ function Broken-Fragment {
 '@ -Encoding UTF8
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 function script:Clear-FragmentErrorTestEnvironment {
     foreach ($name in @(
             'PS_PROFILE_DEBUG'
@@ -206,6 +197,160 @@ Describe 'FragmentErrorHandling extended scenarios' {
             }
             finally {
                 Remove-TestFunction -Name @('Write-ProfileError', 'Test-CachedCommand')
+            }
+        }
+
+        It 'Uses Write-Warning for missing files when structured logging is unavailable' {
+            $missingPath = Join-Path $script:TempDir 'missing-write-warning.ps1'
+            $env:PS_PROFILE_DEBUG = '1'
+            $warnings = [System.Collections.Generic.List[string]]::new()
+            Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
+
+            function global:Write-Warning {
+                param([string]$Message)
+                $null = $warnings.Add($Message)
+            }
+
+            try {
+                $result = Invoke-FragmentSafely -FragmentName 'missing-write-warning' -FragmentPath $missingPath
+                $result | Should -Be $false
+                @($warnings | Where-Object { $_ -like '*not found*' }).Count | Should -BeGreaterThan 0
+            }
+            finally {
+                Remove-TestFunction -Name @('Write-Warning', 'Write-StructuredWarning', 'Write-StructuredError')
+            }
+        }
+
+        It 'Returns false for forced file access failures when debug output is disabled' {
+            $forcedPath = Join-Path $script:TempDir 'force-get-item-fail-no-debug.ps1'
+            Set-Content -LiteralPath $forcedPath -Value '# probe' -Encoding UTF8
+            $env:PS_PROFILE_FRAGMENT_ERROR_FORCE_GET_ITEM_FAIL = '1'
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+
+            try {
+                $result = Invoke-FragmentSafely -FragmentName 'forced-no-debug' -FragmentPath $forcedPath
+                $result | Should -Be $false
+            }
+            finally {
+                Remove-Item Env:PS_PROFILE_FRAGMENT_ERROR_FORCE_GET_ITEM_FAIL -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Uses Write-ScriptMessage for file access failures when structured logging is unavailable' {
+            $forcedPath = Join-Path $script:TempDir 'force-get-item-fail-scriptmessage.ps1'
+            Set-Content -LiteralPath $forcedPath -Value '# probe' -Encoding UTF8
+            $env:PS_PROFILE_FRAGMENT_ERROR_FORCE_GET_ITEM_FAIL = '1'
+            $env:PS_PROFILE_DEBUG = '1'
+            $messages = [System.Collections.Generic.List[string]]::new()
+            Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
+
+            function global:Write-ScriptMessage {
+                param([string]$Message, [switch]$IsWarning, [switch]$IsError)
+                $null = $messages.Add($Message)
+            }
+
+            function global:Test-CachedCommand {
+                param([string]$Name)
+                return $Name -eq 'Write-ScriptMessage'
+            }
+
+            try {
+                $result = Invoke-FragmentSafely -FragmentName 'forced-scriptmessage' -FragmentPath $forcedPath
+                $result | Should -Be $false
+                @($messages | Where-Object { $_ -like '*Cannot access fragment file*' }).Count | Should -BeGreaterThan 0
+            }
+            finally {
+                Remove-TestFunction -Name @('Write-ScriptMessage', 'Test-CachedCommand', 'Write-StructuredWarning', 'Write-StructuredError')
+            }
+        }
+
+        It 'Emits debug tracing when valid fragments load with PS_PROFILE_DEBUG level 3' {
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                $result = Invoke-FragmentSafely -FragmentName 'debug-load-success' -FragmentPath $script:ValidFragment
+                $result | Should -Be $true
+            }
+            finally {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Uses Write-ScriptMessage for script block failures when structured logging is unavailable' {
+            $env:PS_PROFILE_DEBUG = '1'
+            $messages = [System.Collections.Generic.List[string]]::new()
+            Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
+
+            function global:Write-ScriptMessage {
+                param([string]$Message, [switch]$IsWarning, [switch]$IsError)
+                $null = $messages.Add($Message)
+            }
+
+            function global:Test-CachedCommand {
+                param([string]$Name)
+                return $Name -eq 'Write-ScriptMessage'
+            }
+
+            try {
+                $block = { throw 'scriptmessage outer failure' }
+                $result = Invoke-FragmentSafely -FragmentName 'scriptmessage-outer' -FragmentPath 'dummy.ps1' -ScriptBlock $block
+                $result | Should -Be $false
+                @($messages | Where-Object { $_ -like '*Failed to load profile fragment*' }).Count | Should -BeGreaterThan 0
+            }
+            finally {
+                Remove-TestFunction -Name @('Write-ScriptMessage', 'Test-CachedCommand', 'Write-StructuredWarning', 'Write-StructuredError')
+            }
+        }
+
+        It 'Emits position and error detail tracing when PS_PROFILE_DEBUG is level 3' {
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                $block = { throw 'level 3 position probe' }
+                $result = Invoke-FragmentSafely -FragmentName 'level3-position' -FragmentPath 'dummy.ps1' -ScriptBlock $block
+                $result | Should -Be $false
+            }
+            finally {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Continues when Test-FragmentWarningSuppressed throws during error handling' {
+            function global:Test-FragmentWarningSuppressed {
+                throw 'suppression probe failure'
+            }
+
+            function global:Test-CachedCommand {
+                param([string]$Name)
+                return $Name -eq 'Test-FragmentWarningSuppressed'
+            }
+
+            try {
+                $block = { throw 'suppression helper failure' }
+                $result = Invoke-FragmentSafely -FragmentName 'suppression-throws' -FragmentPath 'dummy.ps1' -ScriptBlock $block
+                $result | Should -Be $false
+            }
+            finally {
+                Remove-TestFunction -Name @('Test-FragmentWarningSuppressed', 'Test-CachedCommand')
+            }
+        }
+
+        It 'Imports logging through manual fallback when SafeImport is unavailable' {
+            $fragmentDir = Join-Path $script:TempDir 'fragment-isolated'
+            New-Item -ItemType Directory -Path $fragmentDir -Force | Out-Null
+            Copy-Item -LiteralPath (Join-Path $script:LibPath 'fragment' 'FragmentErrorHandling.psm1') -Destination $fragmentDir
+            Copy-Item -LiteralPath (Join-Path $script:LibPath 'core' 'Logging.psm1') -Destination $fragmentDir
+
+            Remove-Module FragmentErrorHandling, SafeImport, Logging -ErrorAction SilentlyContinue -Force
+
+            try {
+                { Import-Module (Join-Path $fragmentDir 'FragmentErrorHandling.psm1') -DisableNameChecking -Force } | Should -Not -Throw
+                Get-Command Invoke-FragmentSafely -ErrorAction Stop | Should -Not -BeNullOrEmpty
+            }
+            finally {
+                Remove-Module FragmentErrorHandling -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'core' 'Logging.psm1') -DisableNameChecking -Force
+                Import-TestLibraryModule -ModulePath (Join-Path $script:LibPath 'fragment' 'FragmentErrorHandling.psm1')
             }
         }
     }

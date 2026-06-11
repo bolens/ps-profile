@@ -3,6 +3,56 @@
 # Canonical TestSupport helpers restored between test files
 # ===============================================
 
+function Enable-TestStructuredLogging {
+    <#
+    .SYNOPSIS
+        Installs lightweight structured-logging stubs for unit tests.
+
+    .DESCRIPTION
+        Provides no-op Write-StructuredWarning and Write-StructuredError functions
+        without dot-sourcing profile bootstrap fragments. Avoids Set-AgentModeFunction
+        load failures and JSON warning noise during combined Pester coverage runs.
+    #>
+    [CmdletBinding()]
+    param()
+
+    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+        return
+    }
+
+    function global:Write-StructuredWarning {
+        [CmdletBinding()]
+        param(
+            [string]$Message,
+            [string]$OperationName,
+            [hashtable]$Context,
+            [string]$Code
+        )
+    }
+
+    function global:Write-StructuredError {
+        [CmdletBinding()]
+        param(
+            [object]$ErrorRecord,
+            [string]$Message,
+            [string]$OperationName,
+            [hashtable]$Context,
+            [string]$Code
+        )
+    }
+}
+
+function Disable-TestStructuredLogging {
+    <#
+    .SYNOPSIS
+        Removes structured-logging test stubs from the session.
+    #>
+    [CmdletBinding()]
+    param()
+
+    Remove-TestFunction -Name 'Write-StructuredWarning', 'Write-StructuredError', 'Write-WideEvent'
+}
+
 function Remove-TestFunction {
     <#
     .SYNOPSIS

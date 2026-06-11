@@ -87,7 +87,7 @@ function Get-CodeQualityScore {
         if (-not ($CodeMetrics.PSObject.Properties.Name -contains $prop)) {
             $errorMsg = "CodeMetrics object missing required property: $prop"
             if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "Missing required property" -OperationName 'code-quality-score.calculate' -Context @{
+                $null = Write-StructuredWarning -Message "Missing required property" -OperationName 'code-quality-score.calculate' -Context @{
                     missing_property = $prop
                     error_message    = $errorMsg
                 } -Code 'MissingRequiredProperty'
@@ -106,7 +106,7 @@ function Get-CodeQualityScore {
                 else {
                     # Always log warnings even if debug is off
                     if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "Missing required property" -OperationName 'code-quality-score.calculate' -Context @{
+                        $null = Write-StructuredWarning -Message "Missing required property" -OperationName 'code-quality-score.calculate' -Context @{
                             # Technical context
                             missing_property     = $prop
                             code_metrics_type    = $CodeMetrics.GetType().Name
@@ -146,7 +146,7 @@ function Get-CodeQualityScore {
 
         if (-not ($TestCoverage.PSObject.Properties.Name -contains 'CoveragePercent')) {
             if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                Write-StructuredWarning -Message "TestCoverage object missing CoveragePercent property" -OperationName 'code-quality-score.calculate' -Context @{
+                $null = Write-StructuredWarning -Message "TestCoverage object missing CoveragePercent property" -OperationName 'code-quality-score.calculate' -Context @{
                     test_coverage_type = $TestCoverage.GetType().Name
                 } -Code 'MissingCoveragePercent'
             }
@@ -164,7 +164,7 @@ function Get-CodeQualityScore {
                 else {
                     # Always log warnings even if debug is off
                     if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                        Write-StructuredWarning -Message "TestCoverage object missing CoveragePercent property" -OperationName 'code-quality-score.calculate' -Context @{
+                        $null = Write-StructuredWarning -Message "TestCoverage object missing CoveragePercent property" -OperationName 'code-quality-score.calculate' -Context @{
                             # Technical context
                             test_coverage_type   = $TestCoverage.GetType().Name
                             available_properties = $TestCoverage.PSObject.Properties.Name

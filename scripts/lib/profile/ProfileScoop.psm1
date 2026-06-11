@@ -158,6 +158,12 @@ function Initialize-ProfileScoopLegacy {
     param()
 
     try {
+        if ($env:PS_PROFILE_SCOOP_FORCE_LEGACY_ERROR -and (
+                $env:PS_PROFILE_SCOOP_FORCE_LEGACY_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                $env:PS_PROFILE_SCOOP_FORCE_LEGACY_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+            throw [System.InvalidOperationException]::new('profile scoop legacy forced probe')
+        }
+
         $scoopRoot = $null
         # Check global Scoop installation first (optimize: check env var before Test-Path)
         if ($env:SCOOP_GLOBAL) {

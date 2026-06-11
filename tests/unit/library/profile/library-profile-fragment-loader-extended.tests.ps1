@@ -44,8 +44,41 @@ Export-ModuleMember -Function Get-ReloadProbeValue
     }
 
     $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
-    $script:OrchestrationModulePath = Join-Path (Split-Path $script:LoaderPath -Parent) 'ProfileFragmentLoadingOrchestration.psm1'
+    $script:ProfileLibDir = Split-Path $script:LoaderPath -Parent
+    $script:OrchestrationModulePath = Join-Path $script:ProfileLibDir 'ProfileFragmentLoadingOrchestration.psm1'
     $script:OrchestrationHiddenPath = "$script:OrchestrationModulePath.test-hidden"
+    $script:InstalledTestSubmodulePaths = [System.Collections.Generic.List[string]]::new()
+}
+
+function script:Install-TestProfileSubmoduleStub {
+    param(
+        [Parameter(Mandatory)]
+        [string]$FileName,
+
+        [Parameter(Mandatory)]
+        [string]$Content
+    )
+
+    $targetPath = Join-Path $script:ProfileLibDir $FileName
+    if (Test-Path -LiteralPath $targetPath) {
+        return
+    }
+
+    Set-Content -LiteralPath $targetPath -Value $Content -Encoding UTF8
+    [void]$script:InstalledTestSubmodulePaths.Add($targetPath)
+}
+
+function script:Remove-TestProfileSubmoduleStubs {
+    foreach ($path in @($script:InstalledTestSubmodulePaths)) {
+        if ($path -and (Test-Path -LiteralPath $path)) {
+            Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+        }
+    }
+    if ($script:InstalledTestSubmodulePaths) {
+        $script:InstalledTestSubmodulePaths.Clear()
+    }
+
+    Remove-Module ProfileFragmentBootstrap, ProfileFragmentCacheInitialization, ProfileFragmentPreRegistration -ErrorAction SilentlyContinue -Force
 }
 
 function script:Ensure-TestOrchestrationModule {
@@ -73,13 +106,27 @@ function script:Restore-TestOrchestrationModule {
     }
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
+function script:Install-TestLazyLoadingPassthroughModule {
+    Remove-Module ProfileFragmentLazyLoading -ErrorAction SilentlyContinue -Force
+    $null = New-Module -Name ProfileFragmentLazyLoading -ScriptBlock {
+        function Handle-LazyLoadingMode {
+            param(
+                [bool]$LazyLoadEnabled,
+                [System.Collections.Generic.List[System.IO.FileInfo]]$FragmentsToLoad,
+                [System.Collections.Generic.HashSet[string]]$DisabledSet
+            )
 
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
+            # Keep lazy mode enabled but allow Initialize-FragmentLoading to continue
+            # so proxy creation and other post-lazy paths remain reachable in tests.
+            return $false
+        }
+
+        Export-ModuleMember -Function Handle-LazyLoadingMode
+    } | Import-Module -Force -Global
+}
+
+function script:Remove-TestLazyLoadingPassthroughModule {
+    Remove-Module ProfileFragmentLazyLoading -ErrorAction SilentlyContinue -Force
 }
 
 function script:New-ProfileLoaderFixture {
@@ -127,7 +174,9 @@ function script:Invoke-ProfileLoaderInit {
         [System.Collections.Generic.HashSet[string]]$DisabledSet = $null,
         [System.IO.FileInfo[]]$BootstrapFragment = @(),
         [bool]$FragmentLoadingModuleExists = $true,
-        [bool]$LoadBatchLoadingSummary = $false
+        [bool]$LoadBatchLoadingSummary = $true,
+        [string]$FragmentLibDirOverride = $null,
+        [string]$ProfileDOverride = $null
     )
 
     $previousLoadAll = $env:PS_PROFILE_LOAD_ALL_FRAGMENTS
@@ -175,8 +224,14 @@ function script:Invoke-ProfileLoaderInit {
 
     if ($LoadBatchLoadingSummary) {
         . (Join-Path $script:ProfileDir 'bootstrap' 'BatchLoadingSummary.ps1')
+        if (-not (Get-Variable -Name BatchLoadingInfo -Scope Global -ErrorAction SilentlyContinue)) {
+            $global:BatchLoadingInfo = $null
+        }
         Initialize-BatchLoadingInfo
     }
+
+    $fragmentLibDir = if ($FragmentLibDirOverride) { $FragmentLibDirOverride } else { $script:FragmentLibDir }
+    $profileD = if ($ProfileDOverride) { $ProfileDOverride } else { $Fixture.ProfileD }
 
     try {
         Initialize-FragmentLoading `
@@ -186,10 +241,10 @@ function script:Invoke-ProfileLoaderInit {
             -EnableParallelLoading $EnableParallelLoading `
             -FragmentLoadingModule $script:FragmentLoadingModule `
             -FragmentLoadingModuleExists $FragmentLoadingModuleExists `
-            -FragmentLibDir $script:FragmentLibDir `
+            -FragmentLibDir $fragmentLibDir `
             -FragmentErrorHandlingModule $script:FragmentErrorHandlingModule `
             -FragmentErrorHandlingModuleExists $true `
-            -ProfileD $Fixture.ProfileD
+            -ProfileD $profileD
     }
     finally {
         if ($null -ne $previousLoadAll) { $env:PS_PROFILE_LOAD_ALL_FRAGMENTS = $previousLoadAll }
@@ -214,6 +269,7 @@ function script:Invoke-ProfileLoaderInit {
 
 AfterAll {
     Restore-TestOrchestrationModule
+    Remove-TestProfileSubmoduleStubs
     Remove-Module -Name $script:ModuleName -ErrorAction SilentlyContinue -Force
     Remove-Module -Name ProfileFragmentLoader -ErrorAction SilentlyContinue -Force
 
@@ -332,63 +388,71 @@ Describe 'ProfileFragmentLoader extended scenarios' {
         }
 
         It 'Loads bootstrap fragments from the provided bootstrap list' {
-            $fixture = New-ProfileLoaderFixture -Prefix 'bootstrap-profile.d'
-            $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
-            Set-Content -LiteralPath $bootstrapPath -Value '$global:ProfileFragmentLoaderBootstrapProbe = $true' -Encoding UTF8
-            $bootstrap = Get-Item -LiteralPath $bootstrapPath
+            try {
+                $fixture = New-ProfileLoaderFixture -Prefix 'bootstrap-profile.d'
+                $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
+                Set-Content -LiteralPath $bootstrapPath -Value '$global:ProfileFragmentLoaderBootstrapProbe = $true' -Encoding UTF8
+                $bootstrap = Get-Item -LiteralPath $bootstrapPath
 
-                        Remove-Variable -Name ProfileFragmentLoaderBootstrapProbe -Scope Global -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap)
-            $global:ProfileFragmentLoaderBootstrapProbe | Should -Be $true
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderBootstrapProbe -Scope Global -ErrorAction SilentlyContinue
+                            Remove-Variable -Name ProfileFragmentLoaderBootstrapProbe -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap)
+                $global:ProfileFragmentLoaderBootstrapProbe | Should -Be $true
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderBootstrapProbe -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Skips fragments listed in DisabledSet' {
-            $fixture = New-ProfileLoaderFixture -Prefix 'disabled-profile.d' -FragmentBody '$global:ProfileFragmentLoaderDisabledProbe = $true'
-            $disabled = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
-            [void]$disabled.Add('20-loader-probe')
+            try {
+                $fixture = New-ProfileLoaderFixture -Prefix 'disabled-profile.d' -FragmentBody '$global:ProfileFragmentLoaderDisabledProbe = $true'
+                $disabled = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+                [void]$disabled.Add('20-loader-probe')
 
-                        Remove-Variable -Name ProfileFragmentLoaderDisabledProbe -Scope Global -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture -DisabledSet $disabled
-            Get-Variable -Name ProfileFragmentLoaderDisabledProbe -Scope Global -ErrorAction SilentlyContinue |
-                Should -BeNullOrEmpty
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderDisabledProbe -Scope Global -ErrorAction SilentlyContinue
+                            Remove-Variable -Name ProfileFragmentLoaderDisabledProbe -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -DisabledSet $disabled
+                Get-Variable -Name ProfileFragmentLoaderDisabledProbe -Scope Global -ErrorAction SilentlyContinue |
+                    Should -BeNullOrEmpty
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderDisabledProbe -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Loads multiple fragments when parallel loading is enabled' {
-            $markerA = Join-Path $script:TempDir 'parallel-a.marker'
-            $markerB = Join-Path $script:TempDir 'parallel-b.marker'
-            $fixture = New-ProfileLoaderFixture `
-                -Prefix 'parallel-profile.d' `
-                -FragmentName '20-parallel-a.ps1' `
-                -FragmentBody "Set-Content -LiteralPath '$markerA' -Value 'ok' -Encoding UTF8" `
-                -AdditionalFragments @(
-                "30-parallel-b.ps1|Set-Content -LiteralPath '$markerB' -Value 'ok' -Encoding UTF8"
-            )
+            try {
+                $markerA = Join-Path $script:TempDir 'parallel-a.marker'
+                $markerB = Join-Path $script:TempDir 'parallel-b.marker'
+                $fixture = New-ProfileLoaderFixture `
+                    -Prefix 'parallel-profile.d' `
+                    -FragmentName '20-parallel-a.ps1' `
+                    -FragmentBody "Set-Content -LiteralPath '$markerA' -Value 'ok' -Encoding UTF8" `
+                    -AdditionalFragments @(
+                    "30-parallel-b.ps1|Set-Content -LiteralPath '$markerB' -Value 'ok' -Encoding UTF8"
+                )
 
-                        Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
-            { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true } | Should -Not -Throw
-            (Get-Content -LiteralPath $markerA -Raw).Trim() | Should -Be 'ok'
-            (Get-Content -LiteralPath $markerB -Raw).Trim() | Should -Be 'ok'
-        }
-        finally {
-            Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
+                            Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true } | Should -Not -Throw
+                (Get-Content -LiteralPath $markerA -Raw).Trim() | Should -Be 'ok'
+                (Get-Content -LiteralPath $markerB -Raw).Trim() | Should -Be 'ok'
+            }
+            finally {
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Returns early without loading fragment bodies when lazy loading is enabled' {
-            $fixture = New-ProfileLoaderFixture -Prefix 'lazy-profile.d' -FragmentBody '$global:ProfileFragmentLoaderLazyProbe = $true'
+            try {
+                $fixture = New-ProfileLoaderFixture -Prefix 'lazy-profile.d' -FragmentBody '$global:ProfileFragmentLoaderLazyProbe = $true'
 
-                        Remove-Variable -Name ProfileFragmentLoaderLazyProbe -Scope Global -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true
-            (Get-Variable -Name ProfileFragmentLoaderLazyProbe -Scope Global -ErrorAction SilentlyContinue) |
-                Should -BeNullOrEmpty
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderLazyProbe -Scope Global -ErrorAction SilentlyContinue
+                            Remove-Variable -Name ProfileFragmentLoaderLazyProbe -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true
+                (Get-Variable -Name ProfileFragmentLoaderLazyProbe -Scope Global -ErrorAction SilentlyContinue) |
+                    Should -BeNullOrEmpty
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderLazyProbe -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Survives failing fragment bodies without terminating initialization' {
@@ -397,63 +461,71 @@ Describe 'ProfileFragmentLoader extended scenarios' {
         }
 
         It 'Loads dependent fragments in dependency order' {
-            $fixture = New-ProfileLoaderFixture `
-                -Prefix 'dependency-profile.d' `
-                -FragmentName '20-parent.ps1' `
-                -FragmentBody '$global:ProfileFragmentLoaderParentProbe = ''loaded''' `
-                -AdditionalFragments @(
-                '30-child.ps1|# Dependencies: 20-parent
-$global:ProfileFragmentLoaderChildProbe = ''loaded'''
-            )
+            try {
+                $fixture = New-ProfileLoaderFixture `
+                    -Prefix 'dependency-profile.d' `
+                    -FragmentName '20-parent.ps1' `
+                    -FragmentBody '$global:ProfileFragmentLoaderParentProbe = ''loaded''' `
+                    -AdditionalFragments @(
+                    '30-child.ps1|# Dependencies: 20-parent
+    $global:ProfileFragmentLoaderChildProbe = ''loaded'''
+                )
 
-                        Remove-Variable -Name ProfileFragmentLoaderChildProbe, ProfileFragmentLoaderParentProbe -Scope Global -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture
-            $global:ProfileFragmentLoaderParentProbe | Should -Be 'loaded'
-            $global:ProfileFragmentLoaderChildProbe | Should -Be 'loaded'
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderChildProbe, ProfileFragmentLoaderParentProbe -Scope Global -ErrorAction SilentlyContinue
+                            Remove-Variable -Name ProfileFragmentLoaderChildProbe, ProfileFragmentLoaderParentProbe -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture
+                $global:ProfileFragmentLoaderParentProbe | Should -Be 'loaded'
+                $global:ProfileFragmentLoaderChildProbe | Should -Be 'loaded'
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderChildProbe, ProfileFragmentLoaderParentProbe -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Completes lazy loading with debug tracing enabled' {
-            $fixture = New-ProfileLoaderFixture -Prefix 'lazy-debug-profile.d'
-            $originalDebug = $env:PS_PROFILE_DEBUG
-            $env:PS_PROFILE_DEBUG = '2'
+            try {
+                $fixture = New-ProfileLoaderFixture -Prefix 'lazy-debug-profile.d'
+                $originalDebug = $env:PS_PROFILE_DEBUG
+                $env:PS_PROFILE_DEBUG = '2'
 
-                        { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true } | Should -Not -Throw
-        }
-        finally {
-            if ($null -eq $originalDebug) {
-                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true } | Should -Not -Throw
             }
-            else {
-                $env:PS_PROFILE_DEBUG = $originalDebug
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
             }
         }
 
         It 'Loads fragments eagerly when PS_PROFILE_TEST_MODE is enabled' {
-            $fixture = New-ProfileLoaderFixture -Prefix 'testmode-profile.d' -FragmentBody '$global:ProfileFragmentLoaderTestModeProbe = $true'
+            try {
+                $fixture = New-ProfileLoaderFixture -Prefix 'testmode-profile.d' -FragmentBody '$global:ProfileFragmentLoaderTestModeProbe = $true'
 
-                        Remove-Variable -Name ProfileFragmentLoaderTestModeProbe -Scope Global -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture -EnableTestMode $true
-            $global:ProfileFragmentLoaderTestModeProbe | Should -Be $true
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderTestModeProbe -Scope Global -ErrorAction SilentlyContinue
+                            Remove-Variable -Name ProfileFragmentLoaderTestModeProbe -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -EnableTestMode $true
+                $global:ProfileFragmentLoaderTestModeProbe | Should -Be $true
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderTestModeProbe -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Survives failing bootstrap fragments without terminating initialization' {
-            $fixture = New-ProfileLoaderFixture -Prefix 'bootstrap-fail-profile.d'
-            $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
-            Set-Content -LiteralPath $bootstrapPath -Value 'throw "bootstrap failure probe"' -Encoding UTF8
-            $bootstrap = Get-Item -LiteralPath $bootstrapPath
-            $previousErrorAction = $ErrorActionPreference
+            try {
+                $fixture = New-ProfileLoaderFixture -Prefix 'bootstrap-fail-profile.d'
+                $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
+                Set-Content -LiteralPath $bootstrapPath -Value 'throw "bootstrap failure probe"' -Encoding UTF8
+                $bootstrap = Get-Item -LiteralPath $bootstrapPath
+                $previousErrorAction = $ErrorActionPreference
 
-                        $ErrorActionPreference = 'Continue'
-            { Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap) } | Should -Not -Throw
-        }
-        finally {
-            $ErrorActionPreference = $previousErrorAction
+                            $ErrorActionPreference = 'Continue'
+                { Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap) } | Should -Not -Throw
+            }
+            finally {
+                $ErrorActionPreference = $previousErrorAction
+            }
         }
 
         It 'Lists many fragments under lazy loading with level 3 debug tracing' {
@@ -464,72 +536,80 @@ $global:ProfileFragmentLoaderChildProbe = ''loaded'''
         }
 
         It 'Loads several fragments with level 1 debug batch output enabled' {
-            $extras = 2..4 | ForEach-Object { "2$($_)-batch-debug.ps1|`$global:ProfileFragmentLoaderBatch$_ = `$true" }
-            $fixture = New-ProfileLoaderFixture -Prefix 'batch-debug-profile.d' -AdditionalFragments $extras
+            try {
+                $extras = 2..4 | ForEach-Object { "2$($_)-batch-debug.ps1|`$global:ProfileFragmentLoaderBatch$_ = `$true" }
+                $fixture = New-ProfileLoaderFixture -Prefix 'batch-debug-profile.d' -AdditionalFragments $extras
 
-                        Remove-Variable -Name ProfileFragmentLoaderBatch2, ProfileFragmentLoaderBatch3, ProfileFragmentLoaderBatch4 -Scope Global -ErrorAction SilentlyContinue
-            { Invoke-ProfileLoaderInit -Fixture $fixture -DebugLevel '1' } | Should -Not -Throw
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderBatch2, ProfileFragmentLoaderBatch3, ProfileFragmentLoaderBatch4 -Scope Global -ErrorAction SilentlyContinue
+                            Remove-Variable -Name ProfileFragmentLoaderBatch2, ProfileFragmentLoaderBatch3, ProfileFragmentLoaderBatch4 -Scope Global -ErrorAction SilentlyContinue
+                { Invoke-ProfileLoaderInit -Fixture $fixture -DebugLevel '1' } | Should -Not -Throw
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderBatch2, ProfileFragmentLoaderBatch3, ProfileFragmentLoaderBatch4 -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Runs dependency analysis output when parallel loading and debug are enabled' {
-            $markerA = Join-Path $script:TempDir 'dep-a.marker'
-            $markerB = Join-Path $script:TempDir 'dep-b.marker'
-            $fixture = New-ProfileLoaderFixture `
-                -Prefix 'dep-debug-profile.d' `
-                -FragmentName '20-dep-a.ps1' `
-                -FragmentBody "Set-Content -LiteralPath '$markerA' -Value 'ok' -Encoding UTF8" `
-                -AdditionalFragments @("30-dep-b.ps1|Set-Content -LiteralPath '$markerB' -Value 'ok' -Encoding UTF8")
-            $originalDebug = $env:PS_PROFILE_DEBUG
-            $env:PS_PROFILE_DEBUG = '2'
+            try {
+                $markerA = Join-Path $script:TempDir 'dep-a.marker'
+                $markerB = Join-Path $script:TempDir 'dep-b.marker'
+                $fixture = New-ProfileLoaderFixture `
+                    -Prefix 'dep-debug-profile.d' `
+                    -FragmentName '20-dep-a.ps1' `
+                    -FragmentBody "Set-Content -LiteralPath '$markerA' -Value 'ok' -Encoding UTF8" `
+                    -AdditionalFragments @("30-dep-b.ps1|Set-Content -LiteralPath '$markerB' -Value 'ok' -Encoding UTF8")
+                $originalDebug = $env:PS_PROFILE_DEBUG
+                $env:PS_PROFILE_DEBUG = '2'
 
-                        Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
-            { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true } | Should -Not -Throw
-            (Get-Content -LiteralPath $markerA -Raw).Trim() | Should -Be 'ok'
-            (Get-Content -LiteralPath $markerB -Raw).Trim() | Should -Be 'ok'
-        }
-        finally {
-            Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
-            if ($null -eq $originalDebug) {
-                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true } | Should -Not -Throw
+                (Get-Content -LiteralPath $markerA -Raw).Trim() | Should -Be 'ok'
+                (Get-Content -LiteralPath $markerB -Raw).Trim() | Should -Be 'ok'
             }
-            else {
-                $env:PS_PROFILE_DEBUG = $originalDebug
+            finally {
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
             }
         }
     }
 
     Context 'Structured logging and cache paths' {
         It 'Records orchestration fallback through Write-StructuredWarning' {
-            Enable-TestStructuredLogging
-            $fixture = New-ProfileLoaderFixture -Prefix 'orchestration-warning-profile.d'
+            try {
+                Enable-TestStructuredLogging
+                $fixture = New-ProfileLoaderFixture -Prefix 'orchestration-warning-profile.d'
 
-            Hide-TestOrchestrationModule
-                        { Invoke-ProfileLoaderInit -Fixture $fixture } | Should -Not -Throw
-        }
-        finally {
-            Restore-TestOrchestrationModule
+                Hide-TestOrchestrationModule
+                            { Invoke-ProfileLoaderInit -Fixture $fixture } | Should -Not -Throw
+            }
+            finally {
+                Restore-TestOrchestrationModule
+            }
         }
 
         It 'Survives cache pre-warming failures when sqlite helpers are available' {
-            Enable-TestStructuredLogging
-            $fixture = New-ProfileLoaderFixture -Prefix 'prewarm-fail-profile.d'
-            function global:Test-SqliteAvailable { return $true }
-            function global:Initialize-FragmentCache {
-                param(
-                    [object[]]$FragmentFiles,
-                    [bool]$UseAstParsing
-                )
-                throw 'cache prewarm probe'
-            }
+            try {
+                Enable-TestStructuredLogging
+                $fixture = New-ProfileLoaderFixture -Prefix 'prewarm-fail-profile.d'
+                function global:Test-SqliteAvailable { return $true }
+                function global:Initialize-FragmentCache {
+                    param(
+                        [object[]]$FragmentFiles,
+                        [bool]$UseAstParsing
+                    )
+                    throw 'cache prewarm probe'
+                }
 
-                        { Invoke-ProfileLoaderInit -Fixture $fixture -EnablePrewarmCache $true -DebugLevel '2' } | Should -Not -Throw
-        }
-        finally {
-            Remove-Item -Path Function:Test-SqliteAvailable -ErrorAction SilentlyContinue -Force
-            Remove-Item -Path Function:Initialize-FragmentCache -ErrorAction SilentlyContinue -Force
+                            { Invoke-ProfileLoaderInit -Fixture $fixture -EnablePrewarmCache $true -DebugLevel '2' } | Should -Not -Throw
+            }
+            finally {
+                Remove-Item -Path Function:Test-SqliteAvailable -ErrorAction SilentlyContinue -Force
+                Remove-Item -Path Function:Initialize-FragmentCache -ErrorAction SilentlyContinue -Force
+            }
         }
 
         It 'Runs proxy creation when lazy loading and proxy creation are enabled' {
@@ -544,77 +624,85 @@ function Get-ProfileLoaderProxyProbe {
         }
 
         It 'Records fragment results when BatchLoadingSummary helpers are loaded' {
-            $fixture = New-ProfileLoaderFixture `
-                -Prefix 'batch-summary-profile.d' `
-                -FragmentName '20-batch-ok.ps1' `
-                -FragmentBody '$global:ProfileFragmentLoaderBatchOk = $true' `
-                -AdditionalFragments @('30-batch-fail.ps1|throw "batch summary failure probe"')
+            try {
+                $fixture = New-ProfileLoaderFixture `
+                    -Prefix 'batch-summary-profile.d' `
+                    -FragmentName '20-batch-ok.ps1' `
+                    -FragmentBody '$global:ProfileFragmentLoaderBatchOk = $true' `
+                    -AdditionalFragments @('30-batch-fail.ps1|throw "batch summary failure probe"')
 
-                        Remove-Variable -Name ProfileFragmentLoaderBatchOk -Scope Global -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture -LoadBatchLoadingSummary $true
-            $global:BatchLoadingInfo.SucceededFragments.Count | Should -BeGreaterThan 0
-            $global:BatchLoadingInfo.FailedFragments.Count | Should -BeGreaterThan 0
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderBatchOk -Scope Global -ErrorAction SilentlyContinue
+                            Remove-Variable -Name ProfileFragmentLoaderBatchOk -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -LoadBatchLoadingSummary $true
+                $global:BatchLoadingInfo.SucceededFragments.Count | Should -BeGreaterThan 0
+                $global:BatchLoadingInfo.FailedFragments.Count | Should -BeGreaterThan 0
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderBatchOk -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Survives pre-registration failures when lazy loading is enabled' {
-            Enable-TestStructuredLogging
-            $fixture = New-ProfileLoaderFixture -Prefix 'pre-register-fail-profile.d'
-            $registryPath = Join-Path $script:FragmentLibDir 'FragmentCommandRegistry.psm1'
-            Import-Module $registryPath -DisableNameChecking -Force -Global
-            Mock Register-AllFragmentCommands {
-                throw 'pre-register failure probe'
-            } -ModuleName FragmentCommandRegistry
+            try {
+                Enable-TestStructuredLogging
+                $fixture = New-ProfileLoaderFixture -Prefix 'pre-register-fail-profile.d'
+                $registryPath = Join-Path $script:FragmentLibDir 'FragmentCommandRegistry.psm1'
+                Import-Module $registryPath -DisableNameChecking -Force -Global
+                Mock Register-AllFragmentCommands {
+                    throw 'pre-register failure probe'
+                } -ModuleName FragmentCommandRegistry
 
-                        { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -DebugLevel '1' } | Should -Not -Throw
-        }
-        finally {
-            Remove-Module FragmentCommandRegistry -Force -ErrorAction SilentlyContinue
+                            { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -DebugLevel '1' } | Should -Not -Throw
+            }
+            finally {
+                Remove-Module FragmentCommandRegistry -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Uses Write-Warning when dependency grouping fails without structured helpers' {
-            $fixture = New-ProfileLoaderFixture -Prefix 'grouping-warning-profile.d'
-            Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
-            Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            try {
+                $fixture = New-ProfileLoaderFixture -Prefix 'grouping-warning-profile.d'
+                Remove-Item -Path Function:Write-StructuredError -ErrorAction SilentlyContinue -Force
+                Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
 
-            Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
-            Mock Get-FragmentDependencyLevels {
-                throw 'dependency grouping warning probe'
-            } -ModuleName FragmentLoading
+                Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
+                Mock Get-FragmentDependencyLevels {
+                    throw 'dependency grouping warning probe'
+                } -ModuleName FragmentLoading
 
-                        { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -DebugLevel '1' } | Should -Not -Throw
-        }
-        finally {
-            Remove-Module FragmentLoading -Force -ErrorAction SilentlyContinue
-            Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
+                            { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -DebugLevel '1' } | Should -Not -Throw
+            }
+            finally {
+                Remove-Module FragmentLoading -Force -ErrorAction SilentlyContinue
+                Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
+            }
         }
 
         It 'Falls back to sequential loading when dependency grouping fails' {
-            Enable-TestStructuredLogging
-            $markerA = Join-Path $script:TempDir 'group-a.marker'
-            $markerB = Join-Path $script:TempDir 'group-b.marker'
-            $fixture = New-ProfileLoaderFixture `
-                -Prefix 'grouping-fail-profile.d' `
-                -FragmentName '20-group-a.ps1' `
-                -FragmentBody "Set-Content -LiteralPath '$markerA' -Value 'ok' -Encoding UTF8" `
-                -AdditionalFragments @("30-group-b.ps1|Set-Content -LiteralPath '$markerB' -Value 'ok' -Encoding UTF8")
+            try {
+                Enable-TestStructuredLogging
+                $markerA = Join-Path $script:TempDir 'group-a.marker'
+                $markerB = Join-Path $script:TempDir 'group-b.marker'
+                $fixture = New-ProfileLoaderFixture `
+                    -Prefix 'grouping-fail-profile.d' `
+                    -FragmentName '20-group-a.ps1' `
+                    -FragmentBody "Set-Content -LiteralPath '$markerA' -Value 'ok' -Encoding UTF8" `
+                    -AdditionalFragments @("30-group-b.ps1|Set-Content -LiteralPath '$markerB' -Value 'ok' -Encoding UTF8")
 
-            Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
-            Mock Get-FragmentDependencyLevels {
-                throw 'dependency grouping failure probe'
-            } -ModuleName FragmentLoading
+                Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
+                Mock Get-FragmentDependencyLevels {
+                    throw 'dependency grouping failure probe'
+                } -ModuleName FragmentLoading
 
-                        Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -DebugLevel '1'
-            (Get-Content -LiteralPath $markerA -Raw).Trim() | Should -Be 'ok'
-            (Get-Content -LiteralPath $markerB -Raw).Trim() | Should -Be 'ok'
-        }
-        finally {
-            Remove-Module FragmentLoading -Force -ErrorAction SilentlyContinue
-            Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
-            Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
+                            Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -DebugLevel '1'
+                (Get-Content -LiteralPath $markerA -Raw).Trim() | Should -Be 'ok'
+                (Get-Content -LiteralPath $markerB -Raw).Trim() | Should -Be 'ok'
+            }
+            finally {
+                Remove-Module FragmentLoading -Force -ErrorAction SilentlyContinue
+                Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
+                Remove-Item -LiteralPath $markerA, $markerB -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Completes initialization when the fragment loading module is reported unavailable' {
@@ -629,33 +717,37 @@ function Get-ProfileLoaderProxyProbe {
         }
 
         It 'Records dependency parsing metadata when batch helpers are loaded' {
-            Ensure-TestOrchestrationModule
-            $extras = 2..4 | ForEach-Object { "2$($_)-dep-meta.ps1|# fragment $_" }
-            $fixture = New-ProfileLoaderFixture -Prefix 'dep-meta-profile.d' -AdditionalFragments $extras
+            try {
+                Ensure-TestOrchestrationModule
+                $extras = 2..4 | ForEach-Object { "2$($_)-dep-meta.ps1|# fragment $_" }
+                $fixture = New-ProfileLoaderFixture -Prefix 'dep-meta-profile.d' -AdditionalFragments $extras
 
-                        Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -LoadBatchLoadingSummary $true
-            $global:BatchLoadingInfo.DependencyParsingTime | Should -BeGreaterOrEqual 0
-            $global:BatchLoadingInfo.DependencyLevels | Should -BeGreaterThan 0
-        }
-        finally {
-            if ($global:BatchLoadingInfo) {
-                $global:BatchLoadingInfo = $null
+                Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -LoadBatchLoadingSummary $true
+                $global:BatchLoadingInfo.DependencyParsingTime | Should -BeGreaterOrEqual 0
+                $global:BatchLoadingInfo.DependencyLevels | Should -BeGreaterThan 0
+            }
+            finally {
+                if ($global:BatchLoadingInfo) {
+                    $global:BatchLoadingInfo = $null
+                }
             }
         }
 
         It 'Uses Write-StructuredError when bootstrap loading fails without debug output' {
-            Enable-TestStructuredLogging
-            $fixture = New-ProfileLoaderFixture -Prefix 'bootstrap-structured-profile.d'
-            $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
-            Set-Content -LiteralPath $bootstrapPath -Value 'throw "bootstrap structured probe"' -Encoding UTF8
-            $bootstrap = Get-Item -LiteralPath $bootstrapPath
-            $previousErrorAction = $ErrorActionPreference
+            try {
+                Enable-TestStructuredLogging
+                $fixture = New-ProfileLoaderFixture -Prefix 'bootstrap-structured-profile.d'
+                $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
+                Set-Content -LiteralPath $bootstrapPath -Value 'throw "bootstrap structured probe"' -Encoding UTF8
+                $bootstrap = Get-Item -LiteralPath $bootstrapPath
+                $previousErrorAction = $ErrorActionPreference
 
-                        $ErrorActionPreference = 'Continue'
-            { Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap) } | Should -Not -Throw
-        }
-        finally {
-            $ErrorActionPreference = $previousErrorAction
+                            $ErrorActionPreference = 'Continue'
+                { Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap) } | Should -Not -Throw
+            }
+            finally {
+                $ErrorActionPreference = $previousErrorAction
+            }
         }
     }
 
@@ -665,59 +757,67 @@ function Get-ProfileLoaderProxyProbe {
         }
 
         It 'Loads fragments through the orchestration module' {
-            $fixture = New-ProfileLoaderFixture `
-                -Prefix 'orchestration-load-profile.d' `
-                -FragmentBody '$global:ProfileFragmentLoaderOrchestrationProbe = $true'
+            try {
+                $fixture = New-ProfileLoaderFixture `
+                    -Prefix 'orchestration-load-profile.d' `
+                    -FragmentBody '$global:ProfileFragmentLoaderOrchestrationProbe = $true'
 
-                        Remove-Variable -Name ProfileFragmentLoaderOrchestrationProbe -Scope Global -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture
-            $global:ProfileFragmentLoaderOrchestrationProbe | Should -Be $true
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderOrchestrationProbe -Scope Global -ErrorAction SilentlyContinue
+                            Remove-Variable -Name ProfileFragmentLoaderOrchestrationProbe -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture
+                $global:ProfileFragmentLoaderOrchestrationProbe | Should -Be $true
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderOrchestrationProbe -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Skips disabled fragments when orchestration handles loading' {
-            $fixture = New-ProfileLoaderFixture -Prefix 'orchestration-disabled-profile.d' -FragmentBody '$global:ProfileFragmentLoaderOrchestrationDisabled = $true'
-            $disabled = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
-            [void]$disabled.Add('20-loader-probe')
+            try {
+                $fixture = New-ProfileLoaderFixture -Prefix 'orchestration-disabled-profile.d' -FragmentBody '$global:ProfileFragmentLoaderOrchestrationDisabled = $true'
+                $disabled = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+                [void]$disabled.Add('20-loader-probe')
 
-                        Remove-Variable -Name ProfileFragmentLoaderOrchestrationDisabled -Scope Global -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture -DisabledSet $disabled
-            Get-Variable -Name ProfileFragmentLoaderOrchestrationDisabled -Scope Global -ErrorAction SilentlyContinue |
-                Should -BeNullOrEmpty
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderOrchestrationDisabled -Scope Global -ErrorAction SilentlyContinue
+                            Remove-Variable -Name ProfileFragmentLoaderOrchestrationDisabled -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -DisabledSet $disabled
+                Get-Variable -Name ProfileFragmentLoaderOrchestrationDisabled -Scope Global -ErrorAction SilentlyContinue |
+                    Should -BeNullOrEmpty
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderOrchestrationDisabled -Scope Global -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Records fragment results after orchestration completes' {
-            $fixture = New-ProfileLoaderFixture `
-                -Prefix 'orchestration-summary-profile.d' `
-                -FragmentBody '$global:ProfileFragmentLoaderOrchSummary = $true'
+            try {
+                $fixture = New-ProfileLoaderFixture `
+                    -Prefix 'orchestration-summary-profile.d' `
+                    -FragmentBody '$global:ProfileFragmentLoaderOrchSummary = $true'
 
-                        Remove-Variable -Name ProfileFragmentLoaderOrchSummary -Scope Global -ErrorAction SilentlyContinue
-            Invoke-ProfileLoaderInit -Fixture $fixture -LoadBatchLoadingSummary $true
-            $global:BatchLoadingInfo.SucceededFragments.Count | Should -BeGreaterThan 0
-        }
-        finally {
-            Remove-Variable -Name ProfileFragmentLoaderOrchSummary -Scope Global -ErrorAction SilentlyContinue
-            if ($global:BatchLoadingInfo) {
-                $global:BatchLoadingInfo = $null
+                Remove-Variable -Name ProfileFragmentLoaderOrchSummary -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -LoadBatchLoadingSummary $true
+                $global:BatchLoadingInfo.SucceededFragments.Count | Should -BeGreaterThan 0
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderOrchSummary -Scope Global -ErrorAction SilentlyContinue
+                if ($global:BatchLoadingInfo) {
+                    $global:BatchLoadingInfo = $null
+                }
             }
         }
 
         It 'Loads many fragments in batches through the orchestration module' {
-            $extras = 2..11 | ForEach-Object { "2$($_)-orch-batch.ps1|`$global:ProfileFragmentLoaderOrchBatch$_ = `$true" }
-            $fixture = New-ProfileLoaderFixture -Prefix 'orchestration-batch-profile.d' -AdditionalFragments $extras
+            try {
+                $extras = 2..11 | ForEach-Object { "2$($_)-orch-batch.ps1|`$global:ProfileFragmentLoaderOrchBatch$_ = `$true" }
+                $fixture = New-ProfileLoaderFixture -Prefix 'orchestration-batch-profile.d' -AdditionalFragments $extras
 
-                        { Invoke-ProfileLoaderInit -Fixture $fixture -DebugLevel '1' } | Should -Not -Throw
-            $global:ProfileFragmentLoaderOrchBatch2 | Should -Be $true
-            $global:ProfileFragmentLoaderOrchBatch11 | Should -Be $true
-        }
-        finally {
-            2..11 | ForEach-Object {
-                Remove-Variable -Name "ProfileFragmentLoaderOrchBatch$_" -Scope Global -ErrorAction SilentlyContinue
+                { Invoke-ProfileLoaderInit -Fixture $fixture -DebugLevel '1' } | Should -Not -Throw
+                $global:ProfileFragmentLoaderOrchBatch2 | Should -Be $true
+                $global:ProfileFragmentLoaderOrchBatch11 | Should -Be $true
+            }
+            finally {
+                2..11 | ForEach-Object {
+                    Remove-Variable -Name "ProfileFragmentLoaderOrchBatch$_" -Scope Global -ErrorAction SilentlyContinue
+                }
             }
         }
     }
@@ -776,6 +876,430 @@ Export-ModuleMember -Function Get-ReloadProbeValue
             }
             finally {
                 Remove-Variable -Name TestReloadModulePath, TestReloadModuleName -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Returns false when Get-Item cannot resolve the module path' {
+            $global:TestReloadModulePath = $script:ModuleFile
+            $global:TestReloadModuleName = $script:ModuleName
+
+            try {
+                Mock Get-Item { return $null } -ParameterFilter { $LiteralPath -eq $script:ModuleFile }
+
+                InModuleScope -ModuleName ProfileFragmentLoader {
+                    Test-AndReloadModuleIfChanged `
+                        -ModulePath $global:TestReloadModulePath `
+                        -ModuleName $global:TestReloadModuleName | Should -Be $false
+                }
+            }
+            finally {
+                Remove-Variable -Name TestReloadModulePath, TestReloadModuleName -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Returns false when the module path disappears between Test-Path and Get-Item' {
+            $global:TestMissingModulePath = Join-Path $script:TempDir 'vanished-module.psm1'
+            Set-Content -LiteralPath $global:TestMissingModulePath -Value 'Export-ModuleMember' -Encoding UTF8
+            Remove-Item -LiteralPath $global:TestMissingModulePath -Force
+
+            try {
+                InModuleScope -ModuleName ProfileFragmentLoader {
+                    Test-AndReloadModuleIfChanged -ModulePath $global:TestMissingModulePath -ModuleName 'VanishedModule' |
+                        Should -Be $false
+                }
+            }
+            finally {
+                Remove-Variable -Name TestMissingModulePath -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    Context 'Batch progress helpers' {
+        It 'Renders zero-percent progress when total batches is zero' {
+            InModuleScope -ModuleName ProfileFragmentLoader {
+                { Write-BatchProgressRow -BatchNumber 0 -TotalBatches 0 -FragmentCount 0 -FragmentNames @('none') } |
+                    Should -Not -Throw
+            }
+        }
+
+        It 'Truncates long fragment name lists in progress rows' {
+            InModuleScope -ModuleName ProfileFragmentLoader {
+                $names = 1..12 | ForEach-Object { "fragment-$_" }
+                { Write-BatchProgressRow -BatchNumber 1 -TotalBatches 1 -FragmentCount 12 -FragmentNames $names } |
+                    Should -Not -Throw
+            }
+        }
+
+        It 'Prints the batch table header only once per initialization' {
+            InModuleScope -ModuleName ProfileFragmentLoader {
+                Write-BatchProgressTableHeader
+                { Write-BatchProgressTableHeader } | Should -Not -Throw
+            }
+        }
+    }
+
+    Context 'Lazy loading continuation and proxy creation' {
+        AfterEach {
+            Remove-TestLazyLoadingPassthroughModule
+        }
+
+        It 'Continues initialization when lazy loading module declines early return' {
+            try {
+                Install-TestLazyLoadingPassthroughModule
+                $fixture = New-ProfileLoaderFixture -Prefix 'lazy-continue-profile.d' -FragmentBody @'
+function Get-ProfileLoaderLazyContinueProbe {
+    return 'ok'
+}
+'@
+
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -DebugLevel '2' } | Should -Not -Throw
+            }
+            finally {
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Creates command proxies when lazy loading continues with debug tracing' {
+            try {
+                Enable-TestStructuredLogging
+                Install-TestLazyLoadingPassthroughModule
+                Import-Module $script:FragmentLibDir/FragmentCommandRegistry.psm1 -DisableNameChecking -Force -Global
+                Mock Create-CommandProxiesForAutocomplete {
+                    return [PSCustomObject]@{
+                        TotalCommands  = 4
+                        CreatedProxies = 3
+                        FailedProxies  = 1
+                    }
+                } -ModuleName FragmentCommandRegistry
+
+                $fixture = New-ProfileLoaderFixture -Prefix 'proxy-create-profile.d' -FragmentBody @'
+function Get-ProfileLoaderProxyCreateProbe {
+    return 'proxy-create'
+}
+'@
+
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -EnableProxyCreation $true -DebugLevel '2' } |
+                    Should -Not -Throw
+            }
+            finally {
+                Remove-Module FragmentCommandRegistry -Force -ErrorAction SilentlyContinue
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Uses Write-Warning for proxy creation failures without structured helpers' {
+            try {
+                Disable-TestStructuredLogging
+                Install-TestLazyLoadingPassthroughModule
+                function global:Create-CommandProxiesForAutocomplete {
+                    throw 'proxy warning probe'
+                }
+                $fixture = New-ProfileLoaderFixture -Prefix 'proxy-warning-profile.d'
+
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -EnableProxyCreation $true -DebugLevel '1' -WarningVariable warnings } |
+                    Should -Not -Throw
+            }
+            finally {
+                Remove-Item -Path Function:\Create-CommandProxiesForAutocomplete -ErrorAction SilentlyContinue -Force
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Uses Write-Warning when dependency grouping fails without structured helpers' {
+            try {
+                Disable-TestStructuredLogging
+                Install-TestLazyLoadingPassthroughModule
+                Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
+                Mock Get-FragmentDependencyLevels {
+                    throw 'dependency grouping warning probe'
+                } -ModuleName FragmentLoading
+
+                $fixture = New-ProfileLoaderFixture -Prefix 'grouping-plain-warning-profile.d'
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -EnableLazyLoading $true -DebugLevel '1' -WarningVariable warnings } |
+                    Should -Not -Throw
+            }
+            finally {
+                Remove-Module FragmentLoading -Force -ErrorAction SilentlyContinue
+                Import-Module $script:FragmentLoadingModule -DisableNameChecking -Force -Global
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Uses orchestration fallback while lazy loading continues' {
+            try {
+                Enable-TestStructuredLogging
+                Install-TestLazyLoadingPassthroughModule
+                Hide-TestOrchestrationModule
+                $fixture = New-ProfileLoaderFixture -Prefix 'fallback-orchestration-profile.d' -FragmentBody '$global:ProfileFragmentLoaderFallbackOrch = $true'
+
+                Remove-Variable -Name ProfileFragmentLoaderFallbackOrch -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true
+                $global:ProfileFragmentLoaderFallbackOrch | Should -Be $true
+            }
+            finally {
+                Restore-TestOrchestrationModule
+                Remove-Variable -Name ProfileFragmentLoaderFallbackOrch -Scope Global -ErrorAction SilentlyContinue
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Survives proxy creation failures when lazy loading continues' {
+            try {
+                Enable-TestStructuredLogging
+                Install-TestLazyLoadingPassthroughModule
+                Import-Module $script:FragmentLibDir/FragmentCommandRegistry.psm1 -DisableNameChecking -Force -Global
+                Mock Create-CommandProxiesForAutocomplete {
+                    throw 'proxy creation probe'
+                } -ModuleName FragmentCommandRegistry
+
+                $fixture = New-ProfileLoaderFixture -Prefix 'proxy-fail-profile.d' -FragmentBody 'function Get-ProfileLoaderProxyFailProbe { "ok" }'
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -EnableProxyCreation $true -DebugLevel '1' } |
+                    Should -Not -Throw
+            }
+            finally {
+                Remove-Module FragmentCommandRegistry -Force -ErrorAction SilentlyContinue
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Reports missing proxy helpers when Create-CommandProxiesForAutocomplete is unavailable' {
+            try {
+                Install-TestLazyLoadingPassthroughModule
+                Remove-Item -Path Function:\Create-CommandProxiesForAutocomplete -ErrorAction SilentlyContinue -Force
+                $fixture = New-ProfileLoaderFixture -Prefix 'proxy-missing-profile.d'
+
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -EnableProxyCreation $true -DebugLevel '1' } |
+                    Should -Not -Throw
+            }
+            finally {
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Reports when proxy creation is disabled through PS_PROFILE_CREATE_PROXIES' {
+            try {
+                Install-TestLazyLoadingPassthroughModule
+                $fixture = New-ProfileLoaderFixture -Prefix 'proxy-disabled-profile.d'
+                $previous = $env:PS_PROFILE_CREATE_PROXIES
+                $env:PS_PROFILE_CREATE_PROXIES = '0'
+
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -DebugLevel '1' } | Should -Not -Throw
+            }
+            finally {
+                if ($null -eq $previous) { Remove-Item Env:PS_PROFILE_CREATE_PROXIES -ErrorAction SilentlyContinue }
+                else { $env:PS_PROFILE_CREATE_PROXIES = $previous }
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Lists many fragments under lazy loading with level 3 debug tracing' {
+            try {
+                Install-TestLazyLoadingPassthroughModule
+                $extras = 2..14 | ForEach-Object { "1$($_)-lazy-list.ps1|# fragment $_" }
+                $fixture = New-ProfileLoaderFixture -Prefix 'lazy-list-profile.d' -AdditionalFragments $extras
+
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -DebugLevel '3' } | Should -Not -Throw
+            }
+            finally {
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Runs pre-registration summary output when lazy loading continues' {
+            try {
+                Install-TestLazyLoadingPassthroughModule
+                $extras = 2..3 | ForEach-Object { "2$($_)-prereg.ps1|function Get-ProfileLoaderPreReg$_ { 'ok' }" }
+                $fixture = New-ProfileLoaderFixture -Prefix 'prereg-summary-profile.d' -AdditionalFragments $extras
+
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -DebugLevel '2' } | Should -Not -Throw
+            }
+            finally {
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Loads bootstrap fragments through the inline bootstrap module path' {
+            try {
+                $fixture = New-ProfileLoaderFixture -Prefix 'inline-bootstrap-profile.d'
+                $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
+                Set-Content -LiteralPath $bootstrapPath -Value '$global:ProfileFragmentLoaderInlineBootstrap = $true' -Encoding UTF8
+                $bootstrap = Get-Item -LiteralPath $bootstrapPath
+
+                Remove-Variable -Name ProfileFragmentLoaderInlineBootstrap -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap) -DebugLevel '3'
+                $global:ProfileFragmentLoaderInlineBootstrap | Should -Be $true
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderInlineBootstrap -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Initializes fragment cache fallback when cache initialization module is unavailable' {
+            $fixture = New-ProfileLoaderFixture -Prefix 'cache-fallback-profile.d'
+            { Invoke-ProfileLoaderInit -Fixture $fixture -DebugLevel '2' } | Should -Not -Throw
+        }
+
+        It 'Runs parallel dependency analysis output at debug level 2' {
+            try {
+                Install-TestLazyLoadingPassthroughModule
+                $extras = 2..4 | ForEach-Object { "2$($_)-dep-analysis.ps1|# fragment $_" }
+                $fixture = New-ProfileLoaderFixture -Prefix 'dep-analysis-profile.d' -AdditionalFragments $extras
+
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableParallelLoading $true -EnableLazyLoading $true -DebugLevel '2' } |
+                    Should -Not -Throw
+            }
+            finally {
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Resolves the command registry through ProfileD when FragmentLibDir is invalid' {
+            try {
+                Install-TestLazyLoadingPassthroughModule
+                Import-Module $script:FragmentLibDir/FragmentCommandRegistry.psm1 -DisableNameChecking -Force -Global
+                Mock Create-CommandProxiesForAutocomplete {
+                    return [PSCustomObject]@{ TotalCommands = 1; CreatedProxies = 1; FailedProxies = 0 }
+                } -ModuleName FragmentCommandRegistry
+
+                $profileD = Join-Path $script:RepoRoot 'profile.d'
+                $fixture = New-ProfileLoaderFixture -Prefix 'registry-fallback-profile.d' -FragmentBody 'function Get-ProfileLoaderRegistryFallbackProbe { "ok" }'
+                $invalidLibDir = Join-Path $script:TempDir 'missing-fragment-lib'
+
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -EnableProxyCreation $true -DebugLevel '2' -FragmentLibDirOverride $invalidLibDir -ProfileDOverride $profileD } |
+                    Should -Not -Throw
+            }
+            finally {
+                Remove-Module FragmentCommandRegistry -Force -ErrorAction SilentlyContinue
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Records bootstrap failures with structured errors when debug is disabled' {
+            try {
+                Enable-TestStructuredLogging
+                $fixture = New-ProfileLoaderFixture -Prefix 'bootstrap-no-debug-profile.d'
+                $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
+                Set-Content -LiteralPath $bootstrapPath -Value 'throw "bootstrap no debug probe"' -Encoding UTF8
+                $bootstrap = Get-Item -LiteralPath $bootstrapPath
+                $previousErrorAction = $ErrorActionPreference
+
+                $ErrorActionPreference = 'Continue'
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                { Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap) } | Should -Not -Throw
+            }
+            finally {
+                $ErrorActionPreference = $previousErrorAction
+            }
+        }
+
+        It 'Uses optional profile submodule stubs when they are present on disk' {
+            try {
+                Install-TestProfileSubmoduleStub -FileName 'ProfileFragmentCacheInitialization.psm1' -Content @'
+function Initialize-FragmentCacheForLoading {
+    param([string]$FragmentLibDir, [bool]$HasDebug, [int]$DebugLevel)
+}
+function Pre-WarmFragmentCache {
+    param([System.Collections.Generic.List[System.IO.FileInfo]]$FragmentsToLoad, [bool]$HasDebug, [int]$DebugLevel)
+}
+Export-ModuleMember -Function Initialize-FragmentCacheForLoading, Pre-WarmFragmentCache
+'@
+                Install-TestProfileSubmoduleStub -FileName 'ProfileFragmentBootstrap.psm1' -Content @'
+function Invoke-BootstrapFragmentLoading {
+    param(
+        [System.IO.FileInfo[]]$BootstrapFragment,
+        [System.Collections.Generic.HashSet[string]]$AllSucceeded,
+        [System.Collections.Generic.List[hashtable]]$AllFailed,
+        [System.Collections.Generic.HashSet[string]]$FailedNames
+    )
+
+    $bootstrapNameSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($bf in @($BootstrapFragment)) {
+        if ($bf -and $bf.BaseName) {
+            [void]$bootstrapNameSet.Add($bf.BaseName)
+            try {
+                $null = . $bf.FullName
+                [void]$AllSucceeded.Add($bf.BaseName)
+            }
+            catch {
+                if (-not $FailedNames.Contains($bf.BaseName)) {
+                    $AllFailed.Add(@{ Name = $bf.BaseName; Error = $_.Exception.Message })
+                    [void]$FailedNames.Add($bf.BaseName)
+                }
+            }
+        }
+    }
+    return $bootstrapNameSet
+}
+Export-ModuleMember -Function Invoke-BootstrapFragmentLoading
+'@
+                Install-TestProfileSubmoduleStub -FileName 'ProfileFragmentPreRegistration.psm1' -Content @'
+function Invoke-FragmentCommandPreRegistration {
+    param(
+        [System.Collections.Generic.List[System.IO.FileInfo]]$FragmentsToLoad,
+        [string]$FragmentLibDir,
+        [string]$ProfileD
+    )
+
+    return [PSCustomObject]@{
+        TotalFragments     = $FragmentsToLoad.Count
+        RegisteredCommands = 0
+        FailedFragments    = 0
+    }
+}
+Export-ModuleMember -Function Invoke-FragmentCommandPreRegistration
+'@
+
+                $fixture = New-ProfileLoaderFixture -Prefix 'submodule-stub-profile.d'
+                $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
+                Set-Content -LiteralPath $bootstrapPath -Value '$global:ProfileFragmentLoaderSubmoduleBootstrap = $true' -Encoding UTF8
+                $bootstrap = Get-Item -LiteralPath $bootstrapPath
+
+                Remove-Variable -Name ProfileFragmentLoaderSubmoduleBootstrap -Scope Global -ErrorAction SilentlyContinue
+                Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap) -EnablePrewarmCache $true -DebugLevel '2'
+                $global:ProfileFragmentLoaderSubmoduleBootstrap | Should -Be $true
+            }
+            finally {
+                Remove-Variable -Name ProfileFragmentLoaderSubmoduleBootstrap -Scope Global -ErrorAction SilentlyContinue
+                Remove-TestProfileSubmoduleStubs
+            }
+        }
+
+        It 'Reports created proxy counts at debug level 1 when proxies are created' {
+            try {
+                Install-TestLazyLoadingPassthroughModule
+                Import-Module $script:FragmentLibDir/FragmentCommandRegistry.psm1 -DisableNameChecking -Force -Global
+                Mock Create-CommandProxiesForAutocomplete {
+                    return [PSCustomObject]@{
+                        TotalCommands  = 2
+                        CreatedProxies = 2
+                        FailedProxies  = 0
+                    }
+                } -ModuleName FragmentCommandRegistry
+
+                $fixture = New-ProfileLoaderFixture -Prefix 'proxy-count-profile.d'
+                { Invoke-ProfileLoaderInit -Fixture $fixture -EnableLazyLoading $true -EnableProxyCreation $true -DebugLevel '1' } |
+                    Should -Not -Throw
+            }
+            finally {
+                Remove-Module FragmentCommandRegistry -Force -ErrorAction SilentlyContinue
+                Remove-TestLazyLoadingPassthroughModule
+            }
+        }
+
+        It 'Uses Write-Error for bootstrap failures when structured logging is unavailable' {
+            try {
+                Disable-TestStructuredLogging
+                $fixture = New-ProfileLoaderFixture -Prefix 'bootstrap-write-error-profile.d'
+                $bootstrapPath = Join-Path $fixture.ProfileD 'bootstrap.ps1'
+                Set-Content -LiteralPath $bootstrapPath -Value 'throw "bootstrap write-error probe"' -Encoding UTF8
+                $bootstrap = Get-Item -LiteralPath $bootstrapPath
+                $previousErrorAction = $ErrorActionPreference
+
+                $ErrorActionPreference = 'Continue'
+                { Invoke-ProfileLoaderInit -Fixture $fixture -BootstrapFragment @($bootstrap) -DebugLevel '1' } | Should -Not -Throw
+            }
+            finally {
+                $ErrorActionPreference = $previousErrorAction
             }
         }
     }

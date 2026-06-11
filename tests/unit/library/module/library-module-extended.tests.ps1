@@ -22,15 +22,6 @@ BeforeAll {
     Import-Module (Join-Path $script:LibPath 'runtime' 'Module.psm1') -DisableNameChecking -Force
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 function script:Invoke-InModuleWithStubs {
     param(
         [Parameter(Mandatory)]

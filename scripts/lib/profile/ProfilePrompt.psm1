@@ -15,6 +15,12 @@ function Initialize-ProfilePrompt {
     param()
 
     try {
+        if ($env:PS_PROFILE_PROMPT_FORCE_INIT_ERROR -and (
+                $env:PS_PROFILE_PROMPT_FORCE_INIT_ERROR.Trim().ToLowerInvariant() -eq '1' -or
+                $env:PS_PROFILE_PROMPT_FORCE_INIT_ERROR.Trim().ToLowerInvariant() -eq 'true')) {
+            throw [System.InvalidOperationException]::new('profile prompt forced init probe')
+        }
+
         $debugLevel = 0
         if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel)) {
             # Level 1: Basic initialization start

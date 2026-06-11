@@ -384,4 +384,193 @@ Describe 'ScoopDetection extended scenarios' {
             }
         }
     }
+
+    Context 'Get-ScoopRoot via SCOOP env var' {
+        It 'Detects scoop root from SCOOP and emits level 3 tracing' {
+            $localRoot = Join-Path $script:TempDir 'scoop-local-debug'
+            New-Item -ItemType Directory -Path (Join-Path $localRoot 'apps') -Force | Out-Null
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $originalScoop = $env:SCOOP
+            $originalGlobal = $env:SCOOP_GLOBAL
+
+            try {
+                Remove-Item Env:SCOOP_GLOBAL -ErrorAction SilentlyContinue
+                $env:PS_PROFILE_DEBUG = '3'
+                $env:SCOOP = $localRoot
+
+                Get-ScoopRoot | Should -Be $localRoot
+            }
+            finally {
+                if ($null -eq $originalDebug) { Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue } else { $env:PS_PROFILE_DEBUG = $originalDebug }
+                if ($null -eq $originalScoop) { Remove-Item Env:SCOOP -ErrorAction SilentlyContinue } else { $env:SCOOP = $originalScoop }
+                if ($null -eq $originalGlobal) { Remove-Item Env:SCOOP_GLOBAL -ErrorAction SilentlyContinue } else { $env:SCOOP_GLOBAL = $originalGlobal }
+            }
+        }
+    }
+
+    Context 'Get-ScoopRoot via USERPROFILE fallback' {
+        It 'Uses USERPROFILE when HOME is not set' {
+            $profileHome = Join-Path $script:TempDir 'userprofile-home'
+            $defaultScoop = Join-Path $profileHome 'scoop'
+            New-Item -ItemType Directory -Path (Join-Path $defaultScoop 'apps') -Force | Out-Null
+
+            $originalHome = $env:HOME
+            $originalProfile = $env:USERPROFILE
+            $originalScoop = $env:SCOOP
+            $originalGlobal = $env:SCOOP_GLOBAL
+            $originalRoot = $env:SCOOP_ROOT
+            $originalScoopHome = $env:SCOOP_HOME
+
+            try {
+                Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP_GLOBAL -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP_ROOT -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP_HOME -ErrorAction SilentlyContinue
+                $env:USERPROFILE = $profileHome
+                $env:PS_PROFILE_DEBUG = '3'
+
+                Get-ScoopRoot | Should -Be $defaultScoop
+            }
+            finally {
+                if ($null -eq $originalHome) { Remove-Item Env:HOME -ErrorAction SilentlyContinue } else { $env:HOME = $originalHome }
+                if ($null -eq $originalProfile) { Remove-Item Env:USERPROFILE -ErrorAction SilentlyContinue } else { $env:USERPROFILE = $originalProfile }
+                if ($null -eq $originalScoop) { Remove-Item Env:SCOOP -ErrorAction SilentlyContinue } else { $env:SCOOP = $originalScoop }
+                if ($null -eq $originalGlobal) { Remove-Item Env:SCOOP_GLOBAL -ErrorAction SilentlyContinue } else { $env:SCOOP_GLOBAL = $originalGlobal }
+                if ($null -eq $originalRoot) { Remove-Item Env:SCOOP_ROOT -ErrorAction SilentlyContinue } else { $env:SCOOP_ROOT = $originalRoot }
+                if ($null -eq $originalScoopHome) { Remove-Item Env:SCOOP_HOME -ErrorAction SilentlyContinue } else { $env:SCOOP_HOME = $originalScoopHome }
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+        }
+    }
+
+    Context 'Get-ScoopCompletionPath with Validation module' {
+        It 'Resolves completion paths through Test-ValidPath when available' {
+            Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+
+            $completionDir = Join-Path $script:FakeScoopRoot 'apps' 'scoop' 'current' 'supporting' 'completion'
+            New-Item -ItemType Directory -Path $completionDir -Force | Out-Null
+            $completionFile = Join-Path $completionDir 'Scoop-Completion.psd1'
+            Set-Content -LiteralPath $completionFile -Value '@{ RootModule = "" }' -Encoding UTF8
+
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                Get-ScoopCompletionPath -ScoopRoot $script:FakeScoopRoot | Should -Be $completionFile
+            }
+            finally {
+                if ($null -eq $originalDebug) { Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue } else { $env:PS_PROFILE_DEBUG = $originalDebug }
+            }
+        }
+
+        It 'Emits verbose output when completion module is missing' {
+            $rootWithoutCompletion = Join-Path $script:TempDir 'scoop-no-completion'
+            New-Item -ItemType Directory -Path (Join-Path $rootWithoutCompletion 'apps') -Force | Out-Null
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '2'
+
+            try {
+                Get-ScoopCompletionPath -ScoopRoot $rootWithoutCompletion | Should -BeNullOrEmpty
+            }
+            finally {
+                if ($null -eq $originalDebug) { Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue } else { $env:PS_PROFILE_DEBUG = $originalDebug }
+            }
+        }
+    }
+
+    Context 'Get-ScoopShimsPath negative detection' {
+        It 'Returns null and emits verbose output when shims directory is missing' {
+            $rootWithoutShims = Join-Path $script:TempDir 'scoop-no-shims'
+            New-Item -ItemType Directory -Path (Join-Path $rootWithoutShims 'apps') -Force | Out-Null
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '2'
+
+            try {
+                Get-ScoopShimsPath -ScoopRoot $rootWithoutShims | Should -BeNullOrEmpty
+            }
+            finally {
+                if ($null -eq $originalDebug) { Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue } else { $env:PS_PROFILE_DEBUG = $originalDebug }
+            }
+        }
+    }
+
+    Context 'Add-ScoopToPath without detected root' {
+        It 'Returns false when no scoop installation can be detected' {
+            $isolatedHome = New-TestTempDirectory -Prefix 'ScoopAddNoRoot'
+            $originalHome = $env:HOME
+            $originalScoop = $env:SCOOP
+            $originalGlobal = $env:SCOOP_GLOBAL
+            $originalRoot = $env:SCOOP_ROOT
+            $originalScoopHome = $env:SCOOP_HOME
+
+            try {
+                Remove-Item Env:SCOOP -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP_GLOBAL -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP_ROOT -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP_HOME -ErrorAction SilentlyContinue
+                $env:HOME = $isolatedHome
+                $env:PS_PROFILE_DEBUG = '2'
+
+                Add-ScoopToPath | Should -Be $false
+            }
+            finally {
+                if ($null -eq $originalHome) { Remove-Item Env:HOME -ErrorAction SilentlyContinue } else { $env:HOME = $originalHome }
+                if ($null -eq $originalScoop) { Remove-Item Env:SCOOP -ErrorAction SilentlyContinue } else { $env:SCOOP = $originalScoop }
+                if ($null -eq $originalGlobal) { Remove-Item Env:SCOOP_GLOBAL -ErrorAction SilentlyContinue } else { $env:SCOOP_GLOBAL = $originalGlobal }
+                if ($null -eq $originalRoot) { Remove-Item Env:SCOOP_ROOT -ErrorAction SilentlyContinue } else { $env:SCOOP_ROOT = $originalRoot }
+                if ($null -eq $originalScoopHome) { Remove-Item Env:SCOOP_HOME -ErrorAction SilentlyContinue } else { $env:SCOOP_HOME = $originalScoopHome }
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Emits verbose output when shims and bin are already present in PATH' {
+            $shims = Join-Path $script:FakeScoopRoot 'shims'
+            $bin = Join-Path $script:FakeScoopRoot 'bin'
+            New-Item -ItemType Directory -Path $bin -Force | Out-Null
+            $originalPath = $env:PATH
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PATH = "$shims$([System.IO.Path]::PathSeparator)$bin$([System.IO.Path]::PathSeparator)$env:PATH"
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                Add-ScoopToPath -ScoopRoot $script:FakeScoopRoot | Should -Be $false
+            }
+            finally {
+                $env:PATH = $originalPath
+                if ($null -eq $originalDebug) { Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue } else { $env:PS_PROFILE_DEBUG = $originalDebug }
+            }
+        }
+    }
+
+    Context 'Get-ScoopRoot not found tracing' {
+        It 'Emits verbose output when no scoop root can be detected' {
+            $isolatedHome = New-TestTempDirectory -Prefix 'ScoopRootNotFound'
+            $originalHome = $env:HOME
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $originalScoop = $env:SCOOP
+            $originalGlobal = $env:SCOOP_GLOBAL
+            $originalRoot = $env:SCOOP_ROOT
+            $originalScoopHome = $env:SCOOP_HOME
+
+            try {
+                Remove-Item Env:SCOOP -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP_GLOBAL -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP_ROOT -ErrorAction SilentlyContinue
+                Remove-Item Env:SCOOP_HOME -ErrorAction SilentlyContinue
+                $env:HOME = $isolatedHome
+                $env:PS_PROFILE_DEBUG = '2'
+
+                Get-ScoopRoot | Should -BeNullOrEmpty
+            }
+            finally {
+                if ($null -eq $originalHome) { Remove-Item Env:HOME -ErrorAction SilentlyContinue } else { $env:HOME = $originalHome }
+                if ($null -eq $originalScoop) { Remove-Item Env:SCOOP -ErrorAction SilentlyContinue } else { $env:SCOOP = $originalScoop }
+                if ($null -eq $originalGlobal) { Remove-Item Env:SCOOP_GLOBAL -ErrorAction SilentlyContinue } else { $env:SCOOP_GLOBAL = $originalGlobal }
+                if ($null -eq $originalRoot) { Remove-Item Env:SCOOP_ROOT -ErrorAction SilentlyContinue } else { $env:SCOOP_ROOT = $originalRoot }
+                if ($null -eq $originalScoopHome) { Remove-Item Env:SCOOP_HOME -ErrorAction SilentlyContinue } else { $env:SCOOP_HOME = $originalScoopHome }
+                if ($null -eq $originalDebug) { Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue } else { $env:PS_PROFILE_DEBUG = $originalDebug }
+            }
+        }
+    }
 }

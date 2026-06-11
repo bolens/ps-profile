@@ -67,23 +67,6 @@ function script:Reset-FragmentLoaderGlobals {
     Set-Variable -Name '__psprofile_fragment_loaded' -Value @{} -Scope Global
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    function global:Write-StructuredWarning {
-        param(
-            [string]$Message,
-            [string]$OperationName,
-            [hashtable]$Context,
-            [string]$Code
-        )
-
-        return $null
-    }
-}
-
 AfterAll {
     if ($null -eq $script:OriginalProfileFragmentRoot) {
         Remove-Variable -Name 'ProfileFragmentRoot' -Scope Global -ErrorAction SilentlyContinue

@@ -24,15 +24,6 @@ BeforeAll {
     $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 AfterAll {
     Remove-Module EnvFile -ErrorAction SilentlyContinue -Force
 

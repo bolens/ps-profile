@@ -25,15 +25,6 @@ BeforeAll {
     $script:TempDir = New-TestTempDirectory -Prefix 'NodeJsExtended'
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 function script:Clear-NodeJsTestEnvironment {
     foreach ($name in @(
             'PNPM_HOME', 'PNPM_ROOT', 'NPM_CONFIG_PREFIX', 'NODE_PATH', 'NVM_DIR',

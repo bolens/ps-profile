@@ -28,15 +28,6 @@ function script:Clear-CacheKeyTestEnvironment {
     }
 }
 
-function script:Enable-TestStructuredLogging {
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
-    }
-
-    . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
-}
-
 AfterAll {
     Clear-CacheKeyTestEnvironment
     Remove-Module CacheKey -ErrorAction SilentlyContinue -Force
