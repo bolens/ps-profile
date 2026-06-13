@@ -7,7 +7,9 @@
 >
 > Breaking changes, incomplete features, and bugs that prevent normal operation can occur without notice. Use at your own risk. Pin a commit if you rely on it, and expect to tune fragments for your environment.
 
-A modular, cross-platform PowerShell profile that turns your shell into a lazy-loaded toolkit for daily development work. Functionality lives in **130+ fragments** under `profile.d/`—each focused on one concern (Git, containers, a language runtime, a cloud CLI, a conversion pipeline, and so on)—and loads only when you need it.
+A modular, cross-platform PowerShell profile that turns your shell into a lazy-loaded toolkit for daily development work.
+
+Functionality lives in **130+ fragments** under `profile.d/`—each focused on one concern (Git, containers, language runtimes, cloud CLIs, conversion pipelines, and more)—and loads only when you need it.
 
 ## What This Project Does
 
@@ -15,7 +17,9 @@ This is not a minimal prompt-and-alias dotfile. It is a **maintainable profile f
 
 1. **Modular fragments** — Each feature area is a small, idempotent script in `profile.d/` with explicit dependencies, environment presets, and optional disable flags via `.profile-fragments.json`.
 2. **Fast startup** — Expensive work is deferred behind `Enable-*` helpers, command-existence caches, and optional batch/parallel loading so interactive sessions stay responsive.
-3. **On-demand command access** — Functions and aliases register in a fragment command registry so commands can load their fragment automatically (including from `-NoProfile` sessions and generated standalone wrappers). See [docs/guides/FRAGMENT_COMMAND_ACCESS.md](docs/guides/FRAGMENT_COMMAND_ACCESS.md).
+3. **On-demand command access** — Functions and aliases register in a fragment command registry so commands can load their fragment automatically
+   (including from `-NoProfile` sessions and generated standalone wrappers).
+   See [docs/guides/FRAGMENT_COMMAND_ACCESS.md](docs/guides/FRAGMENT_COMMAND_ACCESS.md).
 
 In practice the profile bundles helpers for:
 
@@ -25,7 +29,8 @@ In practice the profile bundles helpers for:
 - **Data and document conversion** — JSON/YAML/CSV/XML, columnar and binary formats, Markdown/LaTeX notes, media transforms, ISBN/bibliography utilities, QR codes, and related pipelines under `profile.d/conversion-modules/`
 - **Shell quality of life** — PSReadLine, oh-my-posh/Starship prompts, history, diagnostics, and system monitoring
 
-The repo also ships the **tooling that keeps the profile maintainable**: Pester unit/integration/performance tests, PSScriptAnalyzer linting, startup benchmarks, auto-generated API docs (`docs/api/`), and 48+ quality tasks via Task/Just/Make/npm.
+The repo also ships the **tooling that keeps the profile maintainable**: Pester unit/integration/performance tests, PSScriptAnalyzer linting, startup benchmarks,
+auto-generated API docs (`docs/api/`), and 48+ quality tasks via Task, Just, Make, or npm.
 
 **Current scale:** see [docs/api/README.md](docs/api/README.md) for live function and alias counts (currently ~1,500 of each).
 

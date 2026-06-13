@@ -89,5 +89,3 @@ After a full API doc regeneration, run `task drift-link` again so `docs/api/**` 
 - **Total Functions**: See [API index](api/README.md) for current count
 - **Total Aliases**: See [API index](api/README.md) for current count
 - **Total Fragments**: See [Fragment index](fragments/README.md) for current count
-
-

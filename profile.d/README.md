@@ -6,7 +6,8 @@ This directory contains small, focused PowerShell scripts that are dot-sourced f
 
 ## Loading Order
 
-Fragments use **dependency-aware loading**, not filename sorting alone. Each fragment can declare dependencies and a tier in its header; the loader resolves load order with topological sorting (see [ARCHITECTURE.md](../ARCHITECTURE.md) and [PROFILE_README.md](../PROFILE_README.md)).
+Fragments use **dependency-aware loading**, not filename sorting alone. Each fragment can declare dependencies and a tier in its header; the loader resolves load order with topological sorting.
+See [ARCHITECTURE.md](../ARCHITECTURE.md) and [PROFILE_README.md](../PROFILE_README.md).
 
 ```powershell
 # Dependencies: bootstrap, env
@@ -186,12 +187,14 @@ if (Test-Path $utilitiesModulesDir) {
 
 ## Local Overrides
 
-The `local-overrides.ps1` fragment is **disabled by default** due to performance issues (100+ second delays on some filesystems when the file doesn't exist). To enable it:
+The `local-overrides.ps1` fragment is **disabled by default** due to performance issues (100+ second delays on some filesystems when the file doesn't exist).
+To enable it:
 
 1. Set the environment variable: `PS_PROFILE_ENABLE_LOCAL_OVERRIDES=1` in your `.env` file
 2. Create `profile.d/local-overrides.ps1` with your machine-specific customizations
 
-**Note**: Only enable this if you actually have a `local-overrides.ps1` file to load. The fragment is intended for machine-specific tweaks and should be added to `.gitignore` if you plan to keep secrets or local-only settings there.
+**Note**: Only enable this if you actually have a `local-overrides.ps1` file to load.
+The fragment is intended for machine-specific tweaks and should be added to `.gitignore` if you plan to keep secrets or local-only settings there.
 
 ## Documentation
 

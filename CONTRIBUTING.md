@@ -643,7 +643,8 @@ Use numeric prefixes to control load order:
 
 ### Documenting dynamic registrations
 
-API docs discover functions registered with `Set-AgentModeFunction`, `Register-LazyFunction`, and `Set-Item` / `New-Item` on `Function:` paths (including `Function:\Name`). Use one of these help patterns so `task generate-docs` can extract documentation:
+API docs discover functions registered with `Set-AgentModeFunction`, `Register-LazyFunction`, and `Set-Item` / `New-Item` on `Function:` paths (including `Function:\Name`).
+Use one of these help patterns so `task generate-docs` can extract documentation:
 
 1. **Block help** — `<# .SYNOPSIS ... .DESCRIPTION ... #>` within three lines above the registration (preferred for full help)
 2. **Single-line caption** — `# Brief description` on the line above the registration

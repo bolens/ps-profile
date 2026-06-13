@@ -23,7 +23,8 @@ The profile uses specialized modules in `scripts/lib/` for fragment management. 
 - **`runtime/`** - Runtime environment modules:
   - **`ScoopDetection.psm1`** - Scoop installation detection and PATH management
 
-**Note**: The `ModuleImport.psm1` module (located in `scripts/lib/` root) automatically resolves subdirectories when using `Import-LibModule`, so you don't need to specify subdirectory paths when importing modules.
+**Note**: The `ModuleImport.psm1` module (located in `scripts/lib/` root) automatically resolves subdirectories when using `Import-LibModule`.
+You don't need to specify subdirectory paths when importing modules.
 
 These modules are imported in `Microsoft.PowerShell_profile.ps1` before fragments are loaded, making them available to all fragments.
 
@@ -103,9 +104,13 @@ Enable with `$env:PS_PROFILE_BATCH_LOAD=1` or `"batchLoad": true` in `.profile-f
 - Fragments can be disabled via `.profile-fragments.json`
 - Loading is idempotent (safe to reload)
 - Batch optimization groups fragments by dependency tiers for more efficient loading
-- **Parallel dependency parsing:** Fragments with 5+ files automatically parse dependencies in parallel using PowerShell runspaces, significantly reducing I/O overhead (from ~10s to <400ms). Control via `PS_PROFILE_PARALLEL_DEPENDENCIES` (default: enabled). Uses runspaces instead of jobs for much better performance (no process spawning overhead).
-- **EXPERIMENTAL: Parallel fragment loading:** Hybrid approach that attempts to load independent fragments (same dependency level) in parallel using PowerShell runspaces, then falls back to sequential loading if parallel execution fails. Enable via `PS_PROFILE_PARALLEL_LOADING=1`. WARNING: Experimental feature - may have issues with fragments that modify session state extensively
-- **Note:** Fragment execution is sequential by default for reliability. Parallel dependency parsing is enabled by default and provides significant speedup. Parallel fragment loading is experimental and opt-in. All parallel processing now uses runspaces (not jobs) for optimal performance.
+- **Parallel dependency parsing:** Fragments with 5+ files automatically parse dependencies in parallel using PowerShell runspaces, significantly reducing I/O overhead (from ~10s to <400ms).
+  Control via `PS_PROFILE_PARALLEL_DEPENDENCIES` (default: enabled). Uses runspaces instead of jobs for much better performance (no process spawning overhead).
+- **EXPERIMENTAL: Parallel fragment loading:** Hybrid approach that attempts to load independent fragments (same dependency level) in parallel using PowerShell runspaces,
+  then falls back to sequential loading if parallel execution fails. Enable via `PS_PROFILE_PARALLEL_LOADING=1`.
+  WARNING: Experimental feature - may have issues with fragments that modify session state extensively
+- **Note:** Fragment execution is sequential by default for reliability. Parallel dependency parsing is enabled by default and provides significant speedup.
+  Parallel fragment loading is experimental and opt-in. All parallel processing now uses runspaces (not jobs) for optimal performance.
 
 ## Fragment Structure
 
@@ -256,7 +261,7 @@ Several fragments have been refactored into modular subdirectories for better or
 
 The bootstrap fragment has been refactored into focused modules:
 
-```
+```text
 bootstrap.ps1 (thin loader)
 bootstrap/
 ├── GlobalState.ps1           # Global variable initialization
@@ -273,7 +278,7 @@ bootstrap/
 
 The Starship prompt fragment has been refactored into focused modules:
 
-```
+```text
 starship.ps1 (main initialization)
 starship/
 ├── StarshipHelpers.ps1       # Test-StarshipInitialized, Test-PromptNeedsReplacement, Get-StarshipPromptArguments
@@ -288,7 +293,7 @@ starship/
 
 The system utilities fragment has been refactored into category-based modules:
 
-```
+```text
 system.ps1 (thin loader)
 system/
 ├── FileOperations.ps1    # touch, mkdir, rm, cp, mv, find (search)
@@ -303,7 +308,7 @@ system/
 
 The files fragment includes extracted modules and loads conversion subsystems:
 
-```
+```text
 files.ps1 (main loader — module orchestration)
 files/                      # Fragment-specific helpers (when present)
 conversion-modules/         # Data, document, and media conversions (loaded from files.ps1)
@@ -313,7 +318,7 @@ conversion-modules/         # Data, document, and media conversions (loaded from
 
 The encoding conversion module has been refactored into format-specific sub-modules:
 
-```
+```text
 core-encoding.ps1 (thin loader, ~60 lines)
 core/
 ├── core-encoding-roman.ps1    # Roman numeral conversions (16 functions)

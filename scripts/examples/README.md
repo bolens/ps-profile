@@ -36,6 +36,7 @@ Import-LibModule -ModuleName 'Module' -ScriptPath $PSScriptRoot -DisableNameChec
 ```
 
 **Available Library Modules:**
+
 - `ModuleImport.psm1` - Module import helper (import this first)
 - `ExitCodes.psm1` - Exit code constants
 - `PathResolution.psm1` - Path resolution utilities
@@ -173,4 +174,3 @@ pwsh -NoProfile -File scripts/git/install-pre-commit-hook.ps1
 ```powershell
 pwsh -NoProfile -File scripts/dev/setup.ps1
 ```
-

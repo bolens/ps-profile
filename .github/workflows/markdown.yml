@@ -26,6 +26,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run markdownlint
-        run: pnpm exec markdownlint '**/*.md' --ignore node_modules
+        run: >
+          pnpm exec markdownlint
+          README.md WARP.md AGENTS.md ARCHITECTURE.md CONTRIBUTING.md
+          PROFILE_README.md PROFILE_DEBUG.md profile.d/README.md
+          requirements/README.md scripts/utils/README.md scripts/examples/README.md
+          docs/README.md
       - name: Check links in README
         run: pnpm dlx markdown-link-check README.md

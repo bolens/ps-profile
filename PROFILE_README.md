@@ -395,7 +395,8 @@ See [PROFILE_DEBUG.md](PROFILE_DEBUG.md) for complete debugging guide.
 
 ## Environment Variable Configuration
 
-The profile supports project-specific environment variable configuration through `.env` files. This allows you to customize package manager preferences and other settings without modifying system environment variables.
+The profile supports project-specific environment variable configuration through `.env` files.
+This allows you to customize package manager preferences and other settings without modifying system environment variables.
 
 ### .env File Support
 
@@ -425,15 +426,21 @@ PS_PROFILE_BATCH_LOAD=1
 - `PS_PARQUET_LIB` - Preferred Parquet library (`auto`, `pyarrow`, `fastparquet`)
 - `PS_SCIENTIFIC_LIB` - Preferred scientific library (`auto`, `netcdf4`, `h5py`, `xarray`)
 - `PS_PROFILE_ENVIRONMENT` - Environment-specific fragment loading (e.g., `minimal`, `development`, `ci`, `cloud`, `server`, `containers`, `web`, `full`). Requires configuration in `.profile-fragments.json`
-- `PS_PROFILE_LOAD_ALL` - Load all fragments (`0` or `1`, default: `0`). When enabled, loads all fragments regardless of disabled fragments list or environment restrictions. Overrides `PS_PROFILE_ENVIRONMENT` and `.profile-fragments.json` disabled list
+- `PS_PROFILE_LOAD_ALL` - Load all fragments (`0` or `1`, default: `0`). When enabled, loads all fragments regardless of disabled fragments list or environment restrictions.
+  Overrides `PS_PROFILE_ENVIRONMENT` and `.profile-fragments.json` disabled list
 - `PS_PROFILE_BATCH_LOAD` - Enable batch loading optimization (`0` or `1`)
 - `PS_PROFILE_PARALLEL_DEPENDENCIES` - Enable parallel dependency parsing (`0` or `1`, default: `1`). Speeds up dependency parsing for profiles with 5+ fragments
-- `PS_PROFILE_PARALLEL_LOADING` - **EXPERIMENTAL**: Enable parallel fragment loading (`0` or `1`, default: `0`). Attempts to load independent fragments in parallel, falls back to sequential on failure
+- `PS_PROFILE_PARALLEL_LOADING` - **EXPERIMENTAL**: Enable parallel fragment loading (`0` or `1`, default: `0`).
+  Attempts to load independent fragments in parallel, falls back to sequential on failure
 - `PS_PROFILE_DEBUG` - Enable debug output (`0` or `1`)
-- `PS_PROFILE_DEBUG` - Debug level (`0`, `1`, `2`, or `3`). Level 2+ includes timing information. Level 2+ shows individual fragment messages (Level 1 shows batched output)
-- `PS_PROFILE_ENABLE_LOCAL_OVERRIDES` - Enable local-overrides.ps1 loading (`0` or `1`, default: `0`) - **WARNING**: Disabled by default due to performance issues (100+ second delays on some filesystems when file doesn't exist)
-- `PS_PROFILE_DEV_MODE` - Development mode (`0` or `1`, default: `0`). Enables optimizations for faster profile loading during development. Skips expensive operations like update checks, git status, and prompt initialization delays
-- `PS_PROFILE_FAST_RELOAD` - Fast reload mode (`0` or `1`, default: `0`). Automatically enables fast reload in `Reload-Profile`, skipping expensive operations. Also automatically enabled if `PS_PROFILE_DEV_MODE` is set
+- `PS_PROFILE_DEBUG` - Debug level (`0`, `1`, `2`, or `3`). Level 2+ includes timing information.
+  Level 2+ shows individual fragment messages (Level 1 shows batched output)
+- `PS_PROFILE_ENABLE_LOCAL_OVERRIDES` - Enable local-overrides.ps1 loading (`0` or `1`, default: `0`) - **WARNING**: Disabled by default due to performance issues
+  (100+ second delays on some filesystems when file doesn't exist)
+- `PS_PROFILE_DEV_MODE` - Development mode (`0` or `1`, default: `0`). Enables optimizations for faster profile loading during development.
+  Skips expensive operations like update checks, git status, and prompt initialization delays
+- `PS_PROFILE_FAST_RELOAD` - Fast reload mode (`0` or `1`, default: `0`). Automatically enables fast reload in `Reload-Profile`, skipping expensive operations.
+  Also automatically enabled if `PS_PROFILE_DEV_MODE` is set
 
 **Features:**
 

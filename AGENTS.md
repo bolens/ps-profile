@@ -4,7 +4,8 @@ This file provides guidance for AI coding assistants (Claude, Cursor, GitHub Cop
 
 ## Quick Start for AI Assistants
 
-This is a **modular, cross-platform PowerShell profile** with lazy-loaded fragments for dev tooling, data/document conversion, cloud and container helpers, and on-demand command access. See [README.md](README.md) for scope and the active-development warning.
+This is a **modular, cross-platform PowerShell profile** with lazy-loaded fragments for dev tooling, data/document conversion, cloud and container helpers, and on-demand command access.
+See [README.md](README.md) for scope and the active-development warning.
 
 - **1,400+ functions** and **1,500+ aliases** (see `docs/api/README.md` for current counts)
 - **130+ fragments** in `profile.d/` with dependency-aware loading
@@ -15,7 +16,7 @@ This is a **modular, cross-platform PowerShell profile** with lazy-loaded fragme
 
 ## Project Structure
 
-```
+```text
 ├── Microsoft.PowerShell_profile.ps1  # Main profile loader (keep minimal)
 ├── profile.d/                         # Modular fragments (130+; dependency-aware loading)
 │   ├── bootstrap.ps1                  # Core helpers (Set-AgentModeFunction, etc.)
@@ -202,7 +203,10 @@ if (Test-CachedCommand 'docker') {
 
 ### 4. Testing Requirements
 
-**Transient test files** must live under `tests/test-data` or `tests/test-artifacts`. Never pass bare filenames (for example `backup.dump`, `CHANGELOG.md`) that resolve against the repository root when a real tool runs. Use `Get-TestArtifactPath`, `New-TestTempDirectory`, or `New-TestTempFile` from `TestSupport/TestPaths.ps1`. Load `TestSupport.ps1` from a Pester hook (`BeforeAll` / `Describe` / `Context`), not at file top level, so per-test `Remove-TestArtifacts` runs via `AfterEach`.
+**Transient test files** must live under `tests/test-data` or `tests/test-artifacts`.
+Never pass bare filenames (for example `backup.dump`, `CHANGELOG.md`) that resolve against the repository root when a real tool runs.
+Use `Get-TestArtifactPath`, `New-TestTempDirectory`, or `New-TestTempFile` from `TestSupport/TestPaths.ps1`.
+Load `TestSupport.ps1` from a Pester hook (`BeforeAll` / `Describe` / `Context`), not at file top level, so per-test `Remove-TestArtifacts` runs via `AfterEach`.
 
 **ALWAYS write tests** for new functionality:
 

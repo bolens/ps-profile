@@ -6,7 +6,7 @@ Python packages stay at the repo root as `requirements.txt` (standard `pip`/`uv`
 
 ## Structure
 
-```
+```text
 requirements/
 ├── scoop.txt                       # Windows Scoop packages (one name per line)
 ├── linux.txt                       # Linux packages (apt, pacman, dnf sections)
@@ -66,6 +66,7 @@ $requirements = Import-Requirements -RepoRoot $repoRoot -UseCache
 
 1. Identify the appropriate category file in `external-tools/`
 2. Add the tool definition following the existing format:
+
    ```powershell
    'tool-name' = @{
        Version        = 'latest'
@@ -78,6 +79,7 @@ $requirements = Import-Requirements -RepoRoot $repoRoot -UseCache
        }
    }
    ```
+
 3. The loader script will automatically include it in the combined requirements
 
 ### Adding New Categories
@@ -85,6 +87,7 @@ $requirements = Import-Requirements -RepoRoot $repoRoot -UseCache
 1. Create a new `.psd1` file in `external-tools/` directory
 2. Follow the format of existing files (wrapped in `@{ ExternalTools = @{ ... } }`)
 3. Add the category to `load-requirements.ps1`:
+
    ```powershell
    # New Category Tools
    $newCategoryPath = Join-Path $scriptDir 'external-tools' 'new-category.psd1'
