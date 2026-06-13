@@ -76,7 +76,8 @@ $code = $LASTEXITCODE
 Remove-Item -LiteralPath $temp -ErrorAction SilentlyContinue
 
 if ($code -ne 0) {
-    Write-ScriptMessage -Message $out
+    $outputText = if ($null -eq $out) { '' } else { ($out | Out-String).TrimEnd() }
+    Write-ScriptMessage -Message $outputText
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Idempotency runner failed (exit code $code)"
 }
 

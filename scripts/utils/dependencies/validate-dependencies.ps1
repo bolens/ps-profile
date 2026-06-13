@@ -159,7 +159,12 @@ if ($requirements.Modules) {
             }
             else {
                 try {
-                    $installedModule = Get-Module -ListAvailable -Name $moduleName -ErrorAction Stop
+                    $installedModule = @(Get-Module -ListAvailable -Name $moduleName -ErrorAction Stop) |
+                        Sort-Object -Property Version -Descending |
+                        Select-Object -First 1
+                    if (@($installedModule).Count -eq 0) {
+                        $installedModule = $null
+                    }
                     # Cache the result (even if null)
                     Set-CachedValue -Key $cacheKey -Value $installedModule -ExpirationSeconds 300
                 }
@@ -201,7 +206,7 @@ if ($requirements.Modules) {
                 }
             }
             else {
-                $installedVersion = $installedModule.Version
+                $installedVersion = [version]$installedModule.Version
                 if ($requiredVersion -and $installedVersion -lt $requiredVersion) {
                     $allValid = $false
                     $versionMismatches.Add("$moduleName version $installedVersion is below required $requiredVersion")
