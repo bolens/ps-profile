@@ -1,3 +1,8 @@
+## [1.10.2] - 2026-06-13
+
+### 🐛 Bug Fixes
+
+- *(ci)* Resolve idempotency output, deps version check, and refresh API docs
 ## [1.10.1] - 2026-06-13
 
 ### 🐛 Bug Fixes
@@ -26,6 +31,7 @@
 ### ⚙️ Miscellaneous Tasks
 
 - *(docs)* Remove stale per-function API docs; add library coverage scanner
+- *(release)* 1.10.1 [skip ci]
 ## [1.10.0] - 2026-06-08
 
 ### 🚀 Features
