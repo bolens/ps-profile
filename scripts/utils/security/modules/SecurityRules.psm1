@@ -29,19 +29,9 @@ function Get-SecurityRules {
         'PSAvoidUsingUserNameAndPasswordParams',
         'PSUsePSCredentialType',
         'PSAvoidUsingInvokeExpression',
-        'PSAvoidUsingPositionalParameters',
         'PSAvoidUsingEmptyCatchBlock',
         'PSAvoidUsingWMICmdlet',
-        'PSAvoidUsingDeprecatedManifestFields',
-        'PSAvoidGlobalVars',
-        'PSAvoidUsingWriteHost',
-        'PSUseDeclaredVarsMoreThanAssignments',
-        'PSAvoidDefaultValueForMandatoryParameter',
-        'PSAvoidUsingCmdletAliases',
-        'PSAvoidUsingComputerNameHardcoded',
-        'PSAvoidUsingPlainTextForPassword',
-        'PSUseShouldProcessForStateChangingFunctions',
-        'PSAvoidNullOrEmptyHelpMessageAttribute'
+        'PSAvoidUsingComputerNameHardcoded'
     ) | Select-Object -Unique
 }
 

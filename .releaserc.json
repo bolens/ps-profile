@@ -6,7 +6,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "git cliff --config cliff.toml --output CHANGELOG.md --bump --tag v${nextRelease.version}"
+        "prepareCmd": "git-cliff --config cliff.toml --output CHANGELOG.md --bump --tag v${nextRelease.version}"
       }
     ],
     [

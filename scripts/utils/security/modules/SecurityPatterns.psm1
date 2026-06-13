@@ -46,7 +46,7 @@ function Get-SecretPatterns {
     [OutputType([hashtable])]
     param()
 
-    $passwordPattern = '(?:password|passwd|pwd)\s*[=:]\s*["'']?([^"'']{8,})["'']?'
+    $passwordPattern = '\b(?:password|passwd|pwd)\b\s*[=:]\s*["'']?([^"'']{8,})["'']?'
     $apiKeyPattern = '(?:apikey|api_key|api-key)\s*[=:]\s*["'']?(?!.*(?:example|sample|test|placeholder|your|changeme|replace|demo|fake|dummy|mock))([A-Za-z0-9]{20,})["'']?'
     $tokenPattern = '(?:token|access_token)\s*[=:]\s*["'']?(?!.*(?:example|sample|test|placeholder|your|changeme|replace|demo|fake|dummy|mock))([A-Za-z0-9]{20,})["'']?'
     $secretPattern = '(?:secret|secretkey|secret_key)\s*[=:]\s*["'']?(?!.*(?:example|sample|test|placeholder|your|changeme|replace|demo|fake|dummy|mock))([A-Za-z0-9]{16,})["'']?'
