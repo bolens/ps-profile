@@ -73,7 +73,7 @@ This project supports multiple task runners for maximum flexibility. All tasks a
 - **Make**: `make <target>` (e.g., `make lint`, `make validate`)
 - **npm/pnpm**: `npm run <script>` or `pnpm run <script>` (e.g., `npm run lint`, `pnpm run validate`)
 - **VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task
-- **Sublime Text**: Tools → Build System → "Task: <name>"
+- **Sublime Text**: Tools → Build System → "Task: name"
 
 **Common Tasks**:
 
