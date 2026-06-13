@@ -1,8 +1,17 @@
+## [1.10.3] - 2026-06-13
+
+### 🐛 Bug Fixes
+
+- *(ci)* Load bootstrap first in idempotency check and refresh API docs
 ## [1.10.2] - 2026-06-13
 
 ### 🐛 Bug Fixes
 
 - *(ci)* Resolve idempotency output, deps version check, and refresh API docs
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* 1.10.2 [skip ci]
 ## [1.10.1] - 2026-06-13
 
 ### 🐛 Bug Fixes
