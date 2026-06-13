@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Global npm packages required for PowerShell profile data format conversions",
   "private": true,
+  "packageManager": "pnpm@11.5.3",
   "scripts": {
+    "prepare": "corepack enable",
     "default": "task --list-all",
     "install-all": "pnpm run install-all-global || pnpm run install-all-local",
     "install-all-global": "pnpm run install-js-global && pnpm run install-python-global",

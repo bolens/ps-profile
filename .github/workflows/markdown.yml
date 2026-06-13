@@ -14,10 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install tools
-        run: |
-          npm install -g markdownlint-cli@0.35.0 markdown-link-check
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Run markdownlint
-        run: markdownlint '**/*.md' --ignore node_modules
+        run: pnpm exec markdownlint '**/*.md' --ignore node_modules
       - name: Check links in README
-        run: markdown-link-check README.md
+        run: pnpm dlx markdown-link-check README.md

@@ -71,5 +71,68 @@ Describe 'Validation extended scenarios' {
 
             { Assert-ValidPath -Path $file -PathType Directory } | Should -Throw '*Directory*'
         }
+
+        It 'Throws with a parameter name in the default message' {
+            $missing = Join-Path $script:TempRoot 'missing-assert.txt'
+
+            { Assert-ValidPath -Path $missing -ParameterName 'ConfigPath' } |
+                Should -Throw "*Parameter 'ConfigPath'*"
+        }
+
+        It 'Throws with a custom error message' {
+            { Assert-ValidPath -Path $null -ErrorMessage 'custom path failure' } |
+                Should -Throw 'custom path failure'
+        }
+
+        It 'Passes when the path exists and matches the requested type' {
+            $directory = Join-Path $script:TempRoot 'assert-valid-dir'
+            New-Item -ItemType Directory -Path $directory -Force | Out-Null
+
+            { Assert-ValidPath -Path $directory -PathType Directory } | Should -Not -Throw
+        }
+    }
+
+    Context 'Assert-ValidString' {
+        It 'Passes for non-empty strings' {
+            { Assert-ValidString -Value 'ready' } | Should -Not -Throw
+        }
+
+        It 'Throws with a parameter name in the default message' {
+            { Assert-ValidString -Value '   ' -ParameterName 'Name' } |
+                Should -Throw "*Parameter 'Name'*"
+        }
+
+        It 'Throws with a custom error message' {
+            { Assert-ValidString -Value $null -ErrorMessage 'custom string failure' } |
+                Should -Throw 'custom string failure'
+        }
+    }
+
+    Context 'Test-ValidString extended conversion' {
+        It 'Accepts non-string values that convert to valid text' {
+            Test-ValidString -Value 42 | Should -Be $true
+        }
+
+        It 'Rejects non-string values that convert to whitespace' {
+            Test-ValidString -Value ([string]::Empty) | Should -Be $false
+        }
+    }
+
+    Context 'Test-ValidPath extended behavior' {
+        It 'Accepts syntactically valid paths when MustExist is false' {
+            Test-ValidPath -Path (Join-Path $script:TempRoot 'not-created-yet.txt') -MustExist:$false |
+                Should -Be $true
+        }
+
+        It 'Rejects null paths even when MustExist is false' {
+            Test-ValidPath -Path $null -MustExist:$false | Should -Be $false
+        }
+
+        It 'Accepts existing files when PathType is File' {
+            $file = Join-Path $script:TempRoot 'valid-file.txt'
+            Set-Content -LiteralPath $file -Value 'ok' -Encoding UTF8
+
+            Test-ValidPath -Path $file -PathType File | Should -Be $true
+        }
     }
 }

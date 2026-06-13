@@ -156,6 +156,103 @@ COMMENTED_PAIR=kept
                 Import-Module (Join-Path (Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists) 'core' 'Validation.psm1') -DisableNameChecking -Force
             }
         }
+
+        It 'Returns silently when the env file is missing and ErrorAction is SilentlyContinue' {
+            $missingFile = Join-Path $script:TempRoot 'missing-silent.env'
+
+            { Load-EnvFile -EnvFilePath $missingFile } | Should -Not -Throw
+        }
+
+        It 'Returns without error for empty env files' {
+            $envFile = Join-Path $script:TempRoot 'empty.env'
+            Set-Content -LiteralPath $envFile -Value '' -Encoding UTF8
+
+            { Load-EnvFile -EnvFilePath $envFile } | Should -Not -Throw
+        }
+
+        It 'Parses double-quoted values and unescapes embedded quotes' {
+            $envFile = Join-Path $script:TempRoot 'quoted-double.env'
+            @'
+QUOTED_DOUBLE="say \"hello\""
+'@ | Set-Content -LiteralPath $envFile -Encoding UTF8
+
+            try {
+                Load-EnvFile -EnvFilePath $envFile
+                $env:QUOTED_DOUBLE | Should -Be 'say "hello"'
+            }
+            finally {
+                Remove-Item Env:\QUOTED_DOUBLE -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Parses single-quoted values' {
+            $envFile = Join-Path $script:TempRoot 'quoted-single.env'
+            "QUOTED_SINGLE='plain value'" | Set-Content -LiteralPath $envFile -Encoding UTF8
+
+            try {
+                Load-EnvFile -EnvFilePath $envFile
+                $env:QUOTED_SINGLE | Should -Be 'plain value'
+            }
+            finally {
+                Remove-Item Env:\QUOTED_SINGLE -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Expands environment variables referenced in values' {
+            $envFile = Join-Path $script:TempRoot 'expand.env'
+            'EXPANDED_VALUE=$EXPAND_SOURCE' | Set-Content -LiteralPath $envFile -Encoding UTF8
+            $env:EXPAND_SOURCE = 'resolved'
+
+            try {
+                Load-EnvFile -EnvFilePath $envFile
+                $env:EXPANDED_VALUE | Should -Be 'resolved'
+            }
+            finally {
+                Remove-Item Env:\EXPANDED_VALUE, Env:\EXPAND_SOURCE -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Emits debug tracing when loading variables at debug level 3' {
+            $envFile = Join-Path $script:TempRoot 'debug-load.env'
+            'DEBUG_LOAD_VAR=loaded' | Set-Content -LiteralPath $envFile -Encoding UTF8
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                Load-EnvFile -EnvFilePath $envFile
+                $env:DEBUG_LOAD_VAR | Should -Be 'loaded'
+            }
+            finally {
+                Remove-Item Env:\DEBUG_LOAD_VAR -ErrorAction SilentlyContinue
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Rethrows load failures when ErrorAction is Stop' {
+            Enable-TestStructuredLogging
+            $envFile = Join-Path $script:TempRoot 'stop-error.env'
+            'GOOD_VAR=ok' | Set-Content -LiteralPath $envFile -Encoding UTF8
+
+            $global:EnvFileStopTestPath = $envFile
+            try {
+                InModuleScope -ModuleName EnvFile {
+                    Mock Get-Content {
+                        throw 'env read failure stop probe'
+                    }
+
+                    { Load-EnvFile -EnvFilePath $global:EnvFileStopTestPath -ErrorAction Stop } |
+                        Should -Throw '*Failed to load environment file*'
+                }
+            }
+            finally {
+                Remove-Variable -Name EnvFileStopTestPath -Scope Global -ErrorAction SilentlyContinue
+            }
+        }
     }
 
     Context 'Initialize-EnvFiles' {
@@ -208,6 +305,84 @@ COMMENTED_PAIR=kept
                 { Initialize-EnvFiles -RepoRoot (Join-Path $script:TempRoot 'missing-repo-dir') } | Should -Not -Throw
             }
             finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Loads .env.local with overwrite after the base .env file' {
+            $repoRoot = Join-Path $script:TempRoot 'local-override-repo'
+            New-Item -ItemType Directory -Path $repoRoot -Force | Out-Null
+            'SHARED_VAR=base' | Set-Content -LiteralPath (Join-Path $repoRoot '.env') -Encoding UTF8
+            'SHARED_VAR=local' | Set-Content -LiteralPath (Join-Path $repoRoot '.env.local') -Encoding UTF8
+
+            try {
+                Initialize-EnvFiles -RepoRoot $repoRoot
+                $env:SHARED_VAR | Should -Be 'local'
+            }
+            finally {
+                Remove-Item Env:\SHARED_VAR -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Emits level 3 tracing when env files are missing' {
+            $repoRoot = Join-Path $script:TempRoot 'missing-env-files-repo'
+            New-Item -ItemType Directory -Path $repoRoot -Force | Out-Null
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '3'
+
+            try {
+                { Initialize-EnvFiles -RepoRoot $repoRoot } | Should -Not -Throw
+            }
+            finally {
+                if ($null -eq $originalDebug) {
+                    Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_DEBUG = $originalDebug
+                }
+            }
+        }
+
+        It 'Uses Get-RepoRoot when RepoRoot is omitted and a caller script path is available' {
+            $repoRoot = Join-Path $script:TempRoot 'get-repo-root-repo'
+            New-Item -ItemType Directory -Path $repoRoot -Force | Out-Null
+            'REPO_ROOT_VAR=detected' | Set-Content -LiteralPath (Join-Path $repoRoot '.env') -Encoding UTF8
+
+            function global:Get-RepoRoot {
+                param([string]$ScriptPath)
+                return $repoRoot
+            }
+
+            try {
+                Initialize-EnvFiles
+                $env:REPO_ROOT_VAR | Should -Be 'detected'
+            }
+            finally {
+                Remove-Item Env:\REPO_ROOT_VAR -ErrorAction SilentlyContinue
+                Remove-Item Function:\Get-RepoRoot -ErrorAction SilentlyContinue
+            }
+        }
+
+        It 'Reports successful initialization at debug level 2 when files are loaded' {
+            $repoRoot = Join-Path $script:TempRoot 'success-init-repo'
+            New-Item -ItemType Directory -Path $repoRoot -Force | Out-Null
+            'SUCCESS_INIT_VAR=loaded' | Set-Content -LiteralPath (Join-Path $repoRoot '.env') -Encoding UTF8
+            'SUCCESS_LOCAL_VAR=local' | Set-Content -LiteralPath (Join-Path $repoRoot '.env.local') -Encoding UTF8
+            $originalDebug = $env:PS_PROFILE_DEBUG
+            $env:PS_PROFILE_DEBUG = '2'
+
+            try {
+                Initialize-EnvFiles -RepoRoot $repoRoot
+                $env:SUCCESS_INIT_VAR | Should -Be 'loaded'
+                $env:SUCCESS_LOCAL_VAR | Should -Be 'local'
+            }
+            finally {
+                Remove-Item Env:\SUCCESS_INIT_VAR, Env:\SUCCESS_LOCAL_VAR -ErrorAction SilentlyContinue
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
                 }

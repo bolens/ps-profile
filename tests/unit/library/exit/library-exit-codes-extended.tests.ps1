@@ -19,15 +19,23 @@ BeforeAll {
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:ExitCodesPath = Join-Path $script:LibPath 'core' 'ExitCodes.psm1'
     $script:TempDir = New-TestTempDirectory -Prefix 'ExitCodesExtended'
+    Import-Module $script:ExitCodesPath -DisableNameChecking -Force
 }
 
 AfterAll {
+    Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
+
     if ($script:TempDir -and (Test-Path -LiteralPath $script:TempDir)) {
         Remove-Item -LiteralPath $script:TempDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
 
 Describe 'ExitCodes extended scenarios' {
+    BeforeEach {
+        Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+        Remove-Item Env:\PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+    }
+
     Context 'Exit-WithCode in test mode' {
         It 'Throws instead of exiting when PS_PROFILE_TEST_MODE is enabled' {
             $testScript = Join-Path $script:TempDir 'exit-test-mode.ps1'
@@ -53,6 +61,99 @@ Exit-WithCode -ExitCode 0
             $output = & pwsh -NoProfile -File $testScript 2>&1
             $LASTEXITCODE | Should -Be 0
             ($output | Out-String) | Should -Match 'completed'
+        }
+
+        It 'Rethrows ErrorRecord in test mode instead of exiting' {
+            $testScript = Join-Path $script:TempDir 'exit-test-mode-errorrecord.ps1'
+            @"
+`$env:PS_PROFILE_TEST_MODE = '1'
+Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
+try {
+    throw 'structured failure probe'
+}
+catch {
+    Exit-WithCode -ExitCode `$EXIT_SETUP_ERROR -ErrorRecord `$_
+}
+"@ | Set-Content -LiteralPath $testScript -Encoding UTF8
+
+            & pwsh -NoProfile -File $testScript 2>&1 | Out-Null
+            $LASTEXITCODE | Should -Not -Be 0
+        }
+    }
+
+    Context 'Exit-WithCode debug output' {
+        It 'Emits debug details when PS_PROFILE_DEBUG is at least 2' {
+            $testScript = Join-Path $script:TempDir 'exit-debug-level2.ps1'
+            @"
+`$env:PS_PROFILE_DEBUG = '2'
+Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
+Exit-WithCode -ExitCode `$EXIT_VALIDATION_FAILURE -Message 'debug probe message'
+"@ | Set-Content -LiteralPath $testScript -Encoding UTF8
+
+            $output = & pwsh -NoProfile -File $testScript 2>&1 | Out-String
+            $output | Should -Match 'debug probe message'
+            $output | Should -Match '\[exit-codes\.exit\]'
+        }
+
+        It 'Emits stack trace details when PS_PROFILE_DEBUG is at least 3' {
+            $testScript = Join-Path $script:TempDir 'exit-debug-level3.ps1'
+            @"
+`$env:PS_PROFILE_DEBUG = '3'
+Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
+try {
+    throw 'level 3 exit probe'
+}
+catch {
+    Exit-WithCode -ExitCode `$EXIT_SETUP_ERROR -ErrorRecord `$_
+}
+"@ | Set-Content -LiteralPath $testScript -Encoding UTF8
+
+            $output = & pwsh -NoProfile -File $testScript 2>&1 | Out-String
+            $output | Should -Match 'Exit stack trace'
+        }
+    }
+
+    Context 'Exit-WithCode in-process coverage' {
+        It 'Throws for non-zero exit codes when PS_PROFILE_TEST_MODE is enabled' {
+            $env:PS_PROFILE_TEST_MODE = '1'
+
+            { Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message 'in-process probe' } |
+                Should -Throw '*in-process probe*'
+        }
+
+        It 'Rethrows ErrorRecord in-process when PS_PROFILE_TEST_MODE is enabled' {
+            $env:PS_PROFILE_TEST_MODE = '1'
+            $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+                [System.InvalidOperationException]::new('in-process error probe'),
+                'ExitCodesProbe',
+                'InvalidOperation',
+                $null
+            )
+
+            { Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $errorRecord } |
+                Should -Throw '*in-process error probe*'
+        }
+
+        It 'Emits debug output in-process when PS_PROFILE_DEBUG is at least 2' {
+            $env:PS_PROFILE_DEBUG = '2'
+            $env:PS_PROFILE_TEST_MODE = '1'
+
+            { Exit-WithCode -ExitCode $EXIT_OTHER_ERROR -Message 'debug in-process probe' } |
+                Should -Throw
+        }
+
+        It 'Emits stack trace debug output in-process when PS_PROFILE_DEBUG is at least 3' {
+            $env:PS_PROFILE_DEBUG = '3'
+            $env:PS_PROFILE_TEST_MODE = '1'
+            $errorRecord = [System.Management.Automation.ErrorRecord]::new(
+                [System.InvalidOperationException]::new('stack trace probe'),
+                'ExitCodesStackProbe',
+                'InvalidOperation',
+                $null
+            )
+
+            { Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $errorRecord } |
+                Should -Throw '*stack trace probe*'
         }
     }
 

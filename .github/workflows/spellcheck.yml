@@ -18,11 +18,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Install cspell
-        run: npm install -g cspell@9
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Run cspell
         run: |
           echo "Running cspell..."
-          cspell "**/*" --no-progress --no-summary
+          pnpm exec cspell "**/*" --no-progress --no-summary
         # NOTE: this step will fail the job if cspell finds issues. Remove or
         # adjust the config if you prefer warnings instead.

@@ -72,7 +72,7 @@ Describe 'PathValidation Module Functions' {
         It 'Validates provided path exists' {
             $defaultPath = $script:TestDir
             $nonExistentPath = Join-Path $script:TestDir 'nonexistent.txt'
-            { Resolve-DefaultPath -Path $nonExistentPath -DefaultPath $defaultPath } | Should -Throw "*does not exist*"
+            { Resolve-DefaultPath -Path $nonExistentPath -DefaultPath $defaultPath } | Should -Throw "*not found*"
         }
 
         It 'Validates file type when PathType is File' {
@@ -111,19 +111,20 @@ Describe 'PathValidation Module Functions' {
         }
 
         It 'Falls back to Test-Path when Test-PathExists is not available' {
-            # Temporarily remove Test-PathExists
             $originalTestPathExists = Get-Command Test-PathExists -ErrorAction SilentlyContinue
             if ($originalTestPathExists) {
                 Remove-Item -Path Function:\Test-PathExists -Force -ErrorAction SilentlyContinue
             }
-            
-                        $defaultPath = $script:TestDir
-            $result = Resolve-DefaultPath -Path $script:TestFile -DefaultPath $defaultPath
-            $result | Should -Be $script:TestFile
-        }
-        finally {
-            if ($originalTestPathExists) {
-                Import-Module (Join-Path $script:LibPath 'file' 'FileSystem.psm1') -DisableNameChecking -ErrorAction SilentlyContinue -Force
+
+            try {
+                $defaultPath = $script:TestDir
+                $result = Resolve-DefaultPath -Path $script:TestFile -DefaultPath $defaultPath
+                $result | Should -Be $script:TestFile
+            }
+            finally {
+                if ($originalTestPathExists) {
+                    Import-Module (Join-Path $script:LibPath 'file' 'FileSystem.psm1') -DisableNameChecking -ErrorAction SilentlyContinue -Force
+                }
             }
         }
     }

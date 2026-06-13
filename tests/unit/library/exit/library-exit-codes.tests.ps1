@@ -30,35 +30,21 @@ BeforeAll {
     Import-Module $script:ExitCodesPath -DisableNameChecking -ErrorAction Stop -Force
     $script:TestTempRoot = New-TestTempDirectory -Prefix 'ExitCodesTests'
 }
-catch {
-    $errorDetails = @{
-        Message  = $_.Exception.Message
-        Type     = $_.Exception.GetType().FullName
-        Location = $_.InvocationInfo.ScriptLineNumber
-    }
-    Write-Error "Failed to initialize ExitCodes tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-    throw
-}
 
 AfterAll {
     Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
+
+    if ($script:TestTempRoot -and (Test-Path -LiteralPath $script:TestTempRoot)) {
+        Remove-Item -LiteralPath $script:TestTempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 Describe 'ExitCodes Module Functions' {
 
     Context 'Exit Code Constants' {
         It 'Defines EXIT_SUCCESS constant' {
-                        Get-Variable EXIT_SUCCESS -ErrorAction Stop | Should -Not -BeNullOrEmpty -Because "EXIT_SUCCESS constant should be defined"
-            $EXIT_SUCCESS | Should -Be 0 -Because "EXIT_SUCCESS should equal 0"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Constant = 'EXIT_SUCCESS'
-                Category = $_.CategoryInfo.Category
-            }
-            Write-Error "EXIT_SUCCESS constant test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            Get-Variable EXIT_SUCCESS -ErrorAction Stop | Should -Not -BeNullOrEmpty -Because 'EXIT_SUCCESS constant should be defined'
+            $EXIT_SUCCESS | Should -Be 0 -Because 'EXIT_SUCCESS should equal 0'
         }
 
         It 'Defines EXIT_VALIDATION_FAILURE constant' {

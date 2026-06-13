@@ -18,12 +18,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Install PSScriptAnalyzer
         shell: pwsh
         run: |
           Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
-      - name: Install cspell
-        run: npm install -g cspell@9
       - name: Run PSScriptAnalyzer and generate JSON report
         shell: pwsh
         run: |
@@ -55,5 +56,5 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cspell "**/*.md" --format json --no-progress --no-summary > cspell-output.json || true
+          pnpm exec cspell "**/*.md" --format json --no-progress --no-summary > cspell-output.json || true
           reviewdog -f=cspell -name=cspell -reporter=github-pr-review -filter-mode=added -level=warning < cspell-output.json || true

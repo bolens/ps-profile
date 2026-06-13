@@ -41,6 +41,21 @@ function Initialize-ProfileVersion {
             $global:PSProfileGitCommitGetter = {
                 if (-not $global:PSProfileGitCommitCalculated) {
                     $global:PSProfileGitCommitCalculated = $true
+
+                    if ($env:PS_PROFILE_VERSION_FORCE_COMMIT) {
+                        $global:PSProfileGitCommit = $env:PS_PROFILE_VERSION_FORCE_COMMIT.Trim()
+                        return $global:PSProfileGitCommit
+                    }
+
+                    if ($env:PS_PROFILE_VERSION_FORCE_PUSH_FAILURE -eq '1') {
+                        $global:PSProfileGitCommit = 'unknown'
+                        return $global:PSProfileGitCommit
+                    }
+
+                    if ($env:PS_PROFILE_VERSION_FORCE_GIT_FAILURE -eq '1') {
+                        $global:PSProfileGitCommit = 'unknown'
+                        return $global:PSProfileGitCommit
+                    }
                     
                     # Quick check: only attempt if .git directory exists
                     $gitDir = Join-Path $capturedProfileDir '.git'
