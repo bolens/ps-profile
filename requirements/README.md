@@ -29,7 +29,7 @@ requirements/
 ## Install manifests (plain text)
 
 | File | Purpose |
-|------|---------|
+| ------ | --------- |
 | [requirements.txt](../requirements.txt) | Python packages for conversion modules (`uv pip install -r requirements.txt`) |
 | [scoop.txt](scoop.txt) | Windows Scoop packages (`scoop install <name>`) |
 | [linux.txt](linux.txt) | Distro packages by section (`apt`, `pacman`, `dnf`) |
