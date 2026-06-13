@@ -54,15 +54,7 @@ function Write-DocumentationIndex {
     $indexContent = "# PowerShell Profile API Documentation`n`n"
     $indexContent += "This documentation is automatically generated from comment-based help in the profile functions and aliases.`n`n"
     $indexContent += "**Total Functions:** $($Functions.Count)`n"
-    $indexContent += "**Total Aliases:** $($Aliases.Count)`n"
-    # Use locale-aware date formatting for user-facing documentation
-    $generatedDate = if (Get-Command Format-LocaleDate -ErrorAction SilentlyContinue) {
-        Format-LocaleDate (Get-Date) -Format 'yyyy-MM-dd HH:mm:ss'
-    }
-    else {
-        (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
-    }
-    $indexContent += "**Generated:** $generatedDate`n`n"
+    $indexContent += "**Total Aliases:** $($Aliases.Count)`n`n"
     $indexContent += "## Functions by Fragment`n`n"
 
     foreach ($group in $groupedFunctions) {
