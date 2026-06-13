@@ -24,8 +24,13 @@ jobs:
           node-version: '24'
       - name: Install git-cliff
         run: |
-          curl --proto '=https' --tlsv1.2 -LsSf \
-            https://github.com/orhun/git-cliff/releases/download/v2.13.1/git-cliff-installer.sh | sh -s -- --to /usr/local/bin
+          CLIFF_VERSION=2.13.1
+          curl -fsSL \
+            "https://github.com/orhun/git-cliff/releases/download/v${CLIFF_VERSION}/git-cliff-${CLIFF_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            -o /tmp/git-cliff.tar.gz
+          tar -xzf /tmp/git-cliff.tar.gz -C /tmp
+          sudo install -m 0755 "/tmp/git-cliff-${CLIFF_VERSION}/git-cliff" /usr/local/bin/git-cliff
+          git-cliff --version
       - name: Install semantic-release
         run: npm install -g semantic-release @semantic-release/exec @semantic-release/git
       - name: Run semantic-release
