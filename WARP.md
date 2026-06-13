@@ -15,7 +15,7 @@ This project supports multiple task runners. Choose the one that fits your workf
 - **Make**: `make <target>` (e.g., `make lint`, `make validate`)
 - **npm/pnpm**: `npm run <script>` or `pnpm run <script>` (e.g., `npm run lint`, `pnpm run validate`)
 - **VS Code**: Press `Ctrl+Shift+P` → "Tasks: Run Task" → select a task
-- **Sublime Text**: Tools → Build System → "Task: <name>"
+- **Sublime Text**: Tools → Build System → "Task: name"
 
 All task runners have full parity - the same 48+ tasks are available in each format.
 
@@ -139,7 +139,8 @@ Start-Sleep -Seconds 30
 ### Core Structure
 
 - **Microsoft.PowerShell_profile.ps1**: Main profile entrypoint. Loads fragments from `profile.d/` in dependency-aware order with error handling. Keep this file minimal.
-- **profile.d/**: 130+ modular fragments (`bootstrap.ps1`, `git.ps1`, `files.ps1`, …). Each fragment is idempotent and safe to dot-source multiple times. Load order comes from declared dependencies and tiers, not numeric filename prefixes.
+- **profile.d/**: 130+ modular fragments (`bootstrap.ps1`, `git.ps1`, `files.ps1`, …). Each fragment is idempotent and safe to dot-source multiple times.
+  Load order comes from declared dependencies and tiers, not numeric filename prefixes.
 - **scripts/**: Validation, testing, and utility scripts. These run with `-NoProfile` to ensure consistent environment.
 
 ### Profile Fragment Loading

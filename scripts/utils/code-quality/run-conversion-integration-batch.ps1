@@ -142,7 +142,7 @@ function New-BatchRunnerArgs {
         $args += '-Quiet'
     }
     if ($Parallel -gt 0) {
-        $args += '-Parallel'
+        $args += '-MaxParallelThreads'
         $args += $Parallel
     }
     if ($ResultPath) {

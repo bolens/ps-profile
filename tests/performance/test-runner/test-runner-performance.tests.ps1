@@ -138,11 +138,11 @@ Describe 'Test Runner Performance Tests' {
 
         It 'Handles parallel execution efficiently' {
             $parallelTime = Measure-Command {
-                $result = & $script:RunPesterPath -Suite Unit -Parallel 4 -OutputFormat None
+                $result = & $script:RunPesterPath -Suite Unit -MaxParallelThreads 4 -OutputFormat None
             }
 
             $sequentialTime = Measure-Command {
-                $result = & $script:RunPesterPath -Suite Unit -Parallel 1 -OutputFormat None
+                $result = & $script:RunPesterPath -Suite Unit -MaxParallelThreads 1 -OutputFormat None
             }
 
             # Parallel should be faster (with some tolerance for system variability)
@@ -296,11 +296,11 @@ Describe "Timeout Performance Tests" {
         It 'Handles high parallelization efficiently' {
             if ([Environment]::ProcessorCount -ge 4) {
                 $highParallelTime = Measure-Command {
-                    $result = & $script:RunPesterPath -Suite Unit -Parallel ([Environment]::ProcessorCount) -OutputFormat None
+                    $result = & $script:RunPesterPath -Suite Unit -MaxParallelThreads ([Environment]::ProcessorCount) -OutputFormat None
                 }
 
                 $singleThreadTime = Measure-Command {
-                    $result = & $script:RunPesterPath -Suite Unit -Parallel 1 -OutputFormat None
+                    $result = & $script:RunPesterPath -Suite Unit -MaxParallelThreads 1 -OutputFormat None
                 }
 
                 # High parallelization should provide benefit

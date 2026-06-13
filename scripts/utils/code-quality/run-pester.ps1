@@ -67,9 +67,9 @@ scripts/utils/run-pester.ps1
 
 .PARAMETER Parallel
     Run tests in parallel for improved performance. Specify the maximum number
-    of parallel threads (1-100). If -Parallel is specified without a value,
-    defaults to the number of logical processors (capped at 16). If not specified,
-    tests run sequentially. Note: Code coverage collection may reduce parallel
+    of parallel threads (1-100). If -Parallel is specified, defaults to the number
+    of logical processors (capped at 16). Use -MaxParallelThreads to set an explicit
+    thread count. If not specified, tests run sequentially.
     execution benefits.
 
 .PARAMETER Randomize
@@ -304,7 +304,7 @@ scripts/utils/run-pester.ps1
     Runs tests matching any of the specified patterns using comma-separated syntax.
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -IncludeTag "Slow" -Parallel 4
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -IncludeTag "Slow" -MaxParallelThreads 4
 
     Runs only tests tagged as "Slow" in parallel with 4 threads.
 
@@ -354,7 +354,7 @@ scripts/utils/run-pester.ps1
     Performs environment health checks, runs in strict mode, and generates analysis.
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -OnlyCategories Unit,Integration -Parallel 4
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -OnlyCategories Unit,Integration -MaxParallelThreads 4
 
     Runs only unit and integration tests in parallel with 4 threads.
 
@@ -453,7 +453,7 @@ param(
 
     [switch]$ShowCoverageSummary,
 
-    [Nullable[int]]$Parallel,
+    [switch]$Parallel,
 
     [switch]$Randomize,
 
@@ -1013,22 +1013,14 @@ try {
     }
 
     # Handle parallel execution
-    # If -Parallel is specified without a value, use CPU count
-    # If -Parallel has a value, use that value
+    # If -Parallel is specified, use CPU count (capped at 16)
     # If -MaxParallelThreads is specified, it takes precedence
     if ($MaxParallelThreads -and $MaxParallelThreads -gt 0) {
         $configParams.Parallel = $MaxParallelThreads
     }
-    elseif ($PSBoundParameters.ContainsKey('Parallel')) {
-        if ($Parallel -gt 0) {
-            $configParams.Parallel = $Parallel
-        }
-        else {
-            # -Parallel specified without value, use CPU count
-            # Cap at reasonable maximum to avoid resource exhaustion
-            $cpuCount = [System.Environment]::ProcessorCount
-            $configParams.Parallel = [Math]::Min($cpuCount, 16)
-        }
+    elseif ($Parallel.IsPresent) {
+        $cpuCount = [System.Environment]::ProcessorCount
+        $configParams.Parallel = [Math]::Min($cpuCount, 16)
     }
 
     # Log parallel execution configuration if verbose

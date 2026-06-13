@@ -4,7 +4,7 @@ This directory contains utility scripts organized by category.
 
 ## Directory Structure
 
-```
+```text
 scripts/utils/
 ├── code-quality/      # Code quality and testing scripts
 │   ├── run-lint.ps1
