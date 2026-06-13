@@ -129,7 +129,7 @@ jobs:
             }
 
       - name: Upload documentation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: api-docs-ubuntu-latest-pwsh
@@ -168,7 +168,7 @@ jobs:
         run: ${{ matrix.powershell }} -NoProfile -File scripts/checks/check-comment-help.ps1
 
       - name: Upload validation artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: validation-results-${{ matrix.os }}-${{ matrix.powershell }}
           path: |
