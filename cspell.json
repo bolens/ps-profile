@@ -1113,6 +1113,7 @@
   "ignorePaths": [
     "**/Modules/**",
     "node_modules",
+    "pnpm-lock.yaml",
     ".git",
     "vendor",
     "**/*.min.*",
