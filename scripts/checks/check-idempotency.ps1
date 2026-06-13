@@ -46,7 +46,21 @@ catch {
 }
 
 Write-ScriptMessage -Message "Building temporary idempotency runner..."
-$files = Get-ChildItem -Path $profileD -Filter '*.ps1' | Sort-Object Name | ForEach-Object { $_.FullName }
+$allFragments = Get-ChildItem -Path $profileD -Filter '*.ps1' -File
+$priorityNames = @('bootstrap.ps1', 'env.ps1')
+$files = [System.Collections.Generic.List[string]]::new()
+foreach ($priorityName in $priorityNames) {
+    $priorityPath = Join-Path $profileD $priorityName
+    if (Test-Path -LiteralPath $priorityPath) {
+        $files.Add($priorityPath)
+    }
+}
+foreach ($fragment in ($allFragments | Sort-Object Name)) {
+    if ($priorityNames -contains $fragment.Name) {
+        continue
+    }
+    $files.Add($fragment.FullName)
+}
 if ($files.Count -eq 0) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "No fragments found in $profileD"
 }

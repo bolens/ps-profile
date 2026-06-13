@@ -1,0 +1,27 @@
+# Get-ChildItemEzaLong
+
+## Synopsis
+
+Lists directory contents in long format using eza.
+
+## Description
+
+Shows detailed directory listing with permissions, sizes, and dates.
+
+## Signature
+
+```powershell
+Get-ChildItemEzaLong
+```
+
+## Parameters
+
+No parameters.
+
+## Examples
+
+No examples provided.
+
+## Source
+
+Defined in: ../profile.d/eza.ps1

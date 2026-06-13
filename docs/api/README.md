@@ -3,8 +3,8 @@
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
 **Total Functions:** 2373
-**Total Aliases:** 1498
-**Generated:** 2026-06-08 18:11:21
+**Total Aliases:** 1471
+**Generated:** 2026-06-13 17:39:39
 
 ## Functions by Fragment
 
@@ -3988,13 +3988,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [density-to-kg-m3](aliases/density-to-kg-m3.md) - Convert to KilogramsPerCubicMeter from Density units (alias for `ConvertTo-KilogramsPerCubicMeterFromDensity`)
 - [kg-m3-to-density](aliases/kg-m3-to-density.md) - Convert from KilogramsPerCubicMeter to Density units (alias for `ConvertFrom-KilogramsPerCubicMeterToDensity`)
 
-### diagnostics-system-monitor (6 aliases)
+### diagnostics-system-monitor (3 aliases)
 
-- [cpuinfo](aliases/cpuinfo.md) - Shows detailed CPU information and usage. (alias for `Show-CPUInfo`)
 - [diskinfo](aliases/diskinfo.md) - Shows detailed disk usage information. (alias for `Show-DiskInfo`)
-- [meminfo](aliases/meminfo.md) - Shows detailed memory usage information. (alias for `Show-MemoryInfo`)
 - [netinfo](aliases/netinfo.md) - Shows detailed network information. (alias for `Show-NetworkInfo`)
-- [sysinfo](aliases/sysinfo.md) - Shows a comprehensive system status dashboard. (alias for `Show-SystemDashboard`)
 - [sysstat](aliases/sysstat.md) - Shows a compact system status overview. (alias for `Show-SystemStatus`)
 
 ### diff (2 aliases)
@@ -4306,12 +4303,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [edn-to-yaml](aliases/edn-to-yaml.md) - Converts EDN file to YAML format. (alias for `ConvertFrom-EdnToYaml`)
 - [json-to-edn](aliases/json-to-edn.md) - Converts JSON file to EDN format. (alias for `ConvertTo-EdnFromJson`)
 
-### encoding (4 aliases)
+### encoding (2 aliases)
 
 - [html-decode](aliases/html-decode.md) - HTML-decodes a string. (alias for `ConvertFrom-HtmlEncoded`)
 - [html-encode](aliases/html-encode.md) - HTML-encodes a string. (alias for `ConvertTo-HtmlEncoded`)
-- [url-decode](aliases/url-decode.md) - URL-decodes a string. (alias for `ConvertFrom-UrlEncoded`)
-- [url-encode](aliases/url-encode.md) - URL-encodes a string. (alias for `ConvertTo-UrlEncoded`)
 
 ### energy (3 aliases)
 
@@ -4328,12 +4323,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [json-to-env](aliases/json-to-env.md) - Converts a JSON file to .env format. (alias for `ConvertTo-EnvFromJson`)
 - [yaml-to-env](aliases/yaml-to-env.md) - Converts a YAML file to .env format. (alias for `ConvertTo-EnvFromYaml`)
 
-### eza (10 aliases)
+### eza (8 aliases)
 
 - [l](aliases/l.md) - Lists directory contents using eza (short alias). (alias for `Get-ChildItemEzaShort`)
-- [la](aliases/la.md) - Lists all directory contents including hidden files using eza. (alias for `Get-ChildItemEzaAll`)
 - [lg](aliases/lg.md) - Lists directory contents with git status using eza. (alias for `Get-ChildItemEzaGit`)
-- [ll](aliases/ll.md) - Lists directory contents in long format using eza. (alias for `Get-ChildItemEzaLong`)
 - [lla](aliases/lla.md) - Lists all directory contents in long format using eza. (alias for `Get-ChildItemEzaAllLong`)
 - [llg](aliases/llg.md) - Lists directory contents in long format with git status using eza. (alias for `Get-ChildItemEzaLongGit`)
 - [ls](aliases/ls.md) - Lists directory contents using eza. (alias for `Get-ChildItemEza`)
@@ -4360,11 +4353,9 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [hex-dump](aliases/hex-dump.md) - Shows hexadecimal dump of a file's contents. (alias for `Get-HexDump`)
 
-### files-listing (5 aliases)
+### files-listing (3 aliases)
 
 - [bat-cat](aliases/bat-cat.md) - bat wrapper (alias for `Show-FileContent`)
-- [la](aliases/la.md) - Listing helpers (prefer eza when available) (alias for `Get-ChildItemAll`)
-- [ll](aliases/ll.md) - Listing helpers (prefer eza when available) (alias for `Get-ChildItemDetailed`)
 - [lx](aliases/lx.md) - Listing helpers (prefer eza when available) (alias for `Get-ChildItemVisible`)
 - [tree](aliases/tree.md) - Listing helpers (prefer eza when available) (alias for `Get-DirectoryTree`)
 
@@ -4461,28 +4452,15 @@ This documentation is automatically generated from comment-based help in the pro
 - [prc](aliases/prc.md) - GitHub PR create - create a pull request (alias for `New-GitHubPullRequest`)
 - [prv](aliases/prv.md) - GitHub PR view - view pull request in browser (alias for `Show-GitHubPullRequest`)
 
-### git-basic (11 aliases)
+### git-basic (3 aliases)
 
-- [ga](aliases/ga.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Add-GitChanges`)
-- [gb](aliases/gb.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Get-GitBranch`)
-- [gc](aliases/gc.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Save-GitCommit`)
 - [gcm](aliases/gcm.md) - Commits staged changes with a message. (alias for `Save-GitCommitWithMessage`)
-- [gco](aliases/gco.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Switch-GitBranch`)
-- [gd](aliases/gd.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Compare-GitChanges`)
 - [gf](aliases/gf.md) - Downloads objects and refs from remote repository. (alias for `Receive-GitChanges`)
-- [gl](aliases/gl.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Get-GitLog`)
-- [gp](aliases/gp.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Publish-GitChanges`)
 - [gpl](aliases/gpl.md) - Fetches and merges changes from remote repository. (alias for `Get-GitChanges`)
-- [gs](aliases/gs.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Invoke-GitStatus`)
 
 ### git-changelog (1 aliases)
 
 - [git-cliff](aliases/git-cliff.md) - Generates a changelog using git-cliff. (alias for `New-GitChangelog`)
-
-### git-github (2 aliases)
-
-- [prc](aliases/prc.md) - GitHub PR create - create a pull request (alias for `New-GitHubPullRequest`)
-- [prv](aliases/prv.md) - GitHub PR view - view pull request in browser (alias for `Show-GitHubPullRequest`)
 
 ### git-gui (4 aliases)
 
@@ -5165,11 +5143,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [regex-test-description](aliases/regex-test-description.md) - Converts a natural language description to regex and tests it against input. (alias for `Test-RegexFromDescription`)
 - [regex-to-description](aliases/regex-to-description.md) - Explains a regular expression pattern in plain language. (alias for `Explain-RegexPattern`)
 
-### rfc3339 (6 aliases)
+### rfc3339 (5 aliases)
 
 - [datetime-to-rfc3339](aliases/datetime-to-rfc3339.md) - Converts a DateTime object to RFC 3339 format. (alias for `ConvertTo-Rfc3339FromDateTime`)
 - [rfc3339-to-datetime](aliases/rfc3339-to-datetime.md) - Converts an RFC 3339 date/time string to a DateTime object. (alias for `ConvertFrom-Rfc3339ToDateTime`)
-- [rfc3339-to-human](aliases/rfc3339-to-human.md) - Converts an RFC 3339 date/time string to a human-readable format. (alias for `ConvertFrom-Rfc3339ToHumanReadable`)
 - [rfc3339-to-iso8601](aliases/rfc3339-to-iso8601.md) - Converts an RFC 3339 date/time string to ISO 8601 format. (alias for `ConvertTo-Iso8601FromRfc3339`)
 - [rfc3339-to-unix](aliases/rfc3339-to-unix.md) - Converts an RFC 3339 date/time string to a Unix timestamp. (alias for `ConvertFrom-Rfc3339ToUnixTimestamp`)
 - [unix-to-rfc3339](aliases/unix-to-rfc3339.md) - Converts a Unix timestamp to RFC 3339 format. (alias for `ConvertTo-Rfc3339FromUnixTimestamp`)
@@ -5433,13 +5410,12 @@ This documentation is automatically generated from comment-based help in the pro
 - [playwright](aliases/playwright.md) - Executes Playwright commands. (alias for `Invoke-Playwright`)
 - [vitest](aliases/vitest.md) - Executes Vitest test runner. (alias for `Invoke-Vitest`)
 
-### text-gaps (5 aliases)
+### text-gaps (4 aliases)
 
 - [csv-to-jsonl](aliases/csv-to-jsonl.md) - Converts CSV file to JSONL format. (alias for `ConvertTo-JsonLFromCsv`)
 - [jsonl-to-csv](aliases/jsonl-to-csv.md) - Converts JSONL file to CSV format. (alias for `ConvertFrom-JsonLToCsv`)
 - [jsonl-to-yaml](aliases/jsonl-to-yaml.md) - Converts JSONL file to YAML format. (alias for `ConvertFrom-JsonLToYaml`)
 - [yaml-to-jsonl](aliases/yaml-to-jsonl.md) - Converts YAML file to JSONL format. (alias for `ConvertTo-JsonLFromYaml`)
-- [yaml-to-xml](aliases/yaml-to-xml.md) - Converts a YAML file to XML format. (alias for `ConvertTo-XmlFromYaml`)
 
 ### TextSearch (1 aliases)
 
@@ -5525,18 +5501,15 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [unit-convert](aliases/unit-convert.md) - Converts values between different units. (alias for `Convert-Units`)
 
-### unix (5 aliases)
+### unix (3 aliases)
 
 - [datetime-to-unix](aliases/datetime-to-unix.md) - Converts a DateTime object to a Unix timestamp. (alias for `ConvertTo-UnixTimestampFromDateTime`)
-- [iso8601-to-unix](aliases/iso8601-to-unix.md) - Converts an ISO 8601 date/time string to a Unix timestamp. (alias for `ConvertTo-UnixTimestampFromIso8601`)
 - [unix-to-datetime](aliases/unix-to-datetime.md) - Converts a Unix timestamp to a DateTime object. (alias for `ConvertFrom-UnixTimestampToDateTime`)
-- [unix-to-iso8601](aliases/unix-to-iso8601.md) - Converts a Unix timestamp to ISO 8601 format. (alias for `ConvertFrom-UnixTimestampToIso8601`)
 - [unix-to-readable](aliases/unix-to-readable.md) - Converts a Unix timestamp to a human-readable date/time string. (alias for `ConvertFrom-UnixTimestampToHumanReadable`)
 
-### url (10 aliases)
+### url (9 aliases)
 
 - [url-decode](aliases/url-decode.md) - Converts URL/percent encoded string to ASCII text. (alias for `ConvertFrom-UrlToAscii`)
-- [url-encode](aliases/url-encode.md) - Converts ASCII text to URL/percent encoded representation. (alias for `ConvertFrom-AsciiToUrl`)
 - [url-to-ascii](aliases/url-to-ascii.md) - Converts URL/percent encoded string to ASCII text. (alias for `ConvertFrom-UrlToAscii`)
 - [url-to-base32](aliases/url-to-base32.md) - Converts URL/percent encoded string to Base32 representation. (alias for `ConvertFrom-UrlToBase32`)
 - [url-to-binary](aliases/url-to-binary.md) - Converts URL/percent encoded string to binary representation. (alias for `ConvertFrom-UrlToBinary`)
@@ -5563,11 +5536,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [from-epoch](aliases/from-epoch.md) - Converts Unix epoch timestamp to DateTime. (alias for `ConvertFrom-Epoch`)
 - [now](aliases/now.md) - Shows current date and time. (alias for `Get-DateTime`)
 - [to-epoch](aliases/to-epoch.md) - Converts DateTime to Unix epoch timestamp. (alias for `ConvertTo-Epoch`)
-
-### utilities-encoding (2 aliases)
-
-- [url-decode](aliases/url-decode.md) - URL-decodes a string. (alias for `ConvertFrom-UrlEncoded`)
-- [url-encode](aliases/url-encode.md) - URL-encodes a string. (alias for `ConvertTo-UrlEncoded`)
 
 ### utilities-filesystem (1 aliases)
 
@@ -5771,9 +5739,8 @@ This documentation is automatically generated from comment-based help in the pro
 - [json-to-yaml](aliases/json-to-yaml.md) - Converts JSON to YAML format. (alias for `ConvertTo-Yaml`)
 - [yaml-to-json](aliases/yaml-to-json.md) - Converts YAML to JSON format. (alias for `ConvertFrom-Yaml`)
 
-### yarn (8 aliases)
+### yarn (7 aliases)
 
-- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
 - [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
 - [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
 - [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)

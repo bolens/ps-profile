@@ -2,15 +2,15 @@
 
 ## Synopsis
 
-Shows a comprehensive system status dashboard.
+Shows system information.
 
 ## Description
 
-Displays CPU usage, memory usage, disk space, network status, and other system metrics in a clean, organized format.
+Displays basic computer system information including name, manufacturer, model, and total memory. On Windows uses Win32_ComputerSystem; on Linux reads /proc/meminfo and dmidecode where available.
 
 ## Alias Information
 
-**Alias for:** `Show-SystemDashboard`
+**Alias for:** `Get-SystemInfo`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/diagnostics-modules/monitoring/diagnostics-system-monitor.ps1
+Defined in: ../profile.d/system-info.ps1

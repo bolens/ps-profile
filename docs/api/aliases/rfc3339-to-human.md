@@ -2,15 +2,15 @@
 
 ## Synopsis
 
-Converts an RFC 3339 date/time string to a human-readable format.
+Converts a DateTime object to a human-readable string.
 
 ## Description
 
-Converts an RFC 3339 formatted date/time string to a human-readable date/time format.
+Converts a DateTime object to a human-readable relative or formatted string.
 
 ## Alias Information
 
-**Alias for:** `ConvertFrom-Rfc3339ToHumanReadable`
+**Alias for:** `ConvertTo-HumanReadableFromRfc3339`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/conversion-modules/data/time/rfc3339.ps1
+Defined in: ../profile.d/conversion-modules/data/time/human-readable.ps1
