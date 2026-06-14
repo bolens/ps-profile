@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript' ]
+        language: [ 'actions' ]
 
     steps:
     - name: Checkout repository
@@ -32,11 +32,7 @@ jobs:
       uses: github/codeql-action/init@v4
       with:
         languages: ${{ matrix.language }}
-        # Use security-extended query suite for comprehensive security analysis
         queries: security-extended,security-and-quality
-
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v4
 
     - name: Perform CodeQL Analysis
       id: analyze
@@ -50,8 +46,6 @@ jobs:
       uses: actions/github-script@v8
       with:
         script: |
-          // CodeQL results are automatically uploaded to GitHub Security tab
-          // This comment provides a summary and link to view detailed results
           const body = `🔍 **CodeQL Analysis Complete** (${{ matrix.language }})
           
           CodeQL analysis has completed successfully. Results are available in the **Security** tab of this PR.
@@ -63,7 +57,7 @@ jobs:
           - Check the Security tab above for detailed findings
           - Review any alerts and address them before merging
           
-          > **Note:** CodeQL does not natively support PowerShell. This analysis covers JavaScript dependencies used in the project.
+          > **Note:** CodeQL does not natively support PowerShell. This analysis covers GitHub Actions workflows in \`.github/workflows\`.
           
           *Analysis performed automatically by CodeQL*`;
           
@@ -93,4 +87,3 @@ jobs:
             repo: context.repo.repo,
             body: body
           });
-
