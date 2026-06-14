@@ -1,8 +1,21 @@
+## [1.10.7] - 2026-06-14
+
+### 🐛 Bug Fixes
+
+- *(ci)* Repair CodeQL and doc freshness checks
+
+### ⚙️ Miscellaneous Tasks
+
+- Add CodeQL workflow and fix AGENTS.md line length
 ## [1.10.6] - 2026-06-14
 
 ### 🐛 Bug Fixes
 
 - *(deps)* Resolve audit issues and standardize on pnpm
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* 1.10.6 [skip ci]
 ## [1.10.5] - 2026-06-14
 
 ### 🐛 Bug Fixes
