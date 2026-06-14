@@ -1,8 +1,17 @@
+## [1.10.9] - 2026-06-14
+
+### 🐛 Bug Fixes
+
+- *(ci)* Drop doc cache restore from freshness check
 ## [1.10.8] - 2026-06-14
 
 ### 🐛 Bug Fixes
 
 - *(ci)* Scan GitHub Actions workflows with CodeQL
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* 1.10.8 [skip ci]
 ## [1.10.7] - 2026-06-14
 
 ### 🐛 Bug Fixes
