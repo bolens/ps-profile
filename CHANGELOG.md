@@ -1,8 +1,17 @@
+## [1.10.6] - 2026-06-14
+
+### 🐛 Bug Fixes
+
+- *(deps)* Resolve audit issues and standardize on pnpm
 ## [1.10.5] - 2026-06-14
 
 ### 🐛 Bug Fixes
 
 - *(docs)* Dedupe parsed commands for deterministic API doc generation
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* 1.10.5 [skip ci]
 ## [1.10.4] - 2026-06-14
 
 ### 🐛 Bug Fixes
