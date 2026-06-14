@@ -9,7 +9,7 @@ scripts/utils/docs/modules/DocIncremental.psm1
     profile sources when generating API documentation.
 #>
 
-$script:DocGenerationCacheVersion = 1
+$script:DocGenerationCacheVersion = 2
 
 <#
 .SYNOPSIS

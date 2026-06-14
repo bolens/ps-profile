@@ -389,16 +389,22 @@ else {
     # Clean up stale documentation files from both subdirectories
     $cleanupStartTime = Get-Date
     try {
-        Remove-StaleDocumentation -DocsPath $functionsPath -DocumentedCommandNames $documentedCommandNames -ErrorAction Stop
-        Remove-StaleDocumentation -DocsPath $aliasesPath -DocumentedCommandNames $documentedCommandNames -ErrorAction Stop
-        $cleanupDuration = ((Get-Date) - $cleanupStartTime).TotalMilliseconds
-        
-        # Level 2: Cleanup timing
-        if ($debugLevel -ge 2) {
-            Write-Verbose "[docs.generate] Cleanup completed in ${cleanupDuration}ms"
+        if ($skipDocWrites) {
+            Write-ScriptMessage -Message 'Skipping stale documentation cleanup; no command changes detected.'
+            $generationSuccess.Cleanup = $true
         }
-        
-        $generationSuccess.Cleanup = $true
+        else {
+            Remove-StaleDocumentation -DocsPath $functionsPath -DocumentedCommandNames $documentedCommandNames -ErrorAction Stop
+            Remove-StaleDocumentation -DocsPath $aliasesPath -DocumentedCommandNames $documentedCommandNames -ErrorAction Stop
+            $cleanupDuration = ((Get-Date) - $cleanupStartTime).TotalMilliseconds
+
+            # Level 2: Cleanup timing
+            if ($debugLevel -ge 2) {
+                Write-Verbose "[docs.generate] Cleanup completed in ${cleanupDuration}ms"
+            }
+
+            $generationSuccess.Cleanup = $true
+        }
     }
     catch {
         $generationErrors.Add("Cleanup: $($_.Exception.Message)")

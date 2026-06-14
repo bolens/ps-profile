@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'javascript', 'python' ]
+        language: [ 'javascript' ]
 
     steps:
     - name: Checkout repository
@@ -63,7 +63,7 @@ jobs:
           - Check the Security tab above for detailed findings
           - Review any alerts and address them before merging
           
-          > **Note:** CodeQL does not natively support PowerShell. This analysis covers JavaScript and Python dependencies used in the project.
+          > **Note:** CodeQL does not natively support PowerShell. This analysis covers JavaScript dependencies used in the project.
           
           *Analysis performed automatically by CodeQL*`;
           

@@ -20,9 +20,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: docs/api/.doc-generation-cache.json
-          key: doc-cache-${{ hashFiles('profile.d/**', 'scripts/utils/docs/**') }}
-          restore-keys: |
-            doc-cache-
+          key: doc-cache-v2-${{ hashFiles('profile.d/**', 'scripts/utils/docs/**') }}
 
       - name: Verify API documentation freshness
         run: pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1
