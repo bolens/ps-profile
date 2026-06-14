@@ -1,8 +1,20 @@
+## [1.10.4] - 2026-06-14
+
+### 🐛 Bug Fixes
+
+- *(deps)* Resolve glob CVE-2025-64756 via markdownlint-cli upgrade
+- *(docs)* Remove volatile API README timestamp
+- *(docs)* Stop writing Generated timestamp in API index generator
+- *(docs)* Satisfy MD060 table spacing in requirements README
 ## [1.10.3] - 2026-06-13
 
 ### 🐛 Bug Fixes
 
 - *(ci)* Load bootstrap first in idempotency check and refresh API docs
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* 1.10.3 [skip ci]
 ## [1.10.2] - 2026-06-13
 
 ### 🐛 Bug Fixes
