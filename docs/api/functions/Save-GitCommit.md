@@ -2,16 +2,16 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Commits staged changes.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Creates a new commit with the currently staged changes. Forwards all arguments to git commit.
 
 ## Signature
 
 ```powershell
-Save-GitCommit
+Save-GitCommit [Object]$a
 ```
 
 ## Parameters
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gc` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- `gc` - Commits staged changes.
 
 
 ## Source
 
-Defined in: ../profile.d/git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

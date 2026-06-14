@@ -36,13 +36,6 @@ System.Int64 Returns a Unix timestamp as a long integer.
 
 Converts an ISO 8601 string to a Unix timestamp.
 
-## Aliases
-
-This function has the following aliases:
-
-- `iso8601-to-unix` - Converts an ISO 8601 date/time string to a Unix timestamp.
-
-
 ## Source
 
 Defined in: ../profile.d/conversion-modules/data/time/iso8601.ps1

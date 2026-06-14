@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Pushes commits to remote repository.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Uploads local commits to the remote repository. Forwards all arguments to git push.
 
 ## Alias Information
 

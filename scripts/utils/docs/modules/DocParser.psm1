@@ -33,6 +33,47 @@ if (Test-Path $aliasParserPath) {
     Import-Module $aliasParserPath -DisableNameChecking -Force -ErrorAction SilentlyContinue
 }
 
+function Get-DeduplicatedDocumentedCommands {
+    <#
+    .SYNOPSIS
+        Deduplicates parsed command metadata by name using stable file-path ordering.
+
+    .DESCRIPTION
+        When the same command name appears in multiple profile files, keeps the entry
+        from the lexicographically latest source file so generation is deterministic
+        across filesystems and CI runners.
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Generic.List[PSCustomObject]])]
+    param(
+        [Parameter(Mandatory)]
+        [System.Collections.Generic.List[PSCustomObject]]$Commands,
+
+        [Parameter(Mandatory)]
+        [string]$PropertyName
+    )
+
+    $commandByName = @{}
+    foreach ($command in $Commands) {
+        $name = $command.$PropertyName
+        if ([string]::IsNullOrWhiteSpace($name)) {
+            continue
+        }
+
+        $existing = $commandByName[$name]
+        if (-not $existing -or ($command.File -and $existing.File -and $command.File -gt $existing.File)) {
+            $commandByName[$name] = $command
+        }
+    }
+
+    $deduped = [System.Collections.Generic.List[PSCustomObject]]::new()
+    foreach ($name in ($commandByName.Keys | Sort-Object)) {
+        $deduped.Add($commandByName[$name])
+    }
+
+    return $deduped
+}
+
 <#
 .SYNOPSIS
     Parses PowerShell files to extract functions and aliases with documentation.
@@ -68,10 +109,12 @@ function Get-DocumentedCommands {
     $functionNames = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 
     if ($Files -and $Files.Count -gt 0) {
-        $sourceFiles = $Files
+        $sourceFiles = @($Files | Sort-Object { $_ })
     }
     else {
-        $sourceFiles = @(Get-ChildItem -Path $ProfilePath -Filter '*.ps1' -Recurse -File | ForEach-Object { $_.FullName })
+        $sourceFiles = @(Get-ChildItem -Path $ProfilePath -Filter '*.ps1' -Recurse -File |
+            Sort-Object FullName |
+            ForEach-Object { $_.FullName })
     }
 
     foreach ($file in $sourceFiles) {
@@ -115,10 +158,13 @@ function Get-DocumentedCommands {
         }
     }
 
+    $functions = Get-DeduplicatedDocumentedCommands -Commands $functions -PropertyName 'Name'
+    $aliases = Get-DeduplicatedDocumentedCommands -Commands $aliases -PropertyName 'Name'
+
     return [PSCustomObject]@{
         Functions = $functions
         Aliases   = $aliases
     }
 }
 
-Export-ModuleMember -Function Get-DocumentedCommands
+Export-ModuleMember -Function Get-DocumentedCommands, Get-DeduplicatedDocumentedCommands

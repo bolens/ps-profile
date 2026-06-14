@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Lists, creates, or deletes branches.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Manages Git branches. Lists branches when called without arguments, or creates/deletes branches with arguments. Forwards all arguments to git branch.
 
 ## Alias Information
 

@@ -33,13 +33,6 @@ The path for the output XML file. If not specified, uses input path with .xml ex
 ConvertFrom-YamlToXml -InputPath ./input.file
 ```
 
-## Aliases
-
-This function has the following aliases:
-
-- `yaml-to-xml` - Converts YAML file to XML format.
-
-
 ## Source
 
 Defined in: ../profile.d/conversion-modules/data/core/json-extended.ps1

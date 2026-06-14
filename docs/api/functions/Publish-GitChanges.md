@@ -2,16 +2,16 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Pushes commits to remote repository.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Uploads local commits to the remote repository. Forwards all arguments to git push.
 
 ## Signature
 
 ```powershell
-Publish-GitChanges
+Publish-GitChanges [Object]$a
 ```
 
 ## Parameters
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gp` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- `gp` - Pushes commits to remote repository.
 
 
 ## Source
 
-Defined in: ../profile.d/git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

@@ -22,13 +22,6 @@ No parameters.
 
 No examples provided.
 
-## Aliases
-
-This function has the following aliases:
-
-- `la` - List all directory contents - enhanced ls -a
-
-
 ## Source
 
 Defined in: ../profile.d/aliases.ps1

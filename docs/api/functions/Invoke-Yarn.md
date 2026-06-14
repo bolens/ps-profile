@@ -35,6 +35,13 @@ Invoke-Yarn --version
 Invoke-Yarn install
 ```
 
+## Aliases
+
+This function has the following aliases:
+
+- `yarn` - Executes Yarn commands.
+
+
 ## Source
 
 Defined in: ../profile.d/yarn.ps1

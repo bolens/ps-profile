@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Switches branches or restores working tree files.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Changes the active branch or restores files from a specific commit or branch. Forwards all arguments to git checkout.
 
 ## Alias Information
 

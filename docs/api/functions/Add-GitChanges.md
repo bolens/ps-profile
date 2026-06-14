@@ -2,16 +2,16 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Stages changes for commit.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Adds file changes to the staging area for the next commit. Forwards all arguments to git add.
 
 ## Signature
 
 ```powershell
-Add-GitChanges
+Add-GitChanges [Object]$a
 ```
 
 ## Parameters
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `ga` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- `ga` - Stages changes for commit.
 
 
 ## Source
 
-Defined in: ../profile.d/git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

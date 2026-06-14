@@ -49,7 +49,6 @@ Converts to URL encoding.
 This function has the following aliases:
 
 - `ascii-to-url` - Converts ASCII text to URL/percent encoded representation.
-- `url-encode` - Converts ASCII text to URL/percent encoded representation.
 
 
 ## Source

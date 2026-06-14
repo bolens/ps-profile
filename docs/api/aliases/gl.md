@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Shows commit history.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Displays the commit log for the repository. Forwards all arguments to git log.
 
 ## Alias Information
 

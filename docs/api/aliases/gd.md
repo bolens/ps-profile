@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Shows differences between commits, branches, or working tree.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Displays changes between the working tree and staging area, or between commits. Forwards all arguments to git diff.
 
 ## Alias Information
 

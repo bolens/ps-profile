@@ -2,16 +2,16 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Shows differences between commits, branches, or working tree.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Displays changes between the working tree and staging area, or between commits. Forwards all arguments to git diff.
 
 ## Signature
 
 ```powershell
-Compare-GitChanges
+Compare-GitChanges [Object]$a
 ```
 
 ## Parameters
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gd` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- `gd` - Shows differences between commits, branches, or working tree.
 
 
 ## Source
 
-Defined in: ../profile.d/git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

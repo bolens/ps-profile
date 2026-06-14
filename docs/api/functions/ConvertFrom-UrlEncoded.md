@@ -29,6 +29,13 @@ URL-encoded text to decode back to plain text.
 ConvertFrom-UrlEncoded -text 'hello%20world'
 ```
 
+## Aliases
+
+This function has the following aliases:
+
+- `url-decode` - URL-decodes a string.
+
+
 ## Source
 
 Defined in: ../profile.d/utilities-modules/data/utilities-encoding.ps1

@@ -2,16 +2,16 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Lists, creates, or deletes branches.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Manages Git branches. Lists branches when called without arguments, or creates/deletes branches with arguments. Forwards all arguments to git branch.
 
 ## Signature
 
 ```powershell
-Get-GitBranch
+Get-GitBranch [Object]$a
 ```
 
 ## Parameters
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gb` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- `gb` - Lists, creates, or deletes branches.
 
 
 ## Source
 
-Defined in: ../profile.d/git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

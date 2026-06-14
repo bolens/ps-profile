@@ -36,6 +36,13 @@ System.String Returns an ISO 8601 formatted date/time string.
 
 Converts the Unix timestamp to ISO 8601 format.
 
+## Aliases
+
+This function has the following aliases:
+
+- `unix-to-iso8601` - Converts a Unix timestamp to ISO 8601 format.
+
+
 ## Source
 
 Defined in: ../profile.d/conversion-modules/data/time/unix.ps1

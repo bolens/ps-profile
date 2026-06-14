@@ -33,6 +33,13 @@ Optional destination XML path.
 ConvertTo-XmlFromYaml -InputPath ./config.yaml
 ```
 
+## Aliases
+
+This function has the following aliases:
+
+- `yaml-to-xml` - Converts a YAML file to XML format.
+
+
 ## Source
 
 Defined in: ../profile.d/conversion-modules/data/core/text-gaps.ps1

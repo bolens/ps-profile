@@ -2,16 +2,16 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Shows commit history.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Displays the commit log for the repository. Forwards all arguments to git log.
 
 ## Signature
 
 ```powershell
-Get-GitLog
+Get-GitLog [Object]$a
 ```
 
 ## Parameters
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gl` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- `gl` - Shows commit history.
 
 
 ## Source
 
-Defined in: ../profile.d/git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

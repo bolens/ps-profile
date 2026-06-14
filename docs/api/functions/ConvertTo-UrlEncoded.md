@@ -29,6 +29,13 @@ Plain text to encode for use in a URL query or path segment.
 ConvertTo-UrlEncoded -text 'hello world'
 ```
 
+## Aliases
+
+This function has the following aliases:
+
+- `url-encode` - URL-encodes a string.
+
+
 ## Source
 
 Defined in: ../profile.d/utilities-modules/data/utilities-encoding.ps1

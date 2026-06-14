@@ -2,16 +2,16 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Switches branches or restores working tree files.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Changes the active branch or restores files from a specific commit or branch. Forwards all arguments to git checkout.
 
 ## Signature
 
 ```powershell
-Switch-GitBranch
+Switch-GitBranch [Object]$a
 ```
 
 ## Parameters
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gco` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- `gco` - Switches branches or restores working tree files.
 
 
 ## Source
 
-Defined in: ../profile.d/git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

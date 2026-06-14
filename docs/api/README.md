@@ -2,7 +2,7 @@
 
 This documentation is automatically generated from comment-based help in the profile functions and aliases.
 
-**Total Functions:** 2373
+**Total Functions:** 2366
 **Total Aliases:** 1471
 
 ## Functions by Fragment
@@ -1306,16 +1306,14 @@ This documentation is automatically generated from comment-based help in the pro
 - [Initialize-FileConversion-Edn](functions/Initialize-FileConversion-Edn.md) - Initializes EDN format conversion utility functions.
 - [Parse-EdnValue](functions/Parse-EdnValue.md) - Initializes EDN format conversion utility functions.
 
-### encoding (10 functions)
+### encoding (8 functions)
 
 - [_ConvertFrom-HtmlEncoded](functions/_ConvertFrom-HtmlEncoded.md) - HTML Encoder/Decoder
 - [_ConvertFrom-UrlEncoded](functions/_ConvertFrom-UrlEncoded.md) - Fallback to PowerShell's built-in decoding
 - [_ConvertTo-HtmlEncoded](functions/_ConvertTo-HtmlEncoded.md) - HTML Encoder/Decoder
 - [_ConvertTo-UrlEncoded](functions/_ConvertTo-UrlEncoded.md) - Fallback to PowerShell's built-in encoding
 - [ConvertFrom-HtmlEncoded](functions/ConvertFrom-HtmlEncoded.md) - HTML-decodes a string.
-- [ConvertFrom-UrlEncoded](functions/ConvertFrom-UrlEncoded.md) - URL-decodes a string.
 - [ConvertTo-HtmlEncoded](functions/ConvertTo-HtmlEncoded.md) - HTML-encodes a string.
-- [ConvertTo-UrlEncoded](functions/ConvertTo-UrlEncoded.md) - URL-encodes a string.
 - [Initialize-DevTools-Encoding](functions/Initialize-DevTools-Encoding.md) - Initializes URL and HTML encoding utility functions.
 - [Initialize-FileConversion-CoreEncoding](functions/Initialize-FileConversion-CoreEncoding.md) - Initializes encoding conversion utility functions.
 
@@ -1530,7 +1528,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Invoke-GitHubPullRequest](functions/Invoke-GitHubPullRequest.md) - Manages GitHub pull requests.
 - [Open-GitHubRepository](functions/Open-GitHubRepository.md) - Opens a GitHub repository in the web browser.
 
-### git-advanced (16 functions)
+### git-advanced (14 functions)
 
 - [Clear-GitUntracked](functions/Clear-GitUntracked.md) - Git clean - remove untracked files
 - [Continue-GitRebase](functions/Continue-GitRebase.md) - Git rebase continue - continue rebase
@@ -1538,22 +1536,28 @@ This documentation is automatically generated from comment-based help in the pro
 - [Get-GitDefaultBranch](functions/Get-GitDefaultBranch.md) - Git default branch - get default branch name
 - [Invoke-GitClone](functions/Invoke-GitClone.md) - Git clone - clone a repository
 - [Merge-GitRebase](functions/Merge-GitRebase.md) - Git rebase - rebase commits
-- [New-GitHubPullRequest](functions/New-GitHubPullRequest.md) - GitHub PR create - create a pull request
 - [Remove-GitMergedBranches](functions/Remove-GitMergedBranches.md) - Git prune merged - remove merged branches
 - [Restore-GitStash](functions/Restore-GitStash.md) - Git stash pop - apply stashed changes
 - [Save-GitStash](functions/Save-GitStash.md) - Git stash - stash changes
 - [Set-LocationGitRoot](functions/Set-LocationGitRoot.md) - Git cd to root - change to repository root
-- [Show-GitHubPullRequest](functions/Show-GitHubPullRequest.md) - GitHub PR view - view pull request in browser
 - [Switch-GitPreviousBranch](functions/Switch-GitPreviousBranch.md) - Git checkout previous - switch to previous branch
 - [Sync-GitRepository](functions/Sync-GitRepository.md) - Git sync - fetch and rebase
 - [Undo-GitCommit](functions/Undo-GitCommit.md) - Git undo - soft reset last commit
 - [Update-GitSubmodule](functions/Update-GitSubmodule.md) - Git submodule update - update submodules
 
-### git-basic (3 functions)
+### git-basic (11 functions)
 
+- [Add-GitChanges](functions/Add-GitChanges.md) - Stages changes for commit.
+- [Compare-GitChanges](functions/Compare-GitChanges.md) - Shows differences between commits, branches, or working tree.
+- [Get-GitBranch](functions/Get-GitBranch.md) - Lists, creates, or deletes branches.
 - [Get-GitChanges](functions/Get-GitChanges.md) - Fetches and merges changes from remote repository.
+- [Get-GitLog](functions/Get-GitLog.md) - Shows commit history.
+- [Invoke-GitStatus](functions/Invoke-GitStatus.md) - Shows Git repository status.
+- [Publish-GitChanges](functions/Publish-GitChanges.md) - Pushes commits to remote repository.
 - [Receive-GitChanges](functions/Receive-GitChanges.md) - Downloads objects and refs from remote repository.
+- [Save-GitCommit](functions/Save-GitCommit.md) - Commits staged changes.
 - [Save-GitCommitWithMessage](functions/Save-GitCommitWithMessage.md) - Commits staged changes with a message.
+- [Switch-GitBranch](functions/Switch-GitBranch.md) - Switches branches or restores working tree files.
 
 ### git-changelog (1 functions)
 
@@ -1586,21 +1590,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [New-GitWorktree](functions/New-GitWorktree.md) - Creates a new Git worktree.
 - [Sync-GitRepos](functions/Sync-GitRepos.md) - Syncs multiple Git repositories.
 
-### git (12 functions)
+### git (4 functions)
 
-- [Add-GitChanges](functions/Add-GitChanges.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
-- [Compare-GitChanges](functions/Compare-GitChanges.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 - [Ensure-Git](functions/Ensure-Git.md) - Sets up all Git utility functions when any of them is called for the first time.
         This lazy loading approach improves profile startup performance.
 - [Format-PromptGitSegment](functions/Format-PromptGitSegment.md) - Git prompt segment - show current branch in prompt
-- [Get-GitBranch](functions/Get-GitBranch.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 - [Get-GitCurrentBranch](functions/Get-GitCurrentBranch.md) - Git current branch - get current branch name
-- [Get-GitLog](functions/Get-GitLog.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 - [Get-GitStatusShort](functions/Get-GitStatusShort.md) - Git status short - show concise status
-- [Invoke-GitStatus](functions/Invoke-GitStatus.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
-- [Publish-GitChanges](functions/Publish-GitChanges.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
-- [Save-GitCommit](functions/Save-GitCommit.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
-- [Switch-GitBranch](functions/Switch-GitBranch.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
 
 ### gradle (4 functions)
 
@@ -2997,12 +2993,10 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-SecondsFromTimeUnit](functions/ConvertTo-SecondsFromTimeUnit.md) - Convert to Seconds from TimeUnit units
 - [Initialize-FileConversion-CoreUnitsTime](functions/Initialize-FileConversion-CoreUnitsTime.md) - Initializes Time duration unit conversion utility functions.
 
-### timestamp (5 functions)
+### timestamp (3 functions)
 
 - [_ConvertFrom-Epoch](functions/_ConvertFrom-Epoch.md) - Initializes timestamp conversion utility functions.
 - [_ConvertTo-Epoch](functions/_ConvertTo-Epoch.md) - Epoch/Unix Timestamp Converter
-- [ConvertFrom-Epoch](functions/ConvertFrom-Epoch.md) - Converts Unix epoch timestamp to DateTime.
-- [ConvertTo-Epoch](functions/ConvertTo-Epoch.md) - Converts DateTime to Unix epoch timestamp.
 - [Initialize-DevTools-Timestamp](functions/Initialize-DevTools-Timestamp.md) - Initializes timestamp conversion utility functions.
 
 ### timezone (9 functions)
@@ -3249,7 +3243,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [Ensure-Utilities](functions/Ensure-Utilities.md) - Sets up all utility functions when any of them is called for the first time.
     This lazy loading approach improves profile startup performance.
 
-### uuid (19 functions)
+### uuid (18 functions)
 
 - [_ConvertFrom-UuidToBase32](functions/_ConvertFrom-UuidToBase32.md) - UUID to Base32
 - [_ConvertFrom-UuidToBase64](functions/_ConvertFrom-UuidToBase64.md) - UUID to Base64
@@ -3267,7 +3261,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [ConvertTo-UuidFromHex](functions/ConvertTo-UuidFromHex.md) - Converts a hexadecimal string to UUID format.
 - [Initialize-DevTools-Uuid](functions/Initialize-DevTools-Uuid.md) - Initializes UUID generator utility functions.
 - [Initialize-FileConversion-CoreEncodingUuid](functions/Initialize-FileConversion-CoreEncodingUuid.md) - Initializes UUID format conversion utility functions.
-- [New-Uuid](functions/New-Uuid.md) - Generates a new UUID (GUID).
 - [New-Uuid](functions/New-Uuid.md) - Generates a UUID (Universally Unique Identifier).
 - [New-UuidV5](functions/New-UuidV5.md) - Generates a UUID v5 (name-based).
 
@@ -3465,11 +3458,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [lms](aliases/lms.md) - Executes LM Studio CLI commands. (alias for `Invoke-LMStudio`)
 - [ollama-enhanced](aliases/ollama-enhanced.md) - Executes Ollama commands with enhanced functionality. (alias for `Invoke-OllamaEnhanced`)
 
-### aliases (2 aliases)
-
-- [la](aliases/la.md) - List all directory contents - enhanced ls -a (alias for `Get-ChildItemEnhancedAll`)
-- [ll](aliases/ll.md) - List directory contents - enhanced ls (alias for `Get-ChildItemEnhanced`)
-
 ### angle (3 aliases)
 
 - [angle](aliases/angle.md) - Convert Angle (alias for `Convert-Angle`)
@@ -3511,7 +3499,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [area-to-m2](aliases/area-to-m2.md) - Convert to Square meters (alias for `ConvertTo-SquareMetersFromArea`)
 - [m2-to-area](aliases/m2-to-area.md) - Convert from Square meters (alias for `ConvertFrom-SquareMetersToArea`)
 
-### ascii (9 aliases)
+### ascii (8 aliases)
 
 - [ascii-to-base32](aliases/ascii-to-base32.md) - Converts ASCII text to Base32 representation. (alias for `ConvertFrom-AsciiToBase32`)
 - [ascii-to-binary](aliases/ascii-to-binary.md) - Converts ASCII text to binary representation. (alias for `ConvertFrom-AsciiToBinary`)
@@ -3521,7 +3509,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [ascii-to-octal](aliases/ascii-to-octal.md) - Converts ASCII text to octal representation. (alias for `ConvertFrom-AsciiToOctal`)
 - [ascii-to-roman](aliases/ascii-to-roman.md) - Converts ASCII text to Roman numeral representation. (alias for `ConvertFrom-AsciiToRoman`)
 - [ascii-to-url](aliases/ascii-to-url.md) - Converts ASCII text to URL/percent encoded representation. (alias for `ConvertFrom-AsciiToUrl`)
-- [url-encode](aliases/url-encode.md) - Converts ASCII text to URL/percent encoded representation. (alias for `ConvertFrom-AsciiToUrl`)
 
 ### asdf (6 aliases)
 
@@ -4352,9 +4339,11 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [hex-dump](aliases/hex-dump.md) - Shows hexadecimal dump of a file's contents. (alias for `Get-HexDump`)
 
-### files-listing (3 aliases)
+### files-listing (5 aliases)
 
 - [bat-cat](aliases/bat-cat.md) - bat wrapper (alias for `Show-FileContent`)
+- [la](aliases/la.md) - Listing helpers (prefer eza when available) (alias for `Get-ChildItemAll`)
+- [ll](aliases/ll.md) - Listing helpers (prefer eza when available) (alias for `Get-ChildItemDetailed`)
 - [lx](aliases/lx.md) - Listing helpers (prefer eza when available) (alias for `Get-ChildItemVisible`)
 - [tree](aliases/tree.md) - Listing helpers (prefer eza when available) (alias for `Get-DirectoryTree`)
 
@@ -4433,7 +4422,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [gh-open](aliases/gh-open.md) - Opens a GitHub repository in the web browser. (alias for `Open-GitHubRepository`)
 - [gh-pr](aliases/gh-pr.md) - Manages GitHub pull requests. (alias for `Invoke-GitHubPullRequest`)
 
-### git-advanced (15 aliases)
+### git-advanced (13 aliases)
 
 - [cdg](aliases/cdg.md) - Git cd to root - change to repository root (alias for `Set-LocationGitRoot`)
 - [gcl](aliases/gcl.md) - Git clone - clone a repository (alias for `Invoke-GitClone`)
@@ -4448,8 +4437,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [gsub](aliases/gsub.md) - Git submodule update - update submodules (alias for `Update-GitSubmodule`)
 - [gsync](aliases/gsync.md) - Git sync - fetch and rebase (alias for `Sync-GitRepository`)
 - [gundo](aliases/gundo.md) - Git undo - soft reset last commit (alias for `Undo-GitCommit`)
-- [prc](aliases/prc.md) - GitHub PR create - create a pull request (alias for `New-GitHubPullRequest`)
-- [prv](aliases/prv.md) - GitHub PR view - view pull request in browser (alias for `Show-GitHubPullRequest`)
 
 ### git-basic (3 aliases)
 
@@ -4461,6 +4448,11 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [git-cliff](aliases/git-cliff.md) - Generates a changelog using git-cliff. (alias for `New-GitChangelog`)
 
+### git-github (2 aliases)
+
+- [prc](aliases/prc.md) - GitHub PR create - create a pull request (alias for `New-GitHubPullRequest`)
+- [prv](aliases/prv.md) - GitHub PR view - view pull request in browser (alias for `Show-GitHubPullRequest`)
+
 ### git-gui (4 aliases)
 
 - [git-tower](aliases/git-tower.md) - Launches Git Tower GUI. (alias for `Invoke-GitTower`)
@@ -4470,16 +4462,16 @@ This documentation is automatically generated from comment-based help in the pro
 
 ### git (11 aliases)
 
-- [ga](aliases/ga.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Add-GitChanges`)
-- [gb](aliases/gb.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Get-GitBranch`)
-- [gc](aliases/gc.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Save-GitCommit`)
-- [gco](aliases/gco.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Switch-GitBranch`)
-- [gd](aliases/gd.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Compare-GitChanges`)
+- [ga](aliases/ga.md) - Stages changes for commit. (alias for `Add-GitChanges`)
+- [gb](aliases/gb.md) - Lists, creates, or deletes branches. (alias for `Get-GitBranch`)
+- [gc](aliases/gc.md) - Commits staged changes. (alias for `Save-GitCommit`)
+- [gco](aliases/gco.md) - Switches branches or restores working tree files. (alias for `Switch-GitBranch`)
+- [gd](aliases/gd.md) - Shows differences between commits, branches, or working tree. (alias for `Compare-GitChanges`)
 - [Git-CurrentBranch](aliases/Git-CurrentBranch.md) - Git current branch - get current branch name (alias for `Get-GitCurrentBranch`)
 - [Git-StatusShort](aliases/Git-StatusShort.md) - Git status short - show concise status (alias for `Get-GitStatusShort`)
-- [gl](aliases/gl.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Get-GitLog`)
-- [gp](aliases/gp.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Publish-GitChanges`)
-- [gs](aliases/gs.md) - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH) (alias for `Invoke-GitStatus`)
+- [gl](aliases/gl.md) - Shows commit history. (alias for `Get-GitLog`)
+- [gp](aliases/gp.md) - Pushes commits to remote repository. (alias for `Publish-GitChanges`)
+- [gs](aliases/gs.md) - Shows Git repository status. (alias for `Invoke-GitStatus`)
 - [Prompt-GitSegment](aliases/Prompt-GitSegment.md) - Git prompt segment - show current branch in prompt (alias for `Format-PromptGitSegment`)
 
 ### gradle (4 aliases)
@@ -4587,7 +4579,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [brewupdate](aliases/brewupdate.md) - Updates Homebrew packages. (alias for `Update-BrewPackages`)
 - [brewupgrade](aliases/brewupgrade.md) - Updates Homebrew packages. (alias for `Update-BrewPackages`)
 
-### human-readable (8 aliases)
+### human-readable (7 aliases)
 
 - [datetime-to-human](aliases/datetime-to-human.md) - Converts a DateTime object to a human-readable string. (alias for `ConvertTo-HumanReadableFromDateTime`)
 - [human-to-datetime](aliases/human-to-datetime.md) - Converts a human-readable date string to a DateTime object. (alias for `ConvertFrom-HumanReadableToDateTime`)
@@ -4595,7 +4587,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [human-to-rfc3339](aliases/human-to-rfc3339.md) - Converts a DateTime object to a human-readable string. (alias for `ConvertFrom-HumanReadableToRfc3339`)
 - [human-to-unix](aliases/human-to-unix.md) - Converts a DateTime object to a human-readable string. (alias for `ConvertFrom-HumanReadableToUnixTimestamp`)
 - [iso8601-to-human](aliases/iso8601-to-human.md) - Converts a DateTime object to a human-readable string. (alias for `ConvertTo-HumanReadableFromIso8601`)
-- [rfc3339-to-human](aliases/rfc3339-to-human.md) - Converts a DateTime object to a human-readable string. (alias for `ConvertTo-HumanReadableFromRfc3339`)
 - [unix-to-human](aliases/unix-to-human.md) - Converts a DateTime object to a human-readable string. (alias for `ConvertTo-HumanReadableFromUnixTimestamp`)
 
 ### ico (6 aliases)
@@ -4623,28 +4614,25 @@ This documentation is automatically generated from comment-based help in the pro
 - [ion-to-json](aliases/ion-to-json.md) - Converts Ion file to JSON format. (alias for `ConvertFrom-IonToJson`)
 - [json-to-ion](aliases/json-to-ion.md) - Converts JSON file to Ion format. (alias for `ConvertTo-IonFromJson`)
 
-### iso8601 (6 aliases)
+### iso8601 (4 aliases)
 
 - [datetime-to-iso8601](aliases/datetime-to-iso8601.md) - Converts a DateTime object to ISO 8601 format. (alias for `ConvertTo-Iso8601FromDateTime`)
 - [iso8601-to-datetime](aliases/iso8601-to-datetime.md) - Converts an ISO 8601 date/time string to a DateTime object. (alias for `ConvertFrom-Iso8601ToDateTime`)
 - [iso8601-to-readable](aliases/iso8601-to-readable.md) - Converts an ISO 8601 date/time string to a human-readable format. (alias for `ConvertFrom-Iso8601ToHumanReadable`)
 - [iso8601-to-rfc3339](aliases/iso8601-to-rfc3339.md) - Converts an ISO 8601 date/time string to RFC 3339 format. (alias for `ConvertFrom-Iso8601ToRfc3339`)
-- [iso8601-to-unix](aliases/iso8601-to-unix.md) - Converts an ISO 8601 date/time string to a Unix timestamp. (alias for `ConvertFrom-Iso8601ToUnixTimestamp`)
-- [unix-to-iso8601](aliases/unix-to-iso8601.md) - Converts a Unix timestamp to ISO 8601 format. (alias for `ConvertTo-Iso8601FromUnixTimestamp`)
 
 ### jq-yq (2 aliases)
 
 - [jq2json](aliases/jq2json.md) - Converts JSON to compact JSON format using jq. (alias for `Convert-JqToJson`)
 - [yq2json](aliases/yq2json.md) - Converts YAML to JSON format using yq. (alias for `Convert-YqToJson`)
 
-### json-extended (6 aliases)
+### json-extended (5 aliases)
 
 - [json-to-json5](aliases/json-to-json5.md) - Converts JSON file to JSON5 format. (alias for `ConvertTo-Json5FromJson`)
 - [json-to-jsonl](aliases/json-to-jsonl.md) - Converts JSON file to JSONL format. (alias for `ConvertTo-JsonLFromJson`)
 - [json5-to-json](aliases/json5-to-json.md) - Converts JSON5 file to JSON format. (alias for `ConvertFrom-Json5ToJson`)
 - [jsonl-to-json](aliases/jsonl-to-json.md) - Converts JSONL file to JSON format. (alias for `ConvertFrom-JsonLToJson`)
 - [xml-to-yaml](aliases/xml-to-yaml.md) - Converts XML file to YAML format. (alias for `ConvertFrom-XmlToYaml`)
-- [yaml-to-xml](aliases/yaml-to-xml.md) - Converts YAML file to XML format. (alias for `ConvertFrom-YamlToXml`)
 
 ### json (1 aliases)
 
@@ -5040,7 +5028,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [pxrun](aliases/pxrun.md) - Runs commands in the pixi environment. (alias for `Invoke-PixiRun`)
 - [pxshell](aliases/pxshell.md) - Activates the pixi shell environment. (alias for `Invoke-PixiShell`)
 
-### pnpm (18 aliases)
+### pnpm (17 aliases)
 
 - [npm](aliases/npm.md) - Alias for `pnpm` (alias for `pnpm`)
 - [pna](aliases/pna.md) - Adds packages using PNPM. (alias for `Add-PnpmPackage`)
@@ -5059,7 +5047,6 @@ This documentation is automatically generated from comment-based help in the pro
 - [pnuninstall](aliases/pnuninstall.md) - Removes packages using pnpm. (alias for `Remove-PnpmPackage`)
 - [pnupdate](aliases/pnupdate.md) - Updates all packages in the current project to their latest versions. (alias for `Update-PnpmPackages`)
 - [pnupgrade](aliases/pnupgrade.md) - Updates pnpm to the latest version. (alias for `Update-PnpmSelf`)
-- [yarn](aliases/yarn.md) - Alias for `pnpm` (alias for `pnpm`)
 
 ### poetry (10 aliases)
 
@@ -5142,10 +5129,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [regex-test-description](aliases/regex-test-description.md) - Converts a natural language description to regex and tests it against input. (alias for `Test-RegexFromDescription`)
 - [regex-to-description](aliases/regex-to-description.md) - Explains a regular expression pattern in plain language. (alias for `Explain-RegexPattern`)
 
-### rfc3339 (5 aliases)
+### rfc3339 (6 aliases)
 
 - [datetime-to-rfc3339](aliases/datetime-to-rfc3339.md) - Converts a DateTime object to RFC 3339 format. (alias for `ConvertTo-Rfc3339FromDateTime`)
 - [rfc3339-to-datetime](aliases/rfc3339-to-datetime.md) - Converts an RFC 3339 date/time string to a DateTime object. (alias for `ConvertFrom-Rfc3339ToDateTime`)
+- [rfc3339-to-human](aliases/rfc3339-to-human.md) - Converts an RFC 3339 date/time string to a human-readable format. (alias for `ConvertFrom-Rfc3339ToHumanReadable`)
 - [rfc3339-to-iso8601](aliases/rfc3339-to-iso8601.md) - Converts an RFC 3339 date/time string to ISO 8601 format. (alias for `ConvertTo-Iso8601FromRfc3339`)
 - [rfc3339-to-unix](aliases/rfc3339-to-unix.md) - Converts an RFC 3339 date/time string to a Unix timestamp. (alias for `ConvertFrom-Rfc3339ToUnixTimestamp`)
 - [unix-to-rfc3339](aliases/unix-to-rfc3339.md) - Converts a Unix timestamp to RFC 3339 format. (alias for `ConvertTo-Rfc3339FromUnixTimestamp`)
@@ -5409,12 +5397,13 @@ This documentation is automatically generated from comment-based help in the pro
 - [playwright](aliases/playwright.md) - Executes Playwright commands. (alias for `Invoke-Playwright`)
 - [vitest](aliases/vitest.md) - Executes Vitest test runner. (alias for `Invoke-Vitest`)
 
-### text-gaps (4 aliases)
+### text-gaps (5 aliases)
 
 - [csv-to-jsonl](aliases/csv-to-jsonl.md) - Converts CSV file to JSONL format. (alias for `ConvertTo-JsonLFromCsv`)
 - [jsonl-to-csv](aliases/jsonl-to-csv.md) - Converts JSONL file to CSV format. (alias for `ConvertFrom-JsonLToCsv`)
 - [jsonl-to-yaml](aliases/jsonl-to-yaml.md) - Converts JSONL file to YAML format. (alias for `ConvertFrom-JsonLToYaml`)
 - [yaml-to-jsonl](aliases/yaml-to-jsonl.md) - Converts YAML file to JSONL format. (alias for `ConvertTo-JsonLFromYaml`)
+- [yaml-to-xml](aliases/yaml-to-xml.md) - Converts a YAML file to XML format. (alias for `ConvertTo-XmlFromYaml`)
 
 ### TextSearch (1 aliases)
 
@@ -5500,15 +5489,16 @@ This documentation is automatically generated from comment-based help in the pro
 
 - [unit-convert](aliases/unit-convert.md) - Converts values between different units. (alias for `Convert-Units`)
 
-### unix (3 aliases)
+### unix (5 aliases)
 
 - [datetime-to-unix](aliases/datetime-to-unix.md) - Converts a DateTime object to a Unix timestamp. (alias for `ConvertTo-UnixTimestampFromDateTime`)
+- [iso8601-to-unix](aliases/iso8601-to-unix.md) - Converts an ISO 8601 date/time string to a Unix timestamp. (alias for `ConvertTo-UnixTimestampFromIso8601`)
 - [unix-to-datetime](aliases/unix-to-datetime.md) - Converts a Unix timestamp to a DateTime object. (alias for `ConvertFrom-UnixTimestampToDateTime`)
+- [unix-to-iso8601](aliases/unix-to-iso8601.md) - Converts a Unix timestamp to ISO 8601 format. (alias for `ConvertFrom-UnixTimestampToIso8601`)
 - [unix-to-readable](aliases/unix-to-readable.md) - Converts a Unix timestamp to a human-readable date/time string. (alias for `ConvertFrom-UnixTimestampToHumanReadable`)
 
-### url (9 aliases)
+### url (8 aliases)
 
-- [url-decode](aliases/url-decode.md) - Converts URL/percent encoded string to ASCII text. (alias for `ConvertFrom-UrlToAscii`)
 - [url-to-ascii](aliases/url-to-ascii.md) - Converts URL/percent encoded string to ASCII text. (alias for `ConvertFrom-UrlToAscii`)
 - [url-to-base32](aliases/url-to-base32.md) - Converts URL/percent encoded string to Base32 representation. (alias for `ConvertFrom-UrlToBase32`)
 - [url-to-binary](aliases/url-to-binary.md) - Converts URL/percent encoded string to binary representation. (alias for `ConvertFrom-UrlToBinary`)
@@ -5535,6 +5525,11 @@ This documentation is automatically generated from comment-based help in the pro
 - [from-epoch](aliases/from-epoch.md) - Converts Unix epoch timestamp to DateTime. (alias for `ConvertFrom-Epoch`)
 - [now](aliases/now.md) - Shows current date and time. (alias for `Get-DateTime`)
 - [to-epoch](aliases/to-epoch.md) - Converts DateTime to Unix epoch timestamp. (alias for `ConvertTo-Epoch`)
+
+### utilities-encoding (2 aliases)
+
+- [url-decode](aliases/url-decode.md) - URL-decodes a string. (alias for `ConvertFrom-UrlEncoded`)
+- [url-encode](aliases/url-encode.md) - URL-encodes a string. (alias for `ConvertTo-UrlEncoded`)
 
 ### utilities-filesystem (1 aliases)
 
@@ -5738,8 +5733,9 @@ This documentation is automatically generated from comment-based help in the pro
 - [json-to-yaml](aliases/json-to-yaml.md) - Converts JSON to YAML format. (alias for `ConvertTo-Yaml`)
 - [yaml-to-json](aliases/yaml-to-json.md) - Converts YAML to JSON format. (alias for `ConvertFrom-Yaml`)
 
-### yarn (7 aliases)
+### yarn (8 aliases)
 
+- [yarn](aliases/yarn.md) - Executes Yarn commands. (alias for `Invoke-Yarn`)
 - [yarn-add](aliases/yarn-add.md) - Adds packages to project dependencies. (alias for `Add-YarnPackage`)
 - [yarn-global-upgrade](aliases/yarn-global-upgrade.md) - Updates all globally installed Yarn packages to their latest versions. (alias for `Update-YarnGlobalPackages`)
 - [yarn-install](aliases/yarn-install.md) - Installs project dependencies. (alias for `Install-YarnDependencies`)

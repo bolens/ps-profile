@@ -48,7 +48,6 @@ Converts URL encoding to "test@example.com".
 
 This function has the following aliases:
 
-- `url-decode` - Converts URL/percent encoded string to ASCII text.
 - `url-to-ascii` - Converts URL/percent encoded string to ASCII text.
 
 

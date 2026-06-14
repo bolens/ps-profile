@@ -2,16 +2,16 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Shows Git repository status.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Displays the working tree status, showing which files have changes, are staged, or are untracked. Forwards all arguments to git status.
 
 ## Signature
 
 ```powershell
-Invoke-GitStatus
+Invoke-GitStatus [Object]$a
 ```
 
 ## Parameters
@@ -26,9 +26,9 @@ No examples provided.
 
 This function has the following aliases:
 
-- `gs` - Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+- `gs` - Shows Git repository status.
 
 
 ## Source
 
-Defined in: ../profile.d/git.ps1
+Defined in: ../profile.d/git-modules/core/git-basic.ps1

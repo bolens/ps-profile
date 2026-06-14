@@ -40,6 +40,13 @@ System.String Returns a human-readable date/time string.
 
 Converts RFC 3339 string to human-readable format.
 
+## Aliases
+
+This function has the following aliases:
+
+- `rfc3339-to-human` - Converts an RFC 3339 date/time string to a human-readable format.
+
+
 ## Source
 
 Defined in: ../profile.d/conversion-modules/data/time/rfc3339.ps1

@@ -2,11 +2,11 @@
 
 ## Synopsis
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Shows Git repository status.
 
 ## Description
 
-Reserve common git shortcuts before modules load (`gs` conflicts with Ghostscript on PATH)
+Displays the working tree status, showing which files have changes, are staged, or are untracked. Forwards all arguments to git status.
 
 ## Alias Information
 

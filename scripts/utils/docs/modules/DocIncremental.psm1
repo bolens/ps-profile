@@ -356,7 +356,7 @@ function Get-DocumentedCommandsIncremental {
     $filesToParse = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     $removedCommandNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 
-    foreach ($relativePath in $fileMap.Keys) {
+    foreach ($relativePath in ($fileMap.Keys | Sort-Object)) {
         $fullPath = $fileMap[$relativePath]
         $writeTime = Get-FileWriteTimeUtc -Path $fullPath
         $cachedWriteTime = if ($cachedFiles.ContainsKey($relativePath)) {
@@ -459,7 +459,7 @@ function Get-DocumentedCommandsIncremental {
     $newCacheEntries = @{}
     $changedCommandNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 
-    foreach ($relativePath in $fileMap.Keys) {
+    foreach ($relativePath in ($fileMap.Keys | Sort-Object)) {
         $fullPath = $fileMap[$relativePath]
         $writeTime = Get-FileWriteTimeUtc -Path $fullPath
         $fileFunctions = [System.Collections.Generic.List[PSCustomObject]]::new()
@@ -514,6 +514,10 @@ function Get-DocumentedCommandsIncremental {
     }
 
     Export-DocGenerationCache -CachePath $CachePath -ProfilePath $ProfilePath -FileEntries $newCacheEntries
+
+    Import-DocParserModule
+    $functions = Get-DeduplicatedDocumentedCommands -Commands $functions -PropertyName 'Name'
+    $aliases = Get-DeduplicatedDocumentedCommands -Commands $aliases -PropertyName 'Name'
 
     $parseMode = if ($cache) { 'Incremental' } else { 'Full' }
 

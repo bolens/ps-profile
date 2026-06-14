@@ -56,13 +56,6 @@ Get-Date | ConvertTo-HumanReadableFromDateTime -Format 'MMMM d, yyyy'
 
 Converts to a formatted string like "January 15, 2024".
 
-## Aliases
-
-This function has the following aliases:
-
-- `rfc3339-to-human` - Converts a DateTime object to a human-readable string.
-
-
 ## Source
 
 Defined in: ../profile.d/conversion-modules/data/time/human-readable.ps1

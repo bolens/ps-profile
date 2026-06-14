@@ -22,13 +22,6 @@ No parameters.
 
 No examples provided.
 
-## Aliases
-
-This function has the following aliases:
-
-- `ll` - List directory contents - enhanced ls
-
-
 ## Source
 
 Defined in: ../profile.d/aliases.ps1

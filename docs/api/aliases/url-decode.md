@@ -2,15 +2,15 @@
 
 ## Synopsis
 
-Converts URL/percent encoded string to ASCII text.
+URL-decodes a string.
 
 ## Description
 
-Converts a URL/percent encoded string back to ASCII text. %XX sequences are decoded to their character equivalents.
+Decodes URL-encoded strings back to their original form.
 
 ## Alias Information
 
-**Alias for:** `ConvertFrom-UrlToAscii`
+**Alias for:** `ConvertFrom-UrlEncoded`
 
 Use this alias as a shorthand for the full command name.
 
@@ -20,4 +20,4 @@ No examples provided.
 
 ## Source
 
-Defined in: ../profile.d/conversion-modules/data/encoding/url.ps1
+Defined in: ../profile.d/utilities-modules/data/utilities-encoding.ps1
