@@ -1,3 +1,8 @@
+## [1.10.5] - 2026-06-14
+
+### 🐛 Bug Fixes
+
+- *(docs)* Dedupe parsed commands for deterministic API doc generation
 ## [1.10.4] - 2026-06-14
 
 ### 🐛 Bug Fixes
@@ -6,6 +11,10 @@
 - *(docs)* Remove volatile API README timestamp
 - *(docs)* Stop writing Generated timestamp in API index generator
 - *(docs)* Satisfy MD060 table spacing in requirements README
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* 1.10.4 [skip ci]
 ## [1.10.3] - 2026-06-13
 
 ### 🐛 Bug Fixes
