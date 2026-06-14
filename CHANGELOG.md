@@ -1,3 +1,8 @@
+## [1.10.8] - 2026-06-14
+
+### 🐛 Bug Fixes
+
+- *(ci)* Scan GitHub Actions workflows with CodeQL
 ## [1.10.7] - 2026-06-14
 
 ### 🐛 Bug Fixes
@@ -7,6 +12,7 @@
 ### ⚙️ Miscellaneous Tasks
 
 - Add CodeQL workflow and fix AGENTS.md line length
+- *(release)* 1.10.7 [skip ci]
 ## [1.10.6] - 2026-06-14
 
 ### 🐛 Bug Fixes
