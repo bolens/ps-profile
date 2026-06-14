@@ -130,9 +130,9 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-# Package manager lock files (keep package-lock.json and pnpm-lock.yaml)
+# Package manager lock files (pnpm only; ignore npm/yarn locks)
 # yarn.lock
-# package-lock.json
+package-lock.json
 # pnpm-lock.yaml
 
 # Yarn

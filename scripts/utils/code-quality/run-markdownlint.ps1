@@ -13,7 +13,7 @@
     any linting errors are found.
 
     The markdownlint-cli version can be controlled via the MARKDOWNLINT_VERSION
-    environment variable. Defaults to 0.46.0 if not specified.
+    environment variable. Defaults to 0.48.0 if not specified.
 
 
 .NOTES
@@ -24,7 +24,7 @@
 
     Version Control:
     - Set MARKDOWNLINT_VERSION environment variable to use a specific version
-    - Default version: 0.46.0
+    - Default version: 0.48.0
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\run-markdownlint.ps1
@@ -56,7 +56,7 @@ $markdownlintVersion = if ($env:MARKDOWNLINT_VERSION) {
     $env:MARKDOWNLINT_VERSION
 }
 else {
-    '0.46.0'  # Default version
+    '0.48.0'  # Default version
 }
 
 # Check if markdownlint-cli is installed

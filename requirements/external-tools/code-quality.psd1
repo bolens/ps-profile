@@ -9,7 +9,7 @@
             Note           = 'Declared in package.json devDependencies'
         }
         'markdownlint-cli' = @{
-            Version        = '0.46.0'
+            Version        = '0.48.0'
             Description    = 'Markdown linting tool'
             Required       = $false
             InstallCommand = 'pnpm install'

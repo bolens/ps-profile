@@ -1,3 +1,6 @@
 allowBuilds:
   lzo: true
   protobufjs: true
+
+overrides:
+  parquetjs>thrift: 0.23.0
