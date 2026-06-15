@@ -84,5 +84,8 @@ function Get-AddFragmentMetadataFixture {
             $updated = Get-Content -LiteralPath (Join-Path $profileDir 'env.ps1') -Raw
             $updated | Should -Match '# Tier: essential'
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 }

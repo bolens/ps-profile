@@ -86,6 +86,9 @@ exit 0
             $result.Output | Should -Match 'Running Bootstrap Tests'
             $result.Output | Should -Match 'Bootstrap.*Passed|Category.*Bootstrap'
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 
     It 'Fails when the stub Pester runner reports Bootstrap test failures' {
@@ -139,6 +142,9 @@ exit 1
             $result.ExitCode | Should -Be 1
             $result.Output | Should -Match 'Systematic Test Execution'
             $result.Output | Should -Match 'Bootstrap.*failures|Failed: [1-9]'
+        }
+        finally {
+            Remove-TestArtifacts
         }
     }
 
@@ -208,6 +214,9 @@ exit 0
             $result.Output | Should -Match 'Running Bootstrap Tests'
             $result.Output | Should -Not -Match 'Running Performance Tests'
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 
     It 'Runs Conversion-Data category tests through run-pester in an isolated repository' {
@@ -263,6 +272,9 @@ exit 0
             $result.Output | Should -Match 'Running Conversion-Data Tests'
             $result.Output | Should -Match 'Conversion-Data.*Passed|Category.*Conversion-Data'
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 
     It 'Generates a report when GenerateReport is requested for a single category' {
@@ -313,6 +325,9 @@ exit 0
             $reportDir = Join-Path $repo 'docs' 'test-verification-reports'
             @(Get-ChildItem -LiteralPath $reportDir -Filter 'systematic-test-report-*.md' -ErrorAction SilentlyContinue).Count |
                 Should -BeGreaterThan 0
+        }
+        finally {
+            Remove-TestArtifacts
         }
     }
 
@@ -389,6 +404,9 @@ exit 0
             $result.Output | Should -Match 'Running Bootstrap Tests'
             $result.Output | Should -Match 'Stopping on first failure'
             $result.Output | Should -Not -Match 'Running Error-Handling Tests'
+        }
+        finally {
+            Remove-TestArtifacts
         }
     }
 }

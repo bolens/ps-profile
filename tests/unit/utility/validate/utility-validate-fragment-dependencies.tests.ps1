@@ -52,6 +52,9 @@ function Get-ValidateFragmentDepsFixture {
             $result.Output | Should -Match 'Dependency validation failed|Missing dependencies'
             $result.Output | Should -Match 'missing-fragment-dep'
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 
     It 'Passes when an isolated profile fragment has no unresolved dependencies' {
@@ -89,6 +92,9 @@ function Get-ValidateFragmentDepsFixture {
             $result.Output | Should -Match 'All dependencies are valid|Validating dependencies'
             $result.Output | Should -Match 'Fragment load order'
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 
     It 'Reports circular dependencies when isolated fragments require each other' {
@@ -114,6 +120,9 @@ function Get-ValidateFragmentDepsBeta { 'beta' }
 
             $result.ExitCode | Should -Be 1
             $result.Output | Should -Match 'Dependency validation failed|Circular dependencies'
+        }
+        finally {
+            Remove-TestArtifacts
         }
     }
 }
