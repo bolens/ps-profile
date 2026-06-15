@@ -13,6 +13,7 @@ env:
 permissions:
   contents: read
   issues: write
+  pull-requests: write
 
 jobs:
   validate-dependencies:

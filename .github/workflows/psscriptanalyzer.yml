@@ -59,18 +59,10 @@ jobs:
         shell: pwsh
         run: |
           pwsh -NoProfile -ExecutionPolicy Bypass -File ./.github/scripts/psa_to_reviewdog.ps1 -ReportPath psscriptanalyzer-report.json
-      - name: Run reviewdog (download binary)
+      - name: Install reviewdog CLI
         if: github.event_name == 'pull_request'
         run: |
-          set -e
-          echo "Downloading reviewdog"
-          RD_VER=0.13.1
-          OS_NAME=$(uname | tr '[:upper:]' '[:lower:]')
-          curl -sSL "https://github.com/reviewdog/reviewdog/releases/download/v${RD_VER}/reviewdog_${RD_VER}_${OS_NAME}_amd64.tar.gz" -o /tmp/reviewdog.tar.gz
-          mkdir -p /tmp/reviewdog
-          tar -xzf /tmp/reviewdog.tar.gz -C /tmp/reviewdog
-          sudo mv /tmp/reviewdog/reviewdog /usr/local/bin/reviewdog
-          reviewdog -version
+          curl -sSfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b /usr/local/bin v0.17.0
       - name: Run reviewdog annotations (rdjson)
         if: github.event_name == 'pull_request'
         run: |
