@@ -12,6 +12,9 @@ env:
 jobs:
   api-docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -130,6 +133,8 @@ jobs:
 
   validate:
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]

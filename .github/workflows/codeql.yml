@@ -16,6 +16,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      issues: write
       security-events: write
       pull-requests: write
 
