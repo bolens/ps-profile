@@ -65,6 +65,8 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b /usr/local/bin v0.17.0
       - name: Run reviewdog annotations (rdjson)
         if: github.event_name == 'pull_request'
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Running reviewdog with RDJSON input"
           reviewdog -f=rdjson -name=psscriptanalyzer -reporter=github-pr-review -level=error < ./psa_for_reviewdog.rdjson
