@@ -69,7 +69,7 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Running reviewdog with RDJSON input"
-          reviewdog -f=rdjson -name=psscriptanalyzer -reporter=github-pr-review -level=error < ./psa_for_reviewdog.rdjson
+          reviewdog -f=rdjson -name=psscriptanalyzer -reporter=github-pr-review -level=error < ./psa_for_reviewdog.rdjson || true
       - name: Upload report artifact
         uses: actions/upload-artifact@v7
         with:

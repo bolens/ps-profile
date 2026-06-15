@@ -646,25 +646,25 @@ if (-not (Test-Path $scriptRoot)) {
 
 # Import shared utilities directly (similar to analyze-coverage.ps1)
 # Calculate lib path manually to avoid circular dependency with Get-RepoRoot
-$libPath = Join-Path $scriptRoot 'scripts' 'lib'
+$libPath = Join-Path (Join-Path $scriptRoot 'scripts') 'lib'
 try {
     Write-Host "Loading shared modules..." -ForegroundColor Yellow
     
     # Import core modules first (needed by others)
     $corePath = Join-Path $libPath 'core'
     Import-Module (Join-Path $corePath 'ExitCodes.psm1') -DisableNameChecking -ErrorAction Stop -Global
-    Import-Module (Join-Path $libPath 'path' 'PathResolution.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    Import-Module (Join-Path (Join-Path $libPath 'path') 'PathResolution.psm1') -DisableNameChecking -ErrorAction Stop -Global
     
     # Now we can use Get-RepoRoot if needed, but continue with direct imports for consistency
     Import-Module (Join-Path $corePath 'Logging.psm1') -DisableNameChecking -ErrorAction Stop -Global
     
     # Locale and Module may not exist - import only if available
-    $localePath = Join-Path $libPath 'utilities' 'Locale.psm1'
+    $localePath = Join-Path (Join-Path $libPath 'utilities') 'Locale.psm1'
     if (Test-Path $localePath) {
         Import-Module $localePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
     }
     
-    $modulePath = Join-Path $libPath 'runtime' 'Module.psm1'
+    $modulePath = Join-Path (Join-Path $libPath 'runtime') 'Module.psm1'
     if (Test-Path $modulePath) {
         Import-Module $modulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
     }
