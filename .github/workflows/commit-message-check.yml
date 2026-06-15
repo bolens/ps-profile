@@ -7,6 +7,10 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   commit-message-check:
     runs-on: ubuntu-latest
@@ -30,7 +34,7 @@ jobs:
 
       - name: Upsert bot comment (on failure)
         if: ${{ steps.validate.outputs.status != '0' }}
-        uses: peter-evans/create-or-update-comment@v5
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
@@ -38,7 +42,7 @@ jobs:
 
       - name: Add label (on failure)
         if: ${{ steps.validate.outputs.status != '0' }}
-        uses: actions-ecosystem/action-add-labels@v1
+        uses: actions-ecosystem/action-add-labels@18f1af5e3544586314bbe15c0273249c770b2daf # v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: commit-message-invalid
