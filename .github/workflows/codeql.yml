@@ -43,7 +43,7 @@ jobs:
 
     - name: Comment PR with CodeQL Results
       if: github.event_name == 'pull_request' && steps.analyze.outcome == 'success'
-      uses: actions/github-script@v8
+      uses: actions/github-script@v9
       with:
         script: |
           const body = `🔍 **CodeQL Analysis Complete** (${{ matrix.language }})
@@ -70,7 +70,7 @@ jobs:
 
     - name: Comment PR with CodeQL Errors
       if: github.event_name == 'pull_request' && steps.analyze.outcome == 'failure'
-      uses: actions/github-script@v8
+      uses: actions/github-script@v9
       with:
         script: |
           const body = `❌ **CodeQL Analysis Failed** (${{ matrix.language }})
