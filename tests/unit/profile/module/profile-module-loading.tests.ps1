@@ -1,24 +1,18 @@
-# Load TestSupport.ps1 - ensure it's loaded before using its functions
-$testSupportPath = Join-Path $PSScriptRoot '..\TestSupport.ps1'
-if (Test-Path $testSupportPath) {
-    . $testSupportPath
-}
-else {
-    throw "TestSupport.ps1 not found at: $testSupportPath"
-}
-
 BeforeAll {
-    # Ensure TestSupport functions are available - reload if needed
-    if (-not (Get-Command Get-TestRepoRoot -ErrorAction SilentlyContinue)) {
-        $testSupportPath = Join-Path $PSScriptRoot '..\TestSupport.ps1'
-        if (Test-Path $testSupportPath) {
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
             . $testSupportPath
+            break
         }
-        if (-not (Get-Command Get-TestRepoRoot -ErrorAction SilentlyContinue)) {
-            throw "Get-TestRepoRoot function not available. TestSupport.ps1 may not have loaded correctly from: $testSupportPath"
-        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
     }
-    
+    if (-not (Get-Command Get-TestRepoRoot -ErrorAction SilentlyContinue)) {
+        throw "Get-TestRepoRoot function not available. TestSupport.ps1 may not have loaded correctly from: $PSScriptRoot"
+    }
+
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:BootstrapDir = Get-TestPath -RelativePath 'profile.d\bootstrap' -StartPath $PSScriptRoot -EnsureExists

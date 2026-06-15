@@ -1,25 +1,26 @@
 
 
 BeforeAll {
-    $current = Get-Item $PSScriptRoot
-    while ($null -ne $current) {
-        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
-        if (Test-Path -LiteralPath $testSupportPath) {
-            . $testSupportPath
-            break
+    try {
+        $current = Get-Item $PSScriptRoot
+        while ($null -ne $current) {
+            $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+            if (Test-Path -LiteralPath $testSupportPath) {
+                . $testSupportPath
+                break
+            }
+            if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+            $current = $current.Parent
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
-        $current = $current.Parent
-    }
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
-        throw "Get-TestPath returned null or empty value for ProfileDir"
+        if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
+            throw "Get-TestPath returned null or empty value for ProfileDir"
+        }
+        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
+            throw "Profile directory not found at: $script:ProfileDir"
+        }
     }
-    if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-        throw "Profile directory not found at: $script:ProfileDir"
-    }
-}
-catch {
+    catch {
     $errorDetails = @{
         Message  = $_.Exception.Message
         Type     = $_.Exception.GetType().FullName
@@ -27,6 +28,7 @@ catch {
     }
     Write-Error "Failed to initialize oh-my-posh tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
     throw
+    }
 }
 
 Describe "Oh My Posh Module" {

@@ -87,6 +87,7 @@ Describe 'Profile Performance Regression Tests' {
 
             $originalBatch = $env:PS_PROFILE_BATCH_LOAD
             $originalDebug = $env:PS_PROFILE_DEBUG
+            $loadResult = $null
 
             try {
                 switch ($BatchMode) {
@@ -209,7 +210,7 @@ Describe 'Profile Performance Regression Tests' {
             }
             finally {
                 $stopwatch.Stop()
-                
+
                 # Cleanup runspace
                 if ($handle) {
                     try {
@@ -226,7 +227,7 @@ Describe 'Profile Performance Regression Tests' {
                     $runspacePool.Close()
                     $runspacePool.Dispose()
                 }
-                
+
                 # Restore original environment
                 if ($null -eq $originalEnv) {
                     Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
@@ -235,12 +236,11 @@ Describe 'Profile Performance Regression Tests' {
                     $env:PS_PROFILE_ENVIRONMENT = $originalEnv
                 }
 
-                return [pscustomobject]@{
+                $loadResult = [pscustomobject]@{
                     DurationMs    = $stopwatch.Elapsed.TotalMilliseconds
                     FragmentTimes = $fragmentTimes
                 }
-            }
-            finally {
+
                 if ($CollectFragmentTimes) {
                     $global:PSProfileFragmentTimes = $null
                     if ($null -eq $originalDebug) {
@@ -270,6 +270,8 @@ Describe 'Profile Performance Regression Tests' {
                     }
                 }
             }
+
+            return $loadResult
         }
 
         function script:Measure-ProfileLoads {
