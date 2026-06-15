@@ -7,6 +7,7 @@
 
 Describe 'Markdown Dialect Conversion Tests' {
     BeforeAll {
+        try {
                 $current = Get-Item $PSScriptRoot
         while ($null -ne $current) {
             $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
@@ -21,9 +22,10 @@ Describe 'Markdown Dialect Conversion Tests' {
         Initialize-ConversionIntegration -ProfileDir $script:ProfileDir -ModuleType 'Documents' -SelectiveModules @(
             'document-markdown-dialects.ps1'
         ) -EnsureDocuments
-    }
-    catch {
-        throw "Failed to initialize markdown dialect tests: $($_.Exception.Message)"
+        }
+        catch {
+            throw "Failed to initialize markdown dialect tests: $($_.Exception.Message)"
+        }
     }
 
     Context 'Dialect conversion utilities' {

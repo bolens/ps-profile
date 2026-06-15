@@ -8,6 +8,7 @@ tests/integration/system/monitor.tests.ps1
 
 Describe 'System Monitor Integration Tests' {
     BeforeAll {
+        try {
                 $current = Get-Item $PSScriptRoot
         while ($null -ne $current) {
             $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
@@ -25,15 +26,16 @@ Describe 'System Monitor Integration Tests' {
         if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
             throw "Profile directory not found at: $script:ProfileDir"
         }
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize system monitor tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize system monitor tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'System monitor functions' {
@@ -51,16 +53,18 @@ Describe 'System Monitor Integration Tests' {
         }
 
         It 'Show-SystemDashboard executes without error' {
+            try {
                         { Show-SystemDashboard } | Should -Not -Throw -Because "Show-SystemDashboard should execute without errors"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Function = 'Show-SystemDashboard'
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Show-SystemDashboard execution test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Function = 'Show-SystemDashboard'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Show-SystemDashboard execution test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Show-SystemStatus function is available' {

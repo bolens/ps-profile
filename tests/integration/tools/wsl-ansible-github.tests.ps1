@@ -10,6 +10,7 @@
 
 Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
     BeforeAll {
+        try {
                 $current = Get-Item $PSScriptRoot
         while ($null -ne $current) {
             $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
@@ -36,15 +37,16 @@ Describe 'WSL, Ansible, and GitHub CLI Integration Tests' {
             throw "Bootstrap file not found at: $bootstrapPath"
         }
         . $bootstrapPath
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize WSL/Ansible/GitHub CLI tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize WSL/Ansible/GitHub CLI tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'WSL helpers (wsl.ps1)' {

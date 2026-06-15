@@ -45,16 +45,18 @@ Describe 'Get-PlatformInstallHint package override extended scenarios' {
         }
 
         It 'Falls back to scoop install when preference hints are unavailable' {
+            try {
             $originalPreferenceHint = Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue
             Remove-Item Function:\Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
 
                         Get-PlatformInstallHint -ToolName 'custom-tool' |
                 Should -Be 'Install with: scoop install custom-tool'
-        }
-        finally {
-            if ($null -ne $originalPreferenceHint) {
-                Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalPreferenceHint.ScriptBlock -Force
+            }
+            finally {
+                if ($null -ne $originalPreferenceHint) {
+                    Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalPreferenceHint.ScriptBlock -Force
+                }
             }
         }
 

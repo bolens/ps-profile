@@ -48,15 +48,17 @@ Describe 'Profile aliases' {
 
     Context 'Alias behaviors' {
         It 'Set-AgentModeAlias returns definition when requested and alias works' {
+            try {
             $name = "test_alias_{0}" -f (Get-Random)
                         $definition = Set-AgentModeAlias -Name $name -Target 'Write-Output' -ReturnDefinition
             $definition | Should -Not -Be $false
             $definition | Should -BeOfType [string]
             (& $name 'hello') | Should -Be 'hello'
-        }
-        finally {
-            if (Get-Alias -Name $name -ErrorAction SilentlyContinue) {
-                Remove-Item Alias:$name -Force
+            }
+            finally {
+                if (Get-Alias -Name $name -ErrorAction SilentlyContinue) {
+                    Remove-Item Alias:$name -Force
+                }
             }
         }
 

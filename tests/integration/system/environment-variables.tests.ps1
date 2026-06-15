@@ -2,6 +2,7 @@
 
 Describe 'Environment Variables Integration Tests' {
     BeforeAll {
+        try {
                 # Load TestSupport to get Mock-EnvironmentVariable
         $testSupportPath = Get-TestSupportPath -StartPath $PSScriptRoot
         if ($null -eq $testSupportPath -or [string]::IsNullOrWhiteSpace($testSupportPath)) {
@@ -21,15 +22,16 @@ Describe 'Environment Variables Integration Tests' {
         }
         
         Initialize-SystemUtilityIntegration -ProfileDir $script:ProfileDir -IncludeUtilities
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize environment variables tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize environment variables tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
     
     AfterAll {
@@ -55,43 +57,49 @@ Describe 'Environment Variables Integration Tests' {
         }
 
         It 'Get-EnvVar retrieves existing variables' {
+            try {
                         $testName = 'TEST_VAR_GET'
             $testValue = 'test_value_get'
             Mock-EnvironmentVariable -Name $testName -Value $testValue
             
             $result = Get-EnvVar -Name $testName
             $result | Should -Be $testValue -Because "Get-EnvVar should retrieve the value of an existing variable"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Function = 'Get-EnvVar'
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Get-EnvVar retrieval test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Function = 'Get-EnvVar'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Get-EnvVar retrieval test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Remove-Path handles malformed PATH' {
+            try {
             $originalPath = $env:PATH
                         # Create a malformed PATH with double semicolons
             $env:PATH = 'C:\Path1;;C:\Path2;;;C:\Path3'
             Remove-Path -Path 'C:\Path2'
             # Should still work despite malformed PATH
             $env:PATH | Should -Not -Match 'C:\\Path2'
-        }
-        finally {
-            $env:PATH = $originalPath
+            }
+            finally {
+                $env:PATH = $originalPath
+            }
         }
 
         It 'Remove-Path handles PATH with only one entry' {
+            try {
             $originalPath = $env:PATH
                         $env:PATH = 'C:\SinglePath'
             Remove-Path -Path 'C:\SinglePath'
             $env:PATH | Should -Be ''
-        }
-        finally {
-            $env:PATH = $originalPath
+            }
+            finally {
+                $env:PATH = $originalPath
+            }
         }
     }
 
@@ -102,45 +110,53 @@ Describe 'Environment Variables Integration Tests' {
         }
 
         It 'Set-EnvVar sets user environment variable' {
+            try {
+            try {
                         $testName = 'TEST_VAR_SET'
             $testValue = 'test_value_set'
             
             Set-EnvVar -Name $testName -Value $testValue
             $result = Get-EnvVar -Name $testName
             $result | Should -Be $testValue -Because "Set-EnvVar should set the environment variable value"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Function = 'Set-EnvVar'
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Set-EnvVar test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
-        }
-        finally {
-            # Clean up user environment variable (Set-EnvVar sets User-level, not Process-level)
-            Set-EnvVar -Name 'TEST_VAR_SET' -Value $null
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Function = 'Set-EnvVar'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Set-EnvVar test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
+            }
+            finally {
+                # Clean up user environment variable (Set-EnvVar sets User-level, not Process-level)
+                Set-EnvVar -Name 'TEST_VAR_SET' -Value $null
+            }
         }
 
         It 'Set-EnvVar handles null value' {
+            try {
             $testName = 'TEST_VAR_NULL'
                         Set-EnvVar -Name $testName -Value $null
             $result = Get-EnvVar -Name $testName
             ($result -eq $null -or $result -eq '') | Should -Be $true
-        }
-        finally {
-            Set-EnvVar -Name $testName -Value $null
+            }
+            finally {
+                Set-EnvVar -Name $testName -Value $null
+            }
         }
 
         It 'Set-EnvVar handles empty value' {
+            try {
             $testName = 'TEST_VAR_EMPTY'
                         Set-EnvVar -Name $testName -Value ''
             $result = Get-EnvVar -Name $testName
             ($result -eq $null -or $result -eq '') | Should -Be $true
-        }
-        finally {
-            Set-EnvVar -Name $testName -Value $null
+            }
+            finally {
+                Set-EnvVar -Name $testName -Value $null
+            }
         }
 
         It 'Set-EnvVar handles null name' {
@@ -158,23 +174,27 @@ Describe 'Environment Variables Integration Tests' {
         }
 
         It 'Publish-EnvVar handles null value' {
+            try {
             # Publish-EnvVar doesn't take parameters, but we can test it after setting a null value
             $testName = 'TEST_NULL_PUBLISH'
                         Set-EnvVar -Name $testName -Value $null
             { Publish-EnvVar } | Should -Not -Throw
-        }
-        finally {
-            Set-EnvVar -Name $testName -Value $null
+            }
+            finally {
+                Set-EnvVar -Name $testName -Value $null
+            }
         }
 
         It 'Publish-EnvVar handles empty value' {
+            try {
             # Publish-EnvVar doesn't take parameters, but we can test it after setting an empty value
             $testName = 'TEST_EMPTY_PUBLISH'
                         Set-EnvVar -Name $testName -Value ''
             { Publish-EnvVar } | Should -Not -Throw
-        }
-        finally {
-            Set-EnvVar -Name $testName -Value $null
+            }
+            finally {
+                Set-EnvVar -Name $testName -Value $null
+            }
         }
     }
 }

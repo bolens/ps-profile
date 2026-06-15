@@ -197,6 +197,7 @@ Describe 'ErrorHandlingStandard.ps1 - Integration Tests' {
         }
         
         It 'Tracks cloud operation with error handling' {
+            try {
             $errorThrown = $false
                         Invoke-WithWideEvent -OperationName 'aws.s3.upload' -Context @{
                 bucket     = 'my-bucket'
@@ -205,16 +206,17 @@ Describe 'ErrorHandlingStandard.ps1 - Integration Tests' {
             } -ScriptBlock {
                 throw 'S3 upload failed'
             }
-        }
-        catch {
-            $errorThrown = $true
+            }
+            catch {
+                $errorThrown = $true
             
-            $errorThrown | Should -Be $true
-            $global:WideEvents.Count | Should -BeGreaterThan 0
-            $event = $global:WideEvents[$global:WideEvents.Count - 1]
-            $event.event_name | Should -Be 'aws.s3.upload'
-            $event.context.bucket | Should -Be 'my-bucket'
-            $event.severity | Should -Be 'ERROR'
+                $errorThrown | Should -Be $true
+                $global:WideEvents.Count | Should -BeGreaterThan 0
+                $event = $global:WideEvents[$global:WideEvents.Count - 1]
+                $event.event_name | Should -Be 'aws.s3.upload'
+                $event.context.bucket | Should -Be 'my-bucket'
+                $event.severity | Should -Be 'ERROR'
+            }
         }
     }
 }

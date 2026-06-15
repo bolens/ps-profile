@@ -14,6 +14,7 @@
 
 Describe 'Brotli Compression Tests' {
     BeforeAll {
+        try {
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir
         
@@ -21,9 +22,10 @@ Describe 'Brotli Compression Tests' {
         $script:brotliAvailable = $false
                 $null = [System.IO.Compression.BrotliStream]
         $script:brotliAvailable = $true
-    }
-    catch {
-        $script:brotliAvailable = $false
+        }
+        catch {
+            $script:brotliAvailable = $false
+        }
     }
 
     Context 'Brotli Compression' {

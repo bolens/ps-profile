@@ -72,20 +72,22 @@ Describe 'EPUB and E-book Conversion Tests' {
         }
 
         It 'ConvertFrom-EpubToMarkdown handles missing input file gracefully' {
+            try {
             $nonExistentFile = $null
                         $nonExistentFile = Join-Path $TestDrive 'nonexistent.epub'
             { ConvertFrom-EpubToMarkdown -InputPath $nonExistentFile -ErrorAction Stop } | Should -Not -Throw
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-                Category = 'ErrorHandling'
-                TestFile = $nonExistentFile
             }
-            Write-Error "ConvertFrom-EpubToMarkdown error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Type     = $_.Exception.GetType().FullName
+                    Location = $_.InvocationInfo.ScriptLineNumber
+                    Category = 'ErrorHandling'
+                    TestFile = $nonExistentFile
+                }
+                Write-Error "ConvertFrom-EpubToMarkdown error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
     }
 
@@ -115,20 +117,22 @@ Describe 'EPUB and E-book Conversion Tests' {
         }
 
         It 'ConvertFrom-MobiToEpub handles missing input file gracefully' {
+            try {
             $nonExistentFile = $null
                         $nonExistentFile = Join-Path $TestDrive 'nonexistent.mobi'
             { ConvertFrom-MobiToEpub -InputPath $nonExistentFile -ErrorAction Stop } | Should -Not -Throw
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-                Category = 'ErrorHandling'
-                TestFile = $nonExistentFile
             }
-            Write-Error "ConvertFrom-MobiToEpub error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Type     = $_.Exception.GetType().FullName
+                    Location = $_.InvocationInfo.ScriptLineNumber
+                    Category = 'ErrorHandling'
+                    TestFile = $nonExistentFile
+                }
+                Write-Error "ConvertFrom-MobiToEpub error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'ConvertTo-MobiFromEpub accepts Format parameter' {
@@ -245,22 +249,24 @@ Describe 'EPUB and E-book Conversion Tests' {
         }
 
         It 'FB2 conversion functions handle missing input file gracefully' {
+            try {
             $nonExistentFile = $null
                         $nonExistentFile = Join-Path $TestDrive 'nonexistent.fb2'
             
             # Missing files should be handled gracefully without terminating errors
             { ConvertFrom-Fb2ToMarkdown -InputPath $nonExistentFile } | Should -Not -Throw
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
-                Category = 'ErrorHandling'
-                TestFile = $nonExistentFile
             }
-            Write-Error "FB2 conversion error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Type     = $_.Exception.GetType().FullName
+                    Location = $_.InvocationInfo.ScriptLineNumber
+                    Category = 'ErrorHandling'
+                    TestFile = $nonExistentFile
+                }
+                Write-Error "FB2 conversion error handling test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
     }
 }

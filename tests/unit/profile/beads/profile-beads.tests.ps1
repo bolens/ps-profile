@@ -98,15 +98,17 @@ Describe 'beads.ps1 - Invoke-Beads' {
         }
 
         It 'Handles bd execution errors' {
+            try {
             Set-TestCommandThrowingMock -CommandName 'bd' -Message 'bd: command failed'
 
             $result = $null
                         $result = Invoke-Beads 'invalid-command' -ErrorAction SilentlyContinue
-        }
-        catch {
-            $result = $null
+            }
+            catch {
+                $result = $null
 
-            $result | Should -BeNullOrEmpty
+                $result | Should -BeNullOrEmpty
+            }
         }
     }
 }

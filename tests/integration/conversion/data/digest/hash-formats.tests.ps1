@@ -23,6 +23,7 @@ Describe 'Hash Format Conversion Tests' {
         }
 
         It 'ConvertFrom-HashHexToBase64 converts hex hash to Base64' {
+            try {
             $hex = '48656c6c6f20576f726c64'  # "Hello World" in hex
             $base64 = ConvertFrom-HashHexToBase64 -HashHex $hex
             
@@ -31,9 +32,10 @@ Describe 'Hash Format Conversion Tests' {
             # Verify it's valid Base64
                         $bytes = [Convert]::FromBase64String($base64)
             $bytes | Should -Not -BeNullOrEmpty
-        }
-        catch {
-            Set-ItResult -Inconclusive -Because "Base64 conversion validation failed"
+            }
+            catch {
+                Set-ItResult -Inconclusive -Because "Base64 conversion validation failed"
+            }
         }
 
         It 'ConvertFrom-HashBase64ToHex function exists' {

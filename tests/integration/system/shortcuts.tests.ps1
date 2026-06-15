@@ -2,6 +2,7 @@
 
 Describe 'Shortcuts Integration Tests' {
     BeforeAll {
+        try {
         $current = Get-Item $PSScriptRoot
         while ($null -ne $current) {
             $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
@@ -21,15 +22,16 @@ Describe 'Shortcuts Integration Tests' {
         }
         # Ensure test mode is set for mocks
         $env:PS_PROFILE_TEST_MODE = '1'
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize shortcuts tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize shortcuts tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
     
     AfterAll {

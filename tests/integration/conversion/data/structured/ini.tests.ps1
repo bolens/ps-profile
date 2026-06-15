@@ -151,51 +151,55 @@ key2 = value2
         }
 
         It 'ConvertFrom-IniToToml converts INI to TOML' {
+            try {
             Get-Command ConvertFrom-IniToToml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if PSToml module not available - check if module can be imported
             $pstomlAvailable = $false
                         $null = Import-Module PSToml -ErrorAction Stop -PassThru
             $pstomlAvailable = $true
-        }
-        catch {
-            # Module not available
-            
-            if (-not $pstomlAvailable) {
-                Set-ItResult -Skipped -Because "PSToml module not available"
-                return
             }
+            catch {
+                # Module not available
             
-            $iniContent = "[section1]`nkey1 = value1`nkey2 = value2"
-            $tempFile = Join-Path $TestDrive 'test.ini'
-            Set-Content -Path $tempFile -Value $iniContent
+                if (-not $pstomlAvailable) {
+                    Set-ItResult -Skipped -Because "PSToml module not available"
+                    return
+                }
             
-            { ConvertFrom-IniToToml -InputPath $tempFile } | Should -Not -Throw
+                $iniContent = "[section1]`nkey1 = value1`nkey2 = value2"
+                $tempFile = Join-Path $TestDrive 'test.ini'
+                Set-Content -Path $tempFile -Value $iniContent
+            
+                { ConvertFrom-IniToToml -InputPath $tempFile } | Should -Not -Throw
+            }
         }
 
         It 'ConvertTo-IniFromToml converts TOML to INI' {
+            try {
             Get-Command ConvertTo-IniFromToml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             # Skip if PSToml module not available - check if module can be imported
             $pstomlAvailable = $false
                         $null = Import-Module PSToml -ErrorAction Stop -PassThru
             $pstomlAvailable = $true
-        }
-        catch {
-            # Module not available
-            
-            if (-not $pstomlAvailable) {
-                Set-ItResult -Skipped -Because "PSToml module not available"
-                return
             }
+            catch {
+                # Module not available
             
-            $tomlContent = "[section1]`nkey1 = `"value1`"`nkey2 = `"value2`""
-            $tempFile = Join-Path $TestDrive 'test.toml'
-            Set-Content -Path $tempFile -Value $tomlContent
+                if (-not $pstomlAvailable) {
+                    Set-ItResult -Skipped -Because "PSToml module not available"
+                    return
+                }
             
-            { ConvertTo-IniFromToml -InputPath $tempFile } | Should -Not -Throw
-            $outputFile = $tempFile -replace '\.toml$', '.ini'
-            if ($outputFile -and -not [string]::IsNullOrWhiteSpace($outputFile) -and (Test-Path -LiteralPath $outputFile)) {
-                $ini = Get-Content -Path $outputFile -Raw
-                $ini | Should -Not -BeNullOrEmpty
+                $tomlContent = "[section1]`nkey1 = `"value1`"`nkey2 = `"value2`""
+                $tempFile = Join-Path $TestDrive 'test.toml'
+                Set-Content -Path $tempFile -Value $tomlContent
+            
+                { ConvertTo-IniFromToml -InputPath $tempFile } | Should -Not -Throw
+                $outputFile = $tempFile -replace '\.toml$', '.ini'
+                if ($outputFile -and -not [string]::IsNullOrWhiteSpace($outputFile) -and (Test-Path -LiteralPath $outputFile)) {
+                    $ini = Get-Content -Path $outputFile -Raw
+                    $ini | Should -Not -BeNullOrEmpty
+                }
             }
         }
 
@@ -512,6 +516,7 @@ key2 = normal_value
         }
 
         It 'INI handles malformed section headers gracefully' {
+            try {
             # Test with INI that has keys without a section (global section with empty string key)
             # This can cause PSCustomObject conversion issues
             $iniWithGlobalKeys = @"
@@ -526,21 +531,22 @@ key1 = value1
             # If it fails, error should be caught
             $errorCaught = $false
                         ConvertFrom-IniToJson -InputPath $tempFile -ErrorAction Stop
-        }
-        catch {
-            $errorCaught = $true
-            $_.Exception.Message | Should -Match "Failed to convert INI to JSON"
-            # Test passes whether it succeeds or fails (both paths are valid)
-            # The important thing is that if it fails, the error is caught
-            if ($errorCaught) {
-                $errorCaught | Should -Be $true
             }
-            else {
-                # If it succeeded, verify output exists
-                $outputFile = $tempFile -replace '\.ini$', '.json'
-                if ($outputFile -and -not [string]::IsNullOrWhiteSpace($outputFile) -and (Test-Path -LiteralPath $outputFile)) {
-                    $json = Get-Content -Path $outputFile -Raw
-                    $json | Should -Not -BeNullOrEmpty
+            catch {
+                $errorCaught = $true
+                $_.Exception.Message | Should -Match "Failed to convert INI to JSON"
+                # Test passes whether it succeeds or fails (both paths are valid)
+                # The important thing is that if it fails, the error is caught
+                if ($errorCaught) {
+                    $errorCaught | Should -Be $true
+                }
+                else {
+                    # If it succeeded, verify output exists
+                    $outputFile = $tempFile -replace '\.ini$', '.json'
+                    if ($outputFile -and -not [string]::IsNullOrWhiteSpace($outputFile) -and (Test-Path -LiteralPath $outputFile)) {
+                        $json = Get-Content -Path $outputFile -Raw
+                        $json | Should -Not -BeNullOrEmpty
+                    }
                 }
             }
         }

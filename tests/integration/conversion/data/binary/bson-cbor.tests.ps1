@@ -87,6 +87,7 @@ Describe 'BSON and CBOR Conversion Tests' {
         }
 
         It 'ConvertTo-CborFromBson handles missing packages gracefully when Node.js is available' {
+            try {
             if (-not $script:NodeAvailable) {
                 Set-ItResult -Skipped -Because "Node.js is not available"
                 return
@@ -104,23 +105,24 @@ Describe 'BSON and CBOR Conversion Tests' {
             if ($cborFile -and -not [string]::IsNullOrWhiteSpace($cborFile) -and (Test-Path -LiteralPath $cborFile)) {
                 $cborFile | Should -Exist
             }
-        }
-        catch {
-            $errorMessage = $_.Exception.Message
-            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-            
-            if ($errorMessage -match '(bson|cbor).*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match '(bson|cbor)') {
-                $installCommand = Resolve-TestNodePackageInstallCommand -PackageNames @('bson', 'cbor')
-                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                }
-                elseif ($errorMessage -match '(bson|cbor)' -or $fullError -match '(bson|cbor)') {
-                    Write-Host "Required packages (bson, cbor) may not be installed. Install with: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match '(bson|cbor)'
-                }
             }
-            # Other errors (like invalid file format) are also acceptable
+            catch {
+                $errorMessage = $_.Exception.Message
+                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+                if ($errorMessage -match '(bson|cbor).*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match '(bson|cbor)') {
+                    $installCommand = Resolve-TestNodePackageInstallCommand -PackageNames @('bson', 'cbor')
+                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                    }
+                    elseif ($errorMessage -match '(bson|cbor)' -or $fullError -match '(bson|cbor)') {
+                        Write-Host "Required packages (bson, cbor) may not be installed. Install with: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match '(bson|cbor)'
+                    }
+                }
+                # Other errors (like invalid file format) are also acceptable
+            }
         }
     }
 }

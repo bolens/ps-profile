@@ -29,6 +29,7 @@ Describe 'profile.d/aws.ps1 extended scenarios' {
     }
 
     It 'Set-AwsProfile sets AWS_PROFILE when aws is available' {
+        try {
         Mark-TestCommandsUnavailable -CommandNames @('aws')
         Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
@@ -37,9 +38,10 @@ Describe 'profile.d/aws.ps1 extended scenarios' {
 
                 Set-AwsProfile -ProfileName 'fragment-test-profile'
         $env:AWS_PROFILE | Should -Be 'fragment-test-profile'
-    }
-    finally {
-        Remove-Item Env:AWS_PROFILE -ErrorAction SilentlyContinue
+        }
+        finally {
+            Remove-Item Env:AWS_PROFILE -ErrorAction SilentlyContinue
+        }
     }
 
     It 'Invoke-Aws warns when aws is unavailable' {

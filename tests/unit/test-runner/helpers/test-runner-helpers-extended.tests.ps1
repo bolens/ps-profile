@@ -37,6 +37,7 @@ AfterAll {
 Describe 'TestRunnerHelpers extended scenarios' {
     Context 'Invoke-TestDryRun' {
         It 'Discovers multiple test files under a directory tree' {
+            try {
             $tempDir = Join-Path $script:TempDir 'nested-dry-run'
             $nestedDir = Join-Path $tempDir 'nested'
             New-Item -ItemType Directory -Path $nestedDir -Force | Out-Null
@@ -50,21 +51,24 @@ Describe 'TestRunnerHelpers extended scenarios' {
             $output = Get-TestWriteHostOutputString
             $output | Should -Match ([regex]::Escape('root.tests.ps1'))
             $output | Should -Match ([regex]::Escape('nested.tests.ps1'))
-        }
-        finally {
-            Restore-TestTerminalStubs
+            }
+            finally {
+                Restore-TestTerminalStubs
+            }
         }
 
         It 'Lists a single file path without executing tests' {
+            try {
             $testFile = Join-Path $script:TempDir 'single.tests.ps1'
             Set-Content -LiteralPath $testFile -Value 'Describe single {}' -Encoding UTF8
 
             Register-TestWriteHostCapture
                         Invoke-TestDryRun -Config $null -TestPaths @($testFile) | Out-Null
             Get-TestWriteHostOutputString | Should -Match ([regex]::Escape('single.tests.ps1'))
-        }
-        finally {
-            Restore-TestTerminalStubs
+            }
+            finally {
+                Restore-TestTerminalStubs
+            }
         }
     }
 }

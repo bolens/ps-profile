@@ -47,6 +47,7 @@ Describe 'TestRunnerHelpers Module' {
         }
 
         It 'Reports a single test file path' {
+            try {
             $testFile = Join-Path $script:TestRepoRoot 'tests/unit/library/common/library-common.tests.ps1'
             if (-not (Test-Path -LiteralPath $testFile)) {
                 Set-ItResult -Skipped -Because 'library-common.tests.ps1 not found'
@@ -56,9 +57,10 @@ Describe 'TestRunnerHelpers Module' {
             Register-TestWriteHostCapture
                         Invoke-TestDryRun -Config $null -TestPaths @($testFile) | Out-Null
             Get-TestWriteHostOutputString | Should -Match 'library-common\.tests\.ps1'
-        }
-        finally {
-            Restore-TestTerminalStubs
+            }
+            finally {
+                Restore-TestTerminalStubs
+            }
         }
     }
 }

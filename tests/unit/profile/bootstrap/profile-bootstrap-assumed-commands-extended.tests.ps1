@@ -28,12 +28,14 @@ Describe 'profile.d/bootstrap/AssumedCommands.ps1 extended scenarios' {
     }
 
     It 'Add-AssumedCommand marks commands as assumed available' {
+        try {
         $commandName = "AssumedCmd_$([Guid]::NewGuid().ToString('N'))"
                 Add-AssumedCommand -Name $commandName | Should -Be $true
         [string[]](Get-AssumedCommands) | Should -Contain $commandName
-    }
-    finally {
-        Remove-AssumedCommand -Name $commandName | Out-Null
+        }
+        finally {
+            Remove-AssumedCommand -Name $commandName | Out-Null
+        }
     }
 
     It 'Preserves assumed command helper bodies on repeated module loads' {
