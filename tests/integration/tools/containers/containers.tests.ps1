@@ -66,6 +66,7 @@ Describe "Container Functions" {
 
     Context "Get-ContainerEnginePreference" {
         It "Returns container engine preference object" {
+            try {
                         # Mock container commands as unavailable for consistent test behavior
             Initialize-ContainerEngineUnavailableMocks
             
@@ -76,15 +77,16 @@ Describe "Container Functions" {
             $result.Contains('DockerAvailable') | Should -Be $true -Because "result should contain DockerAvailable property"
             $result.Contains('PodmanAvailable') | Should -Be $true -Because "result should contain PodmanAvailable property"
             $result.Contains('InstallationCommand') | Should -Be $true -Because "result should contain InstallationCommand property"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Function = 'Get-ContainerEnginePreference'
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Container engine preference test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Function = 'Get-ContainerEnginePreference'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Container engine preference test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It "Provides installation command when no engines are available" {

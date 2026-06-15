@@ -434,6 +434,7 @@ Describe 'Alias helper' {
         }
 
         It 'Register-ToolWrapper wrapper uses custom warning message' {
+            try {
             . $script:BootstrapPath
             $funcName = "test_wrapper_custom_$(Get-Random)"
             $nonexistentCmd = "NonexistentCommand_$(Get-Random)"
@@ -450,12 +451,13 @@ Describe 'Alias helper' {
                 $_.ToString() -match [regex]::Escape($customWarning)
             }
             $hasWarning | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            $WarningPreference = $warningPreference
+            }
+            finally {
+                $WarningPreference = $warningPreference
             
-            # Cleanup
-            Remove-Item "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+                # Cleanup
+                Remove-Item "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Register-ToolWrapper wrapper uses default warning when no hint or message' {

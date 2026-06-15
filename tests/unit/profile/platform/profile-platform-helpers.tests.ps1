@@ -122,6 +122,7 @@ Describe 'Platform Detection Helpers' {
         }
 
         It 'Get-UserHome falls back to $env:USERPROFILE' {
+            try {
             $originalHome = $env:HOME
             $originalUserProfile = $env:USERPROFILE
                         $env:HOME = $null
@@ -129,10 +130,11 @@ Describe 'Platform Detection Helpers' {
                 $result = Get-UserHome
                 $result | Should -Not -BeNullOrEmpty
             }
-        }
-        finally {
-            $env:HOME = $originalHome
-            $env:USERPROFILE = $originalUserProfile
+            }
+            finally {
+                $env:HOME = $originalHome
+                $env:USERPROFILE = $originalUserProfile
+            }
         }
     }
 

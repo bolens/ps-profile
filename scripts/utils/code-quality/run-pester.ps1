@@ -653,6 +653,11 @@ try {
     # Import core modules first (needed by others)
     $corePath = Join-Path $libPath 'core'
     Import-Module (Join-Path $corePath 'ExitCodes.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    # Snapshot exit codes so test cleanup (Remove-Module ExitCodes) cannot break runner shutdown.
+    $script:RunnerExitSuccess = $EXIT_SUCCESS
+    $script:RunnerExitTestFailure = $EXIT_TEST_FAILURE
+    $script:RunnerExitNoTestsFound = $EXIT_NO_TESTS_FOUND
+    $script:RunnerExitCoverageFailure = $EXIT_COVERAGE_FAILURE
     Import-Module (Join-Path (Join-Path $libPath 'path') 'PathResolution.psm1') -DisableNameChecking -ErrorAction Stop -Global
     
     # Now we can use Get-RepoRoot if needed, but continue with direct imports for consistency
@@ -2000,20 +2005,20 @@ try {
         }
 
         # Determine exit code based on results
-        $exitCode = $EXIT_SUCCESS
+        $exitCode = $script:RunnerExitSuccess
     
         if ($result.FailedCount -gt 0) {
-            $exitCode = $EXIT_TEST_FAILURE
+            $exitCode = $script:RunnerExitTestFailure
         }
         elseif ($result.TotalCount -eq 0) {
-            $exitCode = $EXIT_NO_TESTS_FOUND
+            $exitCode = $script:RunnerExitNoTestsFound
         }
         elseif ($MinimumCoverage -and $enableCoverage) {
             # Check coverage threshold if specified
             if ($result.Coverage) {
                 $coveragePercent = [Math]::Round($result.Coverage.NumberOfCommandsExecuted / $result.Coverage.NumberOfCommandsAnalyzed * 100, 2)
                 if ($coveragePercent -lt $MinimumCoverage) {
-                    $exitCode = $EXIT_COVERAGE_FAILURE
+                    $exitCode = $script:RunnerExitCoverageFailure
                     $coveragePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
                         Format-LocaleNumber $coveragePercent -Format 'N2'
                     }
@@ -2033,10 +2038,10 @@ try {
     
         # Exit with appropriate code (unless in watch mode or interactive mode where we return result)
         if (-not $Watch -and -not $Interactive) {
-            if ($exitCode -ne $EXIT_SUCCESS) {
+            if ($exitCode -ne $script:RunnerExitSuccess) {
                 Exit-WithCleanup -ExitCode $exitCode -Message "Test execution completed with failures or issues"
             }
-            Exit-WithCleanup -ExitCode $EXIT_SUCCESS
+            Exit-WithCleanup -ExitCode $script:RunnerExitSuccess
         }
     }
     catch {

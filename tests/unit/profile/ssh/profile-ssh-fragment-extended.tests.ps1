@@ -32,6 +32,7 @@ Describe 'profile.d/ssh.ps1 extended scenarios' {
     }
 
     It 'Add-SSHKeyIfNotLoaded warns and returns when no key path is provided' {
+        try {
         . (Join-Path $script:ProfileDir 'ssh.ps1')
 
         $warnings = @()
@@ -42,11 +43,12 @@ Describe 'profile.d/ssh.ps1 extended scenarios' {
                 $warnings += $_.Message
             }
         }
-    }
-    finally {
-        $WarningPreference = $previousWarningPreference
+        }
+        finally {
+            $WarningPreference = $previousWarningPreference
 
-        $warnings -join ' ' | Should -Match 'Usage: Add-SSHKeyIfNotLoaded'
+            $warnings -join ' ' | Should -Match 'Usage: Add-SSHKeyIfNotLoaded'
+        }
     }
 
     It 'Preserves existing SSH helper bodies on repeated fragment loads' {

@@ -400,20 +400,13 @@ Describe 'PathResolution extended scenarios' {
             Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
 
             try {
-                InModuleScope -ModuleName PathResolution -ArgumentList $invalidPath {
-                    param([string]$InvalidPath)
-
-                    Mock Exit-WithCode {
-                        param($ExitCode, $ErrorRecord)
-                        throw "Exit-WithCode invoked with code $ExitCode"
-                    }
-
-                    { Get-RepoRootSafe -ScriptPath $InvalidPath -ExitOnError } |
-                        Should -Throw '*Exit-WithCode invoked with code*'
-                }
+                # PS_PROFILE_TEST_MODE rethrows the captured ErrorRecord from Exit-WithCode.
+                { Get-RepoRootSafe -ScriptPath $invalidPath -ExitOnError } |
+                    Should -Throw '*Repository root not found*'
             }
             finally {
                 Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
             }
         }
 
@@ -561,20 +554,13 @@ Describe 'PathResolution extended scenarios' {
             Remove-Variable -Name EXIT_SETUP_ERROR -Scope Global -ErrorAction SilentlyContinue
 
             try {
-                InModuleScope -ModuleName PathResolution -ArgumentList $invalidPath {
-                    param([string]$InvalidPath)
-
-                    Mock Exit-WithCode {
-                        param($ExitCode, $ErrorRecord)
-                        throw "Exit-WithCode invoked with code $ExitCode"
-                    }
-
-                    { Get-RepoRootSafe -ScriptPath $InvalidPath -ExitOnError } |
-                        Should -Throw '*Exit-WithCode invoked with code 2*'
-                }
+                # PS_PROFILE_TEST_MODE rethrows the captured ErrorRecord from Exit-WithCode.
+                { Get-RepoRootSafe -ScriptPath $invalidPath -ExitOnError } |
+                    Should -Throw '*Repository root not found*'
             }
             finally {
                 Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
             }
         }
 

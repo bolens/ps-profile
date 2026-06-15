@@ -37,6 +37,7 @@ Describe 'TestGitIntegration Module' {
         }
 
         It 'Returns empty array outside a git repository' {
+            try {
             if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
                 Set-ItResult -Skipped -Because 'git is not available'
                 return
@@ -45,9 +46,10 @@ Describe 'TestGitIntegration Module' {
             $tempDir = New-TestTempDirectory -Prefix 'NoGitRepo'
                         $result = Get-GitChangedFiles -RepoRoot $tempDir
             $result | Should -Be @()
-        }
-        finally {
-            Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Includes untracked files when requested' {

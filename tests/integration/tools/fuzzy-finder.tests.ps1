@@ -23,6 +23,7 @@ BeforeAll {
 
 Describe 'Fuzzy Finder Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
             throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -39,15 +40,16 @@ Describe 'Fuzzy Finder Integration Tests' {
             throw "Bootstrap file not found at: $bootstrapPath"
         }
         . $bootstrapPath
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize fuzzy finder tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize fuzzy finder tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'fzf helpers (fzf.ps1)' {

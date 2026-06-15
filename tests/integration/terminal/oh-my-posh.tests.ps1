@@ -47,16 +47,18 @@ Describe "Oh My Posh Module" {
         }
 
         It "Should exist and be callable" {
+            try {
                         { Get-Command Initialize-OhMyPosh -ErrorAction Stop } | Should -Not -Throw -Because "Initialize-OhMyPosh function should be available"
             { Initialize-OhMyPosh } | Should -Not -Throw -Because "Initialize-OhMyPosh should execute without errors"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Initialize-OhMyPosh availability test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Initialize-OhMyPosh availability test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It "Should skip initialization if already initialized" {

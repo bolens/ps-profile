@@ -197,14 +197,16 @@ Describe 'database.ps1 - Enhanced Functions' {
 
     Context 'Backup-Database' {
         It 'Generates default backup path with timestamp' {
+            try {
             Setup-CapturingCommandMock -CommandName 'pg_dump' -Output ''
 
             Push-Location $script:TestWorkDir
                         $result = Backup-Database -DatabaseType PostgreSQL -Database 'testdb' -ErrorAction SilentlyContinue
             @($result)[-1] | Should -Match '^testdb-\d{14}\.dump$'
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Uses provided BackupPath' {

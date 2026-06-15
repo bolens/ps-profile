@@ -243,6 +243,7 @@ Describe 'Fragment Command Access - Integration Tests' {
     
     Context 'Error Handling' {
         It 'Handles missing registry gracefully' {
+            try {
             # Temporarily clear registry
             $originalRegistry = $null
             if (Get-Variable -Name 'FragmentCommandRegistry' -Scope Global -ErrorAction SilentlyContinue) {
@@ -253,10 +254,11 @@ Describe 'Fragment Command Access - Integration Tests' {
                         if (Get-Command Test-CommandInRegistry -ErrorAction SilentlyContinue) {
                 Test-CommandInRegistry -CommandName 'AnyCommand' | Should -Be $false
             }
-        }
-        finally {
-            if ($originalRegistry) {
-                $global:FragmentCommandRegistry = $originalRegistry
+            }
+            finally {
+                if ($originalRegistry) {
+                    $global:FragmentCommandRegistry = $originalRegistry
+                }
             }
         }
         

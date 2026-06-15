@@ -39,13 +39,15 @@ Describe 'Output path utilities extended scenarios' {
         }
 
         It 'Returns unresolved paths when repository root is not initialized' {
+            try {
             Initialize-OutputUtils -RepoRoot $null
             $external = '/tmp/not-in-repo/example.txt'
 
                         ConvertTo-RepoRelativePath -PathString $external | Should -Be $external
-        }
-        finally {
-            Initialize-OutputUtils -RepoRoot $script:TestRepoRoot
+            }
+            finally {
+                Initialize-OutputUtils -RepoRoot $script:TestRepoRoot
+            }
         }
     }
 

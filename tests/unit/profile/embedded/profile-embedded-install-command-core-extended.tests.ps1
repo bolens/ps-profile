@@ -64,6 +64,7 @@ Describe 'Embedded install command core extended scenarios' {
         }
 
         It 'Uses the PythonCmd override in the fallback install command' {
+            try {
             $originalHint = Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue
             Remove-Item Function:\Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
@@ -73,10 +74,11 @@ Describe 'Embedded install command core extended scenarios' {
                 -PythonCmd 'python3.12'
             $command | Should -Match 'python3.12'
             $command | Should -Match 'requests'
-        }
-        finally {
-            if ($null -ne $originalHint) {
-                Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalHint.ScriptBlock -Force
+            }
+            finally {
+                if ($null -ne $originalHint) {
+                    Set-Item -Path Function:\global:Get-PreferenceAwareInstallHint -Value $originalHint.ScriptBlock -Force
+                }
             }
         }
 

@@ -77,14 +77,16 @@ Describe 'bootstrap.ps1 extended scenarios' {
         }
 
         It 'Preserves existing function bodies on repeated Set-AgentModeFunction calls' {
+            try {
             $funcName = "BootstrapExtended_$([Guid]::NewGuid().ToString('N'))"
                         Set-AgentModeFunction -Name $funcName -Body { 'first-body' } | Should -Be $true
             Set-AgentModeFunction -Name $funcName -Body { 'second-body' } | Should -Be $false
             & $funcName | Should -Be 'first-body'
-        }
-        finally {
-            Remove-Item -Path "Function:\$funcName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path "Function:\$funcName" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 

@@ -153,15 +153,17 @@ Describe 'TestExecution Module Tests' {
         }
 
         It 'Detects CI environment variables' {
+            try {
             # Mock CI environment
             $originalCI = $env:CI
             $env:CI = 'true'
 
                         $env = Get-TestEnvironment
             $env.IsCI | Should -Be $true
-        }
-        finally {
-            $env:CI = $originalCI
+            }
+            finally {
+                $env:CI = $originalCI
+            }
         }
 
         It 'Detects available tools' {

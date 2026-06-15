@@ -15,6 +15,7 @@ BeforeAll {
 
 Describe 'Enhanced History Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
             throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -22,15 +23,16 @@ Describe 'Enhanced History Integration Tests' {
         if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
             throw "Profile directory not found at: $script:ProfileDir"
         }
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize enhanced history tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize enhanced history tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'Enhanced history functions' {
@@ -69,15 +71,17 @@ Describe 'Enhanced History Integration Tests' {
         }
 
         It 'Find-HistoryFuzzy executes without error' {
+            try {
                         { Find-HistoryFuzzy -Pattern "test" } | Should -Not -Throw -Because "Find-HistoryFuzzy should execute without errors"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Find-HistoryFuzzy execution test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Find-HistoryFuzzy execution test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Find-HistoryQuick function is available' {

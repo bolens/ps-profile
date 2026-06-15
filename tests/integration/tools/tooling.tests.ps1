@@ -13,6 +13,7 @@ BeforeAll {
 
 Describe 'Tooling Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
         $script:DocsPath = Get-TestPath -RelativePath 'docs' -StartPath $PSScriptRoot -EnsureExists
         $script:CspellPath = Get-TestPath -RelativePath 'cspell.json' -StartPath $PSScriptRoot -EnsureExists
@@ -38,15 +39,16 @@ Describe 'Tooling Integration Tests' {
         if (-not (Test-Path -LiteralPath $script:ScriptsUtilsPath)) {
             throw "Scripts utils path not found at: $script:ScriptsUtilsPath"
         }
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize tooling tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize tooling tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'Documentation generation' {

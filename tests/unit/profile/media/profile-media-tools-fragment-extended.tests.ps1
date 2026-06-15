@@ -39,6 +39,7 @@ Describe 'profile.d/media-tools.ps1 extended scenarios' {
     }
 
     It 'Convert-Video warns when ffmpeg and handbrake are unavailable' {
+        try {
         . (Join-Path $script:ProfileDir 'media-tools.ps1')
 
         Mark-TestCommandsUnavailable -CommandNames @('ffmpeg', 'handbrake', 'HandBrakeCLI')
@@ -58,9 +59,10 @@ Describe 'profile.d/media-tools.ps1 extended scenarios' {
         $testOutput = New-TestTempFile -Prefix 'media-tools-output' -Extension '.mkv'
                 $output = Convert-Video -InputPath $testInput -OutputPath $testOutput 2>&1 3>&1 | Out-String
         $output | Should -Match 'ffmpeg|handbrake|not found'
-    }
-    finally {
-        Remove-TestArtifacts
+        }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 
     It 'Skips re-initialization when media-tools is already loaded' {

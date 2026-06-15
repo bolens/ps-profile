@@ -34,22 +34,25 @@ Describe 'UserHome extended scenarios' {
         }
 
         It 'Prefers HOME when it is set' {
+            try {
             $originalHome = $env:HOME
             $testHome = New-TestTempDirectory -Prefix 'UserHomeExtended'
 
                         $env:HOME = $testHome
             Get-UserHome | Should -Be $testHome
-        }
-        finally {
-            if ($null -ne $originalHome) {
-                $env:HOME = $originalHome
             }
-            else {
-                Remove-Item Env:\HOME -ErrorAction SilentlyContinue
+            finally {
+                if ($null -ne $originalHome) {
+                    $env:HOME = $originalHome
+                }
+                else {
+                    Remove-Item Env:\HOME -ErrorAction SilentlyContinue
+                }
             }
         }
 
         It 'Falls back to USERPROFILE when HOME is unset' {
+            try {
             $originalHome = $env:HOME
             $originalProfile = $env:USERPROFILE
             $testProfile = New-TestTempDirectory -Prefix 'UserProfileExtended'
@@ -57,16 +60,17 @@ Describe 'UserHome extended scenarios' {
                         Remove-Item Env:\HOME -ErrorAction SilentlyContinue
             $env:USERPROFILE = $testProfile
             Get-UserHome | Should -Be $testProfile
-        }
-        finally {
-            if ($null -ne $originalHome) {
-                $env:HOME = $originalHome
             }
-            if ($null -ne $originalProfile) {
-                $env:USERPROFILE = $originalProfile
-            }
-            else {
-                Remove-Item Env:\USERPROFILE -ErrorAction SilentlyContinue
+            finally {
+                if ($null -ne $originalHome) {
+                    $env:HOME = $originalHome
+                }
+                if ($null -ne $originalProfile) {
+                    $env:USERPROFILE = $originalProfile
+                }
+                else {
+                    Remove-Item Env:\USERPROFILE -ErrorAction SilentlyContinue
+                }
             }
         }
 

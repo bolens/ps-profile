@@ -66,6 +66,8 @@ Describe 'generate-fragment-readmes.ps1 execution' {
     }
 
     It 'Writes fragment README files for an isolated profile directory' {
+        try {
+        try {
         $repo = New-TestTempDirectory -Prefix 'GenerateFragmentReadmesApply'
         $docsDir = Join-Path $repo 'scripts' 'utils' 'docs'
         $profileDir = Join-Path $repo 'profile.d'
@@ -89,25 +91,27 @@ function Get-FragmentReadmeFixture {
         git config user.name 'Fixture'
         git add profile.d/fixture.ps1
         git commit -m 'init fragment readme fixture' -q
-    }
-    finally {
-        Pop-Location
+        }
+        finally {
+            Pop-Location
 
-        $scriptPath = Join-Path $docsDir 'generate-fragment-readmes.ps1'
-        Push-Location $repo
-                $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
-            '-Force',
-            '-OutputPath', $outputDir
-        )
-    }
-    finally {
-        Pop-Location
+            $scriptPath = Join-Path $docsDir 'generate-fragment-readmes.ps1'
+            Push-Location $repo
+                    $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+                '-Force',
+                '-OutputPath', $outputDir
+            )
+        }
+        }
+        finally {
+            Pop-Location
 
-        $result.ExitCode | Should -Be 0
-        $expectedReadme = Join-Path $outputDir 'fixture.md'
-        Test-Path -LiteralPath $expectedReadme | Should -BeTrue
-        Test-Path -LiteralPath (Join-Path $outputDir 'README.md') | Should -BeTrue
-        Get-Content -LiteralPath $expectedReadme -Raw | Should -Match 'Get-FragmentReadmeFixture|fixture'
-        Test-Path -LiteralPath (Join-Path $profileDir 'fixture.ps1.README.md') | Should -BeFalse
+            $result.ExitCode | Should -Be 0
+            $expectedReadme = Join-Path $outputDir 'fixture.md'
+            Test-Path -LiteralPath $expectedReadme | Should -BeTrue
+            Test-Path -LiteralPath (Join-Path $outputDir 'README.md') | Should -BeTrue
+            Get-Content -LiteralPath $expectedReadme -Raw | Should -Match 'Get-FragmentReadmeFixture|fixture'
+            Test-Path -LiteralPath (Join-Path $profileDir 'fixture.ps1.README.md') | Should -BeFalse
+        }
     }
 }

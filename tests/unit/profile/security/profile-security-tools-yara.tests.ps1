@@ -102,15 +102,17 @@ Describe 'security-tools.ps1 - Invoke-YaraScan' {
         }
 
         It 'Handles yara execution errors gracefully' {
+            try {
             Set-TestCommandThrowingMock -CommandName 'yara' -Message 'Execution failed'
 
             $result = $null
                         $result = Invoke-YaraScan -FilePath $script:TestFile -RulesPath $script:TestRulesPath -ErrorAction SilentlyContinue
-        }
-        catch {
-            $result = $null
+            }
+            catch {
+                $result = $null
 
-            $result | Should -BeNullOrEmpty
+                $result | Should -BeNullOrEmpty
+            }
         }
 
         It 'Tests yara with recursive flag' {

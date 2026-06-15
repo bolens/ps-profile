@@ -29,19 +29,21 @@ Describe 'profile.d/bootstrap/GlobalState.ps1 extended scenarios' {
     }
 
     It 'Test-EnvBool and Get-ProfileDebugLevel parse environment values' {
+        try {
         Test-EnvBool -Value 'true' | Should -Be $true
         Test-EnvBool -Value '0' | Should -Be $false
 
         $previousDebug = $env:PS_PROFILE_DEBUG
                 $env:PS_PROFILE_DEBUG = '2'
         Get-ProfileDebugLevel | Should -Be 2
-    }
-    finally {
-        if ($null -eq $previousDebug) {
-            Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
         }
-        else {
-            $env:PS_PROFILE_DEBUG = $previousDebug
+        finally {
+            if ($null -eq $previousDebug) {
+                Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_DEBUG = $previousDebug
+            }
         }
     }
 

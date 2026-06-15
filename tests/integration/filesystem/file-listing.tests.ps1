@@ -55,18 +55,21 @@ Describe 'File Listing Functions Integration Tests' {
         }
 
         It 'Get-ChildItemDetailed lists directory contents' {
+            try {
             $testDir = Join-Path $TestDrive 'test_listing'
             New-Item -ItemType Directory -Path $testDir -Force | Out-Null
             New-Item -ItemType File -Path (Join-Path $testDir 'test.txt') -Force | Out-Null
 
             Push-Location $testDir
                         { Get-ChildItemDetailed | Out-Null } | Should -Not -Throw
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Get-DirectoryTree displays directory structure' {
+            try {
             $testDir = Join-Path $TestDrive 'test_tree'
             New-Item -ItemType Directory -Path $testDir -Force | Out-Null
             New-Item -ItemType Directory -Path (Join-Path $testDir 'subdir') -Force | Out-Null
@@ -74,9 +77,10 @@ Describe 'File Listing Functions Integration Tests' {
 
             Push-Location $testDir
                         { Get-DirectoryTree | Out-Null } | Should -Not -Throw
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Show-FileContent handles file input' {

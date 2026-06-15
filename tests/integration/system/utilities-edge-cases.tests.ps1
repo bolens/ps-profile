@@ -61,15 +61,17 @@ Describe 'System Utility Functions Edge Cases' {
         }
 
         It 'search handles empty directories' {
+            try {
             $emptyDir = Join-Path $TestDrive 'empty_search'
             New-Item -ItemType Directory -Path $emptyDir -Force | Out-Null
 
             Push-Location $emptyDir
                         $result = search '*.txt'
             ($result -eq $null -or $result.Count -eq 0) | Should -Be $true
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
     }
 }
