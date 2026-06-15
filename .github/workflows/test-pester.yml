@@ -22,8 +22,6 @@ jobs:
             powershell: pwsh
           - os: windows-latest
             powershell: pwsh
-          - os: windows-latest
-            powershell: powershell
     steps:
       - uses: actions/checkout@v6
       - name: Install Pester
