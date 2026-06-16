@@ -418,6 +418,24 @@ Describe 'TestSupport Modules' {
     }
 
     Describe 'TestNpmHelpers Module' {
+        Context 'Get-TestNodeModuleSearchPaths' {
+            It 'Does not throw when HOME is unset on Windows-style environments' {
+                $originalHome = $env:HOME
+                try {
+                    Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                    { $null = Get-TestNodeModuleSearchPaths } | Should -Not -Throw
+                }
+                finally {
+                    if ($null -ne $originalHome) {
+                        $env:HOME = $originalHome
+                    }
+                    else {
+                        Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                    }
+                }
+            }
+        }
+
         Context 'Test-NpmPackageAvailable' {
             It 'Returns false when package is not available' {
                 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
