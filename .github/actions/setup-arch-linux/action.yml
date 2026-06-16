@@ -1,0 +1,29 @@
+name: Setup Arch Linux for PowerShell
+description: Prepare an Arch Linux container with git and PowerShell for CI jobs.
+inputs:
+  pwsh-version:
+    description: PowerShell version to install from the official Linux tarball (for example 7.4.7).
+    required: false
+    default: '7.4.7'
+runs:
+  using: composite
+  steps:
+    - name: Install PowerShell on Arch Linux
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        pwsh_version='${{ inputs.pwsh-version }}'
+        install_root="/opt/microsoft/powershell/$(echo "${pwsh_version}" | cut -d. -f1,2)"
+        tarball="powershell-${pwsh_version}-linux-x64.tar.gz"
+        download_url="https://github.com/PowerShell/PowerShell/releases/download/v${pwsh_version}/${tarball}"
+
+        pacman -Syu --noconfirm
+        pacman -S --noconfirm git icu curl ca-certificates tar gzip which
+
+        mkdir -p "${install_root}"
+        curl -fsSL -o "/tmp/${tarball}" "${download_url}"
+        tar -xzf "/tmp/${tarball}" -C "${install_root}"
+        ln -sf "${install_root}/pwsh" /usr/bin/pwsh
+
+        pwsh --version
