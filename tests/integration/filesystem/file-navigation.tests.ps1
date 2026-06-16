@@ -2,6 +2,7 @@
 
 Describe 'File Navigation Functions Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         $script:BootstrapPath = Get-TestPath -RelativePath 'profile.d\bootstrap.ps1' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:BootstrapPath -or [string]::IsNullOrWhiteSpace($script:BootstrapPath)) {
@@ -11,15 +12,16 @@ Describe 'File Navigation Functions Integration Tests' {
             throw "Bootstrap file not found at: $script:BootstrapPath"
         }
         . $script:BootstrapPath
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to load bootstrap in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to load bootstrap in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'File navigation functions' {
@@ -74,6 +76,7 @@ Describe 'File Navigation Functions Integration Tests' {
         }
 
         It '... function navigates up two directories' {
+            try {
             $testDir = Join-Path $TestDrive 'level1\level2\level3'
             New-Item -ItemType Directory -Path $testDir -Force | Out-Null
 
@@ -83,12 +86,14 @@ Describe 'File Navigation Functions Integration Tests' {
             $after = Get-Location
             $beforeParent = Split-Path (Split-Path $before.Path)
             $after.Path | Should -Match ([regex]::Escape($beforeParent))
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It '.... function navigates up three directories' {
+            try {
             $testDir = Join-Path $TestDrive 'level1\level2\level3\level4'
             New-Item -ItemType Directory -Path $testDir -Force | Out-Null
 
@@ -98,54 +103,63 @@ Describe 'File Navigation Functions Integration Tests' {
             $after = Get-Location
             $beforeParent = Split-Path (Split-Path (Split-Path $before.Path))
             $after.Path | Should -Match ([regex]::Escape($beforeParent))
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It '~ function navigates to home directory' {
+            try {
             $originalLocation = Get-Location
                         ~
             $homeLocation = Get-Location
             $homeLocation.Path | Should -Match ([regex]::Escape($env:USERPROFILE))
-        }
-        finally {
-            Set-Location $originalLocation
+            }
+            finally {
+                Set-Location $originalLocation
+            }
         }
 
         It 'desktop alias navigates to Desktop' {
             if (Test-Path "$env:USERPROFILE\Desktop") {
                 $originalLocation = Get-Location
-                                desktop
-                $desktop = Get-Location
-                $desktop.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Desktop"))
-            }
-            finally {
-                Set-Location $originalLocation
+                try {
+                    desktop
+                    $desktop = Get-Location
+                    $desktop.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Desktop"))
+                }
+                finally {
+                    Set-Location $originalLocation
+                }
             }
         }
 
         It 'downloads alias navigates to Downloads' {
             if (Test-Path "$env:USERPROFILE\Downloads") {
                 $originalLocation = Get-Location
-                                downloads
-                $downloads = Get-Location
-                $downloads.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Downloads"))
-            }
-            finally {
-                Set-Location $originalLocation
+                try {
+                    downloads
+                    $downloads = Get-Location
+                    $downloads.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Downloads"))
+                }
+                finally {
+                    Set-Location $originalLocation
+                }
             }
         }
 
         It 'docs alias navigates to Documents' {
             if (Test-Path "$env:USERPROFILE\Documents") {
                 $originalLocation = Get-Location
-                                docs
-                $docs = Get-Location
-                $docs.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Documents"))
-            }
-            finally {
-                Set-Location $originalLocation
+                try {
+                    docs
+                    $docs = Get-Location
+                    $docs.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Documents"))
+                }
+                finally {
+                    Set-Location $originalLocation
+                }
             }
         }
     }

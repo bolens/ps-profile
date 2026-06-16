@@ -4,3 +4,4 @@ allowBuilds:
 
 overrides:
   parquetjs>thrift: 0.23.0
+  js-yaml: '>=4.2.0'

@@ -38,7 +38,25 @@ try {
             }
         }
 
-        # Load ErrorHandlingStandard (depends on global state, provides standardized error handling)
+        # Load FunctionRegistration early (provides Set-AgentModeFunction for downstream bootstrap modules)
+        $functionRegistrationPath = Join-Path $bootstrapModulesDir 'FunctionRegistration.ps1'
+        if ($functionRegistrationPath -and -not [string]::IsNullOrWhiteSpace($functionRegistrationPath) -and (Test-Path -LiteralPath $functionRegistrationPath)) {
+            try {
+                . $functionRegistrationPath
+            }
+            catch {
+                if ($env:PS_PROFILE_DEBUG) {
+                    if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+                        Write-ProfileError -ErrorRecord $_ -Context "Fragment: bootstrap (FunctionRegistration.ps1)" -Category 'Fragment'
+                    }
+                    else {
+                        Write-Warning "Failed to load bootstrap module FunctionRegistration.ps1 : $($_.Exception.Message)"
+                    }
+                }
+            }
+        }
+
+        # Load ErrorHandlingStandard (depends on global state and FunctionRegistration)
         $errorHandlingStandardPath = Join-Path $bootstrapModulesDir 'ErrorHandlingStandard.ps1'
         if ($errorHandlingStandardPath -and -not [string]::IsNullOrWhiteSpace($errorHandlingStandardPath) -and (Test-Path -LiteralPath $errorHandlingStandardPath)) {
             try {
@@ -267,24 +285,6 @@ try {
                     }
                     else {
                         Write-Warning "Failed to load bootstrap module FragmentWarnings.ps1 : $($_.Exception.Message)"
-                    }
-                }
-            }
-        }
-
-        # Load FunctionRegistration (depends on global state)
-        $functionRegistrationPath = Join-Path $bootstrapModulesDir 'FunctionRegistration.ps1'
-        if ($functionRegistrationPath -and -not [string]::IsNullOrWhiteSpace($functionRegistrationPath) -and (Test-Path -LiteralPath $functionRegistrationPath)) {
-            try {
-                . $functionRegistrationPath
-            }
-            catch {
-                if ($env:PS_PROFILE_DEBUG) {
-                    if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                        Write-ProfileError -ErrorRecord $_ -Context "Fragment: bootstrap (FunctionRegistration.ps1)" -Category 'Fragment'
-                    }
-                    else {
-                        Write-Warning "Failed to load bootstrap module FunctionRegistration.ps1 : $($_.Exception.Message)"
                     }
                 }
             }

@@ -48,19 +48,21 @@ Describe 'System Utility Functions' {
         }
 
         It 'Get-DiskUsage function exists and returns drive information' {
+            try {
                         Get-Command Get-DiskUsage -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null -Because "Get-DiskUsage function should be available"
             $result = Get-DiskUsage
             $result | Should -Not -BeNullOrEmpty -Because "Get-DiskUsage should return drive information"
             $result[0].PSObject.Properties.Name | Should -Contain 'Name' -Because "drive information should include Name property"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Function = 'Get-DiskUsage'
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Get-DiskUsage test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Function = 'Get-DiskUsage'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Get-DiskUsage test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Get-TopProcesses function exists and returns process information' {
@@ -118,14 +120,16 @@ Describe 'System Utility Functions' {
         }
 
         It 'Find-File function exists and can search for files' {
+            try {
             Get-Command Find-File -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             $testFile = Join-Path $TestDrive 'test_find.txt'
             Set-Content -Path $testFile -Value 'test content'
             Push-Location $TestDrive
                         { Find-File 'test_find.txt' -ErrorAction SilentlyContinue | Out-Null } | Should -Not -Throw
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'New-Directory function exists' {

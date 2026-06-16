@@ -1,24 +1,18 @@
-# Load TestSupport.ps1 - ensure it's loaded before using its functions
-$testSupportPath = Join-Path $PSScriptRoot '..\TestSupport.ps1'
-if (Test-Path $testSupportPath) {
-    . $testSupportPath
-}
-else {
-    throw "TestSupport.ps1 not found at: $testSupportPath"
-}
-
 BeforeAll {
-    # Ensure TestSupport functions are available - reload if needed
-    if (-not (Get-Command Get-TestRepoRoot -ErrorAction SilentlyContinue)) {
-        $testSupportPath = Join-Path $PSScriptRoot '..\TestSupport.ps1'
-        if (Test-Path $testSupportPath) {
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
             . $testSupportPath
+            break
         }
-        if (-not (Get-Command Get-TestRepoRoot -ErrorAction SilentlyContinue)) {
-            throw "Get-TestRepoRoot function not available. TestSupport.ps1 may not have loaded correctly from: $testSupportPath"
-        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
     }
-    
+    if (-not (Get-Command Get-TestRepoRoot -ErrorAction SilentlyContinue)) {
+        throw "Get-TestRepoRoot function not available. TestSupport.ps1 may not have loaded correctly from: $PSScriptRoot"
+    }
+
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:BootstrapDir = Get-TestPath -RelativePath 'profile.d\bootstrap' -StartPath $PSScriptRoot -EnsureExists
@@ -311,6 +305,7 @@ Describe 'ModuleLoading Functions' {
         }
         
         It 'Checks multiple dependencies' {
+            try {
             $dep2 = "Test-Dep2_$(Get-Random)"
             Set-Item -Path "Function:\$dep2" -Value { 'dep2' } -Force
             
@@ -320,12 +315,14 @@ Describe 'ModuleLoading Functions' {
                 -Dependencies @($script:DepFunctionName, $dep2)
             
             $result | Should -Be $true
-        }
-        finally {
-            Remove-Item -Path "Function:\$dep2" -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path "Function:\$dep2" -Force -ErrorAction SilentlyContinue
+            }
         }
         
         It 'Checks for module dependencies' {
+            try {
             # Create a test module
             $testModulePath = Join-Path $script:TestModulesDir 'dependency-module.psm1'
             Set-Content -Path $testModulePath -Value @'
@@ -344,10 +341,11 @@ Export-ModuleMember -Function 'Test-DependencyFunction'
                 -Dependencies @($moduleName)
             
             $result | Should -Be $true
-        }
-        finally {
-            Remove-Module ([System.IO.Path]::GetFileNameWithoutExtension($testModulePath)) -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path $testModulePath -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Module ([System.IO.Path]::GetFileNameWithoutExtension($testModulePath)) -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path $testModulePath -Force -ErrorAction SilentlyContinue
+            }
         }
     }
     
@@ -386,18 +384,20 @@ function Test-RetryFunction {
         }
         
         It 'Does not retry on syntax errors' {
-            $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error.ps1'
-            Set-Content -Path $syntaxErrorModule -Value 'invalid syntax {'
-            
-                        $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
-                -ModulePath @('test-modules', 'syntax-error.ps1') `
-                -Context 'Test: syntax-error' `
-                -RetryCount 2
-            
-            $result | Should -Be $false
-        }
-        finally {
-            Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+            try {
+                $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error.ps1'
+                Set-Content -Path $syntaxErrorModule -Value 'invalid syntax {'
+
+                $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
+                    -ModulePath @('test-modules', 'syntax-error.ps1') `
+                    -Context 'Test: syntax-error' `
+                    -RetryCount 2
+
+                $result | Should -Be $false
+            }
+            finally {
+                Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+            }
         }
         
         It 'Does not retry on file not found errors' {
@@ -412,6 +412,7 @@ function Test-RetryFunction {
     
     Context 'Import-FragmentModule - Invoke-FragmentSafely' {
         It 'Uses Invoke-FragmentSafely when available' {
+            try {
             # Create a mock Invoke-FragmentSafely if it doesn't exist
             if (-not (Get-Command Invoke-FragmentSafely -ErrorAction SilentlyContinue)) {
                 function global:Invoke-FragmentSafely {
@@ -427,17 +428,19 @@ function Test-RetryFunction {
             
             $result | Should -Be $true
             Get-Command Test-ValidFunction -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
-            # Only remove if we created it
-            $cmd = Get-Command Invoke-FragmentSafely -ErrorAction SilentlyContinue
-            if ($cmd -and $cmd.Source -eq '') {
-                Remove-Item -Path 'Function:\Invoke-FragmentSafely' -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+                # Only remove if we created it
+                $cmd = Get-Command Invoke-FragmentSafely -ErrorAction SilentlyContinue
+                if ($cmd -and $cmd.Source -eq '') {
+                    Remove-Item -Path 'Function:\Invoke-FragmentSafely' -Force -ErrorAction SilentlyContinue
+                }
             }
         }
         
         It 'Returns false when Invoke-FragmentSafely returns false' {
+            try {
             # Create a mock Invoke-FragmentSafely that returns false
             function global:Invoke-FragmentSafely {
                 param([string]$FragmentName, [string]$FragmentPath)
@@ -453,10 +456,11 @@ function Test-RetryFunction {
             
             # The function should return false when Invoke-FragmentSafely returns false
             $result | Should -Be $false
-        }
-        finally {
-            Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path 'Function:\Invoke-FragmentSafely' -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path 'Function:\Invoke-FragmentSafely' -Force -ErrorAction SilentlyContinue
+            }
         }
     }
     
@@ -475,22 +479,24 @@ function Test-RetryFunction {
         }
         
         It 'Validates PowerShell syntax when PS_PROFILE_DEBUG_SYNTAX_CHECK is set' {
-            $env:PS_PROFILE_DEBUG_SYNTAX_CHECK = '1'
-            $env:PS_PROFILE_DEBUG = '1'
-            
-            # Create a module with syntax errors
-            $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-check-module.ps1'
-            Set-Content -Path $syntaxErrorModule -Value 'function Test-SyntaxCheck { { { }'
-            
-                        $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
-                -ModulePath @('test-modules', 'syntax-check-module.ps1') `
-                -Context 'Test: syntax-check'
-            
-            $result | Should -Be $false
-        }
-        finally {
-            Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path 'Function:\Test-SyntaxCheck' -Force -ErrorAction SilentlyContinue
+            try {
+                $env:PS_PROFILE_DEBUG_SYNTAX_CHECK = '1'
+                $env:PS_PROFILE_DEBUG = '1'
+
+                # Create a module with syntax errors
+                $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-check-module.ps1'
+                Set-Content -Path $syntaxErrorModule -Value 'function Test-SyntaxCheck { { { }'
+
+                $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
+                    -ModulePath @('test-modules', 'syntax-check-module.ps1') `
+                    -Context 'Test: syntax-check'
+
+                $result | Should -Be $false
+            }
+            finally {
+                Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path 'Function:\Test-SyntaxCheck' -Force -ErrorAction SilentlyContinue
+            }
         }
         
         It 'Loads valid module when syntax checking is enabled' {
@@ -508,6 +514,7 @@ function Test-RetryFunction {
     
     Context 'Import-FragmentModule - Error Handling' {
         It 'Uses Write-ProfileError when available' {
+            try {
             # Create a module that throws an error
             $errorModule = Join-Path $script:TestModulesDir 'error-module.ps1'
             Set-Content -Path $errorModule -Value 'throw "Test error"'
@@ -527,19 +534,21 @@ function Test-RetryFunction {
             
             $result | Should -Be $false
             # Note: We can't easily verify Write-ProfileError was called without more complex mocking
-        }
-        finally {
-            Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
-            if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
-                # Only remove if we created it
-                $cmd = Get-Command Write-ProfileError
-                if ($cmd.Source -eq '') {
-                    Remove-Item -Path 'Function:\Write-ProfileError' -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
+                if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
+                    # Only remove if we created it
+                    $cmd = Get-Command Write-ProfileError
+                    if ($cmd.Source -eq '') {
+                        Remove-Item -Path 'Function:\Write-ProfileError' -Force -ErrorAction SilentlyContinue
+                    }
                 }
             }
         }
         
         It 'Falls back to Write-Warning in debug mode when Write-ProfileError not available' {
+            try {
             $env:PS_PROFILE_DEBUG = '1'
             $errorModule = Join-Path $script:TestModulesDir 'error-module2.ps1'
             Set-Content -Path $errorModule -Value 'throw "Test error"'
@@ -549,10 +558,11 @@ function Test-RetryFunction {
                 -Context 'Test: warning-fallback'
             
             $result | Should -Be $false
-        }
-        finally {
-            Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
-            $env:PS_PROFILE_DEBUG = $null
+            }
+            finally {
+                Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue
+                $env:PS_PROFILE_DEBUG = $null
+            }
         }
     }
     
@@ -649,6 +659,7 @@ function Test-RetryFunction {
         }
         
         It 'Handles modules with dependencies' {
+            try {
             $depFunction = "Test-BatchDep_$(Get-Random)"
             Set-Item -Path "Function:\$depFunction" -Value { 'batch-dep' } -Force
             
@@ -663,9 +674,10 @@ function Test-RetryFunction {
             $result = Import-FragmentModules -FragmentRoot $script:TestFragmentRoot -Modules $modules
             
             $result.SuccessCount | Should -Be 1
-        }
-        finally {
-            Remove-Item -Path "Function:\$depFunction" -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path "Function:\$depFunction" -Force -ErrorAction SilentlyContinue
+            }
         }
         
         It 'Handles missing ModulePath or Context gracefully' {
@@ -685,6 +697,7 @@ function Test-RetryFunction {
     
     Context 'Import-FragmentModule - Retry Logic' {
         It 'Retries on transient failures when RetryCount is specified' {
+            try {
             # Create a module that fails first time, succeeds second time
             $flakyModule = Join-Path $script:TestModulesDir 'flaky-module.ps1'
             $script:attempt = 0
@@ -705,29 +718,32 @@ function global:Test-FlakyFunction {
             
             $result | Should -Be $true
             Get-Command Test-FlakyFunction -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            Remove-Item -Path $flakyModule -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path 'Function:\Test-FlakyFunction' -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path $flakyModule -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path 'Function:\Test-FlakyFunction' -Force -ErrorAction SilentlyContinue
+            }
         }
         
         It 'Does not retry on syntax errors' {
-            $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error-module.ps1'
-            # Use a more severe syntax error that PowerShell will definitely catch
-            Set-Content -Path $syntaxErrorModule -Value 'function Test-SyntaxError { { { }'
-            
-                        $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
-                -ModulePath @('test-modules', 'syntax-error-module.ps1') `
-                -Context 'Test: syntax-error' `
-                -RetryCount 2
-            
-            # PowerShell may load the file even with syntax errors, but the function won't work
-            # The important thing is that we test the retry logic path
-            $result | Should -BeIn @($true, $false)
-        }
-        finally {
-            Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path 'Function:\Test-SyntaxError' -Force -ErrorAction SilentlyContinue
+            try {
+                $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error-module.ps1'
+                # Use a more severe syntax error that PowerShell will definitely catch
+                Set-Content -Path $syntaxErrorModule -Value 'function Test-SyntaxError { { { }'
+
+                $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
+                    -ModulePath @('test-modules', 'syntax-error-module.ps1') `
+                    -Context 'Test: syntax-error' `
+                    -RetryCount 2
+
+                # PowerShell may load the file even with syntax errors, but the function won't work
+                # The important thing is that we test the retry logic path
+                $result | Should -BeIn @($true, $false)
+            }
+            finally {
+                Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path 'Function:\Test-SyntaxError' -Force -ErrorAction SilentlyContinue
+            }
         }
     }
     
@@ -766,6 +782,7 @@ function global:Test-FlakyFunction {
     
     Context 'Import-FragmentModule - CacheResults' {
         It 'Uses direct Test-Path when CacheResults is false' {
+            try {
             # Mock Test-ModulePath to not be available
             $originalTestModulePath = Get-Command Test-ModulePath -ErrorAction SilentlyContinue
             if ($originalTestModulePath) {
@@ -778,21 +795,23 @@ function global:Test-FlakyFunction {
                 -CacheResults:$false
             
             $result | Should -Be $true
-        }
-        finally {
-            if ($originalTestModulePath) {
-                # Restore Test-ModulePath
-                $modulePathCachePath = Join-Path $script:BootstrapDir 'ModulePathCache.ps1'
-                if (Test-Path $modulePathCachePath) {
-                    . $modulePathCachePath
-                }
             }
-            Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+            finally {
+                if ($originalTestModulePath) {
+                    # Restore Test-ModulePath
+                    $modulePathCachePath = Join-Path $script:BootstrapDir 'ModulePathCache.ps1'
+                    if (Test-Path $modulePathCachePath) {
+                        . $modulePathCachePath
+                    }
+                }
+                Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+            }
         }
     }
     
     Context 'Import-FragmentModule - Dependency Checking' {
         It 'Checks for module dependencies' {
+            try {
             $moduleName = "TestModuleDep_$(Get-Random)"
             <#
             .SYNOPSIS
@@ -813,13 +832,15 @@ function global:Test-FlakyFunction {
                 -Dependencies @($moduleName)
             
             $result | Should -Be $true
-        }
-        finally {
-            Remove-Module $moduleName -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Module $moduleName -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+            }
         }
         
         It 'Checks for command dependencies (alias)' {
+            try {
             $aliasName = "TestAliasDep_$(Get-Random)"
             Set-Alias -Name $aliasName -Value 'Get-Command' -Scope Global
             
@@ -829,13 +850,15 @@ function global:Test-FlakyFunction {
                 -Dependencies @($aliasName)
             
             $result | Should -Be $true
-        }
-        finally {
-            Remove-Item -Path "Alias:\$aliasName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path "Alias:\$aliasName" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+            }
         }
         
         It 'Checks for global function dependencies' {
+            try {
             $globalFuncName = "Test-GlobalFuncDep_$(Get-Random)"
             Set-Item -Path "Function:\global:$globalFuncName" -Value { 'global' } -Force
             
@@ -845,11 +868,12 @@ function global:Test-FlakyFunction {
                 -Dependencies @($globalFuncName)
             
             $result | Should -Be $true
-        }
-        finally {
-            Remove-Item -Path "Function:\$globalFuncName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path "Function:\global:$globalFuncName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path "Function:\$globalFuncName" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "Function:\global:$globalFuncName" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path 'Function:\Test-ValidFunction' -Force -ErrorAction SilentlyContinue
+            }
         }
     }
     
@@ -883,6 +907,7 @@ function global:Test-FlakyFunction {
         }
         
         It 'Falls back to Test-Path when Test-ModulePath is not available' {
+            try {
             $originalTestModulePath = Get-Command Test-ModulePath -ErrorAction SilentlyContinue
             if ($originalTestModulePath) {
                 Remove-Item -Path "Function:\Test-ModulePath" -Force -ErrorAction SilentlyContinue
@@ -890,13 +915,14 @@ function global:Test-FlakyFunction {
             
                         $result = Test-FragmentModulePath -Path $script:ValidModule
             $result | Should -Be $true
-        }
-        finally {
-            if ($originalTestModulePath) {
-                # Restore Test-ModulePath
-                $modulePathCachePath = Join-Path $script:BootstrapDir 'ModulePathCache.ps1'
-                if (Test-Path $modulePathCachePath) {
-                    . $modulePathCachePath
+            }
+            finally {
+                if ($originalTestModulePath) {
+                    # Restore Test-ModulePath
+                    $modulePathCachePath = Join-Path $script:BootstrapDir 'ModulePathCache.ps1'
+                    if (Test-Path $modulePathCachePath) {
+                        . $modulePathCachePath
+                    }
                 }
             }
         }
@@ -951,16 +977,18 @@ function global:Test-FlakyFunction {
         }
         
         It 'Handles empty ModulePath array' {
+            try {
             # Empty array should be handled gracefully
                         $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
                 -ModulePath @() `
                 -Context 'Test: empty-array'
             
             $result | Should -Be $false
-        }
-        catch {
-            # If it throws due to parameter validation, that's also acceptable
-            $_.Exception.Message | Should -Not -BeNullOrEmpty
+            }
+            catch {
+                # If it throws due to parameter validation, that's also acceptable
+                $_.Exception.Message | Should -Not -BeNullOrEmpty
+            }
         }
     }
 }

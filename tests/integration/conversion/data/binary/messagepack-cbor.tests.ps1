@@ -87,6 +87,7 @@ Describe 'MessagePack and CBOR Conversion Tests' {
         }
 
         It 'ConvertTo-CborFromMessagePack handles missing packages gracefully when Node.js is available' {
+            try {
             if (-not $script:NodeAvailable) {
                 Set-ItResult -Skipped -Because "Node.js is not available"
                 return
@@ -104,23 +105,24 @@ Describe 'MessagePack and CBOR Conversion Tests' {
             if ($cborFile -and -not [string]::IsNullOrWhiteSpace($cborFile) -and (Test-Path -LiteralPath $cborFile)) {
                 $cborFile | Should -Exist
             }
-        }
-        catch {
-            $errorMessage = $_.Exception.Message
-            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-            
-            if ($errorMessage -match '(@msgpack/msgpack|cbor).*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match '(@msgpack/msgpack|cbor)') {
-                $installCommand = Resolve-TestNodePackageInstallCommand -PackageNames @('@msgpack/msgpack', 'cbor')
-                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                }
-                elseif ($errorMessage -match '(@msgpack/msgpack|cbor)' -or $fullError -match '(@msgpack/msgpack|cbor)') {
-                    Write-Host "Required packages (@msgpack/msgpack, cbor) may not be installed. Install with: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match '(@msgpack/msgpack|cbor)'
-                }
             }
-            # Other errors (like invalid file format) are also acceptable
+            catch {
+                $errorMessage = $_.Exception.Message
+                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+                if ($errorMessage -match '(@msgpack/msgpack|cbor).*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match '(@msgpack/msgpack|cbor)') {
+                    $installCommand = Resolve-TestNodePackageInstallCommand -PackageNames @('@msgpack/msgpack', 'cbor')
+                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                    }
+                    elseif ($errorMessage -match '(@msgpack/msgpack|cbor)' -or $fullError -match '(@msgpack/msgpack|cbor)') {
+                        Write-Host "Required packages (@msgpack/msgpack, cbor) may not be installed. Install with: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match '(@msgpack/msgpack|cbor)'
+                    }
+                }
+                # Other errors (like invalid file format) are also acceptable
+            }
         }
     }
 }

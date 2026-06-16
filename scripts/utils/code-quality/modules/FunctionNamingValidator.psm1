@@ -189,6 +189,8 @@ function Test-IsBootstrapFunction {
             'Get-UserDirectory',
             'Get-WranglerConfigPaths',
             'Get-PlatformInstallHint',
+            'Get-SystemInstallCommand',
+            'Get-InstallHintPlatform',
             'Resolve-InstallPackageName',
             'Register-LazyFunction',
             'Get-FragmentConfigPath',

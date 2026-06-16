@@ -8,6 +8,7 @@ tests/integration/profile/quality.tests.ps1
 
 Describe 'Profile Quality Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:ProfilePath -or [string]::IsNullOrWhiteSpace($script:ProfilePath)) {
@@ -22,27 +23,28 @@ Describe 'Profile Quality Integration Tests' {
         if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
             throw "Profile directory not found at: $script:ProfileDir"
         }
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize profile quality tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize profile quality tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
 
-        $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
-        if (-not (Test-Path -LiteralPath $bootstrapPath)) {
-            throw "Bootstrap file not found at: $bootstrapPath"
-        }
-        $null = . $bootstrapPath
+            $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
+            if (-not (Test-Path -LiteralPath $bootstrapPath)) {
+                throw "Bootstrap file not found at: $bootstrapPath"
+            }
+            $null = . $bootstrapPath
 
-        $script:UtilitiesEnvPath = Join-Path $script:ProfileDir 'utilities-modules' 'system' 'utilities-env.ps1'
-        if (-not (Test-Path -LiteralPath $script:UtilitiesEnvPath)) {
-            throw "Utilities env module not found at: $($script:UtilitiesEnvPath)"
+            $script:UtilitiesEnvPath = Join-Path $script:ProfileDir 'utilities-modules' 'system' 'utilities-env.ps1'
+            if (-not (Test-Path -LiteralPath $script:UtilitiesEnvPath)) {
+                throw "Utilities env module not found at: $($script:UtilitiesEnvPath)"
+            }
+            $null = . $script:UtilitiesEnvPath
         }
-        $null = . $script:UtilitiesEnvPath
     }
 
     Context 'Cross-platform compatibility' {
@@ -59,15 +61,17 @@ Describe 'Profile Quality Integration Tests' {
 
     Context 'Cross-platform PATH manipulation' {
         It 'Add-Path uses platform-appropriate separator' {
+            try {
             $testPath = Join-Path $TestDrive 'test-path'
             New-Item -ItemType Directory -Path $testPath -Force | Out-Null
 
             $originalPath = $env:PATH
                         Add-Path -Path $testPath
             $env:PATH | Should -Match ([regex]::Escape($testPath))
-        }
-        finally {
-            $env:PATH = $originalPath
+            }
+            finally {
+                $env:PATH = $originalPath
+            }
         }
 
         It 'Remove-Path uses platform-appropriate separator' {

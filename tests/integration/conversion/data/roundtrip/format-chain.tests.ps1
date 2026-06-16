@@ -26,11 +26,7 @@ Describe 'Format Chain Conversion Tests' {
             Get-Command ConvertFrom-ToonToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-TomlFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertFrom-TomlToXml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             if (-not (Get-Module -ListAvailable -Name PSToml -ErrorAction SilentlyContinue)) {
                 Set-ItResult -Skipped -Because "PSToml module not available"
                 return

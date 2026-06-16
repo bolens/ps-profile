@@ -32,6 +32,8 @@ Describe 'Profile fragments' {
 
     Context 'Agent helper registration' {
         It 'Set-AgentModeFunction registers a function safely' {
+            try {
+            try {
             . $script:BootstrapPath
             $scriptBlock = Set-AgentModeFunction -Name 'test_agent_fn' -Body { 'ok' } -ReturnScriptBlock
             $scriptBlock | Should -Not -Be $false
@@ -39,19 +41,21 @@ Describe 'Profile fragments' {
 
             $result = $null
                         $result = (& test_agent_fn)
-        }
-        catch {
-            $result | Should -Be 'ok'
+            }
+            catch {
+                $result | Should -Be 'ok'
 
-            $aliasName = "test_alias_{0}" -f (Get-Random)
-            $aliasCreated = Set-AgentModeAlias -Name $aliasName -Target 'Write-Output'
-            $aliasCreated | Should -Be $true
+                $aliasName = "test_alias_{0}" -f (Get-Random)
+                $aliasCreated = Set-AgentModeAlias -Name $aliasName -Target 'Write-Output'
+                $aliasCreated | Should -Be $true
 
-            $aliasOutput = $null
-                        $aliasOutput = & $aliasName 'ping'
-        }
-        catch {
-            $aliasOutput | Should -Be 'ping'
+                $aliasOutput = $null
+                            $aliasOutput = & $aliasName 'ping'
+            }
+            }
+            catch {
+                $aliasOutput | Should -Be 'ping'
+            }
         }
     }
 

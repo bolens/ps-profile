@@ -799,14 +799,16 @@ Describe 'run-pester.ps1 Additional Flags' {
     }
 
     It 'Accepts IncludeUntracked with ChangedFiles' {
+        try {
         Push-Location $script:TestRepoRoot
                 $isGitRepo = git rev-parse --git-dir 2>$null
         if ($LASTEXITCODE -eq 0) {
             { Invoke-RunPesterDryRun @{ ChangedFiles = $true; IncludeUntracked = $true } } | Should -Not -Throw
         }
-    }
-    finally {
-        Pop-Location
+        }
+        finally {
+            Pop-Location
+        }
     }
 
     It 'Accepts CodeCoverageOutputFormat values' {

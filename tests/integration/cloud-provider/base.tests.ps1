@@ -90,6 +90,7 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
         }
         
         It 'Supports GCloud-style project management' {
+            try {
             $originalProject = $env:GCLOUD_PROJECT
             
                         $result = Set-CloudProfile -ProviderName 'gcloud' -ProfileType 'Project' -Value 'test-project' -EnvVarName 'GCLOUD_PROJECT' -ErrorAction SilentlyContinue
@@ -98,13 +99,14 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
             if ($result) {
                 $env:GCLOUD_PROJECT | Should -Be 'test-project'
             }
-        }
-        finally {
-            if ($originalProject) {
-                $env:GCLOUD_PROJECT = $originalProject
             }
-            else {
-                Remove-Item Env:GCLOUD_PROJECT -ErrorAction SilentlyContinue
+            finally {
+                if ($originalProject) {
+                    $env:GCLOUD_PROJECT = $originalProject
+                }
+                else {
+                    Remove-Item Env:GCLOUD_PROJECT -ErrorAction SilentlyContinue
+                }
             }
         }
     }
@@ -122,6 +124,7 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
         }
         
         It 'Falls back when Invoke-WithWideEvent is not available' {
+            try {
             # Temporarily remove Invoke-WithWideEvent if it exists
             $savedFunction = Get-Command Invoke-WithWideEvent -ErrorAction SilentlyContinue
             if ($savedFunction) {
@@ -134,11 +137,12 @@ Describe 'CloudProviderBase.ps1 - Integration Tests' {
             
             # Should still work without wide event tracking
             $result | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            # Restore function if it existed
-            if ($savedFunction) {
-                . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
+            }
+            finally {
+                # Restore function if it existed
+                if ($savedFunction) {
+                    . (Join-Path $script:ProfileDir 'bootstrap' 'ErrorHandlingStandard.ps1')
+                }
             }
         }
     }

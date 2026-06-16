@@ -36,6 +36,7 @@ Describe 'Profile shortcut functions' {
 
     Context 'Execution behavior' {
         It 'vsc opens current directory in VS Code' {
+            try {
             # Ensure Get-AvailableEditor returns null to prevent actual editor execution
             # Remove any existing function first
             if (Test-Path Function:\Get-AvailableEditor) {
@@ -66,19 +67,22 @@ Describe 'Profile shortcut functions' {
             $ErrorActionPreference = 'SilentlyContinue'
                         # vsc should not throw when no editor is available (it should just warn)
             { vsc } | Should -Not -Throw
-        }
-        finally {
-            $WarningPreference = $originalWarningPreference
-            $ErrorActionPreference = $originalErrorActionPreference
+            }
+            finally {
+                $WarningPreference = $originalWarningPreference
+                $ErrorActionPreference = $originalErrorActionPreference
+            }
         }
 
         It 'e requires a path parameter' {
+            try {
             $originalWarningPreference = $WarningPreference
             $WarningPreference = 'SilentlyContinue'
                         { e } | Should -Not -Throw
-        }
-        finally {
-            $WarningPreference = $originalWarningPreference
+            }
+            finally {
+                $WarningPreference = $originalWarningPreference
+            }
         }
     }
 }

@@ -23,6 +23,7 @@ BeforeAll {
 
 Describe 'Infrastructure Tools Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
             throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -39,15 +40,16 @@ Describe 'Infrastructure Tools Integration Tests' {
             throw "Bootstrap file not found at: $bootstrapPath"
         }
         . $bootstrapPath
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize infrastructure tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize infrastructure tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'kubectl helpers (kubectl.ps1)' {
@@ -56,16 +58,18 @@ Describe 'Infrastructure Tools Integration Tests' {
         }
 
         It 'Creates Invoke-Kubectl function' {
+            try {
                         Get-Command Invoke-Kubectl -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty -Because "Invoke-Kubectl function should be created"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Function = 'Invoke-Kubectl'
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Invoke-Kubectl function creation test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Function = 'Invoke-Kubectl'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Invoke-Kubectl function creation test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Creates k alias for Invoke-Kubectl' {

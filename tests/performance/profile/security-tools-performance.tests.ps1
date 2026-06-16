@@ -51,6 +51,7 @@ Describe 'Security Tools Fragment Performance Tests' {
 
     Context 'Fragment Load Performance' {
         It 'security-tools fragment loads within acceptable time limit' {
+            try {
             # Load bootstrap first
             $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
             if (Test-Path -LiteralPath $bootstrapPath) {
@@ -60,14 +61,15 @@ Describe 'Security Tools Fragment Performance Tests' {
             # Measure fragment load time
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
                         . $script:SecurityToolsPath -ErrorAction Stop
-        }
-        finally {
-            $stopwatch.Stop()
+            }
+            finally {
+                $stopwatch.Stop()
 
-            $loadTimeMs = $stopwatch.Elapsed.TotalMilliseconds
-            Write-Verbose "Security tools fragment loaded in $([Math]::Round($loadTimeMs, 2)) ms" -Verbose
+                $loadTimeMs = $stopwatch.Elapsed.TotalMilliseconds
+                Write-Verbose "Security tools fragment loaded in $([Math]::Round($loadTimeMs, 2)) ms" -Verbose
 
-            $loadTimeMs | Should -BeLessThan $script:MaxFragmentLoadTimeMs
+                $loadTimeMs | Should -BeLessThan $script:MaxFragmentLoadTimeMs
+            }
         }
 
         It 'fragment load time is consistent across multiple loads' {

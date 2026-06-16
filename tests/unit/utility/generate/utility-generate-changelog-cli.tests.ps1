@@ -47,6 +47,7 @@ Describe 'generate-changelog.ps1 with git-cliff installed' {
     }
 
     It 'Uses git-cliff default configuration when cliff.toml is missing in an isolated repository' {
+        try {
         if (-not $script:GitCliffAvailable) {
             Set-ItResult -Skipped -Because 'git-cliff is not installed'
             return
@@ -65,17 +66,18 @@ Describe 'generate-changelog.ps1 with git-cliff installed' {
         Set-Content -LiteralPath (Join-Path $repo 'README.md') -Value 'fixture' -Encoding UTF8
         git add README.md
         git commit -m 'init' -q
-    }
-    finally {
-        Pop-Location
+        }
+        finally {
+            Pop-Location
 
-        $outputRel = 'CHANGELOG-fixture.md'
-        $result = Invoke-TestScriptFile -ScriptPath (Join-Path $docsDir 'generate-changelog.ps1') -ArgumentList @(
-            '-OutputFile', $outputRel
-        )
+            $outputRel = 'CHANGELOG-fixture.md'
+            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $docsDir 'generate-changelog.ps1') -ArgumentList @(
+                '-OutputFile', $outputRel
+            )
 
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'cliff\.toml.*not found|default configuration|Changelog generated successfully'
-        Test-Path -LiteralPath (Join-Path $repo $outputRel) | Should -BeTrue
+            $result.ExitCode | Should -Be 0
+            $result.Output | Should -Match 'cliff\.toml.*not found|default configuration|Changelog generated successfully'
+            Test-Path -LiteralPath (Join-Path $repo $outputRel) | Should -BeTrue
+        }
     }
 }

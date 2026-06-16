@@ -124,9 +124,9 @@ function Initialize-FileConversion-MediaColorsConvert {
                 $minDistance = [double]::MaxValue
                 $closestName = 'black'
                     
-                foreach ($name in $script:CssNamedColors.Keys) {
+                foreach ($name in $global:CssNamedColors.Keys) {
                     if ($name -eq 'transparent') { continue }
-                    $namedRgb = $script:CssNamedColors[$name]
+                    $namedRgb = $global:CssNamedColors[$name]
                     $distance = [Math]::Sqrt(
                         [Math]::Pow($rgb.r - $namedRgb.r, 2) +
                         [Math]::Pow($rgb.g - $namedRgb.g, 2) +

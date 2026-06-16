@@ -30,11 +30,7 @@ Describe 'CSV/XML Roundtrip Conversion Integration Tests' {
 
         It 'ConvertFrom-CsvToYaml and ConvertFrom-YamlToCsv roundtrip' {
             Get-Command ConvertFrom-YamlToCsv -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $originalCsv = "name,value`nalice,123`nbob,456"
             $tempFile = Join-Path $TestDrive 'test.csv'
             Set-Content -Path $tempFile -Value $originalCsv

@@ -25,6 +25,7 @@ AfterAll {
 Describe 'Utility Script Error Handling' {
     Context 'Missing Common module' {
         It 'Exits with expected code when Common.psm1 import fails' {
+            try {
             $scriptPath = Join-Path $script:TempRoot 'missing-common.ps1'
             @'
 try {
@@ -39,14 +40,16 @@ catch {
 
                         $null = pwsh -NoProfile -File $scriptPath 2>&1
             $LASTEXITCODE | Should -Be 2
-        }
-        finally {
-            Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 
     Context 'Exit-WithCode pattern' {
         It 'Exits with validation failure code when Exit-WithCode is invoked' {
+            try {
             $scriptPath = Join-Path $script:TempRoot 'exit-with-code.ps1'
             @'
 enum ExitCode { Success = 0; ValidationFailure = 1; SetupError = 2; OtherError = 3 }
@@ -62,14 +65,16 @@ Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message 'validation failed'
                         $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
             $LASTEXITCODE | Should -Be 1
             $output | Should -Match 'validation failed'
-        }
-        finally {
-            Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 
     Context 'ModuleImport bootstrap pattern' {
         It 'Exits with setup error when ModuleImport.psm1 is missing from scripts/lib' {
+            try {
             $scriptPath = Join-Path $script:TempRoot 'missing-moduleimport.ps1'
             @'
 $ErrorActionPreference = 'Stop'
@@ -84,9 +89,10 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
                         $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
             $LASTEXITCODE | Should -BeIn @(1, 2)
             $output | Should -Match 'ModuleImport\.psm1 not found'
-        }
-        finally {
-            Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -LiteralPath $scriptPath -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 }

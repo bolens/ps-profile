@@ -282,20 +282,22 @@ Describe 'ErrorHandlingStandard.ps1 - Invoke-WithWideEvent' {
     
     Context 'Error Handling' {
         It 'Records error when script block throws' {
+            try {
             $errorThrown = $false
                         Invoke-WithWideEvent -OperationName 'test.error' -Context @{} -ScriptBlock {
                 throw 'Test error'
             }
-        }
-        catch {
-            $errorThrown = $true
+            }
+            catch {
+                $errorThrown = $true
             
-            $errorThrown | Should -Be $true
-            $event = $global:WideEvents[-1]
-            $event.event_name | Should -Be 'test.error'
-            $event.severity | Should -Be 'ERROR'
-            $event.context.outcome | Should -Be 'error'
-            $event.error | Should -Not -BeNullOrEmpty
+                $errorThrown | Should -Be $true
+                $event = $global:WideEvents[-1]
+                $event.event_name | Should -Be 'test.error'
+                $event.severity | Should -Be 'ERROR'
+                $event.context.outcome | Should -Be 'error'
+                $event.error | Should -Not -BeNullOrEmpty
+            }
         }
         
         It 'Re-throws exception after recording' {

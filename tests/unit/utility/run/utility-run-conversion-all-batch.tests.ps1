@@ -59,6 +59,9 @@ exit 0
             $result.Output | Should -Match 'Conversion all-batch'
             $result.Output | Should -Match '1P / 0F / 0S'
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 
     It 'Fails the batch when the stub integration runner reports failures' {
@@ -85,6 +88,9 @@ exit 1
 
             $result.ExitCode | Should -Be 1
             $result.Output | Should -Match 'Conversion all-batch|Sub-batches with failures|0P / 1F / 0S'
+        }
+        finally {
+            Remove-TestArtifacts
         }
     }
 
@@ -121,6 +127,9 @@ exit 0
             $result.Output | Should -Match '=== document ==='
             $result.Output | Should -Match '=== media ==='
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 
     It 'Discovers data sub-batches when tests exist only in nested subdirectories' {
@@ -152,6 +161,9 @@ exit 0
             $result.ExitCode | Should -Be 0
             $result.Output | Should -Match 'Conversion all-batch'
             $result.Output | Should -Match '=== data/encoding ==='
+        }
+        finally {
+            Remove-TestArtifacts
         }
     }
 }

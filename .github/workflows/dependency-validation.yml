@@ -10,6 +10,11 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   validate-dependencies:
     name: Validate Dependencies

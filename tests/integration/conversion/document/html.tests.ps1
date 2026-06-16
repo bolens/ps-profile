@@ -13,6 +13,7 @@
 
 Describe 'HTML Document Conversion Tests' {
     BeforeAll {
+        try {
                 $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegration -ProfileDir $script:ProfileDir -ModuleType 'Documents' -SelectiveModules @(
             'document-common-html.ps1'
@@ -30,16 +31,17 @@ Describe 'HTML Document Conversion Tests' {
             'document-fb2.ps1'
             'document-latex.ps1'
         ) -EnsureDocuments
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
-            Category = 'BeforeAll'
         }
-        Write-Error "Failed to initialize HTML document conversion tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+                Category = 'BeforeAll'
+            }
+            Write-Error "Failed to initialize HTML document conversion tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'HTML conversion utilities' {

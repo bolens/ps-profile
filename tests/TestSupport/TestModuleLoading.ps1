@@ -181,9 +181,10 @@ function Import-ModuleGroup {
         $ModuleConfig
     }
 
-    # Filter to selective modules if specified
+    # Filter to selective modules if specified (preserve caller order for dependencies)
     if ($SelectiveModules) {
-        $modules = @($modules | Where-Object { $SelectiveModules -contains $_ })
+        $selectiveOrder = @($SelectiveModules)
+        $modules = @($selectiveOrder | Where-Object { $modules -contains $_ })
         # Load shared common.ps1 helpers before format-specific modules
         $commonFirst = @($modules | Where-Object { $_ -eq 'common.ps1' })
         $rest = @($modules | Where-Object { $_ -ne 'common.ps1' })
@@ -949,7 +950,8 @@ function Ensure-ConversionModulesLoaded {
     $cacheKey = "ConversionModules_${ModuleType}_$selectiveKey"
     
     # Check if already loaded (use script scope for cross-file caching)
-    if ($null -eq $script:ModuleLoadCache) {
+    $moduleLoadCacheVar = Get-Variable -Name ModuleLoadCache -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $moduleLoadCacheVar -or $null -eq $moduleLoadCacheVar.Value) {
         $script:ModuleLoadCache = @{}
     }
     
@@ -1065,7 +1067,8 @@ function Initialize-TestProfile {
     $cacheKey = "Profile_$(if ($LoadBootstrap) { 'Bootstrap' })_$(if ($LoadConversionModules) { $LoadConversionModules })_${selectiveKey}_$(if ($LoadFilesFragment) { 'Files' })_$(if ($EnsureFileConversion) { 'EnsureData' })_$(if ($EnsureFileConversionMedia) { 'EnsureMedia' })_$(if ($EnsureFileConversionDocuments) { 'EnsureDocs' })"
     
     # Check if already loaded (use script scope for cross-file caching)
-    if ($null -eq $script:ProfileLoadCache) {
+    $profileLoadCacheVar = Get-Variable -Name ProfileLoadCache -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $profileLoadCacheVar -or $null -eq $profileLoadCacheVar.Value) {
         $script:ProfileLoadCache = @{}
     }
     
@@ -1637,11 +1640,17 @@ function Initialize-ConversionIntegration {
         $env:PS_PROFILE_REPO_ROOT = Split-Path -Parent $ProfileDir
     }
 
-    Initialize-TestProfile `
-        -ProfileDir $ProfileDir `
-        -LoadBootstrap `
-        -LoadConversionModules $ModuleType `
-        -SelectiveModules $SelectiveModules
+    $profileInitParams = @{
+        ProfileDir            = $ProfileDir
+        LoadBootstrap         = $true
+        LoadConversionModules = $ModuleType
+        SelectiveModules      = $SelectiveModules
+    }
+    if ($EnsureMedia -or $EnsureDocuments) {
+        $profileInitParams['LoadFilesFragment'] = $true
+    }
+
+    Initialize-TestProfile @profileInitParams
 
     if ($EnsureData) {
         if (-not $SelectiveModules -or @($SelectiveModules).Count -eq 0) {
@@ -1665,11 +1674,12 @@ function Initialize-ConversionIntegration {
     }
 
     if ($EnsureMedia) {
-        if ($SelectiveModules -and @($SelectiveModules).Count -gt 0) {
-            $global:FileConversionMediaInitialized = $true
-        }
-        elseif (Get-Command Ensure-FileConversion-Media -ErrorAction SilentlyContinue) {
+        if (Get-Command Ensure-FileConversion-Media -ErrorAction SilentlyContinue) {
             Ensure-FileConversion-Media
+        }
+        elseif (Get-Command _Parse-Color -ErrorAction SilentlyContinue) {
+            # Selective media module loading registers parsers without files.ps1 Ensure helpers.
+            $global:FileConversionMediaInitialized = $true
         }
     }
 
@@ -1681,6 +1691,9 @@ function Initialize-ConversionIntegration {
             Ensure-FileConversion-Specialized
         }
     }
+
+    # yq availability is resolved lazily via Test-MikefarahYqAvailable when tests call
+    # Skip-IfMikefarahYqUnavailable; probing here broke unrelated conversion BeforeAll hooks on Linux CI.
 }
 
 

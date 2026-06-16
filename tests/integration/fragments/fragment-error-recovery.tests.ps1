@@ -39,11 +39,13 @@ Describe 'Fragment Error Recovery' {
         $script:InvokeProfileSilently = {
             # Temporarily silence warnings so intentionally failing fragments don't pollute test output.
             $originalWarningPreference = $WarningPreference
-                        $WarningPreference = 'SilentlyContinue'
-            . $script:ProfilePath
-        }
-        finally {
-            $WarningPreference = $originalWarningPreference
+            try {
+                $WarningPreference = 'SilentlyContinue'
+                . $script:ProfilePath
+            }
+            finally {
+                $WarningPreference = $originalWarningPreference
+            }
         }
 
         # Helper to create a temporary fragment with specific content

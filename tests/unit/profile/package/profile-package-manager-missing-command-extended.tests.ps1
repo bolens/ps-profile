@@ -94,6 +94,7 @@ Describe 'PackageManagerBase missing command extended scenarios' {
         }
 
         It 'Registers custom commands alongside standard helpers' {
+            try {
             $customName = "Audit$($script:Suffix)"
             $null = Register-PackageManager `
                 -ManagerName $script:ManagerName `
@@ -101,9 +102,10 @@ Describe 'PackageManagerBase missing command extended scenarios' {
                 -CustomCommands @{ $customName = { 'audit-ok' } }
 
                         & $customName | Should -Be 'audit-ok'
-        }
-        finally {
-            Remove-Item -Path "Function:\$customName" -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path "Function:\$customName" -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Returns false when manager metadata is blank' {

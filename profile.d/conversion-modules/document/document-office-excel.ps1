@@ -37,7 +37,7 @@ function Initialize-FileConversion-DocumentOfficeExcel {
                     else {
                         Import-Excel -Path $InputPath
                     }
-                    $data | Export-Csv -Path $OutputPath -NoTypeInformation -Encoding UTF8
+                    $data | Export-Csv -Path $OutputPath -Encoding UTF8
                     return
                 }
             }

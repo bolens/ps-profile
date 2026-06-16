@@ -181,10 +181,10 @@ Set-Item -Path Function:Global:_ConvertFrom-BsonToCsv -Value {
             $jsonContent = Get-Content -LiteralPath $tempJson -Raw -ErrorAction Stop
             $jsonData = $jsonContent | ConvertFrom-Json -ErrorAction Stop
             if ($jsonData -is [array]) {
-                $jsonData | Export-Csv -Path $OutputPath -NoTypeInformation -ErrorAction Stop
+                $jsonData | Export-Csv -Path $OutputPath -ErrorAction Stop
             }
             elseif ($jsonData -is [PSCustomObject]) {
-                @($jsonData) | Export-Csv -Path $OutputPath -NoTypeInformation -ErrorAction Stop
+                @($jsonData) | Export-Csv -Path $OutputPath -ErrorAction Stop
             }
             else {
                 throw "BSON data must be an array or object"
@@ -227,10 +227,10 @@ Set-Item -Path Function:Global:_ConvertFrom-MessagePackToCsv -Value {
             $jsonContent = Get-Content -LiteralPath $tempJson -Raw -ErrorAction Stop
             $jsonData = $jsonContent | ConvertFrom-Json -ErrorAction Stop
             if ($jsonData -is [array]) {
-                $jsonData | Export-Csv -Path $OutputPath -NoTypeInformation -ErrorAction Stop
+                $jsonData | Export-Csv -Path $OutputPath -ErrorAction Stop
             }
             elseif ($jsonData -is [PSCustomObject]) {
-                @($jsonData) | Export-Csv -Path $OutputPath -NoTypeInformation -ErrorAction Stop
+                @($jsonData) | Export-Csv -Path $OutputPath -ErrorAction Stop
             }
             else {
                 throw "MessagePack data must be an array or object"
@@ -273,10 +273,10 @@ Set-Item -Path Function:Global:_ConvertFrom-CborToCsv -Value {
             $jsonContent = Get-Content -LiteralPath $tempJson -Raw -ErrorAction Stop
             $jsonData = $jsonContent | ConvertFrom-Json -ErrorAction Stop
             if ($jsonData -is [array]) {
-                $jsonData | Export-Csv -Path $OutputPath -NoTypeInformation -ErrorAction Stop
+                $jsonData | Export-Csv -Path $OutputPath -ErrorAction Stop
             }
             elseif ($jsonData -is [PSCustomObject]) {
-                @($jsonData) | Export-Csv -Path $OutputPath -NoTypeInformation -ErrorAction Stop
+                @($jsonData) | Export-Csv -Path $OutputPath -ErrorAction Stop
             }
             else {
                 throw "CBOR data must be an array or object"

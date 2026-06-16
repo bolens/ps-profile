@@ -85,5 +85,8 @@ Describe 'perf sample' {
             $output | Should -Match 'Analyzing test performance for suite: Unit'
             $output | Should -Match 'Test Performance Analysis Report|=== Summary ==='
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 }

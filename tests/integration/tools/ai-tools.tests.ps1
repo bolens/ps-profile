@@ -167,15 +167,17 @@ Describe 'ai-tools.ps1 - Integration Tests' {
         }
 
         It 'Handles missing lms gracefully' {
+            try {
             Set-TestCommandAvailabilityState -CommandName 'lms' -Available $false
             $originalHome = $env:HOME
             $env:HOME = $TestDrive
                         $output = & { Invoke-LMStudio -Arguments @('list') } 2>&1 3>&1 | Out-String
             Assert-TestMissingToolWarning -Output $output -Pattern 'lms not found'
             Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'lms'
-        }
-        finally {
-            $env:HOME = $originalHome
+            }
+            finally {
+                $env:HOME = $originalHome
+            }
         }
 
         It 'Handles missing koboldcpp gracefully' {

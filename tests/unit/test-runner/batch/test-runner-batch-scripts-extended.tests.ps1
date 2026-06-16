@@ -50,21 +50,25 @@ Describe 'Batch test runner extended scenarios' {
 
     Context 'Failure handling' {
         It 'Exits with code 2 when the unit test directory is missing' {
+            try {
             $fakeRoot = New-TestTempDirectory -Prefix 'BatchMissingUnitDir'
                         & pwsh -NoProfile -File $script:BatchScripts.Unit -RepoRoot $fakeRoot 2>&1 | Out-Null
             $LASTEXITCODE | Should -Be 2
-        }
-        finally {
-            Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Exits with code 2 when the performance test directory is missing' {
+            try {
             $fakeRoot = New-TestTempDirectory -Prefix 'BatchMissingPerfDir'
                         & pwsh -NoProfile -File $script:BatchScripts.Performance -RepoRoot $fakeRoot 2>&1 | Out-Null
             $LASTEXITCODE | Should -Be 2
-        }
-        finally {
-            Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 

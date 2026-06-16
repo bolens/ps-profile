@@ -60,6 +60,7 @@ Describe 'UBJSON Format Conversion Tests' {
         }
 
         It 'ConvertTo-UbjsonFromJson handles missing ubjson package gracefully when Node.js is available' {
+            try {
             if (-not $script:NodeAvailable) {
                 Set-ItResult -Skipped -Because "Node.js is not available"
                 return
@@ -91,33 +92,35 @@ Describe 'UBJSON Format Conversion Tests' {
             if ($ubjsonFile -and -not [string]::IsNullOrWhiteSpace($ubjsonFile) -and (Test-Path -LiteralPath $ubjsonFile)) {
                 $ubjsonFile | Should -Exist
             }
-        }
-        catch {
-            # Capture full error output including stderr
-            $errorMessage = $_.Exception.Message
-            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-            
-            # If conversion fails, verify it's due to missing ubjson package
-            if ($errorMessage -match 'ubjson.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'ubjson') {
-                # Verify installation command is present in error message
-                $installCommand = Resolve-TestToolInstallCommand -ToolName 'ubjson' -ToolType 'node-package'
-                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                }
-                elseif ($errorMessage -match 'ubjson' -or $fullError -match 'ubjson') {
-                    Write-Host "ubjson package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                    # Error mentions ubjson but may not include exact command format
-                    $errorMessage | Should -Match 'ubjson'
-                }
             }
-            else {
-                # Re-throw if it's an unexpected error
-                throw
+            catch {
+                # Capture full error output including stderr
+                $errorMessage = $_.Exception.Message
+                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+                # If conversion fails, verify it's due to missing ubjson package
+                if ($errorMessage -match 'ubjson.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'ubjson') {
+                    # Verify installation command is present in error message
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'ubjson' -ToolType 'node-package'
+                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                    }
+                    elseif ($errorMessage -match 'ubjson' -or $fullError -match 'ubjson') {
+                        Write-Host "ubjson package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                        # Error mentions ubjson but may not include exact command format
+                        $errorMessage | Should -Match 'ubjson'
+                    }
+                }
+                else {
+                    # Re-throw if it's an unexpected error
+                    throw
+                }
             }
         }
 
         It 'ConvertFrom-UbjsonToJson handles missing ubjson package gracefully when Node.js is available' {
+            try {
             if (-not $script:NodeAvailable) {
                 Set-ItResult -Skipped -Because "Node.js is not available"
                 return
@@ -142,27 +145,28 @@ Describe 'UBJSON Format Conversion Tests' {
             if ($jsonFile -and -not [string]::IsNullOrWhiteSpace($jsonFile) -and (Test-Path -LiteralPath $jsonFile)) {
                 $jsonFile | Should -Exist
             }
-        }
-        catch {
-            # Capture full error output including stderr
-            $errorMessage = $_.Exception.Message
-            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-            
-            # If conversion fails, verify it's due to missing ubjson package or invalid file format
-            if ($errorMessage -match 'ubjson.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'ubjson') {
-                # Verify installation command is present in error message
-                $installCommand = Resolve-TestToolInstallCommand -ToolName 'ubjson' -ToolType 'node-package'
-                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                }
-                elseif ($errorMessage -match 'ubjson' -or $fullError -match 'ubjson') {
-                    Write-Host "ubjson package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                    # Error mentions ubjson but may not include exact command format
-                    $errorMessage | Should -Match 'ubjson'
-                }
             }
-            # Other errors (like invalid file format) are also acceptable
+            catch {
+                # Capture full error output including stderr
+                $errorMessage = $_.Exception.Message
+                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+                # If conversion fails, verify it's due to missing ubjson package or invalid file format
+                if ($errorMessage -match 'ubjson.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'ubjson') {
+                    # Verify installation command is present in error message
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'ubjson' -ToolType 'node-package'
+                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                    }
+                    elseif ($errorMessage -match 'ubjson' -or $fullError -match 'ubjson') {
+                        Write-Host "ubjson package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                        # Error mentions ubjson but may not include exact command format
+                        $errorMessage | Should -Match 'ubjson'
+                    }
+                }
+                # Other errors (like invalid file format) are also acceptable
+            }
         }
 
         It 'UBJSON aliases resolve to functions' {

@@ -45,6 +45,7 @@ Describe 'Barcode Conversion Tests' {
         }
 
         It 'ConvertTo-BarcodeFromText supports different formats' {
+            try {
             Get-Command ConvertTo-BarcodeFromText -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             
             # Verify format parameter validation
@@ -54,10 +55,11 @@ Describe 'Barcode Conversion Tests' {
 
             # Should accept valid formats (may fail if jsbarcode/canvas npm packages are missing)
                         ConvertTo-BarcodeFromText -InputPath $tempFile -Format CODE128 -ErrorAction Stop
-        }
-        catch {
-            if ($_.Exception.Message -notmatch 'jsbarcode|canvas|MODULE_NOT_FOUND|Node\.js') {
-                throw
+            }
+            catch {
+                if ($_.Exception.Message -notmatch 'jsbarcode|canvas|MODULE_NOT_FOUND|Node\.js') {
+                    throw
+                }
             }
         }
 

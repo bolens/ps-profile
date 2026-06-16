@@ -90,6 +90,7 @@ Describe 'Test Runner Error Handling (real run-pester.ps1)' {
 
     Context 'Interactive mode constraints' {
         It 'Rejects interactive mode in non-interactive environments' {
+            try {
             $previous = $env:PS_PROFILE_NONINTERACTIVE
             $env:PS_PROFILE_NONINTERACTIVE = '1'
                         $output = Invoke-RunPesterCapturingOutput @{
@@ -97,13 +98,14 @@ Describe 'Test Runner Error Handling (real run-pester.ps1)' {
                 TestFile    = $script:DryRunTestFile
             }
             ($output -join ' ') | Should -Match 'Interactive mode requires a TTY|EXIT:'
-        }
-        finally {
-            if ($null -eq $previous) {
-                Remove-Item Env:PS_PROFILE_NONINTERACTIVE -ErrorAction SilentlyContinue
             }
-            else {
-                $env:PS_PROFILE_NONINTERACTIVE = $previous
+            finally {
+                if ($null -eq $previous) {
+                    Remove-Item Env:PS_PROFILE_NONINTERACTIVE -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_NONINTERACTIVE = $previous
+                }
             }
         }
     }

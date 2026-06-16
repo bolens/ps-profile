@@ -55,24 +55,26 @@ Describe 'Error Handling Module' {
 
     Context 'Write-ProfileError' {
         It 'logs error to file when debug mode is enabled' {
+            try {
             # Create an error record by executing a script that throws
                         & {
                 throw "Test error"
             }
-        }
-        catch {
-            $errorRecord = $_
+            }
+            catch {
+                $errorRecord = $_
 
-            Write-ProfileError -ErrorRecord $errorRecord -Context "Test context" -Category "Profile"
+                Write-ProfileError -ErrorRecord $errorRecord -Context "Test context" -Category "Profile"
 
-            $userHome = if ($env:HOME) { $env:HOME } else { $env:USERPROFILE }
-            $logDir = Join-Path $userHome '.local' 'share' 'powershell'
-            $logFile = Join-Path $logDir 'profile-errors.log'
+                $userHome = if ($env:HOME) { $env:HOME } else { $env:USERPROFILE }
+                $logDir = Join-Path $userHome '.local' 'share' 'powershell'
+                $logFile = Join-Path $logDir 'profile-errors.log'
 
-            $logContent = Get-Content $logFile -Raw
-            $logContent | Should -Match "\[Profile\] Error"
-            $logContent | Should -Match "Context: Test context"
-            $logContent | Should -Match "Message: Test error"
+                $logContent = Get-Content $logFile -Raw
+                $logContent | Should -Match "\[Profile\] Error"
+                $logContent | Should -Match "Context: Test context"
+                $logContent | Should -Match "Message: Test error"
+            }
         }
 
         It 'displays warning when debug mode is disabled' {

@@ -9,6 +9,7 @@
 
 Describe 'System Utilities - Clipboard Integration Tests' {
     BeforeAll {
+        try {
                 $current = Get-Item $PSScriptRoot
         while ($null -ne $current) {
             $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
@@ -35,15 +36,16 @@ Describe 'System Utilities - Clipboard Integration Tests' {
             throw "Bootstrap file not found at: $bootstrapPath"
         }
         . $bootstrapPath
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize system utilities clipboard tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize system utilities clipboard tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'Clipboard helpers (clipboard.ps1)' {
@@ -70,14 +72,16 @@ Describe 'System Utilities - Clipboard Integration Tests' {
         }
 
         It 'Copy-ToClipboard function accepts pipeline input' {
+            try {
             # Test that the function accepts pipeline input (it has ValueFromPipeline parameter)
             $testText = "Test clipboard content $(Get-Random)"
                         $testText | Copy-ToClipboard
             $result = $true
-        }
-        catch {
-            $result = $false
-            $result | Should -Be $true
+            }
+            catch {
+                $result = $false
+                $result | Should -Be $true
+            }
         }
     }
 }

@@ -7,6 +7,10 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   reviewdog:
     runs-on: ubuntu-latest
@@ -15,7 +19,7 @@ jobs:
       - name: Ensure pwsh available
         run: pwsh -c "$PSVersionTable"
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@b0f76dfb45f55f8421693e4803ac7bb65143bd34 # v6
         with:
           version: 11.5.3
       - name: Install Node

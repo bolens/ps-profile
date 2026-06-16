@@ -150,7 +150,11 @@ function New-PesterTestConfiguration {
 
         [string]$RepoRoot,
 
-        [string[]]$TestPaths
+        [string[]]$TestPaths,
+
+        [string]$TestSupportPath,
+
+        [string]$TestsDir
     )
 
     # Convert enums to strings
@@ -202,6 +206,8 @@ function New-PesterTestConfiguration {
         Randomize              = $Randomize
         FailOnWarnings         = $FailOnWarnings
         SkipRemainingOnFailure = $SkipRemainingOnFailure
+        TestSupportPath        = $TestSupportPath
+        TestsDir               = $TestsDir
     }
 
     if ($null -ne $Timeout) {

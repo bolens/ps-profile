@@ -32,31 +32,37 @@ Describe 'TestPaths helpers' {
 
     Context 'New-TestExternalTempDirectory' {
         It 'Creates a directory outside the repository root and registers cleanup' {
+            try {
             $externalDir = New-TestExternalTempDirectory -Prefix 'PathsExternal'
                         Test-Path -LiteralPath $externalDir | Should -Be $true
             $externalDir.StartsWith($script:TestRepoRoot, [StringComparison]::OrdinalIgnoreCase) | Should -Be $false
-        }
-        finally {
-            Clear-RegisteredTestCleanupPaths
+            }
+            finally {
+                Clear-RegisteredTestCleanupPaths
+            }
         }
     }
 
     Context 'New-TestTempFile' {
         It 'Creates a file with optional initial content' {
+            try {
             $filePath = New-TestTempFile -Prefix 'PathsContent' -Extension '.txt' -Content 'probe-content'
                         Test-Path -LiteralPath $filePath | Should -Be $true
             (Get-Content -LiteralPath $filePath -Raw).Trim() | Should -Be 'probe-content'
-        }
-        finally {
-            Remove-Item -LiteralPath $filePath -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -LiteralPath $filePath -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Normalizes extensions without a leading dot' {
+            try {
             $filePath = New-TestTempFile -Prefix 'PathsExt' -Extension 'json'
                         $filePath | Should -Match '\.json$'
-        }
-        finally {
-            Remove-Item -LiteralPath $filePath -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -LiteralPath $filePath -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 

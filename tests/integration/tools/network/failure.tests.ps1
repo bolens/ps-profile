@@ -6,8 +6,20 @@ Tests for network failure scenarios and error handling.
 
 
 BeforeAll {
+    try {
+        $current = Get-Item $PSScriptRoot
+        while ($null -ne $current) {
+            $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+            if (Test-Path -LiteralPath $testSupportPath) {
+                . $testSupportPath
+                break
+            }
+            if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+            $current = $current.Parent
+        }
+
         # Get repository root
-    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+        $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
     $script:ScriptsChecksPath = Get-TestPath -RelativePath 'scripts\checks' -StartPath $PSScriptRoot -EnsureExists
     if ($null -eq $script:ScriptsUtilsPath -or [string]::IsNullOrWhiteSpace($script:ScriptsUtilsPath)) {
@@ -22,8 +34,8 @@ BeforeAll {
     if (-not (Test-Path -LiteralPath $script:ScriptsChecksPath)) {
         throw "Scripts checks path not found at: $script:ScriptsChecksPath"
     }
-}
-catch {
+    }
+    catch {
     $errorDetails = @{
         Message  = $_.Exception.Message
         Type     = $_.Exception.GetType().FullName
@@ -31,6 +43,7 @@ catch {
     }
     Write-Error "Failed to initialize network failure tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
     throw
+    }
 }
 
 Describe 'Network Failure Scenarios' {

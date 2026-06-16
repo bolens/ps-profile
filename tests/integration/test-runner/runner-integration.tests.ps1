@@ -131,6 +131,7 @@ Describe 'Test Runner Integration (real run-pester.ps1)' {
 
     Context 'Git and configuration flags' {
         It 'Accepts git integration switches in a git repository' {
+            try {
             Push-Location $script:TestRepoRoot
                         git rev-parse --git-dir 2>$null | Out-Null
             if ($LASTEXITCODE -eq 0) {
@@ -138,9 +139,10 @@ Describe 'Test Runner Integration (real run-pester.ps1)' {
                 { Invoke-RunPesterDryRun @{ ChangedSince = 'HEAD~1' } } | Should -Not -Throw
                 { Invoke-RunPesterDryRun @{ ChangedFiles = $true; IncludeUntracked = $true } } | Should -Not -Throw
             }
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Saves and loads JSON configuration files' {

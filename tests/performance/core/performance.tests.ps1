@@ -87,6 +87,7 @@ Describe 'Profile Performance Regression Tests' {
 
             $originalBatch = $env:PS_PROFILE_BATCH_LOAD
             $originalDebug = $env:PS_PROFILE_DEBUG
+            $loadResult = $null
 
             try {
                 switch ($BatchMode) {
@@ -209,7 +210,7 @@ Describe 'Profile Performance Regression Tests' {
             }
             finally {
                 $stopwatch.Stop()
-                
+
                 # Cleanup runspace
                 if ($handle) {
                     try {
@@ -226,7 +227,7 @@ Describe 'Profile Performance Regression Tests' {
                     $runspacePool.Close()
                     $runspacePool.Dispose()
                 }
-                
+
                 # Restore original environment
                 if ($null -eq $originalEnv) {
                     Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
@@ -235,12 +236,11 @@ Describe 'Profile Performance Regression Tests' {
                     $env:PS_PROFILE_ENVIRONMENT = $originalEnv
                 }
 
-                return [pscustomobject]@{
+                $loadResult = [pscustomobject]@{
                     DurationMs    = $stopwatch.Elapsed.TotalMilliseconds
                     FragmentTimes = $fragmentTimes
                 }
-            }
-            finally {
+
                 if ($CollectFragmentTimes) {
                     $global:PSProfileFragmentTimes = $null
                     if ($null -eq $originalDebug) {
@@ -270,6 +270,8 @@ Describe 'Profile Performance Regression Tests' {
                     }
                 }
             }
+
+            return $loadResult
         }
 
         function script:Measure-ProfileLoads {
@@ -464,33 +466,35 @@ Describe 'Profile Performance Regression Tests' {
 
     Context 'Batch Loading Performance' {
         It 'batch loading mode performs similarly to sequential' {
+            try {
             # Use minimal environment for faster test execution
             $originalEnv = $env:PS_PROFILE_ENVIRONMENT
             $env:PS_PROFILE_ENVIRONMENT = 'minimal'
             
                         $sequentialResult = Measure-ProfileLoads -Count 1 -BatchMode Sequential -WarmUp
             $batchResult = Measure-ProfileLoads -Count 1 -BatchMode Batch -WarmUp
-        }
-        finally {
-            if ($null -eq $originalEnv) {
-                Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
             }
-            else {
-                $env:PS_PROFILE_ENVIRONMENT = $originalEnv
+            finally {
+                if ($null -eq $originalEnv) {
+                    Remove-Item -Path Env:PS_PROFILE_ENVIRONMENT -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_ENVIRONMENT = $originalEnv
+                }
+
+                $sequentialTime = $sequentialResult[0].DurationMs
+                $batchTime = $batchResult[0].DurationMs
+
+                # Batch loading should not be significantly slower (within 30% to account for system variance)
+                # Use the larger time as denominator to avoid division by small numbers
+                $maxTime = [Math]::Max($sequentialTime, $batchTime)
+                $timeDifference = [Math]::Abs($batchTime - $sequentialTime)
+                $timeDifferencePercent = if ($maxTime -gt 0) { ($timeDifference / $maxTime) * 100 } else { 0 }
+
+                $timeDifferencePercent | Should -BeLessThan 30
+
+                Write-Verbose "Sequential: $sequentialTime ms, Batch: $batchTime ms, Difference: $([Math]::Round($timeDifferencePercent, 2))%" -Verbose
             }
-
-            $sequentialTime = $sequentialResult[0].DurationMs
-            $batchTime = $batchResult[0].DurationMs
-
-            # Batch loading should not be significantly slower (within 30% to account for system variance)
-            # Use the larger time as denominator to avoid division by small numbers
-            $maxTime = [Math]::Max($sequentialTime, $batchTime)
-            $timeDifference = [Math]::Abs($batchTime - $sequentialTime)
-            $timeDifferencePercent = if ($maxTime -gt 0) { ($timeDifference / $maxTime) * 100 } else { 0 }
-
-            $timeDifferencePercent | Should -BeLessThan 30
-
-            Write-Verbose "Sequential: $sequentialTime ms, Batch: $batchTime ms, Difference: $([Math]::Round($timeDifferencePercent, 2))%" -Verbose
         }
     }
 }
