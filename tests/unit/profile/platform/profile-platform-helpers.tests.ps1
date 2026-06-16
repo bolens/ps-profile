@@ -111,13 +111,15 @@ Describe 'Platform Detection Helpers' {
     Context 'Cross-Platform Compatibility' {
         It 'Get-UserHome prefers $env:HOME on Unix' {
             if ((Test-IsLinux) -or (Test-IsMacOS)) {
-                $originalHome = $env:HOME
-                                $env:HOME = '/test/home'
-                $result = Get-UserHome
-                $result | Should -Be '/test/home'
-            }
-            finally {
-                $env:HOME = $originalHome
+                try {
+                    $originalHome = $env:HOME
+                    $env:HOME = '/test/home'
+                    $result = Get-UserHome
+                    $result | Should -Be '/test/home'
+                }
+                finally {
+                    $env:HOME = $originalHome
+                }
             }
         }
 

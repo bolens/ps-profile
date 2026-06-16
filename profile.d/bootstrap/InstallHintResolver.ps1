@@ -492,7 +492,7 @@ function global:Get-PreferenceAwareInstallHint {
                         "brew install node"
                     }
                 }
-                default { "scoop install nodejs" }
+                default { Get-SystemInstallCommand -ToolName 'nodejs' }
             }
             return "Install with: $runtimeInstall"
         }
@@ -518,7 +518,7 @@ function global:Get-PreferenceAwareInstallHint {
                         "npm install -g pnpm"
                     }
                 }
-                default { "scoop install pnpm" }
+                default { Get-SystemInstallCommand -ToolName 'pnpm' }
             }
             return "Install with: $runtimeInstall"
         }
@@ -544,7 +544,7 @@ function global:Get-PreferenceAwareInstallHint {
                         "npm install -g yarn"
                     }
                 }
-                default { "scoop install yarn" }
+                default { Get-SystemInstallCommand -ToolName 'yarn' }
             }
             return "Install with: $runtimeInstall"
         }
@@ -570,7 +570,7 @@ function global:Get-PreferenceAwareInstallHint {
                         "curl -fsSL https://bun.sh/install | bash"
                     }
                 }
-                default { "scoop install bun" }
+                default { Get-SystemInstallCommand -ToolName 'bun' }
             }
             return "Install with: $runtimeInstall"
         }
@@ -596,7 +596,8 @@ function global:Get-PreferenceAwareInstallHint {
                 if ($pythonExe) {
                     # If it's a command name (not a path), use it directly
                     if ($pythonExe -notmatch '[\\/]') {
-                        return "Install with: scoop install python (or ensure $pythonExe is in PATH)"
+                        $pythonInstall = Get-SystemInstallCommand -ToolName 'python'
+                        return "Install with: $pythonInstall (or ensure $pythonExe is in PATH)"
                     }
                 }
             }
@@ -638,7 +639,7 @@ function global:Get-PreferenceAwareInstallHint {
                         "Install Python from python.org (or ensure $pythonRuntime is in PATH)"
                     }
                 }
-                default { "scoop install python (or ensure $pythonRuntime is in PATH)" }
+                default { "$(Get-SystemInstallCommand -ToolName 'python') (or ensure $pythonRuntime is in PATH)" }
             }
             return "Install with: $runtimeInstall"
         }
@@ -661,7 +662,7 @@ function global:Get-PreferenceAwareInstallHint {
                     "Install Python from python.org"
                 }
             }
-            default { "scoop install python" }
+            default { Get-SystemInstallCommand -ToolName 'python' }
         }
         return "Install with: $runtimeInstall"
     }
@@ -703,10 +704,23 @@ function global:Get-PreferenceAwareInstallHint {
             return "Install with: cargo install cargo-binstall"
         }
         elseif ($ToolName -eq 'cargo' -or $ToolName -eq 'rustup') {
-            return "Install with: scoop install rustup"
+            $runtimeInstall = switch (Get-InstallHintPlatform) {
+                'Windows' {
+                    if (Test-CachedCommand 'scoop') { "scoop install rustup" }
+                    else { Get-SystemInstallCommand -ToolName 'rustup' }
+                }
+                'Linux' { "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" }
+                'macOS' {
+                    if (Test-CachedCommand 'brew') { "brew install rustup" }
+                    else { "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh" }
+                }
+                default { Get-SystemInstallCommand -ToolName 'rustup' }
+            }
+            return "Install with: $runtimeInstall"
         }
         else {
-            return "Install with: cargo install $ToolName (or: scoop install rustup)"
+            $rustupInstall = Get-SystemInstallCommand -ToolName 'rustup'
+            return "Install with: cargo install $ToolName (or: $rustupInstall)"
         }
     }
     
@@ -740,10 +754,11 @@ function global:Get-PreferenceAwareInstallHint {
         }
         
         if ($ToolName -eq 'go') {
-            return "Install with: scoop install go"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'go')"
         }
         else {
-            return "Install with: go install $ToolName@latest (or: scoop install go)"
+            $goInstall = Get-SystemInstallCommand -ToolName 'go'
+            return "Install with: go install $ToolName@latest (or: $goInstall)"
         }
     }
     
@@ -762,23 +777,23 @@ function global:Get-PreferenceAwareInstallHint {
         $hasSbt = Test-CachedCommand 'sbt'
         
         if ($preference -eq 'maven' -and $hasMaven) {
-            return "Install with: mvn install (or: scoop install maven)"
+            return "Install with: mvn install (or: $(Get-SystemInstallCommand -ToolName 'maven'))"
         }
         elseif ($preference -eq 'gradle' -and $hasGradle) {
-            return "Install with: gradle build (or: scoop install gradle)"
+            return "Install with: gradle build (or: $(Get-SystemInstallCommand -ToolName 'gradle'))"
         }
         elseif ($preference -eq 'sbt' -and $hasSbt) {
-            return "Install with: sbt compile (or: scoop install sbt)"
+            return "Install with: sbt compile (or: $(Get-SystemInstallCommand -ToolName 'sbt'))"
         }
         elseif ($preference -eq 'auto') {
             if ($hasMaven) {
-                return "Install with: mvn install (or: scoop install maven)"
+                return "Install with: mvn install (or: $(Get-SystemInstallCommand -ToolName 'maven'))"
             }
             elseif ($hasGradle) {
-                return "Install with: gradle build (or: scoop install gradle)"
+                return "Install with: gradle build (or: $(Get-SystemInstallCommand -ToolName 'gradle'))"
             }
             elseif ($hasSbt) {
-                return "Install with: sbt compile (or: scoop install sbt)"
+                return "Install with: sbt compile (or: $(Get-SystemInstallCommand -ToolName 'sbt'))"
             }
         }
         
@@ -788,16 +803,16 @@ function global:Get-PreferenceAwareInstallHint {
         }
         
         if ($ToolName -match '^mvn|maven') {
-            return "Install with: scoop install maven"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'maven')"
         }
         elseif ($ToolName -eq 'gradle') {
-            return "Install with: scoop install gradle"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'gradle')"
         }
         elseif ($ToolName -eq 'sbt') {
-            return "Install with: scoop install sbt"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'sbt')"
         }
         else {
-            return "Install with: scoop install $ToolName"
+            return "Install with: $(Get-SystemInstallCommand -ToolName $ToolName)"
         }
     }
     
@@ -844,22 +859,15 @@ function global:Get-PreferenceAwareInstallHint {
         
         # Check if gem/ruby needs to be installed first
         if ($ToolName -eq 'gem' -or $ToolName -eq 'ruby') {
-            if ($hasScoop) {
-                return "Install with: scoop install ruby"
-            }
-            else {
-                return "Install with: scoop install ruby (or: https://www.ruby-lang.org/)"
-            }
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'ruby')"
         }
         elseif ($ToolName -eq 'bundler') {
             if ($hasGem) {
                 return "Install with: gem install bundler"
             }
-            elseif ($hasScoop) {
-                return "Install with: scoop install ruby (then: gem install bundler)"
-            }
             else {
-                return "Install with: gem install bundler (requires Ruby: scoop install ruby or https://www.ruby-lang.org/)"
+                $rubyInstall = Get-SystemInstallCommand -ToolName 'ruby'
+                return "Install with: $rubyInstall (then: gem install bundler)"
             }
         }
         else {
@@ -867,11 +875,9 @@ function global:Get-PreferenceAwareInstallHint {
             if ($hasGem) {
                 return "Install with: gem install $ToolName"
             }
-            elseif ($hasScoop) {
-                return "Install with: scoop install ruby (then: gem install $ToolName)"
-            }
             else {
-                return "Install with: gem install $ToolName (requires Ruby: scoop install ruby or https://www.ruby-lang.org/)"
+                $rubyInstall = Get-SystemInstallCommand -ToolName 'ruby'
+                return "Install with: $rubyInstall (then: gem install $ToolName)"
             }
         }
     }
@@ -916,13 +922,14 @@ function global:Get-PreferenceAwareInstallHint {
         }
         
         if ($ToolName -eq 'composer') {
-            return "Install with: scoop install composer"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'composer')"
         }
         elseif ($ToolName -eq 'php') {
-            return "Install with: scoop install php"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'php')"
         }
         else {
-            return "Install with: composer require $ToolName (or: scoop install composer)"
+            $composerInstall = Get-SystemInstallCommand -ToolName 'composer'
+            return "Install with: composer require $ToolName (or: $composerInstall)"
         }
     }
     
@@ -959,13 +966,15 @@ function global:Get-PreferenceAwareInstallHint {
         }
         
         if ($ToolName -eq 'dotnet') {
-            return "Install with: scoop install dotnet-sdk"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'dotnet-sdk')"
         }
         elseif ($ToolName -eq 'nuget') {
-            return "Install with: dotnet tool install -g NuGet.CommandLine (or: scoop install nuget)"
+            $nugetInstall = Get-SystemInstallCommand -ToolName 'nuget'
+            return "Install with: dotnet tool install -g NuGet.CommandLine (or: $nugetInstall)"
         }
         else {
-            return "Install with: dotnet add package $ToolName (or: scoop install dotnet-sdk)"
+            $dotnetInstall = Get-SystemInstallCommand -ToolName 'dotnet-sdk'
+            return "Install with: dotnet add package $ToolName (or: $dotnetInstall)"
         }
     }
     
@@ -1002,13 +1011,14 @@ function global:Get-PreferenceAwareInstallHint {
         }
         
         if ($ToolName -eq 'flutter') {
-            return "Install with: scoop install flutter"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'flutter')"
         }
         elseif ($ToolName -eq 'dart') {
-            return "Install with: scoop install dart-sdk"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'dart-sdk')"
         }
         else {
-            return "Install with: dart pub add $ToolName (or: scoop install dart-sdk)"
+            $dartInstall = Get-SystemInstallCommand -ToolName 'dart-sdk'
+            return "Install with: dart pub add $ToolName (or: $dartInstall)"
         }
     }
     
@@ -1042,10 +1052,11 @@ function global:Get-PreferenceAwareInstallHint {
         }
         
         if ($ToolName -eq 'mix' -or $ToolName -eq 'elixir') {
-            return "Install with: scoop install elixir"
+            return "Install with: $(Get-SystemInstallCommand -ToolName 'elixir')"
         }
         else {
-            return "Install with: mix deps.get (or: scoop install elixir)"
+            $elixirInstall = Get-SystemInstallCommand -ToolName 'elixir'
+            return "Install with: mix deps.get (or: $elixirInstall)"
         }
     }
     
@@ -1108,9 +1119,6 @@ function global:Get-PreferenceAwareInstallHint {
             elseif ($hasPacman) {
                 "sudo pacman -S $ToolName"
             }
-            elseif ($hasScoop) {
-                "scoop install $ToolName"
-            }
             else {
                 "sudo apt install $ToolName (or: sudo dnf install $ToolName, or: sudo yum install $ToolName)"
             }
@@ -1120,15 +1128,12 @@ function global:Get-PreferenceAwareInstallHint {
             if ($hasBrew) {
                 "brew install $ToolName"
             }
-            elseif ($hasScoop) {
-                "scoop install $ToolName"
-            }
             else {
-                "brew install $ToolName (or: scoop install $ToolName)"
+                "brew install $ToolName"
             }
         }
         default {
-            "scoop install $ToolName"
+            Get-SystemInstallCommand -ToolName $ToolName
         }
     }
     
@@ -1213,6 +1218,79 @@ function global:Invoke-MissingToolWarning {
     else {
         $hint = if ($installHint) { " $installHint" } else { '' }
         Write-Warning "$displayTool is not installed.$hint"
+    }
+}
+
+<#
+.SYNOPSIS
+    Detects the current platform for install hint resolution.
+
+.OUTPUTS
+    System.String
+#>
+function global:Get-InstallHintPlatform {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    if (Get-Command Get-Platform -ErrorAction SilentlyContinue) {
+        try {
+            return (Get-Platform).Name
+        }
+        catch {
+            # Fall through to basic detection
+        }
+    }
+
+    if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { return 'Windows' }
+    if ($IsLinux) { return 'Linux' }
+    if ($IsMacOS) { return 'macOS' }
+    return 'Windows'
+}
+
+<#
+.SYNOPSIS
+    Returns a bare platform-aware system package manager install command.
+
+.DESCRIPTION
+    Uses Get-SystemPackageManagerFallbackChain when available, otherwise falls
+    back to platform-appropriate default package managers.
+
+.PARAMETER ToolName
+    Package or tool name to install.
+
+.OUTPUTS
+    System.String
+#>
+function global:Get-SystemInstallCommand {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ToolName
+    )
+
+    if (Get-Command Get-SystemPackageManagerFallbackChain -ErrorAction SilentlyContinue) {
+        $fallbackInfo = Get-SystemPackageManagerFallbackChain -ToolName $ToolName
+        if ($fallbackInfo.FallbackChain) {
+            return $fallbackInfo.FallbackChain
+        }
+    }
+
+    $platform = Get-InstallHintPlatform
+    switch ($platform) {
+        'Windows' {
+            return "scoop install $ToolName (or: winget install $ToolName, or: choco install $ToolName -y)"
+        }
+        'Linux' {
+            return "sudo apt install $ToolName (or: sudo dnf install $ToolName, or: sudo pacman -S $ToolName)"
+        }
+        'macOS' {
+            return "brew install $ToolName"
+        }
+        default {
+            return "sudo apt install $ToolName"
+        }
     }
 }
 
@@ -1435,7 +1513,7 @@ function global:Get-PlatformInstallHint {
         return Get-PreferenceAwareInstallHint -ToolName $packageName -ToolType $ToolType
     }
 
-    return "Install with: scoop install $packageName"
+    return "Install with: $(Get-SystemInstallCommand -ToolName $packageName)"
 }
 
 <#
@@ -1454,7 +1532,9 @@ function global:Get-ContainerEngineInstallHint {
     param()
 
     if (-not (Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue)) {
-        return 'Install with: scoop install docker (or: scoop install podman)'
+        $dockerCmd = Get-SystemInstallCommand -ToolName 'docker'
+        $podmanCmd = Get-SystemInstallCommand -ToolName 'podman'
+        return "Install with: $dockerCmd (or: $podmanCmd)"
     }
 
     $dockerCmd = ((Get-PlatformInstallHint -ToolName 'docker') -replace '^Install with: ', '')
@@ -1481,7 +1561,9 @@ function global:Get-ContainerInstallationCommand {
         return ((Get-ContainerEngineInstallHint) -replace '^Install with: ', '')
     }
 
-    return 'scoop install docker or scoop install podman'
+    $dockerCmd = Get-SystemInstallCommand -ToolName 'docker'
+    $podmanCmd = Get-SystemInstallCommand -ToolName 'podman'
+    return "$dockerCmd or $podmanCmd"
 }
 
 <#
@@ -1507,7 +1589,9 @@ function global:Invoke-ContainerEngineMissingWarning {
         Get-PlatformInstallHint -ToolName 'docker'
     }
     else {
-        'Install with: scoop install docker (or: scoop install podman)'
+        $dockerCmd = Get-SystemInstallCommand -ToolName 'docker'
+        $podmanCmd = Get-SystemInstallCommand -ToolName 'podman'
+        "Install with: $dockerCmd (or: $podmanCmd)"
     }
 
     if (Get-Command Write-MissingToolWarning -ErrorAction SilentlyContinue) {
@@ -1586,7 +1670,7 @@ function global:Get-ToolInstallationCommand {
         return ((Get-PlatformInstallHint -ToolName $ToolName) -replace '^Install with: ', '')
     }
 
-    return "scoop install $ToolName"
+    return Get-SystemInstallCommand -ToolName $ToolName
 }
 
 <#
@@ -1634,7 +1718,7 @@ function global:Get-ConversionToolMissingMessage {
         "Install with: $(Get-ToolInstallationCommand -ToolName $ToolName)"
     }
     else {
-        "Install with: scoop install $ToolName"
+        "Install with: $(Get-SystemInstallCommand -ToolName $ToolName)"
     }
 
     $subject = if ($Context) { $Context } else { "$ToolName command" }

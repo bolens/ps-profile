@@ -10,6 +10,61 @@
     This module is part of the TestSupport utilities and should be imported via TestSupport.ps1
 #>
 
+function script:Ensure-TestInstallHintResolverLoaded {
+    if (Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue) {
+        return
+    }
+
+    if (-not (Get-Command Get-TestRepoRoot -ErrorAction SilentlyContinue)) {
+        return
+    }
+
+    try {
+        $bootstrapDir = Get-TestPath -RelativePath 'profile.d/bootstrap' -EnsureExists
+        foreach ($bootstrapFile in @(
+                'GlobalState.ps1'
+                'CommandCache.ps1'
+                'AssumedCommands.ps1'
+                'MissingToolWarnings.ps1'
+                'ToolInstallRegistry.ps1'
+                'InstallHintResolver.ps1'
+            )) {
+            $path = Join-Path $bootstrapDir $bootstrapFile
+            if (Test-Path -LiteralPath $path) {
+                $null = . $path
+            }
+        }
+    }
+    catch {
+        # Fall back to lightweight platform detection below
+    }
+}
+
+function script:Get-TestFallbackInstallCommand {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$PackageName
+    )
+
+    if (Get-Command Get-SystemInstallCommand -ErrorAction SilentlyContinue) {
+        return Get-SystemInstallCommand -ToolName $PackageName
+    }
+
+    $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
+    elseif ($IsLinux) { 'Linux' }
+    elseif ($IsMacOS) { 'macOS' }
+    else { 'Windows' }
+
+    switch ($platform) {
+        'Windows' { return "scoop install $PackageName" }
+        'Linux' { return "sudo apt install $PackageName" }
+        'macOS' { return "brew install $PackageName" }
+        default { return "sudo apt install $PackageName" }
+    }
+}
+
 function Resolve-TestToolInstallCommand {
     <#
     .SYNOPSIS
@@ -42,6 +97,8 @@ function Resolve-TestToolInstallCommand {
         $ToolName
     }
 
+    Ensure-TestInstallHintResolverLoaded
+
     if (Get-Command Get-ToolInstallationCommand -ErrorAction SilentlyContinue) {
         return Get-ToolInstallationCommand -ToolName $packageName
     }
@@ -67,7 +124,7 @@ function Resolve-TestToolInstallCommand {
         return $DefaultInstallCommand
     }
 
-    return "scoop install $packageName"
+    return Get-TestFallbackInstallCommand -PackageName $packageName
 }
 
 function Get-TestToolSkipMessage {
@@ -799,6 +856,10 @@ function Test-MikefarahYqAvailable {
         Profile YAML conversions use `yq eval`, which requires
         https://github.com/mikefarah/yq. The unrelated python `yq` package
         exposes a different CLI and is not compatible.
+
+        When bootstrap command-cache helpers are loaded, this mirrors
+        Get-CachedExternalCommand / Invoke-CachedYqCommand resolution so
+        skip helpers do not report yq as available when conversions cannot invoke it.
     #>
     [CmdletBinding()]
     [OutputType([bool])]
@@ -806,10 +867,16 @@ function Test-MikefarahYqAvailable {
 
     if (Get-Command Get-CachedExternalCommand -ErrorAction SilentlyContinue) {
         $yqCmd = Get-CachedExternalCommand -Name 'yq'
-        if ($yqCmd -and (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue)) {
+        if (-not $yqCmd) {
+            return $false
+        }
+
+        if (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue) {
             $executable = if (-not [string]::IsNullOrWhiteSpace($yqCmd.Source)) { $yqCmd.Source } else { $yqCmd.Name }
             return Test-IsMikefarahYqExecutable -Executable $executable
         }
+
+        return $true
     }
 
     foreach ($candidate in @('go-yq', 'yq')) {
@@ -840,6 +907,340 @@ function Test-MikefarahYqAvailable {
     }
 
     return $false
+}
+
+function Get-TestMikefarahYqSkipMessage {
+    <#
+    .SYNOPSIS
+        Standard Pester skip message when mikefarah/yq is unavailable.
+    #>
+    [CmdletBinding()]
+    [OutputType([string])]
+    param()
+
+    return Get-TestToolSkipMessage -ToolName 'yq' -Context 'mikefarah/yq v4+ required (python-yq is not compatible)'
+}
+
+function Skip-IfMikefarahYqUnavailable {
+    <#
+    .SYNOPSIS
+        Skips the current Pester test when mikefarah/yq is unavailable.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param()
+
+    if (Test-MikefarahYqAvailable) {
+        return $false
+    }
+
+    Set-ItResult -Skipped -Because (Get-TestMikefarahYqSkipMessage)
+    return $true
+}
+
+function Skip-IfMikefarahYqAvailable {
+    <#
+    .SYNOPSIS
+        Skips the current Pester test when mikefarah/yq is available.
+    .DESCRIPTION
+        Use for tests that exercise missing-yq or yq-failure code paths.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param()
+
+    if (-not (Test-MikefarahYqAvailable)) {
+        return $false
+    }
+
+    Set-ItResult -Skipped -Because 'mikefarah/yq is available'
+    return $true
+}
+
+function Skip-IfToolUnavailable {
+    <#
+    .SYNOPSIS
+        Skips the current Pester test when a CLI tool is not on PATH.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ToolName,
+
+        [string]$Context,
+
+        [ValidateSet('python-package', 'node-package', 'python-runtime', 'rust-package', 'go-package', 'java-build-tool', 'ruby-package', 'php-package', 'dotnet-package', 'dart-package', 'elixir-package', 'generic')]
+        [string]$ToolType = 'generic'
+    )
+
+    $tool = Test-ToolAvailable -ToolName $ToolName -ToolType $ToolType -Silent
+    if ($tool.Available) {
+        return $false
+    }
+
+    $message = if ($Context) {
+        Get-TestToolSkipMessage -ToolName $ToolName -ToolType $ToolType -Context $Context
+    }
+    else {
+        Get-TestToolSkipMessage -ToolName $ToolName -ToolType $ToolType
+    }
+
+    Set-ItResult -Skipped -Because $message
+    return $true
+}
+
+function Skip-IfNodeUnavailable {
+    <#
+    .SYNOPSIS
+        Skips the current Pester test when Node.js is not available.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param()
+
+    return (Skip-IfToolUnavailable -ToolName 'node' -ToolType 'node-package' -Context 'Node.js is not available')
+}
+
+function Skip-IfNpmPackagesUnavailable {
+    <#
+    .SYNOPSIS
+        Skips when Node.js or any required npm package is unavailable.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [string[]]$PackageNames,
+
+        [string]$Context = 'Required npm packages not installed'
+    )
+
+    if (Skip-IfNodeUnavailable) {
+        return $true
+    }
+
+    $missing = @($PackageNames | Where-Object { -not (Test-NpmPackageAvailable -PackageName $_) })
+    if ($missing.Count -eq 0) {
+        return $false
+    }
+
+    Set-ItResult -Skipped -Because (Get-TestNodePackageSkipMessage -PackageNames $missing -Context $Context)
+    return $true
+}
+
+function Test-PythonRuntimeAvailable {
+    <#
+    .SYNOPSIS
+        Returns whether a Python interpreter is available for tests.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param()
+
+    if (Get-Command Get-PythonPath -ErrorAction SilentlyContinue) {
+        try {
+            $pythonPath = Get-PythonPath
+            if (-not [string]::IsNullOrWhiteSpace($pythonPath)) {
+                return $true
+            }
+        }
+        catch {
+            # Fall through to direct command lookup
+        }
+    }
+
+    foreach ($candidate in @('python', 'python3')) {
+        if (Get-Command $candidate -ErrorAction SilentlyContinue) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Skip-IfPythonUnavailable {
+    <#
+    .SYNOPSIS
+        Skips the current Pester test when Python is not available.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [string]$Context = 'Python is not available'
+    )
+
+    if (Test-PythonRuntimeAvailable) {
+        return $false
+    }
+
+    Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'python' -ToolType 'python-runtime' -Context $Context)
+    return $true
+}
+
+function Skip-IfPythonPackageUnavailable {
+    <#
+    .SYNOPSIS
+        Skips when Python or a required Python package is unavailable.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$PackageName,
+
+        [string]$Context
+    )
+
+    if (Skip-IfPythonUnavailable) {
+        return $true
+    }
+
+    if (Get-Command Test-PythonPackageAvailable -ErrorAction SilentlyContinue) {
+        if (Test-PythonPackageAvailable -PackageName $PackageName) {
+            return $false
+        }
+    }
+    else {
+        return $false
+    }
+
+    $message = if ($Context) {
+        Get-TestToolSkipMessage -ToolName $PackageName -ToolType 'python-package' -Context $Context
+    }
+    else {
+        Get-TestToolSkipMessage -ToolName $PackageName -ToolType 'python-package' -Context "$PackageName package not installed"
+    }
+
+    Set-ItResult -Skipped -Because $message
+    return $true
+}
+
+function Skip-IfModuleUnavailable {
+    <#
+    .SYNOPSIS
+        Skips the current Pester test when a PowerShell module is not installed.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ModuleName,
+
+        [string]$Context
+    )
+
+    if (Get-Module -ListAvailable -Name $ModuleName -ErrorAction SilentlyContinue) {
+        return $false
+    }
+
+    $message = if ($Context) { $Context } else { "$ModuleName module not available" }
+    Set-ItResult -Skipped -Because $message
+    return $true
+}
+
+function Skip-IfModuleAvailable {
+    <#
+    .SYNOPSIS
+        Skips when a PowerShell module is installed (inverse of Skip-IfModuleUnavailable).
+    .DESCRIPTION
+        Use for tests that only apply when a module is missing.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$ModuleName,
+
+        [string]$Context
+    )
+
+    if (-not (Get-Module -ListAvailable -Name $ModuleName -ErrorAction SilentlyContinue)) {
+        return $false
+    }
+
+    $message = if ($Context) { $Context } else { "$ModuleName module is installed" }
+    Set-ItResult -Skipped -Because $message
+    return $true
+}
+
+function Skip-IfBrotliStreamUnavailable {
+    <#
+    .SYNOPSIS
+        Skips when System.IO.Compression.BrotliStream is unavailable.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param()
+
+    try {
+        $null = [System.IO.Compression.BrotliStream]
+        return $false
+    }
+    catch {
+        Set-ItResult -Skipped -Because 'BrotliStream is not available (requires .NET Core 2.1+ or .NET 5+)'
+        return $true
+    }
+}
+
+function Skip-IfAnyToolUnavailable {
+    <#
+    .SYNOPSIS
+        Skips when none of the listed CLI tools are available.
+    .OUTPUTS
+        System.Boolean
+        Returns $true when the test was skipped.
+    #>
+    [CmdletBinding()]
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$Context,
+
+        [Parameter(Mandatory)]
+        [hashtable[]]$Tools
+    )
+
+    foreach ($tool in $Tools) {
+        $toolType = if ($tool['ToolType']) { $tool['ToolType'] } else { 'generic' }
+        $resolved = Test-ToolAvailable -ToolName $tool['Name'] -ToolType $toolType -Silent
+        if ($resolved.Available) {
+            return $false
+        }
+    }
+
+    Set-ItResult -Skipped -Because (Get-TestToolsSkipMessage -Context $Context -Tools $Tools)
+    return $true
 }
 
 function Get-ToolRecommendations {

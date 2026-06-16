@@ -111,14 +111,16 @@ Describe 'Cloud Tools Integration Tests' {
 
         It 'aws-profile alias sets AWS_PROFILE environment variable' {
             if (Get-Command Set-AwsProfile -CommandType Function -ErrorAction SilentlyContinue) {
-                $originalProfile = $env:AWS_PROFILE
-                                Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
-                Set-Alias -Name aws-profile -Value Set-AwsProfile -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
-                aws-profile 'test-profile' 2>&1 | Out-Null
-                $env:AWS_PROFILE | Should -Be 'test-profile'
-            }
-            finally {
-                $env:AWS_PROFILE = $originalProfile
+                try {
+                    $originalProfile = $env:AWS_PROFILE
+                    Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
+                    Set-Alias -Name aws-profile -Value Set-AwsProfile -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
+                    aws-profile 'test-profile' 2>&1 | Out-Null
+                    $env:AWS_PROFILE | Should -Be 'test-profile'
+                }
+                finally {
+                    $env:AWS_PROFILE = $originalProfile
+                }
             }
         }
 
@@ -133,14 +135,16 @@ Describe 'Cloud Tools Integration Tests' {
 
         It 'aws-region alias sets AWS_REGION environment variable' {
             if (Get-Command Set-AwsRegion -CommandType Function -ErrorAction SilentlyContinue) {
-                $originalRegion = $env:AWS_REGION
-                                Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
-                Set-Alias -Name aws-region -Value Set-AwsRegion -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
-                aws-region 'us-east-1' 2>&1 | Out-Null
-                $env:AWS_REGION | Should -Be 'us-east-1'
-            }
-            finally {
-                $env:AWS_REGION = $originalRegion
+                try {
+                    $originalRegion = $env:AWS_REGION
+                    Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
+                    Set-Alias -Name aws-region -Value Set-AwsRegion -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
+                    aws-region 'us-east-1' 2>&1 | Out-Null
+                    $env:AWS_REGION | Should -Be 'us-east-1'
+                }
+                finally {
+                    $env:AWS_REGION = $originalRegion
+                }
             }
         }
     }

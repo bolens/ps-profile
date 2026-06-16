@@ -626,12 +626,14 @@ try {
     }
 
     # Register functions
-    Set-AgentModeFunction -Name 'Write-WideEvent' -Body ${function:Write-WideEvent}
-    Set-AgentModeFunction -Name 'Write-StructuredError' -Body ${function:Write-StructuredError}
-    Set-AgentModeFunction -Name 'Write-StructuredWarning' -Body ${function:Write-StructuredWarning}
-    Set-AgentModeFunction -Name 'Invoke-WithWideEvent' -Body ${function:Invoke-WithWideEvent}
-    Set-AgentModeFunction -Name 'Get-EventSamplingStats' -Body ${function:Get-EventSamplingStats}
-    Set-AgentModeFunction -Name 'Clear-EventCollection' -Body ${function:Clear-EventCollection}
+    if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
+        Set-AgentModeFunction -Name 'Write-WideEvent' -Body ${function:Write-WideEvent}
+        Set-AgentModeFunction -Name 'Write-StructuredError' -Body ${function:Write-StructuredError}
+        Set-AgentModeFunction -Name 'Write-StructuredWarning' -Body ${function:Write-StructuredWarning}
+        Set-AgentModeFunction -Name 'Invoke-WithWideEvent' -Body ${function:Invoke-WithWideEvent}
+        Set-AgentModeFunction -Name 'Get-EventSamplingStats' -Body ${function:Get-EventSamplingStats}
+        Set-AgentModeFunction -Name 'Clear-EventCollection' -Body ${function:Clear-EventCollection}
+    }
 
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
@@ -642,7 +644,7 @@ catch {
     if (Get-Command Write-ProfileError -ErrorAction SilentlyContinue) {
         Write-ProfileError -ErrorRecord $_ -Context "Fragment: error-handling-standard" -Category 'Fragment'
     }
-    else {
+    elseif ($env:PS_PROFILE_TEST_MODE -ne '1') {
         Write-Warning "Failed to load error-handling-standard fragment: $($_.Exception.Message)"
     }
 }

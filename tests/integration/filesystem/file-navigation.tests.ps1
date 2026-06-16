@@ -124,36 +124,42 @@ Describe 'File Navigation Functions Integration Tests' {
         It 'desktop alias navigates to Desktop' {
             if (Test-Path "$env:USERPROFILE\Desktop") {
                 $originalLocation = Get-Location
-                                desktop
-                $desktop = Get-Location
-                $desktop.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Desktop"))
-            }
-            finally {
-                Set-Location $originalLocation
+                try {
+                    desktop
+                    $desktop = Get-Location
+                    $desktop.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Desktop"))
+                }
+                finally {
+                    Set-Location $originalLocation
+                }
             }
         }
 
         It 'downloads alias navigates to Downloads' {
             if (Test-Path "$env:USERPROFILE\Downloads") {
                 $originalLocation = Get-Location
-                                downloads
-                $downloads = Get-Location
-                $downloads.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Downloads"))
-            }
-            finally {
-                Set-Location $originalLocation
+                try {
+                    downloads
+                    $downloads = Get-Location
+                    $downloads.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Downloads"))
+                }
+                finally {
+                    Set-Location $originalLocation
+                }
             }
         }
 
         It 'docs alias navigates to Documents' {
             if (Test-Path "$env:USERPROFILE\Documents") {
                 $originalLocation = Get-Location
-                                docs
-                $docs = Get-Location
-                $docs.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Documents"))
-            }
-            finally {
-                Set-Location $originalLocation
+                try {
+                    docs
+                    $docs = Get-Location
+                    $docs.Path | Should -Match ([regex]::Escape("$env:USERPROFILE\Documents"))
+                }
+                finally {
+                    Set-Location $originalLocation
+                }
             }
         }
     }

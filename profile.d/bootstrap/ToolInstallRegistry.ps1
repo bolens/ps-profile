@@ -2301,17 +2301,17 @@ function global:Get-SystemPackageManagerFallbackChain {
                 @{ Name = 'dnf'; Command = 'dnf'; InstallCmd = "sudo dnf install $ToolName" }
                 @{ Name = 'yum'; Command = 'yum'; InstallCmd = "sudo yum install $ToolName" }
                 @{ Name = 'pacman'; Command = 'pacman'; InstallCmd = "sudo pacman -S $ToolName" }
-                @{ Name = 'scoop'; Command = 'scoop'; InstallCmd = "scoop install $ToolName" }
             )
         }
         'macOS' {
             @(
                 @{ Name = 'homebrew'; Command = 'brew'; InstallCmd = "brew install $ToolName" }
-                @{ Name = 'scoop'; Command = 'scoop'; InstallCmd = "scoop install $ToolName" }
             )
         }
         default {
             @(
+                @{ Name = 'apt'; Command = 'apt'; InstallCmd = "sudo apt install $ToolName" }
+                @{ Name = 'dnf'; Command = 'dnf'; InstallCmd = "sudo dnf install $ToolName" }
                 @{ Name = 'scoop'; Command = 'scoop'; InstallCmd = "scoop install $ToolName" }
             )
         }

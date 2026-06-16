@@ -70,7 +70,8 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
             $result = Get-PreferenceAwareInstallHint -ToolName 'test-tool' -ToolType 'generic'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest Linux package managers
-            $result | Should -Match 'apt|yum|dnf|pacman|scoop'
+            $result | Should -Match 'apt|yum|dnf|pacman'
+            $result | Should -Not -Match 'scoop install'
         }
         
         It 'Prioritizes apt on Debian-based systems' -Skip:(-not $IsLinux) {
@@ -111,7 +112,8 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
             $result = Get-PreferenceAwareInstallHint -ToolName 'test-tool' -ToolType 'generic'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest macOS package managers
-            $result | Should -Match 'brew|scoop'
+            $result | Should -Match 'brew'
+            $result | Should -Not -Match 'scoop install'
         }
         
         It 'Prioritizes Homebrew on macOS when available' -Skip:(-not $IsMacOS) {
@@ -126,21 +128,21 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
             $result = Get-PreferenceAwareInstallHint -ToolName 'pnpm' -ToolType 'node-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest macOS-appropriate method
-            $result | Should -Match 'brew|npm|scoop'
+            $result | Should -Match 'brew|npm'
         }
         
         It 'Suggests macOS-specific installation for uv' -Skip:(-not $IsMacOS) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'uv' -ToolType 'python-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest macOS-appropriate method
-            $result | Should -Match 'brew|pip|scoop'
+            $result | Should -Match 'brew|pip'
         }
         
         It 'Suggests macOS-specific installation for poetry' -Skip:(-not $IsMacOS) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'poetry' -ToolType 'python-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest macOS-appropriate method
-            $result | Should -Match 'brew|pip|scoop'
+            $result | Should -Match 'brew|pip'
         }
     }
     

@@ -24,11 +24,7 @@ Describe 'Multi-Format Roundtrip Conversion Tests' {
             Get-Command ConvertTo-ToonFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertFrom-ToonToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertFrom-Yaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $originalJson = '{"name": "test", "value": 123}'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $originalJson
@@ -49,11 +45,7 @@ Describe 'Multi-Format Roundtrip Conversion Tests' {
             Get-Command ConvertTo-TomlFromToon -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertFrom-TomlToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-CsvFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $originalCsv = "name,value`nalice,123`nbob,456"
             $tempFile = Join-Path $TestDrive 'test.csv'
             Set-Content -Path $tempFile -Value $originalCsv

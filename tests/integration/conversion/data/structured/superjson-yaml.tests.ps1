@@ -42,11 +42,7 @@ Describe 'SuperJSON to/from YAML Conversion Tests' {
                 Set-ItResult -Skipped -Because $skipMessage
                 return
             }
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
                 Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
@@ -74,11 +70,7 @@ Describe 'SuperJSON to/from YAML Conversion Tests' {
                 Set-ItResult -Skipped -Because $skipMessage
                 return
             }
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
                 Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
@@ -103,11 +95,7 @@ Describe 'SuperJSON to/from YAML Conversion Tests' {
                 Set-ItResult -Skipped -Because $skipMessage
                 return
             }
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             # Check if superjson is available
             if (-not (Test-NpmPackageAvailable -PackageName 'superjson')) {
                 Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'superjson' -ToolType 'node-package' -Context 'superjson package not installed')
