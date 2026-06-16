@@ -616,6 +616,32 @@ Batch scripts forward a subset of flags (`-Quiet`, `-Parallel` on conversion bat
 For full runner features (coverage, retries, baselines), call `run-pester.ps1` directly
 or use `task test -- <flags>`.
 
+### CI shards (GitHub Actions)
+
+The `Test - Pester` workflow runs the suite as **parallel matrix jobs** instead of one
+multi-hour job. Each shard is a bounded path set executed via `run-pester-ci-shard.ps1`:
+
+```powershell
+# List shard names (matches .github/workflows/test-pester.yml)
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -ListShards
+
+# Run one shard locally (same as a single CI job)
+task test-ci-shard -- -Shard unit-library -Quiet
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard conversion-data-compression -Quiet
+```
+
+| Shard kind | Examples | Runner |
+|------------|----------|--------|
+| Unit | `unit-library`, `unit-profile-core`, `unit-profile-misc-a` | `run-pester.ps1 -Parallel` |
+| Integration (non-conversion) | `integration-core` | `run-pester.ps1 -Parallel` |
+| Tools integration | `integration-tools` | `run-tools-integration-batch.ps1` |
+| Conversion integration | `conversion-data-structured`, `conversion-media` | conversion batch scripts |
+| Performance | `performance` (Windows job only) | `run-performance-batch.ps1` |
+| Coverage smoke | `coverage-smoke` (Ubuntu only) | `run-pester.ps1 -Coverage` on bootstrap + library |
+
+Wall-clock time is dominated by the slowest shard; tune shards in `run-pester-ci-shard.ps1`
+when one bucket grows too large.
+
 ## Coverage Analysis
 
 During development, `analyze-coverage.ps1` is the recommended entry point. It maps
