@@ -863,67 +863,102 @@ function Test-MikefarahYqAvailable {
     #>
     [CmdletBinding()]
     [OutputType([bool])]
-    param()
+    param(
+        [switch]$Refresh
+    )
 
-    if (Get-Command Get-CachedExternalCommand -ErrorAction SilentlyContinue) {
-        $yqCmd = Get-CachedExternalCommand -Name 'yq'
-        if (-not $yqCmd) {
-            return $false
-        }
-
-        if (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue) {
-            $executable = if (Get-Command Resolve-CommandExecutablePath -ErrorAction SilentlyContinue) {
-                Resolve-CommandExecutablePath -CommandInfo $yqCmd
-            }
-            elseif (-not [string]::IsNullOrWhiteSpace($yqCmd.Name)) {
-                [string]$yqCmd.Name
-            }
-            else {
-                $null
-            }
-            return Test-IsMikefarahYqExecutable -Executable $executable
-        }
-
-        return $true
+    if (-not $Refresh -and (Get-Variable -Name MikefarahYqAvailabilityCache -Scope Script -ErrorAction SilentlyContinue)) {
+        return [bool]$script:MikefarahYqAvailabilityCache
     }
 
-    foreach ($candidate in @('go-yq', 'yq')) {
-        foreach ($cmd in @(Get-Command $candidate -CommandType Application -ErrorAction SilentlyContinue)) {
-            $exe = if (Get-Command Resolve-CommandExecutablePath -ErrorAction SilentlyContinue) {
-                Resolve-CommandExecutablePath -CommandInfo $cmd
-            }
-            elseif (-not [string]::IsNullOrWhiteSpace($cmd.Name)) {
-                [string]$cmd.Name
-            }
-            else {
-                $null
-            }
-            if ([string]::IsNullOrWhiteSpace($exe)) {
-                continue
-            }
+    try {
+        $available = $false
 
-            if (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue) {
-                if (Test-IsMikefarahYqExecutable -Executable $exe) {
-                    return $true
+        if (Get-Command Get-CachedExternalCommand -ErrorAction SilentlyContinue) {
+            $yqCmd = Get-CachedExternalCommand -Name 'yq'
+            if ($yqCmd) {
+                if (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue) {
+                    $executable = if (Get-Command Resolve-CommandExecutablePath -ErrorAction SilentlyContinue) {
+                        Resolve-CommandExecutablePath -CommandInfo $yqCmd
+                    }
+                    elseif (-not [string]::IsNullOrWhiteSpace($yqCmd.Name)) {
+                        [string]$yqCmd.Name
+                    }
+                    else {
+                        $null
+                    }
+                    $available = Test-IsMikefarahYqExecutable -Executable $executable
+                }
+                else {
+                    $available = $true
                 }
             }
-            else {
-                $versionOutput = (& $exe --version 2>&1 | Out-String).Trim()
-                if ($versionOutput -match 'mikefarah|github\.com/mikefarah') {
-                    return $true
-                }
+        }
+        else {
+            foreach ($candidate in @('go-yq', 'yq')) {
+                foreach ($cmd in @(Get-Command $candidate -CommandType Application -ErrorAction SilentlyContinue)) {
+                    $exe = if (Get-Command Resolve-CommandExecutablePath -ErrorAction SilentlyContinue) {
+                        Resolve-CommandExecutablePath -CommandInfo $cmd
+                    }
+                    elseif (-not [string]::IsNullOrWhiteSpace($cmd.Name)) {
+                        [string]$cmd.Name
+                    }
+                    else {
+                        $null
+                    }
+                    if ([string]::IsNullOrWhiteSpace($exe)) {
+                        continue
+                    }
 
-                if ($versionOutput -notmatch '^yq\s+\d') {
-                    $evalHelp = (& $exe eval --help 2>&1 | Out-String)
-                    if ($evalHelp -match 'evaluates' -and $evalHelp -notmatch 'jq_filter') {
-                        return $true
+                    if (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue) {
+                        if (Test-IsMikefarahYqExecutable -Executable $exe) {
+                            $available = $true
+                            break
+                        }
+                    }
+                    else {
+                        $versionOutput = (& $exe --version 2>&1 | Out-String).Trim()
+                        if ($versionOutput -match 'mikefarah|github\.com/mikefarah') {
+                            $available = $true
+                            break
+                        }
+
+                        if ($versionOutput -notmatch '^yq\s+\d') {
+                            $evalHelp = (& $exe eval --help 2>&1 | Out-String)
+                            if ($evalHelp -match 'evaluates' -and $evalHelp -notmatch 'jq_filter') {
+                                $available = $true
+                                break
+                            }
+                        }
                     }
                 }
+
+                if ($available) {
+                    break
+                }
             }
         }
-    }
 
-    return $false
+        $script:MikefarahYqAvailabilityCache = $available
+        return $available
+    }
+    catch {
+        $script:MikefarahYqAvailabilityCache = $false
+        return $false
+    }
+}
+
+function Clear-TestMikefarahYqAvailabilityCache {
+    <#
+    .SYNOPSIS
+        Clears the cached result used by Test-MikefarahYqAvailable.
+    #>
+    [CmdletBinding()]
+    param()
+
+    if (Get-Variable -Name MikefarahYqAvailabilityCache -Scope Script -ErrorAction SilentlyContinue) {
+        $script:MikefarahYqAvailabilityCache = $null
+    }
 }
 
 function Get-TestMikefarahYqSkipMessage {

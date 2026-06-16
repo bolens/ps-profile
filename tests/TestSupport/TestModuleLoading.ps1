@@ -1692,14 +1692,8 @@ function Initialize-ConversionIntegration {
         }
     }
 
-    if (Get-Command Test-MikefarahYqAvailable -ErrorAction SilentlyContinue) {
-        try {
-            $script:MikefarahYqAvailable = Test-MikefarahYqAvailable
-        }
-        catch {
-            $script:MikefarahYqAvailable = $false
-        }
-    }
+    # yq availability is resolved lazily via Test-MikefarahYqAvailable when tests call
+    # Skip-IfMikefarahYqUnavailable; probing here broke unrelated conversion BeforeAll hooks on Linux CI.
 }
 
 

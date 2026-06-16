@@ -539,9 +539,10 @@ function global:Get-CachedExternalCommand {
 
         # Prefer explicit test mocks over host binaries with the same name.
         if ($global:TestRegisteredMockCommands -and $global:TestRegisteredMockCommands.Contains($candidate)) {
-            $mockFunction = Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue
-            if ($mockFunction -and $mockFunction.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
-                return $mockFunction
+            foreach ($mockFunction in @(Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue)) {
+                if ($mockFunction.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
+                    return $mockFunction
+                }
             }
         }
 
@@ -552,23 +553,40 @@ function global:Get-CachedExternalCommand {
                 continue
             }
 
-            if ($isYqLookup -and -not (Test-IsMikefarahYqExecutable -Executable $executablePath)) {
-                continue
+            if ($isYqLookup) {
+                try {
+                    if (-not (Test-IsMikefarahYqExecutable -Executable $executablePath)) {
+                        continue
+                    }
+                }
+                catch {
+                    continue
+                }
             }
 
             return $application
         }
 
         # Profile aliases with the same name as a binary would otherwise recurse into wrapper functions.
-        $functionCmd = Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue
-        if ($functionCmd -and $functionCmd.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
-            return $functionCmd
+        foreach ($functionCmd in @(Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue)) {
+            if ($functionCmd.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
+                return $functionCmd
+            }
         }
 
         foreach ($externalScript in @(Get-Command -Name $candidate -CommandType ExternalScript -ErrorAction SilentlyContinue)) {
             if ($isYqLookup) {
                 $exe = Resolve-CommandExecutablePath -CommandInfo $externalScript
-                if ([string]::IsNullOrWhiteSpace($exe) -or -not (Test-IsMikefarahYqExecutable -Executable $exe)) {
+                if ([string]::IsNullOrWhiteSpace($exe)) {
+                    continue
+                }
+
+                try {
+                    if (-not (Test-IsMikefarahYqExecutable -Executable $exe)) {
+                        continue
+                    }
+                }
+                catch {
                     continue
                 }
             }
@@ -599,6 +617,9 @@ function global:Clear-TestCachedCommandCache {
     }
 
     $global:TestCachedCommandCache.Clear()
+    if (Get-Command Clear-TestMikefarahYqAvailabilityCache -ErrorAction SilentlyContinue) {
+        Clear-TestMikefarahYqAvailabilityCache
+    }
     return $true
 }
 
