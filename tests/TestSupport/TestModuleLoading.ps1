@@ -1693,7 +1693,12 @@ function Initialize-ConversionIntegration {
     }
 
     if (Get-Command Test-MikefarahYqAvailable -ErrorAction SilentlyContinue) {
-        $script:MikefarahYqAvailable = Test-MikefarahYqAvailable
+        try {
+            $script:MikefarahYqAvailable = Test-MikefarahYqAvailable
+        }
+        catch {
+            $script:MikefarahYqAvailable = $false
+        }
     }
 }
 

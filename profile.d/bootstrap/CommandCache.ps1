@@ -322,6 +322,109 @@ function global:Get-ExternalCommandLookupNames {
 
 <#
 .SYNOPSIS
+    Resolves an executable path from command metadata or path-like input.
+
+.DESCRIPTION
+    Normalizes CommandInfo objects, nested command arrays, and multi-value Source
+    properties into a single executable path string for external command invocation.
+
+.PARAMETER CommandInfo
+    Command metadata, executable path, or enumerable command results.
+
+.OUTPUTS
+    System.String
+#>
+function global:Resolve-CommandExecutablePath {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [AllowNull()]
+        [object]$CommandInfo
+    )
+
+    if ($null -eq $CommandInfo) {
+        return $null
+    }
+
+    if ($CommandInfo -is [string]) {
+        $text = $CommandInfo.Trim()
+        if ([string]::IsNullOrWhiteSpace($text)) {
+            return $null
+        }
+
+        return $text
+    }
+
+    if ($CommandInfo -is [System.Management.Automation.CommandInfo]) {
+        $fromSource = $null
+        if ($null -ne $CommandInfo.Source) {
+            $fromSource = Resolve-CommandExecutablePath -CommandInfo $CommandInfo.Source
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($fromSource)) {
+            return $fromSource
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($CommandInfo.Name)) {
+            return [string]$CommandInfo.Name
+        }
+
+        return $null
+    }
+
+    if ($null -ne $CommandInfo.PSObject.Properties['Source'] -or $null -ne $CommandInfo.PSObject.Properties['Name']) {
+        if ($null -ne $CommandInfo.Source) {
+            $fromSource = Resolve-CommandExecutablePath -CommandInfo $CommandInfo.Source
+            if (-not [string]::IsNullOrWhiteSpace($fromSource)) {
+                return $fromSource
+            }
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($CommandInfo.Name)) {
+            return [string]$CommandInfo.Name
+        }
+
+        return $null
+    }
+
+    if ($CommandInfo -is [System.Array]) {
+        foreach ($entry in $CommandInfo) {
+            $resolved = Resolve-CommandExecutablePath -CommandInfo $entry
+            if (-not [string]::IsNullOrWhiteSpace($resolved)) {
+                return $resolved
+            }
+        }
+
+        return $null
+    }
+
+    if ($CommandInfo -is [System.Collections.IEnumerable]) {
+        foreach ($entry in $CommandInfo) {
+            $resolved = Resolve-CommandExecutablePath -CommandInfo $entry
+            if (-not [string]::IsNullOrWhiteSpace($resolved)) {
+                return $resolved
+            }
+        }
+
+        return $null
+    }
+
+    try {
+        $text = ([string]$CommandInfo).Trim()
+        if ([string]::IsNullOrWhiteSpace($text)) {
+            return $null
+        }
+
+        return $text
+    }
+    catch {
+        return $null
+    }
+}
+
+<#
+.SYNOPSIS
     Returns whether an executable is mikefarah/yq v4+ (not python-yq).
 
 .DESCRIPTION
@@ -342,9 +445,10 @@ function global:Test-IsMikefarahYqExecutable {
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)]
-        [string]$Executable
+        [object]$Executable
     )
 
+    $Executable = Resolve-CommandExecutablePath -CommandInfo $Executable
     if ([string]::IsNullOrWhiteSpace($Executable)) {
         return $false
     }
@@ -381,7 +485,11 @@ function global:Invoke-CachedYqCommand {
         throw 'yq command not found. Install mikefarah/yq (on Arch: sudo pacman -S go-yq).'
     }
 
-    $executable = if (-not [string]::IsNullOrWhiteSpace($yqCmd.Source)) { $yqCmd.Source } else { $yqCmd.Name }
+    $executable = Resolve-CommandExecutablePath -CommandInfo $yqCmd
+    if ([string]::IsNullOrWhiteSpace($executable)) {
+        throw 'yq command not found. Install mikefarah/yq (on Arch: sudo pacman -S go-yq).'
+    }
+
     $yqArguments = @($args)
     $pipedInput = @($input)
 
@@ -437,9 +545,14 @@ function global:Get-CachedExternalCommand {
             }
         }
 
-        $application = Get-Command -Name $candidate -CommandType Application -ErrorAction SilentlyContinue
-        if ($application) {
-            if ($isYqLookup -and -not (Test-IsMikefarahYqExecutable -Executable $application.Source)) {
+        $applications = @(Get-Command -Name $candidate -CommandType Application -ErrorAction SilentlyContinue)
+        foreach ($application in $applications) {
+            $executablePath = Resolve-CommandExecutablePath -CommandInfo $application
+            if ([string]::IsNullOrWhiteSpace($executablePath)) {
+                continue
+            }
+
+            if ($isYqLookup -and -not (Test-IsMikefarahYqExecutable -Executable $executablePath)) {
                 continue
             }
 
@@ -452,11 +565,10 @@ function global:Get-CachedExternalCommand {
             return $functionCmd
         }
 
-        $externalScript = Get-Command -Name $candidate -CommandType ExternalScript -ErrorAction SilentlyContinue
-        if ($externalScript) {
+        foreach ($externalScript in @(Get-Command -Name $candidate -CommandType ExternalScript -ErrorAction SilentlyContinue)) {
             if ($isYqLookup) {
-                $exe = if (-not [string]::IsNullOrWhiteSpace($externalScript.Source)) { $externalScript.Source } else { $externalScript.Name }
-                if (-not (Test-IsMikefarahYqExecutable -Executable $exe)) {
+                $exe = Resolve-CommandExecutablePath -CommandInfo $externalScript
+                if ([string]::IsNullOrWhiteSpace($exe) -or -not (Test-IsMikefarahYqExecutable -Executable $exe)) {
                     continue
                 }
             }
