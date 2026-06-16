@@ -872,7 +872,15 @@ function Test-MikefarahYqAvailable {
         }
 
         if (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue) {
-            $executable = if (-not [string]::IsNullOrWhiteSpace($yqCmd.Source)) { $yqCmd.Source } else { $yqCmd.Name }
+            $executable = if (Get-Command Resolve-CommandExecutablePath -ErrorAction SilentlyContinue) {
+                Resolve-CommandExecutablePath -CommandInfo $yqCmd
+            }
+            elseif (-not [string]::IsNullOrWhiteSpace($yqCmd.Name)) {
+                [string]$yqCmd.Name
+            }
+            else {
+                $null
+            }
             return Test-IsMikefarahYqExecutable -Executable $executable
         }
 
@@ -880,27 +888,36 @@ function Test-MikefarahYqAvailable {
     }
 
     foreach ($candidate in @('go-yq', 'yq')) {
-        $cmd = Get-Command $candidate -CommandType Application -ErrorAction SilentlyContinue
-        if (-not $cmd) {
-            continue
-        }
-
-        $exe = $cmd.Source
-        if (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue) {
-            if (Test-IsMikefarahYqExecutable -Executable $exe) {
-                return $true
+        foreach ($cmd in @(Get-Command $candidate -CommandType Application -ErrorAction SilentlyContinue)) {
+            $exe = if (Get-Command Resolve-CommandExecutablePath -ErrorAction SilentlyContinue) {
+                Resolve-CommandExecutablePath -CommandInfo $cmd
             }
-        }
-        else {
-            $versionOutput = (& $exe --version 2>&1 | Out-String).Trim()
-            if ($versionOutput -match 'mikefarah|github\.com/mikefarah') {
-                return $true
+            elseif (-not [string]::IsNullOrWhiteSpace($cmd.Name)) {
+                [string]$cmd.Name
+            }
+            else {
+                $null
+            }
+            if ([string]::IsNullOrWhiteSpace($exe)) {
+                continue
             }
 
-            if ($versionOutput -notmatch '^yq\s+\d') {
-                $evalHelp = (& $exe eval --help 2>&1 | Out-String)
-                if ($evalHelp -match 'evaluates' -and $evalHelp -notmatch 'jq_filter') {
+            if (Get-Command Test-IsMikefarahYqExecutable -ErrorAction SilentlyContinue) {
+                if (Test-IsMikefarahYqExecutable -Executable $exe) {
                     return $true
+                }
+            }
+            else {
+                $versionOutput = (& $exe --version 2>&1 | Out-String).Trim()
+                if ($versionOutput -match 'mikefarah|github\.com/mikefarah') {
+                    return $true
+                }
+
+                if ($versionOutput -notmatch '^yq\s+\d') {
+                    $evalHelp = (& $exe eval --help 2>&1 | Out-String)
+                    if ($evalHelp -match 'evaluates' -and $evalHelp -notmatch 'jq_filter') {
+                        return $true
+                    }
                 }
             }
         }
