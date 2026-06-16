@@ -7,22 +7,40 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  POWERSHELL_TELEMETRY_OPTOUT: "1"
 
 jobs:
   test:
+    name: Pester on ${{ matrix.label }} (${{ matrix.powershell }})
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
         include:
-          - os: ubuntu-latest
+          - label: ubuntu-latest
+            os: ubuntu-latest
+            container: null
             powershell: pwsh
-          - os: windows-latest
+          - label: windows-latest
+            os: windows-latest
+            container: null
             powershell: pwsh
-          - os: windows-latest
+          - label: windows-latest
+            os: windows-latest
+            container: null
             powershell: powershell
+          - label: arch-latest
+            os: ubuntu-latest
+            container: archlinux:latest
+            powershell: pwsh
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Arch Linux
+        if: matrix.label == 'arch-latest'
+        uses: ./.github/actions/setup-arch-linux
+        with:
+          pwsh-version: 7.4.7
       - name: Install Pester
         run: ${{ matrix.powershell }} -NoProfile -Command "Install-Module -Name Pester -Force -Scope CurrentUser"
       - name: Run Pester
@@ -30,10 +48,10 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v7
         with:
-          name: test-results-${{ matrix.os }}-${{ matrix.powershell }}
+          name: test-results-${{ matrix.label }}-${{ matrix.powershell }}
           path: pester-results.xml
       - name: Upload coverage reports
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-${{ matrix.os }}-${{ matrix.powershell }}
+          name: coverage-${{ matrix.label }}-${{ matrix.powershell }}
           path: coverage.xml

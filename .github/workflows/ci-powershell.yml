@@ -8,17 +8,44 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  POWERSHELL_TELEMETRY_OPTOUT: "1"
 
 jobs:
   validate:
-    name: Validate on ${{ matrix.os }} / PowerShell ${{ matrix.pwsh }}
+    name: Validate on ${{ matrix.label }} / PowerShell ${{ matrix.pwsh }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        pwsh: [7.2, 7.4]
+        include:
+          - label: ubuntu-latest
+            os: ubuntu-latest
+            container: null
+            pwsh: '7.2'
+          - label: ubuntu-latest
+            os: ubuntu-latest
+            container: null
+            pwsh: '7.4'
+          - label: windows-latest
+            os: windows-latest
+            container: null
+            pwsh: '7.2'
+          - label: windows-latest
+            os: windows-latest
+            container: null
+            pwsh: '7.4'
+          - label: arch-latest
+            os: ubuntu-latest
+            container: archlinux:latest
+            pwsh: '7.4'
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v6
+      - name: Setup Arch Linux
+        if: matrix.label == 'arch-latest'
+        uses: ./.github/actions/setup-arch-linux
+        with:
+          pwsh-version: 7.4.7
       - name: Install PSScriptAnalyzer
         run: pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force"
       - name: Validate profile (lint + idempotency)
