@@ -92,6 +92,10 @@ function Get-TestSupportPath {
         [string]$StartPath = $PSScriptRoot
     )
 
+    if ($env:PS_PROFILE_TEST_SUPPORT_PATH -and -not [string]::IsNullOrWhiteSpace($env:PS_PROFILE_TEST_SUPPORT_PATH) -and (Test-Path -LiteralPath $env:PS_PROFILE_TEST_SUPPORT_PATH)) {
+        return $env:PS_PROFILE_TEST_SUPPORT_PATH
+    }
+
     $current = Get-Item -LiteralPath $StartPath
     
     while ($null -ne $current) {
