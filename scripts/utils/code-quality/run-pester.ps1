@@ -796,6 +796,9 @@ try {
     $testsDir = Join-Path $repoRoot 'tests'
     $profileDir = Join-Path $repoRoot 'profile.d'
     $testSupportPath = Join-Path $testsDir 'TestSupport.ps1'
+
+    $env:PS_PROFILE_TEST_SUPPORT_PATH = $testSupportPath
+    $env:PS_PROFILE_TESTS_DIR = $testsDir
     
     # Level 2: Repository paths resolved
     if ($debugLevel -ge 2) {
@@ -1015,6 +1018,8 @@ try {
         Verbose                  = $Verbose
         ProfileDir               = $profileDir
         RepoRoot                 = $repoRoot
+        TestSupportPath          = $testSupportPath
+        TestsDir                 = $testsDir
     }
 
     # Handle parallel execution

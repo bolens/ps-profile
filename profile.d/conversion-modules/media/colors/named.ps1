@@ -15,7 +15,7 @@
 #>
 function Initialize-FileConversion-MediaColorsNamed {
     # CSS Named Colors - Complete list from CSS Color Module Level 4 specification
-    $script:CssNamedColors = @{
+    $global:CssNamedColors = @{
         # Basic 16 colors
         'black'                = @{ r = 0; g = 0; b = 0 }
         'silver'               = @{ r = 192; g = 192; b = 192 }

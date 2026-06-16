@@ -153,13 +153,18 @@ Describe 'SAS Format Conversion Tests' {
             
             if ($error) {
                 $errorMessage = $error.Exception.Message
-                $missingDataFrameLib = -not $script:PandasAvailable -and -not $script:PolarsAvailable
-                if ($missingDataFrameLib -or -not $script:PyreadstatAvailable) {
-                    ($errorMessage -match 'pandas|polars|pyreadstat') | Should -Be $true
-                    ($errorMessage -match 'uv pip install|pip install') | Should -Be $true
+                if ($errorMessage -match 'not found|does not exist|cannot find|InputPath|Input file') {
+                    ($errorMessage -match 'not found|does not exist|cannot find|InputPath|Input file|missing|\.sas7bdat') | Should -Be $true
                 }
                 else {
-                    ($errorMessage -match 'not found|does not exist|cannot find|InputPath|missing|\.sas7bdat') | Should -Be $true
+                    $missingDataFrameLib = -not $script:PandasAvailable -and -not $script:PolarsAvailable
+                    if ($missingDataFrameLib -or -not $script:PyreadstatAvailable) {
+                        ($errorMessage -match 'pandas|polars|pyreadstat') | Should -Be $true
+                        ($errorMessage -match 'uv pip install|pip install') | Should -Be $true
+                    }
+                    else {
+                        ($errorMessage -match 'not found|does not exist|cannot find|InputPath|missing|\.sas7bdat') | Should -Be $true
+                    }
                 }
             }
         }

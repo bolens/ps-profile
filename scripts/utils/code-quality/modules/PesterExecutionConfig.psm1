@@ -44,7 +44,9 @@ function Set-PesterExecutionOptions {
         [switch]$Randomize,
         [Nullable[int]]$Timeout,
         [switch]$FailOnWarnings,
-        [switch]$SkipRemainingOnFailure
+        [switch]$SkipRemainingOnFailure,
+        [string]$TestSupportPath,
+        [string]$TestsDir
     )
 
     # Configure parallel execution
@@ -54,6 +56,43 @@ function Set-PesterExecutionOptions {
         }
         if ($Config.Run.PSObject.Properties.Name -contains 'MaximumThreadCount') {
             $Config.Run.MaximumThreadCount = $Parallel
+        }
+
+        # Parallel workers run in isolated runspaces; load TestSupport in each worker.
+        if ($TestSupportPath -and -not [string]::IsNullOrWhiteSpace($TestSupportPath) -and (Test-Path -LiteralPath $TestSupportPath)) {
+            $supportPath = $TestSupportPath
+            $testsDirectory = if ($TestsDir -and -not [string]::IsNullOrWhiteSpace($TestsDir)) {
+                $TestsDir
+            }
+            else {
+                Split-Path -Parent $TestSupportPath
+            }
+
+            if ($Config.Run.PSObject.Properties.Name -contains 'Initialization') {
+                $Config.Run.Initialization = {
+                    $ErrorActionPreference = 'Stop'
+                    $ConfirmPreference = 'None'
+                    $global:ConfirmPreference = 'None'
+                    if (-not $global:PSDefaultParameterValues) {
+                        $global:PSDefaultParameterValues = @{}
+                    }
+                    $global:PSDefaultParameterValues['Remove-Item:Confirm'] = $false
+                    $global:PSDefaultParameterValues['Remove-Item:Force'] = $true
+                    $global:PSDefaultParameterValues['Remove-Item:Recurse'] = $true
+
+                    $env:PS_PROFILE_TEST_SUPPORT_PATH = $using:supportPath
+                    $env:PS_PROFILE_TESTS_DIR = $using:testsDirectory
+
+                    $originalPSScriptRoot = $PSScriptRoot
+                    $PSScriptRoot = $using:testsDirectory
+                    try {
+                        . $using:supportPath
+                    }
+                    finally {
+                        $PSScriptRoot = $originalPSScriptRoot
+                    }
+                }
+            }
         }
     }
 
