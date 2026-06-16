@@ -224,20 +224,22 @@ Describe "ModuleLoading Functions - Additional Coverage" {
         }
         
         It "Writes warning in debug mode when syntax check fails" {
-            $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error.ps1'
-            Set-Content -Path $syntaxErrorModule -Value 'invalid syntax {' -NoNewline
-            $env:PS_PROFILE_DEBUG_SYNTAX_CHECK = '1'
-            
-                        $result = Import-FragmentModule `
-                -FragmentRoot $script:TestFragmentRoot `
-                -ModulePath @('test-modules', 'syntax-error.ps1') `
-                -Context 'Test: debug-syntax-error'
-            
-            $result | Should -Be $false
-        }
-        finally {
-            Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:PS_PROFILE_DEBUG_SYNTAX_CHECK -ErrorAction SilentlyContinue
+            try {
+                $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error.ps1'
+                Set-Content -Path $syntaxErrorModule -Value 'invalid syntax {' -NoNewline
+                $env:PS_PROFILE_DEBUG_SYNTAX_CHECK = '1'
+
+                $result = Import-FragmentModule `
+                    -FragmentRoot $script:TestFragmentRoot `
+                    -ModulePath @('test-modules', 'syntax-error.ps1') `
+                    -Context 'Test: debug-syntax-error'
+
+                $result | Should -Be $false
+            }
+            finally {
+                Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:PS_PROFILE_DEBUG_SYNTAX_CHECK -ErrorAction SilentlyContinue
+            }
         }
         
         It "Writes warning in debug mode when module fails to load" {

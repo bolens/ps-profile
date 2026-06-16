@@ -384,18 +384,20 @@ function Test-RetryFunction {
         }
         
         It 'Does not retry on syntax errors' {
-            $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error.ps1'
-            Set-Content -Path $syntaxErrorModule -Value 'invalid syntax {'
-            
-                        $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
-                -ModulePath @('test-modules', 'syntax-error.ps1') `
-                -Context 'Test: syntax-error' `
-                -RetryCount 2
-            
-            $result | Should -Be $false
-        }
-        finally {
-            Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+            try {
+                $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error.ps1'
+                Set-Content -Path $syntaxErrorModule -Value 'invalid syntax {'
+
+                $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
+                    -ModulePath @('test-modules', 'syntax-error.ps1') `
+                    -Context 'Test: syntax-error' `
+                    -RetryCount 2
+
+                $result | Should -Be $false
+            }
+            finally {
+                Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+            }
         }
         
         It 'Does not retry on file not found errors' {
@@ -477,22 +479,24 @@ function Test-RetryFunction {
         }
         
         It 'Validates PowerShell syntax when PS_PROFILE_DEBUG_SYNTAX_CHECK is set' {
-            $env:PS_PROFILE_DEBUG_SYNTAX_CHECK = '1'
-            $env:PS_PROFILE_DEBUG = '1'
-            
-            # Create a module with syntax errors
-            $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-check-module.ps1'
-            Set-Content -Path $syntaxErrorModule -Value 'function Test-SyntaxCheck { { { }'
-            
-                        $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
-                -ModulePath @('test-modules', 'syntax-check-module.ps1') `
-                -Context 'Test: syntax-check'
-            
-            $result | Should -Be $false
-        }
-        finally {
-            Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path 'Function:\Test-SyntaxCheck' -Force -ErrorAction SilentlyContinue
+            try {
+                $env:PS_PROFILE_DEBUG_SYNTAX_CHECK = '1'
+                $env:PS_PROFILE_DEBUG = '1'
+
+                # Create a module with syntax errors
+                $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-check-module.ps1'
+                Set-Content -Path $syntaxErrorModule -Value 'function Test-SyntaxCheck { { { }'
+
+                $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
+                    -ModulePath @('test-modules', 'syntax-check-module.ps1') `
+                    -Context 'Test: syntax-check'
+
+                $result | Should -Be $false
+            }
+            finally {
+                Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path 'Function:\Test-SyntaxCheck' -Force -ErrorAction SilentlyContinue
+            }
         }
         
         It 'Loads valid module when syntax checking is enabled' {
@@ -722,22 +726,24 @@ function global:Test-FlakyFunction {
         }
         
         It 'Does not retry on syntax errors' {
-            $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error-module.ps1'
-            # Use a more severe syntax error that PowerShell will definitely catch
-            Set-Content -Path $syntaxErrorModule -Value 'function Test-SyntaxError { { { }'
-            
-                        $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
-                -ModulePath @('test-modules', 'syntax-error-module.ps1') `
-                -Context 'Test: syntax-error' `
-                -RetryCount 2
-            
-            # PowerShell may load the file even with syntax errors, but the function won't work
-            # The important thing is that we test the retry logic path
-            $result | Should -BeIn @($true, $false)
-        }
-        finally {
-            Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path 'Function:\Test-SyntaxError' -Force -ErrorAction SilentlyContinue
+            try {
+                $syntaxErrorModule = Join-Path $script:TestModulesDir 'syntax-error-module.ps1'
+                # Use a more severe syntax error that PowerShell will definitely catch
+                Set-Content -Path $syntaxErrorModule -Value 'function Test-SyntaxError { { { }'
+
+                $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
+                    -ModulePath @('test-modules', 'syntax-error-module.ps1') `
+                    -Context 'Test: syntax-error' `
+                    -RetryCount 2
+
+                # PowerShell may load the file even with syntax errors, but the function won't work
+                # The important thing is that we test the retry logic path
+                $result | Should -BeIn @($true, $false)
+            }
+            finally {
+                Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path 'Function:\Test-SyntaxError' -Force -ErrorAction SilentlyContinue
+            }
         }
     }
     
