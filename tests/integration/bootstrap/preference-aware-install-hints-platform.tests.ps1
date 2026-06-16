@@ -4,6 +4,16 @@
 # ===============================================
 
 BeforeAll {
+    $current = Get-Item $PSScriptRoot
+    while ($null -ne $current) {
+        $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+        if (Test-Path -LiteralPath $testSupportPath) {
+            . $testSupportPath
+            break
+        }
+        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        $current = $current.Parent
+    }
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $bootstrapDir = Join-Path $script:ProfileDir 'bootstrap'
     foreach ($file in @('MissingToolWarnings.ps1', 'ToolInstallRegistry.ps1', 'InstallHintResolver.ps1')) {
@@ -17,18 +27,14 @@ BeforeAll {
 
 Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
     Context 'Windows Platform-Specific Suggestions' {
-        BeforeAll {
-            $script:IsWindowsPlatform = $IsWindows -or $PSVersionTable.PSVersion.Major -lt 6
-        }
-        
-        It 'Suggests Windows-appropriate package managers on Windows' -Skip:(-not $script:IsWindowsPlatform) {
+        It 'Suggests Windows-appropriate package managers on Windows' -Skip:(-not ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6)) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'test-tool' -ToolType 'generic'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest Windows package managers
             $result | Should -Match 'scoop|winget|choco'
         }
         
-        It 'Prioritizes Scoop on Windows when available' -Skip:(-not $script:IsWindowsPlatform) {
+        It 'Prioritizes Scoop on Windows when available' -Skip:(-not ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6)) {
             if (Get-Command scoop -ErrorAction SilentlyContinue) {
                 $env:PS_SYSTEM_PACKAGE_MANAGER = 'auto'
                 $result = Get-PreferenceAwareInstallHint -ToolName 'test-tool' -ToolType 'generic'
@@ -36,7 +42,7 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
             }
         }
         
-        It 'Falls back to Winget on Windows when Scoop unavailable' -Skip:(-not $script:IsWindowsPlatform) {
+        It 'Falls back to Winget on Windows when Scoop unavailable' -Skip:(-not ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6)) {
             if (-not (Get-Command scoop -ErrorAction SilentlyContinue) -and (Get-Command winget -ErrorAction SilentlyContinue)) {
                 $env:PS_SYSTEM_PACKAGE_MANAGER = 'auto'
                 $result = Get-PreferenceAwareInstallHint -ToolName 'test-tool' -ToolType 'generic'
@@ -44,14 +50,14 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
             }
         }
         
-        It 'Suggests Windows-specific installation for pnpm' -Skip:(-not $script:IsWindowsPlatform) {
+        It 'Suggests Windows-specific installation for pnpm' -Skip:(-not ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6)) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'pnpm' -ToolType 'node-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest Windows-appropriate method
             $result | Should -Match 'scoop|winget|npm|choco'
         }
         
-        It 'Suggests Windows-specific installation for uv' -Skip:(-not $script:IsWindowsPlatform) {
+        It 'Suggests Windows-specific installation for uv' -Skip:(-not ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6)) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'uv' -ToolType 'python-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest Windows-appropriate method
@@ -60,18 +66,14 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
     }
     
     Context 'Linux Platform-Specific Suggestions' {
-        BeforeAll {
-            $script:IsLinuxPlatform = $IsLinux
-        }
-        
-        It 'Suggests Linux-appropriate package managers on Linux' -Skip:(-not $script:IsLinuxPlatform) {
+        It 'Suggests Linux-appropriate package managers on Linux' -Skip:(-not $IsLinux) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'test-tool' -ToolType 'generic'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest Linux package managers
             $result | Should -Match 'apt|yum|dnf|pacman|scoop'
         }
         
-        It 'Prioritizes apt on Debian-based systems' -Skip:(-not $script:IsLinuxPlatform) {
+        It 'Prioritizes apt on Debian-based systems' -Skip:(-not $IsLinux) {
             if (Get-Command apt -ErrorAction SilentlyContinue) {
                 $env:PS_SYSTEM_PACKAGE_MANAGER = 'auto'
                 $result = Get-PreferenceAwareInstallHint -ToolName 'test-tool' -ToolType 'generic'
@@ -79,7 +81,7 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
             }
         }
         
-        It 'Falls back to dnf/yum on RedHat-based systems' -Skip:(-not $script:IsLinuxPlatform) {
+        It 'Falls back to dnf/yum on RedHat-based systems' -Skip:(-not $IsLinux) {
             if (-not (Get-Command apt -ErrorAction SilentlyContinue)) {
                 if (Get-Command dnf -ErrorAction SilentlyContinue) {
                     $env:PS_SYSTEM_PACKAGE_MANAGER = 'auto'
@@ -89,14 +91,14 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
             }
         }
         
-        It 'Suggests Linux-specific installation for uv' -Skip:(-not $script:IsLinuxPlatform) {
+        It 'Suggests Linux-specific installation for uv' -Skip:(-not $IsLinux) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'uv' -ToolType 'python-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest Linux-appropriate method (curl script or pip)
             $result | Should -Match 'curl|pip|apt|yum|dnf'
         }
         
-        It 'Suggests Linux-specific installation for poetry' -Skip:(-not $script:IsLinuxPlatform) {
+        It 'Suggests Linux-specific installation for poetry' -Skip:(-not $IsLinux) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'poetry' -ToolType 'python-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest Linux-appropriate method
@@ -105,18 +107,14 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
     }
     
     Context 'macOS Platform-Specific Suggestions' {
-        BeforeAll {
-            $script:IsMacOSPlatform = $IsMacOS
-        }
-        
-        It 'Suggests macOS-appropriate package managers on macOS' -Skip:(-not $script:IsMacOSPlatform) {
+        It 'Suggests macOS-appropriate package managers on macOS' -Skip:(-not $IsMacOS) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'test-tool' -ToolType 'generic'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest macOS package managers
             $result | Should -Match 'brew|scoop'
         }
         
-        It 'Prioritizes Homebrew on macOS when available' -Skip:(-not $script:IsMacOSPlatform) {
+        It 'Prioritizes Homebrew on macOS when available' -Skip:(-not $IsMacOS) {
             if (Get-Command brew -ErrorAction SilentlyContinue) {
                 $env:PS_SYSTEM_PACKAGE_MANAGER = 'auto'
                 $result = Get-PreferenceAwareInstallHint -ToolName 'test-tool' -ToolType 'generic'
@@ -124,21 +122,21 @@ Describe 'Preference-Aware Install Hints - Cross-Platform Tests' {
             }
         }
         
-        It 'Suggests macOS-specific installation for pnpm' -Skip:(-not $script:IsMacOSPlatform) {
+        It 'Suggests macOS-specific installation for pnpm' -Skip:(-not $IsMacOS) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'pnpm' -ToolType 'node-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest macOS-appropriate method
             $result | Should -Match 'brew|npm|scoop'
         }
         
-        It 'Suggests macOS-specific installation for uv' -Skip:(-not $script:IsMacOSPlatform) {
+        It 'Suggests macOS-specific installation for uv' -Skip:(-not $IsMacOS) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'uv' -ToolType 'python-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest macOS-appropriate method
             $result | Should -Match 'brew|pip|scoop'
         }
         
-        It 'Suggests macOS-specific installation for poetry' -Skip:(-not $script:IsMacOSPlatform) {
+        It 'Suggests macOS-specific installation for poetry' -Skip:(-not $IsMacOS) {
             $result = Get-PreferenceAwareInstallHint -ToolName 'poetry' -ToolType 'python-package'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest macOS-appropriate method
