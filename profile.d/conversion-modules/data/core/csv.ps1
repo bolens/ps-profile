@@ -92,11 +92,11 @@ function Initialize-FileConversion-CoreBasicCsv {
             
             if ($data -is [array]) {
                 $rowCount = $data.Count
-                $data | Export-Csv -NoTypeInformation -Path $outputPath
+                $data | Export-Csv -Path $outputPath
             } 
             elseif ($data -is [PSCustomObject]) {
                 $rowCount = 1
-                @($data) | Export-Csv -NoTypeInformation -Path $outputPath
+                @($data) | Export-Csv -Path $outputPath
             } 
             else { 
                 throw "JSON must be an array of objects or a single object"
@@ -221,7 +221,7 @@ function Initialize-FileConversion-CoreBasicCsv {
             if (-not $data) {
                 return
             }
-            $data | Export-Csv -NoTypeInformation -Path ($Path -replace '\.ya?ml$', '.csv')
+            $data | Export-Csv -Path ($Path -replace '\.ya?ml$', '.csv')
         }
         catch {
             Write-Error "Failed to convert YAML to CSV: $_"

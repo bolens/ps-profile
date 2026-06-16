@@ -44,14 +44,26 @@ Describe 'Get-PlatformInstallHint package override extended scenarios' {
             $hint | Should -Match 'typescript'
         }
 
-        It 'Falls back to scoop install when preference hints are unavailable' {
+        It 'Falls back to platform-aware install when preference hints are unavailable' {
             try {
             $originalPreferenceHint = Get-Command Get-PreferenceAwareInstallHint -ErrorAction SilentlyContinue
             Remove-Item Function:\Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PreferenceAwareInstallHint -Force -ErrorAction SilentlyContinue
 
-                        Get-PlatformInstallHint -ToolName 'custom-tool' |
-                Should -Be 'Install with: scoop install custom-tool'
+            $hint = Get-PlatformInstallHint -ToolName 'custom-tool'
+            $hint | Should -Match '^Install with:'
+            $hint | Should -Match 'custom-tool'
+            if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
+                $hint | Should -Match 'scoop|winget|choco'
+            }
+            elseif ($IsLinux) {
+                $hint | Should -Match 'apt|dnf|yum|pacman'
+                $hint | Should -Not -Match 'scoop install'
+            }
+            elseif ($IsMacOS) {
+                $hint | Should -Match 'brew'
+                $hint | Should -Not -Match 'scoop install'
+            }
             }
             finally {
                 if ($null -ne $originalPreferenceHint) {

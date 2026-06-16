@@ -101,7 +101,8 @@ key3 = value3
                 Set-ItResult -Skipped -Because "Python is not available"
                 return
             }
-            
+            if (Skip-IfMikefarahYqUnavailable) { return }
+
             $cfgContent = @"
 [section1]
 key1 = value1

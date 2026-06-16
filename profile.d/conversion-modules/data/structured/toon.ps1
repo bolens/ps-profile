@@ -91,10 +91,10 @@ function Initialize-FileConversion-Toon {
             $jsonObj = Convert-ToonToJson -ToonString $json
             $data = $jsonObj | ConvertTo-Json -Depth 100 | ConvertFrom-Json
             if ($data -is [array]) {
-                $data | Export-Csv -NoTypeInformation -Path $OutputPath
+                $data | Export-Csv -Path $OutputPath
             }
             elseif ($data -is [PSCustomObject]) {
-                @($data) | Export-Csv -NoTypeInformation -Path $OutputPath
+                @($data) | Export-Csv -Path $OutputPath
             }
             else {
                 Write-Error "TOON must represent an array of objects or a single object"

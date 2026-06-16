@@ -63,13 +63,25 @@ Describe 'Container install hint extended scenarios' {
             $command | Should -Match 'docker'
         }
 
-        It 'Falls back to scoop guidance when Get-ContainerEngineInstallHint is unavailable' {
+        It 'Falls back to platform-aware guidance when Get-ContainerEngineInstallHint is unavailable' {
             try {
             $originalHint = Get-Command Get-ContainerEngineInstallHint -ErrorAction SilentlyContinue
             Remove-Item Function:\Get-ContainerEngineInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-ContainerEngineInstallHint -Force -ErrorAction SilentlyContinue
 
-                        Get-ContainerInstallationCommand | Should -Match 'scoop install docker'
+            $command = Get-ContainerInstallationCommand
+            $command | Should -Match 'docker'
+            if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
+                $command | Should -Match 'scoop install docker'
+            }
+            elseif ($IsLinux) {
+                $command | Should -Match 'apt|dnf|yum|pacman'
+                $command | Should -Not -Match 'scoop install'
+            }
+            elseif ($IsMacOS) {
+                $command | Should -Match 'brew'
+                $command | Should -Not -Match 'scoop install'
+            }
             }
             finally {
                 if ($null -ne $originalHint) {

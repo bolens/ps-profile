@@ -68,6 +68,7 @@ Describe 'TOON Conversion Integration Tests' {
         }
 
         It 'ConvertFrom-ToonToYaml converts TOON to YAML' {
+            if (Skip-IfMikefarahYqUnavailable) { return }
             Get-Command ConvertFrom-ToonToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             $toon = "name `"test`"`nvalue 123"
             $tempFile = Join-Path $TestDrive 'test.toon'
@@ -110,13 +111,9 @@ Describe 'TOON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-ToonFromYaml converts YAML to TOON' {
+            if (Skip-IfMikefarahYqUnavailable) { return }
             Get-Command ConvertTo-ToonFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
-            
+
             $yamlContent = "name: test`nvalue: 123"
             $tempFile = Join-Path $TestDrive 'test.yaml'
             Set-Content -Path $tempFile -Value $yamlContent
@@ -180,12 +177,8 @@ Describe 'TOON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-ToonFromYaml converts YAML to TOON' {
+            if (Skip-IfMikefarahYqUnavailable) { return }
             Get-Command ConvertTo-ToonFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
             $yaml = "name: test`nvalue: 123"
             $tempFile = Join-Path $TestDrive 'test.yaml'
             Set-Content -Path $tempFile -Value $yaml
@@ -209,13 +202,9 @@ Describe 'TOON Conversion Integration Tests' {
         }
 
         It 'ConvertFrom-ToonToYaml and ConvertTo-ToonFromYaml roundtrip' {
+            if (Skip-IfMikefarahYqUnavailable) { return }
             Get-Command ConvertFrom-ToonToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-ToonFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Skip if yq not available
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq command not available"
-                return
-            }
             $originalToon = "name `"test`"`nvalue 123"
             $tempFile = Join-Path $TestDrive 'test.toon'
             Set-Content -Path $tempFile -Value $originalToon

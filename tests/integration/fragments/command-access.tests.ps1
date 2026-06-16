@@ -163,19 +163,21 @@ Describe 'Fragment Command Access - Integration Tests' {
         
         It 'Respects auto-loading environment variable' {
             if (Get-Command Register-CommandDispatcher -ErrorAction SilentlyContinue) {
-                # Test with auto-loading disabled
-                $originalValue = $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS
-                                $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = '0'
-                $result = Register-CommandDispatcher
-                # Should return false when disabled
-                $result | Should -Be $false
-            }
-            finally {
-                if ($originalValue) {
-                    $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = $originalValue
+                try {
+                    # Test with auto-loading disabled
+                    $originalValue = $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS
+                    $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = '0'
+                    $result = Register-CommandDispatcher
+                    # Should return false when disabled
+                    $result | Should -Be $false
                 }
-                else {
-                    Remove-Item -Path env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
+                finally {
+                    if ($originalValue) {
+                        $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = $originalValue
+                    }
+                    else {
+                        Remove-Item -Path env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
+                    }
                 }
             }
         }
@@ -183,20 +185,22 @@ Describe 'Fragment Command Access - Integration Tests' {
         It 'Loads a registered fragment when Invoke-CommandDispatcher is called' {
             if ((Get-Command Invoke-CommandDispatcher -ErrorAction SilentlyContinue) -and
                 (Get-Command Register-FragmentCommand -ErrorAction SilentlyContinue)) {
-                $commandName = "Test-DispatcherAccess_$([Guid]::NewGuid().ToString('N').Substring(0, 8))"
-                $null = Register-FragmentCommand -CommandName $commandName -FragmentName 'bootstrap' -CommandType 'Function'
+                try {
+                    $commandName = "Test-DispatcherAccess_$([Guid]::NewGuid().ToString('N').Substring(0, 8))"
+                    $null = Register-FragmentCommand -CommandName $commandName -FragmentName 'bootstrap' -CommandType 'Function'
 
-                $originalAutoLoad = $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS
-                                $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = '1'
-                { Invoke-CommandDispatcher -CommandName $commandName } | Should -Not -Throw
-                Test-CommandInRegistry -CommandName $commandName | Should -Be $true
-            }
-            finally {
-                if ($null -ne $originalAutoLoad) {
-                    $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = $originalAutoLoad
+                    $originalAutoLoad = $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS
+                    $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = '1'
+                    { Invoke-CommandDispatcher -CommandName $commandName } | Should -Not -Throw
+                    Test-CommandInRegistry -CommandName $commandName | Should -Be $true
                 }
-                else {
-                    Remove-Item -Path env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
+                finally {
+                    if ($null -ne $originalAutoLoad) {
+                        $env:PS_PROFILE_AUTO_LOAD_FRAGMENTS = $originalAutoLoad
+                    }
+                    else {
+                        Remove-Item -Path env:PS_PROFILE_AUTO_LOAD_FRAGMENTS -ErrorAction SilentlyContinue
+                    }
                 }
             }
         }

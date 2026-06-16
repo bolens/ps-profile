@@ -427,12 +427,14 @@ Describe 'Profile file utility functions' {
         It 'file-hash handles non-existent files gracefully' {
             $missing = Join-Path $script:TestTempRoot 'non_existent.txt'
             {
-                $originalWarningPreference = $WarningPreference
-                                $WarningPreference = 'SilentlyContinue'
-                file-hash -Path $missing | Out-Null
-            }
-            finally {
-                $WarningPreference = $originalWarningPreference
+                try {
+                    $originalWarningPreference = $WarningPreference
+                    $WarningPreference = 'SilentlyContinue'
+                    file-hash -Path $missing | Out-Null
+                }
+                finally {
+                    $WarningPreference = $originalWarningPreference
+                }
             } | Should -Not -Throw
         }
     }

@@ -21,10 +21,7 @@ Describe 'Invalid Input Handling Tests' {
     Context 'Invalid input handling' {
         It 'ConvertFrom-TomlToJson handles invalid TOML gracefully' {
             Get-Command ConvertFrom-TomlToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            if (-not (Test-MikefarahYqAvailable)) {
-                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $invalidToml = "invalid = toml content [unclosed"
             $tempFile = Join-Path $TestDrive 'invalid.toml'
             Set-Content -Path $tempFile -Value $invalidToml

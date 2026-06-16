@@ -949,7 +949,8 @@ function Ensure-ConversionModulesLoaded {
     $cacheKey = "ConversionModules_${ModuleType}_$selectiveKey"
     
     # Check if already loaded (use script scope for cross-file caching)
-    if ($null -eq $script:ModuleLoadCache) {
+    $moduleLoadCacheVar = Get-Variable -Name ModuleLoadCache -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $moduleLoadCacheVar -or $null -eq $moduleLoadCacheVar.Value) {
         $script:ModuleLoadCache = @{}
     }
     
@@ -1065,7 +1066,8 @@ function Initialize-TestProfile {
     $cacheKey = "Profile_$(if ($LoadBootstrap) { 'Bootstrap' })_$(if ($LoadConversionModules) { $LoadConversionModules })_${selectiveKey}_$(if ($LoadFilesFragment) { 'Files' })_$(if ($EnsureFileConversion) { 'EnsureData' })_$(if ($EnsureFileConversionMedia) { 'EnsureMedia' })_$(if ($EnsureFileConversionDocuments) { 'EnsureDocs' })"
     
     # Check if already loaded (use script scope for cross-file caching)
-    if ($null -eq $script:ProfileLoadCache) {
+    $profileLoadCacheVar = Get-Variable -Name ProfileLoadCache -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $profileLoadCacheVar -or $null -eq $profileLoadCacheVar.Value) {
         $script:ProfileLoadCache = @{}
     }
     
@@ -1680,6 +1682,10 @@ function Initialize-ConversionIntegration {
         elseif (Get-Command Ensure-FileConversion-Specialized -ErrorAction SilentlyContinue) {
             Ensure-FileConversion-Specialized
         }
+    }
+
+    if (Get-Command Test-MikefarahYqAvailable -ErrorAction SilentlyContinue) {
+        $script:MikefarahYqAvailable = Test-MikefarahYqAvailable
     }
 }
 

@@ -23,15 +23,11 @@ Describe 'YAML and JSON Conversion Integration Tests' {
             -SelectiveModules @('yaml.ps1', 'json.ps1') `
             -EnsureData
 
-        $script:MikefarahYqAvailable = Test-MikefarahYqAvailable
     }
 
     Context 'YAML conversion utilities' {
         It 'ConvertTo-Yaml converts JSON to YAML' {
-            if (-not $script:MikefarahYqAvailable) {
-                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $json = '{"name": "test", "value": 123}'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $json
@@ -42,10 +38,7 @@ Describe 'YAML and JSON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-Yaml handles complex JSON structures' {
-            if (-not $script:MikefarahYqAvailable) {
-                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $json = '{"users": [{"name": "alice", "age": 30}, {"name": "bob", "age": 25}]}'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $json
@@ -56,10 +49,7 @@ Describe 'YAML and JSON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-Yaml handles empty JSON object' {
-            if (-not $script:MikefarahYqAvailable) {
-                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $json = '{}'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $json
@@ -69,10 +59,7 @@ Describe 'YAML and JSON Conversion Integration Tests' {
         }
 
         It 'ConvertTo-Yaml handles JSON arrays' {
-            if (-not $script:MikefarahYqAvailable) {
-                Set-ItResult -Skipped -Because 'mikefarah/yq v4+ required (python-yq is not compatible)'
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $json = '["item1", "item2", "item3"]'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $json
@@ -83,73 +70,66 @@ Describe 'YAML and JSON Conversion Integration Tests' {
 
         It 'ConvertFrom-Yaml converts YAML to JSON' {
             Get-Command ConvertFrom-Yaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Test function existence and basic parameter handling
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $yaml = "name: test`nvalue: 123"
             $tempFile = Join-Path $TestDrive 'test.yaml'
             Set-Content -Path $tempFile -Value $yaml
-            # Test that function doesn't throw when called (yq may not be available)
             { ConvertFrom-Yaml $tempFile } | Should -Not -Throw
         }
 
         It 'ConvertFrom-Yaml handles complex YAML structures' {
             Get-Command ConvertFrom-Yaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Test function existence and basic parameter handling
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $yaml = "users:`n  - name: alice`n    age: 30`n  - name: bob`n    age: 25"
             $tempFile = Join-Path $TestDrive 'test.yaml'
             Set-Content -Path $tempFile -Value $yaml
-            # Test that function doesn't throw when called (yq may not be available)
             { ConvertFrom-Yaml $tempFile } | Should -Not -Throw
         }
 
         It 'ConvertFrom-Yaml handles empty YAML' {
             Get-Command ConvertFrom-Yaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Test function existence and basic parameter handling
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $yaml = '{}'
             $tempFile = Join-Path $TestDrive 'test.yaml'
             Set-Content -Path $tempFile -Value $yaml
-            # Test that function doesn't throw when called (yq may not be available)
             { ConvertFrom-Yaml $tempFile } | Should -Not -Throw
         }
 
         It 'ConvertFrom-Yaml handles YAML arrays' {
             Get-Command ConvertFrom-Yaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Test function existence and basic parameter handling
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $yaml = "- item1`n- item2`n- item3"
             $tempFile = Join-Path $TestDrive 'test.yaml'
             Set-Content -Path $tempFile -Value $yaml
-            # Test that function doesn't throw when called (yq may not be available)
             { ConvertFrom-Yaml $tempFile } | Should -Not -Throw
         }
 
         It 'ConvertTo-Yaml and ConvertFrom-Yaml roundtrip' {
             Get-Command ConvertTo-Yaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertFrom-Yaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Test function existence and basic parameter handling
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $originalJson = '{"test": "value", "number": 42, "array": [1, 2, 3]}'
             $tempFile = Join-Path $TestDrive 'test.json'
             Set-Content -Path $tempFile -Value $originalJson
-            # Test that functions don't throw when called (yq may not be available)
             { ConvertTo-Yaml $tempFile } | Should -Not -Throw
             { ConvertFrom-Yaml $tempFile } | Should -Not -Throw
         }
 
         It 'ConvertFrom-Yaml handles invalid YAML gracefully' {
             Get-Command ConvertFrom-Yaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Test function existence and basic parameter handling
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $invalidYaml = "invalid: yaml: content: [unclosed"
             $tempFile = Join-Path $TestDrive 'invalid.yaml'
             Set-Content -Path $tempFile -Value $invalidYaml
-            # Test that function doesn't throw when called (yq may not be available)
             { ConvertFrom-Yaml $tempFile 2>$null } | Should -Not -Throw
         }
 
         It 'ConvertTo-Yaml handles invalid JSON gracefully' {
             Get-Command ConvertTo-Yaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Test function existence and basic parameter handling
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $invalidJson = '{"invalid": json content'
             $tempFile = Join-Path $TestDrive 'invalid.json'
             Set-Content -Path $tempFile -Value $invalidJson
-            # Test that function doesn't throw when called (yq may not be available)
             { ConvertTo-Yaml $tempFile 2>$null } | Should -Not -Throw
         }
     }

@@ -34,6 +34,7 @@ Describe 'CSV to XML Conversion Integration Tests' {
         }
 
         It 'ConvertFrom-CsvToYaml converts CSV to YAML' {
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $csv = "name,value`nalice,123`nbob,456"
             $tempFile = Join-Path $TestDrive 'test.csv'
             Set-Content -Path $tempFile -Value $csv

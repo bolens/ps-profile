@@ -91,7 +91,8 @@ city=New York
         
         It 'ConvertFrom-PropertiesToYaml converts Properties to YAML' {
             Get-Command _ConvertFrom-PropertiesToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            
+            if (Skip-IfMikefarahYqUnavailable) { return }
+
             $propertiesContent = @"
 name=John
 age=30

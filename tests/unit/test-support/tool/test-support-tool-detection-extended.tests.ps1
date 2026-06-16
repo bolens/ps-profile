@@ -20,6 +20,13 @@ Describe 'tests/TestSupport/ToolDetection.ps1 extended scenarios' {
         $c = Get-Content -LiteralPath $script:Fragment -Raw
         $c | Should -Match 'Tool detection and recommendation utilities'
         $c | Should -Match 'Get-TestToolSkipMessage'
+        $c | Should -Match 'Skip-IfMikefarahYqUnavailable'
+        $c | Should -Match 'Skip-IfMikefarahYqAvailable'
+        $c | Should -Match 'Skip-IfToolUnavailable'
+        $c | Should -Match 'Skip-IfNodeUnavailable'
+        $c | Should -Match 'Skip-IfNpmPackagesUnavailable'
+        $c | Should -Match 'Skip-IfPythonUnavailable'
+        $c | Should -Match 'Skip-IfModuleUnavailable'
     }
     It 'Defines install command resolution helpers' {
         $c = Get-Content -LiteralPath $script:Fragment -Raw

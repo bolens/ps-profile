@@ -617,10 +617,12 @@ try {
     }
 
     # Register functions
-    Set-AgentModeFunction -Name 'Invoke-CloudCommand' -Body ${function:Invoke-CloudCommand}
-    Set-AgentModeFunction -Name 'Set-CloudProfile' -Body ${function:Set-CloudProfile}
-    Set-AgentModeFunction -Name 'Get-CloudResources' -Body ${function:Get-CloudResources}
-    Set-AgentModeFunction -Name 'Test-CloudConnection' -Body ${function:Test-CloudConnection}
+    if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) {
+        Set-AgentModeFunction -Name 'Invoke-CloudCommand' -Body ${function:Invoke-CloudCommand}
+        Set-AgentModeFunction -Name 'Set-CloudProfile' -Body ${function:Set-CloudProfile}
+        Set-AgentModeFunction -Name 'Get-CloudResources' -Body ${function:Get-CloudResources}
+        Set-AgentModeFunction -Name 'Test-CloudConnection' -Body ${function:Test-CloudConnection}
+    }
 
     # Mark fragment as loaded
     if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
@@ -641,6 +643,8 @@ catch {
         Write-ProfileError -ErrorRecord $_ -Context "Fragment: cloud-provider-base" -Category 'Fragment'
     }
     else {
-        Write-Warning "Failed to load cloud-provider-base fragment: $($_.Exception.Message)"
+        if ($env:PS_PROFILE_TEST_MODE -ne '1') {
+            Write-Warning "Failed to load cloud-provider-base fragment: $($_.Exception.Message)"
+        }
     }
 }

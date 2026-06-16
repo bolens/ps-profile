@@ -21,10 +21,7 @@ Describe 'JSONL and YAML Format Conversion Tests' {
     Context 'JSONL and YAML Conversions' {
         It 'ConvertFrom-JsonLToYaml converts JSONL to YAML' {
             Get-Command ConvertFrom-JsonLToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $jsonl = '{"name":"test1","value":123}' + "`n" + '{"name":"test2","value":456}'
             $tempJsonl = Join-Path $TestDrive 'test.jsonl'
             Set-Content -Path $tempJsonl -Value $jsonl
@@ -38,10 +35,7 @@ Describe 'JSONL and YAML Format Conversion Tests' {
 
         It 'ConvertTo-JsonLFromYaml converts YAML to JSONL' {
             Get-Command ConvertTo-JsonLFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $yaml = "- name: test1`n  value: 123`n- name: test2`n  value: 456"
             $tempYaml = Join-Path $TestDrive 'test.yaml'
             Set-Content -Path $tempYaml -Value $yaml

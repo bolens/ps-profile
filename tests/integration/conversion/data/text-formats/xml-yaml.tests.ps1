@@ -21,10 +21,7 @@ Describe 'XML and YAML Format Conversion Tests' {
     Context 'XML and YAML Conversions' {
         It 'ConvertFrom-XmlToYaml converts XML to YAML' {
             Get-Command ConvertFrom-XmlToYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $xml = '<root><name>test</name><value>123</value></root>'
             $tempXml = Join-Path $TestDrive 'test.xml'
             Set-Content -Path $tempXml -Value $xml
@@ -39,10 +36,7 @@ Describe 'XML and YAML Format Conversion Tests' {
 
         It 'ConvertTo-XmlFromYaml converts YAML to XML' {
             Get-Command ConvertTo-XmlFromYaml -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $yaml = "name: test`nvalue: 123"
             $tempYaml = Join-Path $TestDrive 'test.yaml'
             Set-Content -Path $tempYaml -Value $yaml
