@@ -73,6 +73,11 @@ tasks:
     cmds:
       - pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 {{.CLI_ARGS}}
 
+  test-ci-shard:
+    desc: Run one CI Pester shard (use -- -Shard unit-library -ListShards)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 {{.CLI_ARGS}}
+
   test-coverage:
     desc: Run Pester Tests with Coverage
     cmds:

@@ -15,13 +15,39 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        include:
+        shard:
+          - unit-library
+          - unit-utility
+          - unit-test-runner
+          - unit-support
+          - unit-profile-conversion
+          - unit-profile-core
+          - unit-profile-infra
+          - unit-profile-misc-a
+          - unit-profile-misc-b
+          - integration-tools
+          - integration-core
+          - conversion-document
+          - conversion-media
+          - conversion-data-structured
+          - conversion-data-units
+          - conversion-data-encoding
+          - conversion-data-binary
+          - conversion-data-compression
+          - conversion-data-scientific
+          - conversion-data-misc
+          - performance
+        exclude:
+          # Performance tests are slow and Windows-centric; run once on Windows.
           - os: ubuntu-latest
-            powershell: pwsh
-          - os: windows-latest
-            powershell: pwsh
+            shard: performance
+        include:
+          # Lightweight coverage signal on Ubuntu only (full suite is sharded without coverage).
+          - os: ubuntu-latest
+            shard: coverage-smoke
     steps:
       - uses: actions/checkout@v6
       - name: Install Pester
@@ -32,15 +58,22 @@ jobs:
           }
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
           Install-Module -Name Pester -MinimumVersion 5.0.0 -Force -Scope CurrentUser
-      - name: Run Pester
-        run: ${{ matrix.powershell }} -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel
+      - name: Run Pester shard
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard '${{ matrix.shard }}' -Quiet
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: test-results-${{ matrix.os }}-${{ matrix.powershell }}
-          path: pester-results.xml
-      - name: Upload coverage reports
+          name: pester-${{ matrix.os }}-${{ matrix.shard }}
+          path: tests/test-artifacts/ci-${{ matrix.shard }}/**
+          if-no-files-found: ignore
+      - name: Upload coverage report
+        if: matrix.shard == 'coverage-smoke'
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-${{ matrix.os }}-${{ matrix.powershell }}
-          path: coverage.xml
+          name: coverage-ubuntu-smoke
+          path: |
+            coverage.xml
+            tests/test-artifacts/ci-coverage-smoke/**
