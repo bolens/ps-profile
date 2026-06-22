@@ -13,7 +13,7 @@ jobs:
     name: Smoke check (Windows)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Run repro smoke script (verbose)
         shell: pwsh
         env:
