@@ -13,7 +13,7 @@ jobs:
   validate-comment-help:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Run comment-based help check
         run: pwsh -NoProfile -File .\scripts\checks\check-comment-help.ps1
         shell: pwsh
