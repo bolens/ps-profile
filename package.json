@@ -99,7 +99,7 @@
     "jsonc": "^2.0.0",
     "jsonwebtoken": "^9.0.3",
     "parquetjs": "^0.11.2",
-    "protobufjs": "^8.6.0",
+    "protobufjs": "^8.6.4",
     "qrcode": "^1.5.4",
     "superjson": "^2.2.6",
     "thrift": "^0.23.0",

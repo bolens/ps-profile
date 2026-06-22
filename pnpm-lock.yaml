@@ -48,8 +48,8 @@ importers:
         specifier: ^0.11.2
         version: 0.11.2
       protobufjs:
-        specifier: ^8.6.0
-        version: 8.6.0
+        specifier: ^8.6.4
+        version: 8.6.4
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
@@ -972,8 +972,8 @@ packages:
     resolution: {integrity: sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw==}
     engines: {node: '>=10.13.0'}
 
-  protobufjs@8.6.0:
-    resolution: {integrity: sha512-PIOO89BMGMXGz2333TVv/OqPNVWm7w30ll/4FtLbtLBaonzJMYwTbAZSSlobjIy9MoUgIAxSVUpK7aP7EpTtkg==}
+  protobufjs@8.6.4:
+    resolution: {integrity: sha512-/+XMv9JalknuncEJSwsyEVlwcxVLKx2iaoSUXFZA86MJkdqyOdfrlB1sB7S6aKyUk9tl20YY+SgQe5J2sJHTcg==}
     engines: {node: '>=12.0.0'}
 
   punycode.js@2.3.1:
@@ -2104,7 +2104,7 @@ snapshots:
 
   pngjs@5.0.0: {}
 
-  protobufjs@8.6.0:
+  protobufjs@8.6.4:
     dependencies:
       long: 5.3.2
 
