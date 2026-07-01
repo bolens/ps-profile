@@ -99,12 +99,12 @@
     "jsonc": "^2.0.0",
     "jsonwebtoken": "^9.0.3",
     "parquetjs": "^0.11.2",
-    "protobufjs": "^8.6.0",
+    "protobufjs": "^8.6.4",
     "qrcode": "^1.5.4",
     "superjson": "^2.2.6",
     "thrift": "^0.23.0",
     "ubjson": "^0.0.8",
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.1"
   },
   "engines": {
     "node": ">=16.0.0"
@@ -115,7 +115,7 @@
     "@cspell/dict-docker": "^1.1.17",
     "@cspell/dict-dotnet": "^5.0.13",
     "@cspell/dict-en-au": "^1.1.22",
-    "@cspell/dict-en-ca": "^1.0.58",
+    "@cspell/dict-en-ca": "^1.0.60",
     "@cspell/dict-en-gb-ise": "^1.0.29",
     "@cspell/dict-filetypes": "^3.0.18",
     "@cspell/dict-k8s": "^1.0.12",

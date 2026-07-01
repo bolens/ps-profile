@@ -18,7 +18,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Verify API documentation freshness
         run: pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1
@@ -145,7 +145,7 @@ jobs:
             powershell: powershell
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PowerShell (Linux)
         if: matrix.os == 'ubuntu-latest'
