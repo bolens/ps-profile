@@ -156,6 +156,14 @@ function Reset-TestIsolationState {
     if (Get-Command Initialize-TestMocks -ErrorAction SilentlyContinue) {
         Initialize-TestMocks
     }
+
+    if (Get-Command Restore-TestSupportHelperFunctions -ErrorAction SilentlyContinue) {
+        Restore-TestSupportHelperFunctions
+    }
+
+    if (Get-Command Export-TestSupportGlobalFunctions -ErrorAction SilentlyContinue) {
+        Export-TestSupportGlobalFunctions
+    }
 }
 
 <#
@@ -691,6 +699,14 @@ function Restore-TestSupportFunctions {
     $testCommandAvailabilityPath = Join-Path $PSScriptRoot 'TestCommandAvailability.ps1'
     if (Test-Path -LiteralPath $testCommandAvailabilityPath) {
         . $testCommandAvailabilityPath
+    }
+
+    if (Get-Command Restore-TestSupportHelperFunctions -ErrorAction SilentlyContinue) {
+        Restore-TestSupportHelperFunctions
+    }
+
+    if (Get-Command Export-TestSupportGlobalFunctions -ErrorAction SilentlyContinue) {
+        Export-TestSupportGlobalFunctions
     }
 }
 

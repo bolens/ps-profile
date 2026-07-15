@@ -10,9 +10,8 @@ Describe 'Alias helper' {
             if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
             $current = $current.Parent
         }
-        # Resolve bootstrap path directly
-        $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-        $script:BootstrapPath = Join-Path $repoRoot 'profile.d\bootstrap.ps1'
+        $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+        $script:BootstrapPath = Join-Path $script:RepoRoot 'profile.d' 'bootstrap.ps1'
         if (-not (Test-Path $script:BootstrapPath)) {
             throw "Bootstrap file not found: $script:BootstrapPath"
         }

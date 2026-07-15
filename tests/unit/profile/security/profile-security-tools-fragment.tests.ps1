@@ -87,6 +87,12 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
     }
 
     Context 'Fragment Loading' {
+        BeforeEach {
+            if (Get-Command Clear-FragmentLoaded -ErrorAction SilentlyContinue) {
+                Clear-FragmentLoaded -FragmentName 'security-tools' -ErrorAction SilentlyContinue
+            }
+        }
+
         It 'Fragment is idempotent (can be loaded multiple times)' {
             if (Test-Path -LiteralPath $script:SecurityToolsPath) {
                 . $script:SecurityToolsPath
@@ -117,23 +123,27 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
         }
 
         It 'Calls Test-FragmentLoaded when the helper is available' {
-            $script:TestFragmentLoadedCalls = [System.Collections.Generic.List[string]]::new()
+            $global:TestFragmentLoadedCalls = [System.Collections.Generic.List[string]]::new()
             $originalTestFragmentLoaded = Get-Command Test-FragmentLoaded -ErrorAction SilentlyContinue
 
             function global:Test-FragmentLoaded {
                 param([string]$FragmentName)
-                $null = $script:TestFragmentLoadedCalls.Add($FragmentName)
-                return $true
+                $null = $global:TestFragmentLoadedCalls.Add($FragmentName)
+                return $false
             }
 
             try {
+                if (Get-Command Clear-FragmentLoaded -ErrorAction SilentlyContinue) {
+                    Clear-FragmentLoaded -FragmentName 'security-tools'
+                }
+
                 if (Test-Path -LiteralPath $script:SecurityToolsPath) {
                     Remove-Item Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue
                     . $script:SecurityToolsPath
                 }
 
-                $script:TestFragmentLoadedCalls.Count | Should -Be 1
-                $script:TestFragmentLoadedCalls[0] | Should -Be 'security-tools'
+                $global:TestFragmentLoadedCalls.Count | Should -Be 1
+                $global:TestFragmentLoadedCalls[0] | Should -Be 'security-tools'
             }
             finally {
                 Remove-Item Function:\Test-FragmentLoaded -Force -ErrorAction SilentlyContinue
@@ -158,25 +168,35 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
     }
 
     Context 'Requirements Loading' {
+        BeforeEach {
+            if (Get-Command Clear-FragmentLoaded -ErrorAction SilentlyContinue) {
+                Clear-FragmentLoaded -FragmentName 'security-tools' -ErrorAction SilentlyContinue
+            }
+        }
+
         It 'Calls Set-FragmentLoaded when fragment loads successfully' {
-            $script:SetFragmentLoadedCalls = [System.Collections.Generic.List[string]]::new()
+            $global:SetFragmentLoadedCalls = [System.Collections.Generic.List[string]]::new()
             $originalSetFragmentLoaded = Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue
 
             function global:Set-FragmentLoaded {
                 param([string]$FragmentName)
-                $null = $script:SetFragmentLoadedCalls.Add($FragmentName)
+                $null = $global:SetFragmentLoadedCalls.Add($FragmentName)
             }
 
             Remove-Item -Path 'Function:\Test-FragmentLoaded' -Force -ErrorAction SilentlyContinue
             Remove-Item -Path 'Function:\global:Test-FragmentLoaded' -Force -ErrorAction SilentlyContinue
 
             try {
+                if (Get-Command Clear-FragmentLoaded -ErrorAction SilentlyContinue) {
+                    Clear-FragmentLoaded -FragmentName 'security-tools'
+                }
+
                 if (Test-Path -LiteralPath $script:SecurityToolsPath) {
                     Remove-Item Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue
                     . $script:SecurityToolsPath
                 }
 
-                $script:SetFragmentLoadedCalls | Should -Contain 'security-tools'
+                $global:SetFragmentLoadedCalls | Should -Contain 'security-tools'
             }
             finally {
                 Remove-Item Function:\Set-FragmentLoaded -Force -ErrorAction SilentlyContinue

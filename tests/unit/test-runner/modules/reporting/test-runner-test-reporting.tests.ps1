@@ -27,7 +27,7 @@ BeforeAll {
     Import-Module (Join-Path $modulePath 'TestRetry.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestEnvironment.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestPerformanceMonitoring.psm1') -Force
-    Import-Module (Join-Path $modulePath 'TestTimeoutHandling.psm1') -Force
+    Import-Module (Join-Path $modulePath 'TestTimeoutHandling.psm1') -Force -Global
     Import-Module (Join-Path $modulePath 'TestRecovery.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestSummaryGeneration.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestReporting.psm1') -Force

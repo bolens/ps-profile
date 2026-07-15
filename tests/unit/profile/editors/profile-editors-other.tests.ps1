@@ -264,6 +264,8 @@ Describe 'editors.ps1 - Other Editor Functions' {
 
     Context 'Get-EditorInfo' {
         It 'Returns empty array when no editors are available' {
+            Reset-TestEditorCommandAvailability
+
             $result = Get-EditorInfo
 
             @($result).Count | Should -Be 0

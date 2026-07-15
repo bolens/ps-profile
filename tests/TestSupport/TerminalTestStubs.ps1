@@ -64,8 +64,13 @@ function Get-TestWriteHostCaptureCount {
 function Restore-TestWriteHostCapture {
     Clear-TestWriteHostCapture
 
-    if ($script:OriginalWriteHostCommand) {
-        Set-Item -Path 'Function:\global:Write-Host' -Value $script:OriginalWriteHostCommand -Force -ErrorAction SilentlyContinue
+    $originalBlock = $null
+    if (Get-Variable -Name 'OriginalWriteHostCommand' -Scope Script -ErrorAction SilentlyContinue) {
+        $originalBlock = $script:OriginalWriteHostCommand
+    }
+
+    if ($originalBlock) {
+        Set-Item -Path 'Function:\global:Write-Host' -Value $originalBlock -Force -ErrorAction SilentlyContinue
     }
     else {
         Remove-Item -Path 'Function:\global:Write-Host' -Force -ErrorAction SilentlyContinue

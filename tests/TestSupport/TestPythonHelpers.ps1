@@ -200,3 +200,6 @@ function Get-PythonPackageInstallRecommendation {
     }
 }
 
+if ($env:PS_PROFILE_TEST_MODE -eq '1') {
+    Set-Item -Path Function:\global:Get-PythonPackageInstallRecommendation -Value ${function:Get-PythonPackageInstallRecommendation} -Force
+}

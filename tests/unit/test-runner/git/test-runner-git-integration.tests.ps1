@@ -91,6 +91,18 @@ Describe 'TestGitIntegration Module' {
                 return
             }
 
+            Push-Location $script:TestRepoRoot
+            try {
+                $headParent = git rev-parse --verify HEAD~1 2>$null
+                if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($headParent)) {
+                    Set-ItResult -Skipped -Because 'Repository checkout has no HEAD~1 (shallow clone)'
+                    return
+                }
+            }
+            finally {
+                Pop-Location -ErrorAction SilentlyContinue
+            }
+
             $result = Get-GitChangedFilesSince -Since 'HEAD~1' -RepoRoot $script:TestRepoRoot
             $result | Should -Not -BeNullOrEmpty
         }

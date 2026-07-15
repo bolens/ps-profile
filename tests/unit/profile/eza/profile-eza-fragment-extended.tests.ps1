@@ -3,6 +3,28 @@
 # Execution tests for eza.ps1 fragment behavior
 # ===============================================
 
+function script:Import-EzaFragmentForTest {
+    param(
+        [switch]$EnsureAvailable
+    )
+
+    foreach ($aliasName in @('ls', 'l', 'll', 'la', 'lla', 'lt', 'lta', 'lg', 'llg', 'lS', 'ltime')) {
+        if (Get-Alias -Name $aliasName -ErrorAction SilentlyContinue) {
+            Remove-Item -Path "Alias:$aliasName" -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    if ($EnsureAvailable) {
+        Mark-TestCommandsUnavailable -CommandNames @('eza')
+        Set-TestCommandAvailabilityState -CommandName 'eza' -Available $true
+        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+            Clear-TestCachedCommandCache | Out-Null
+        }
+    }
+
+    . (Join-Path $script:ProfileDir 'eza.ps1')
+}
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -17,12 +39,7 @@ BeforeAll {
 
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
-    Mark-TestCommandsUnavailable -CommandNames @('eza')
-    Set-TestCommandAvailabilityState -CommandName 'eza' -Available $true
-    if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-        Clear-TestCachedCommandCache | Out-Null
-    }
-    . (Join-Path $script:ProfileDir 'eza.ps1')
+    Import-EzaFragmentForTest -EnsureAvailable
 }
 
 Describe 'profile.d/eza.ps1 extended scenarios' {
@@ -34,16 +51,20 @@ Describe 'profile.d/eza.ps1 extended scenarios' {
     }
 
     It 'Registers ll and la aliases targeting eza listing helpers' {
-        Get-Alias ll -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        (Get-Alias ll).ResolvedCommandName | Should -Be 'Get-ChildItemEzaLong'
-        Get-Alias la -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        (Get-Alias la).ResolvedCommandName | Should -Be 'Get-ChildItemEzaAll'
+        $ll = Get-Alias ll -ErrorAction Stop
+        $la = Get-Alias la -ErrorAction Stop
+        $(if ($ll.ResolvedCommandName) { $ll.ResolvedCommandName } else { $ll.Definition }) |
+            Should -Be 'Get-ChildItemEzaLong'
+        $(if ($la.ResolvedCommandName) { $la.ResolvedCommandName } else { $la.Definition }) |
+            Should -Be 'Get-ChildItemEzaAll'
     }
 
     It 'Registers tree and git-aware listing aliases lt and lg' {
-        Get-Alias lt -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        (Get-Alias lt).ResolvedCommandName | Should -Be 'Get-ChildItemEzaTree'
-        Get-Alias lg -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        (Get-Alias lg).ResolvedCommandName | Should -Be 'Get-ChildItemEzaGit'
+        $lt = Get-Alias lt -ErrorAction Stop
+        $lg = Get-Alias lg -ErrorAction Stop
+        $(if ($lt.ResolvedCommandName) { $lt.ResolvedCommandName } else { $lt.Definition }) |
+            Should -Be 'Get-ChildItemEzaTree'
+        $(if ($lg.ResolvedCommandName) { $lg.ResolvedCommandName } else { $lg.Definition }) |
+            Should -Be 'Get-ChildItemEzaGit'
     }
 }

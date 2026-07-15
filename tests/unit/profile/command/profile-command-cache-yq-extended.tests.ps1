@@ -97,24 +97,24 @@ Describe 'CommandCache yq extended scenarios' {
         }
 
         It 'Forwards arguments to the resolved yq executable' {
-            $stubName = "yq-args-stub-$([Guid]::NewGuid().ToString('N'))"
-            $script:YqArgsReceived = $null
+            $global:YqArgsReceived = $null
             try {
-                Set-Item -Path "Function:\global:$stubName" -Value {
-                    $script:YqArgsReceived = $args
+                Set-TestCommandAvailabilityState -CommandName 'yq' -Available $true
+                Set-Item -Path 'Function:\global:yq' -Value {
+                    $global:YqArgsReceived = $args
                     Write-Output 'yq-stub-ok'
                 } -Force
 
-                Set-TestCommandAvailabilityState -CommandName 'yq' -Available $true
-                Mock Get-CachedExternalCommand { return (Get-Command -Name $stubName) }
-
                 $output = Invoke-CachedYqCommand --version
                 $output | Should -Be 'yq-stub-ok'
-                $script:YqArgsReceived | Should -Contain '--version'
+                @($global:YqArgsReceived) | Should -Contain '--version'
             }
             finally {
-                Remove-Item -Path "Function:\global:$stubName" -Force -ErrorAction SilentlyContinue
-                $script:YqArgsReceived = $null
+                if (Get-Command Clear-TestCommandAvailabilityStub -ErrorAction SilentlyContinue) {
+                    Clear-TestCommandAvailabilityStub
+                }
+                Clear-TestCachedCommandCache | Out-Null
+                $global:YqArgsReceived = $null
             }
         }
     }

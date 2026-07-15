@@ -75,9 +75,10 @@ Describe 'Profile utility functions' {
         It 'from-epoch converts Unix timestamp correctly' {
             $timestamp = 1609459200
             $result = from-epoch $timestamp
-            $result.Year | Should -Be 2020
-            $result.Month | Should -Be 12
-            $result.Day | Should -Be 31
+            $expected = [DateTimeOffset]::FromUnixTimeSeconds($timestamp).LocalDateTime
+            $result.Year | Should -Be $expected.Year
+            $result.Month | Should -Be $expected.Month
+            $result.Day | Should -Be $expected.Day
         }
 
         It 'epoch returns current Unix timestamp' {

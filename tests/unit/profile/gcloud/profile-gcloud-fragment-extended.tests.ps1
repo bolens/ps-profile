@@ -23,8 +23,18 @@ BeforeAll {
 Describe 'profile.d/gcloud.ps1 extended scenarios' {
     It 'Registers Invoke-GCloud and the gcloud alias' {
         Get-Command Invoke-GCloud -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command gcloud -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        (Get-Alias gcloud).ResolvedCommandName | Should -Be 'Invoke-GCloud'
+
+        $alias = Get-Alias gcloud -ErrorAction SilentlyContinue
+        if ($null -eq $alias) {
+            $existing = Get-Command gcloud -ErrorAction SilentlyContinue
+            if ($null -ne $existing -and $existing.CommandType -eq 'Application') {
+                Set-ItResult -Inconclusive -Because 'gcloud application is on PATH; Set-AgentModeAlias skips alias registration by design'
+                return
+            }
+        }
+
+        $alias | Should -Not -BeNullOrEmpty
+        $alias.ResolvedCommandName | Should -Be 'Invoke-GCloud'
     }
 
     It 'Registers Set-GCloudConfig helper command' {

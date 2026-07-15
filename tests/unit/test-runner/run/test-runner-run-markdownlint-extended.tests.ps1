@@ -25,7 +25,7 @@ Describe 'run-markdownlint.ps1 extended scenarios' {
         It 'Documents MARKDOWNLINT_VERSION environment variable' {
             $content = Get-Content -LiteralPath $script:MarkdownlintScript -Raw
             $content | Should -Match 'MARKDOWNLINT_VERSION'
-            $content | Should -Match '0\.35\.0'
+            $content | Should -Match '0\.48\.0'
         }
 
         It 'Documents exit codes for success validation and setup errors' {

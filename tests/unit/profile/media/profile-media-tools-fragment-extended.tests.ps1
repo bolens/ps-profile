@@ -42,15 +42,16 @@ Describe 'profile.d/media-tools.ps1 extended scenarios' {
         try {
         . (Join-Path $script:ProfileDir 'media-tools.ps1')
 
-        Mark-TestCommandsUnavailable -CommandNames @('ffmpeg', 'handbrake', 'HandBrakeCLI')
+        Mark-TestCommandsUnavailable -CommandNames @('ffmpeg', 'handbrake', 'handbrake-cli', 'HandBrakeCLI')
         Set-TestCommandAvailabilityState -CommandName 'ffmpeg' -Available $false
         Set-TestCommandAvailabilityState -CommandName 'handbrake' -Available $false
+        Set-TestCommandAvailabilityState -CommandName 'handbrake-cli' -Available $false
         Set-TestCommandAvailabilityState -CommandName 'HandBrakeCLI' -Available $false
         if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
             Clear-TestCachedCommandCache | Out-Null
         }
         if ($global:MissingToolWarnings) {
-            foreach ($tool in @('ffmpeg', 'handbrake', 'HandBrakeCLI')) {
+            foreach ($tool in @('ffmpeg', 'handbrake', 'handbrake-cli', 'HandBrakeCLI')) {
                 $null = $global:MissingToolWarnings.TryRemove($tool, [ref]$null)
             }
         }

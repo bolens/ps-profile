@@ -121,7 +121,10 @@ Describe 'terminal-enhanced.ps1 - Integration Tests' {
         }
 
         It 'Get-TerminalInfo returns empty list when no terminals available' {
-            foreach ($cmd in @('alacritty', 'kitty', 'wezterm-nightly', 'wezterm', 'tabby', 'tmux', 'screen')) {
+            foreach ($cmd in @(
+                    'alacritty', 'kitty', 'wezterm-nightly', 'wezterm', 'tabby', 'tmux', 'screen',
+                    'wt', 'windows-terminal', 'hyper', 'terminator'
+                )) {
                 Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
             }
 

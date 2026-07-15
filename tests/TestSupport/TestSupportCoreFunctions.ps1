@@ -221,6 +221,70 @@ function Import-TestLibraryModule {
     Import-Module -Name $ModulePath -DisableNameChecking -Global -Force -ErrorAction Stop
 }
 
+function Export-TestSupportGlobalFunctions {
+    <#
+    .SYNOPSIS
+        Promotes core TestSupport helpers to the global scope for Pester parallel workers.
+    #>
+    [CmdletBinding()]
+    param()
+
+    $globalFunctionNames = @(
+        'Get-TestSupportPath'
+        'Get-TestPath'
+        'Get-TestRepoRoot'
+        'Get-TestSuitePath'
+        'Get-TestArtifactPath'
+        'New-TestTempDirectory'
+        'New-TestTempFile'
+        'Remove-TestArtifacts'
+        'Import-TestLibraryModule'
+        'Initialize-TestProfile'
+        'Get-TestProfileDir'
+        'Reset-TestIsolationState'
+        'Restore-TestSupportHelperFunctions'
+        'Get-PythonPackageInstallRecommendation'
+        'Invoke-MakeGenericTypeWrapper'
+        'Invoke-CreateInstanceWrapper'
+        'Invoke-TypeConstructorWrapper'
+    )
+
+    foreach ($functionName in $globalFunctionNames) {
+        $command = Get-Command $functionName -ErrorAction SilentlyContinue
+        if (-not $command) {
+            continue
+        }
+
+        if ($command.CommandType -ne 'Function') {
+            continue
+        }
+
+        Set-Item -Path "Function:\global:$functionName" -Value $command.ScriptBlock -Force
+    }
+}
+
+function Restore-TestSupportHelperFunctions {
+    <#
+    .SYNOPSIS
+        Re-registers TestSupport helper functions cleared by Reset-TestIsolationState.
+    #>
+    [CmdletBinding()]
+    param()
+
+    $helperFiles = @(
+        'TestPaths.ps1'
+        'TestPythonHelpers.ps1'
+        'TestReflectionHelpers.ps1'
+    )
+
+    foreach ($helperFile in $helperFiles) {
+        $helperPath = Join-Path $PSScriptRoot $helperFile
+        if (Test-Path -LiteralPath $helperPath) {
+            . $helperPath
+        }
+    }
+}
+
 function Clear-CommandTestStubs {
     <#
     .SYNOPSIS
