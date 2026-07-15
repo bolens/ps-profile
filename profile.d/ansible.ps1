@@ -24,7 +24,7 @@
 
 # Determine invocation strategy once at load time
 $script:_ansibleIsLinux = $IsLinux -or $IsMacOS
-$script:_ansibleHasWsl  = -not $script:_ansibleIsLinux -and (Test-CachedCommand 'wsl')
+$script:_ansibleHasWsl = -not $script:_ansibleIsLinux -and (Test-CachedCommand 'wsl')
 
 # On Windows without WSL there is nothing to register — show install hint and bail out
 if (-not $script:_ansibleIsLinux -and -not $script:_ansibleHasWsl) {

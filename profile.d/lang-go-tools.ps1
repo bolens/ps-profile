@@ -538,4 +538,3 @@ catch {
         Write-Error "Failed to load lang-go-tools fragment: $($_.Exception.Message)"
     }
 }
-

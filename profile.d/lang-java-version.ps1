@@ -110,11 +110,11 @@ try {
             else {
                 if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
                     Write-StructuredError -ErrorRecord (New-Object System.Management.Automation.ErrorRecord(
-                        [System.IO.DirectoryNotFoundException]::new("Java installation not found at: $JavaHome"),
-                        'JavaHomeNotFound',
-                        [System.Management.Automation.ErrorCategory]::ObjectNotFound,
-                        $JavaHome
-                    )) -OperationName 'java.version.set' -Context @{ java_home = $JavaHome }
+                            [System.IO.DirectoryNotFoundException]::new("Java installation not found at: $JavaHome"),
+                            'JavaHomeNotFound',
+                            [System.Management.Automation.ErrorCategory]::ObjectNotFound,
+                            $JavaHome
+                        )) -OperationName 'java.version.set' -Context @{ java_home = $JavaHome }
                 }
                 else {
                     Write-Error "Java installation not found at: $JavaHome"

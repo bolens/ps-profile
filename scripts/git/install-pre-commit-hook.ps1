@@ -107,13 +107,33 @@ if ($hookPath -and -not [string]::IsNullOrWhiteSpace($hookPath) -and (Test-Path 
 
 $psExe = Get-PowerShellExecutable
 $preCommitScript = Join-Path $RepoRoot 'scripts' 'git' 'pre-commit.ps1'
-$script = @"
-#!/usr/bin/env $psExe
+$psExeLiteral = $psExe -replace "'", "''"
+$preCommitLiteral = $preCommitScript -replace "'", "''"
+if (Test-IsWindows) {
+    $script = @"
+#!/usr/bin/env pwsh
 # pre-commit hook to format and validate PowerShell profile
-$psExe -NoProfile -File "$preCommitScript"
-if (`$LASTEXITCODE -ne 0) { Write-Host 'Pre-commit: checks failed' ; exit 1 }
-Exit-WithCode -ExitCode $EXIT_SUCCESS
+& '$psExeLiteral' -NoProfile -File '$preCommitLiteral'
+if (`$LASTEXITCODE -ne 0) {
+    Write-Host 'Pre-commit: checks failed'
+    exit 1
+}
+exit 0
 "@
+}
+else {
+    $script = @"
+#!/bin/sh
+# pre-commit hook to format and validate PowerShell profile
+'$psExeLiteral' -NoProfile -File '$preCommitLiteral'
+status=`$?
+if [ `$status -ne 0 ]; then
+  echo 'Pre-commit: checks failed'
+  exit 1
+fi
+exit 0
+"@
+}
 
 Set-Content -LiteralPath $hookPath -Value $script -NoNewline -Force
 # Make executable on supported systems (Git for Windows respects the hook file, Unix needs +x)

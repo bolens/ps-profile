@@ -635,8 +635,16 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 -
 pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 -ListOnly
 ```
 
-Pre-push can opt into the same run with `PS_PROFILE_PUSH_TESTS=1` (optional
-`PS_PROFILE_PUSH_TESTS_SINCE=origin/main`). Pre-commit stays format + validate only.
+Pre-push runs the same changed-shard filters by default (after validate-profile with
+cspell/markdownlint gating). Opt out with `PS_PROFILE_SKIP_PUSH_TESTS=1` or
+`PS_PROFILE_PUSH_TESTS=0`. Override the diff base with
+`PS_PROFILE_PUSH_TESTS_SINCE=origin/main`. Pre-commit stays format + validate only.
+
+```bash
+just pre-push-checks
+# or
+pwsh -NoProfile -File scripts/git/hooks/pre-push.ps1
+```
 
 Each enabled shard is a bounded path set executed via `run-pester-ci-shard.ps1`:
 

@@ -329,6 +329,11 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/git/pre-commit.ps1
 
+  pre-push-checks:
+    desc: Run Pre-push Checks (validate + changed CI Pester shards)
+    cmds:
+      - pwsh -NoProfile -File scripts/git/hooks/pre-push.ps1 {{.CLI_ARGS}}
+
   check-idempotency:
     desc: Check Idempotency
     cmds:

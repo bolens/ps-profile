@@ -198,6 +198,10 @@ quality-check format security-scan lint spellcheck markdownlint check-comment-he
 pre-commit-checks:
     pwsh -NoProfile -File scripts/git/pre-commit.ps1
 
+# Run Pre-push Checks (validate + changed CI Pester shards)
+pre-push-checks *ARGS:
+    pwsh -NoProfile -File scripts/git/hooks/pre-push.ps1 {{ ARGS }}
+
 # Check Idempotency
 check-idempotency:
     pwsh -NoProfile -File scripts/checks/check-idempotency.ps1

@@ -13,3 +13,9 @@
 *.yaml text eol=lf
 *.toml text eol=lf
 *.psrc text eol=lf
+*.jsonc text eol=lf
+.editorconfig text eol=lf
+justfile text eol=lf
+Justfile text eol=lf
+Makefile text eol=lf
+*.mk text eol=lf

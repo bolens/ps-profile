@@ -11,9 +11,13 @@ function global:New-CommitMsgHookFixture {
     New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
 
-    $hooksDir = Join-Path $repo '.git' 'hooks'
+    # Mirror real layout: scripts/git/hooks/commit-msg.ps1
+    $hooksDir = Join-Path $scriptsDir 'git' 'hooks'
     New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
     Copy-Item -LiteralPath $script:CommitMsgHookScript -Destination (Join-Path $hooksDir 'commit-msg.ps1') -Force
+
+    Push-Location $repo
+    try { & git init -q 2>$null } finally { Pop-Location }
 
     return [pscustomobject]@{
         RepoRoot = $repo
@@ -28,8 +32,11 @@ function global:Invoke-CommitMsgHook {
     )
 
     $msgFile = New-TestTempFile -Prefix 'CommitMsg' -Extension '.txt' -Content $Message
-    & pwsh -NoProfile -File $HookPath -CommitMsgFile $msgFile 2>&1 | Out-Null
-    return $LASTEXITCODE
+    $raw = & pwsh -NoProfile -File $HookPath -CommitMsgFile $msgFile 2>&1
+    return [pscustomobject]@{
+        ExitCode = $LASTEXITCODE
+        Output   = ($raw | Out-String)
+    }
 }
 
 BeforeAll {
@@ -51,27 +58,28 @@ BeforeAll {
 Describe 'commit-msg.ps1 execution' {
     It 'Accepts a valid Conventional Commit subject' {
         $fixture = New-CommitMsgHookFixture
-                Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "feat(cli): add hook test`n" | Should -Be 0
+        (Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "feat(cli): add hook test`n").ExitCode | Should -Be 0
     }
 
     It 'Rejects an invalid commit subject' {
         $fixture = New-CommitMsgHookFixture
-                Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "bad commit message`n" | Should -BeIn @(1, 2)
+        (Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "bad commit message`n").ExitCode | Should -BeIn @(1, 2)
     }
 
     It 'Allows merge commit subjects' {
         $fixture = New-CommitMsgHookFixture
-                Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "Merge branch 'main' into feature`n" | Should -Be 0
+        (Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "Merge branch 'main' into feature`n").ExitCode | Should -Be 0
     }
 
     It 'Accepts revert commits with a Conventional Commit subject' {
         $fixture = New-CommitMsgHookFixture
-                Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "revert: feat(cli): roll back hook test`n" | Should -Be 0
+        (Invoke-CommitMsgHook -HookPath $fixture.HookPath -Message "revert: feat(cli): roll back hook test`n").ExitCode | Should -Be 0
     }
 
     It 'Fails when the commit message file is missing' {
         $fixture = New-CommitMsgHookFixture
-                & pwsh -NoProfile -File $fixture.HookPath -CommitMsgFile (Join-Path $fixture.RepoRoot 'missing.txt') 2>&1 | Out-Null
+        $raw = & pwsh -NoProfile -File $fixture.HookPath -CommitMsgFile (Join-Path $fixture.RepoRoot 'missing.txt') 2>&1
         $LASTEXITCODE | Should -BeIn @(1, 2)
+        ($raw | Out-String) | Should -Match 'not provided or not found|commit-msg'
     }
 }

@@ -71,30 +71,31 @@ Describe 'install-githooks.ps1 execution' {
         $result.Output | Should -Match 'DRY RUN'
         $result.Output | Should -Match 'commit-msg'
         $result.Output | Should -Match 'pre-push'
-        Test-Path -LiteralPath (Join-Path $repo '.git' 'commit-msg') | Should -BeFalse
-        Test-Path -LiteralPath (Join-Path $repo '.git' 'pre-push') | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $repo '.git' 'hooks' 'commit-msg') | Should -BeFalse
+        Test-Path -LiteralPath (Join-Path $repo '.git' 'hooks' 'pre-push') | Should -BeFalse
     }
 
-    It 'Installs hook wrappers into .git for each scripts/git/hooks script' {
+    It 'Installs hook wrappers into .git/hooks for each scripts/git/hooks script' {
         $repo = New-InstallGitHooksTestRepository
         $result = Invoke-InstallGitHooksScript -RepositoryRoot $repo
         $result.ExitCode | Should -Be 0
         $result.Output | Should -Match 'Git hooks installed|Installing hook'
-                $commitMsgHook = Join-Path $repo '.git' 'commit-msg'
-        $prePushHook = Join-Path $repo '.git' 'pre-push'
+        $commitMsgHook = Join-Path $repo '.git' 'hooks' 'commit-msg'
+        $prePushHook = Join-Path $repo '.git' 'hooks' 'pre-push'
         Test-Path -LiteralPath $commitMsgHook | Should -BeTrue
         Test-Path -LiteralPath $prePushHook | Should -BeTrue
         Get-Content -LiteralPath $commitMsgHook -Raw | Should -Match 'commit-msg\.ps1'
         Get-Content -LiteralPath $prePushHook -Raw | Should -Match 'pre-push\.ps1'
+        Get-Content -LiteralPath $prePushHook -Raw | Should -Match 'scripts/git/hooks/pre-push\.ps1'
     }
 
     It 'Reinstalls hooks idempotently when run a second time' {
         $repo = New-InstallGitHooksTestRepository
         $first = Invoke-InstallGitHooksScript -RepositoryRoot $repo
         $second = Invoke-InstallGitHooksScript -RepositoryRoot $repo
-                $first.ExitCode | Should -Be 0
+        $first.ExitCode | Should -Be 0
         $second.ExitCode | Should -Be 0
-        Test-Path -LiteralPath (Join-Path $repo '.git' 'pre-push') | Should -BeTrue
+        Test-Path -LiteralPath (Join-Path $repo '.git' 'hooks' 'pre-push') | Should -BeTrue
     }
 
     It 'Fails when the requested git hooks directory does not exist' {

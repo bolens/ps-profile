@@ -1,26 +1,80 @@
+# https://editorconfig.org
+# Keep in sync with .gitattributes (LF), run-format.ps1 (UTF-8 / LF),
+# PSScriptAnalyzerSettings.psd1 (no BOM required), .vscode/settings.json,
+# and .markdownlint.json (MD013 line_length 200).
+
 root = true
 
 [*]
 charset = utf-8
-end_of_line = crlf
+end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
-
-[*.ps1]
 indent_style = space
 indent_size = 4
 
-[*.psd1]
+# PowerShell — 4-space indent (VS Code editor.tabSize + Invoke-Formatter)
+[*.{ps1,psm1,psd1,ps1xml,pssc,psrc}]
 indent_style = space
 indent_size = 4
 
+# YAML / Taskfile / GitHub Actions — 2-space indent
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+[{Taskfile.yml,Taskfile.yaml,.github/workflows/**}]
+indent_style = space
+indent_size = 2
+
+# JSON (package.json, cspell, VS Code) — 2-space indent
+[*.json]
+indent_style = space
+indent_size = 2
+
+[{.vscode/**,.markdownlint.json,cspell.json,cspell*.json}]
+indent_style = space
+indent_size = 2
+
+# Markdown — MD013 line_length 200; keep trailing spaces (hard line breaks)
 [*.md]
+indent_style = space
+indent_size = 2
 trim_trailing_whitespace = false
+max_line_length = 200
 
-[*.yml]
+# Just recipes use 4-space bodies (see justfile)
+[{justfile,Justfile,*.just}]
+indent_style = space
+indent_size = 4
+
+# Makefiles require tabs
+[{Makefile,makefile,*.mk}]
+indent_style = tab
+
+# TOML / INI-style configs
+[*.{toml,ini}]
 indent_style = space
 indent_size = 2
 
-[*.yaml]
+# Shell helpers shipped beside PowerShell tooling
+[*.{sh,bash}]
 indent_style = space
 indent_size = 2
+end_of_line = lf
+
+# Lockfiles and generated blobs — do not reformat on save
+[{pnpm-lock.yaml,package-lock.json,yarn.lock,**/docs/api/**,**/docs/test-verification-reports/**}]
+indent_style = unset
+indent_size = unset
+trim_trailing_whitespace = unset
+insert_final_newline = unset
+max_line_length = unset
+
+[*.{svg,png,jpg,jpeg,gif,webp,ico,woff,woff2,ttf,eot}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset

@@ -55,7 +55,7 @@ function Get-BatteryInfo {
             Where-Object { (Get-Content (Join-Path $_.FullName 'type') -ErrorAction SilentlyContinue) -eq 'Battery' }
         if ($batteries) {
             foreach ($bat in $batteries) {
-                $cap  = Get-Content (Join-Path $bat.FullName 'capacity') -ErrorAction SilentlyContinue
+                $cap = Get-Content (Join-Path $bat.FullName 'capacity') -ErrorAction SilentlyContinue
                 $stat = Get-Content (Join-Path $bat.FullName 'status')   -ErrorAction SilentlyContinue
                 [PSCustomObject]@{
                     Name                     = $bat.Name
@@ -89,9 +89,9 @@ function Get-SystemInfo {
             if ($memLine) { $totalMem = [long]$memLine.Matches[0].Groups[1].Value * 1KB }
         }
         [PSCustomObject]@{
-            Name               = [System.Net.Dns]::GetHostName()
-            Manufacturer       = (Get-Content '/sys/class/dmi/id/sys_vendor'   -ErrorAction SilentlyContinue) ?? 'Unknown'
-            Model              = (Get-Content '/sys/class/dmi/id/product_name' -ErrorAction SilentlyContinue) ?? 'Unknown'
+            Name                = [System.Net.Dns]::GetHostName()
+            Manufacturer        = (Get-Content '/sys/class/dmi/id/sys_vendor'   -ErrorAction SilentlyContinue) ?? 'Unknown'
+            Model               = (Get-Content '/sys/class/dmi/id/product_name' -ErrorAction SilentlyContinue) ?? 'Unknown'
             TotalPhysicalMemory = $totalMem
         }
     }
@@ -111,10 +111,10 @@ function Get-CpuInfo {
     else {
         $cpuinfo = Get-Content '/proc/cpuinfo' -ErrorAction SilentlyContinue
         if ($cpuinfo) {
-            $modelName   = ($cpuinfo | Select-String '^model name\s*:(.+)' | Select-Object -First 1)?.Matches[0]?.Groups[1]?.Value?.Trim()
-            $physCores   = ($cpuinfo | Select-String '^cpu cores\s*:(.+)'  | Select-Object -First 1)?.Matches[0]?.Groups[1]?.Value?.Trim()
+            $modelName = ($cpuinfo | Select-String '^model name\s*:(.+)' | Select-Object -First 1)?.Matches[0]?.Groups[1]?.Value?.Trim()
+            $physCores = ($cpuinfo | Select-String '^cpu cores\s*:(.+)'  | Select-Object -First 1)?.Matches[0]?.Groups[1]?.Value?.Trim()
             $logicalProc = ($cpuinfo | Select-String '^processor\s*:'      | Measure-Object).Count
-            $maxMHz      = ($cpuinfo | Select-String '^cpu MHz\s*:(.+)'    | ForEach-Object { [double]$_.Matches[0].Groups[1].Value } | Measure-Object -Maximum).Maximum
+            $maxMHz = ($cpuinfo | Select-String '^cpu MHz\s*:(.+)'    | ForEach-Object { [double]$_.Matches[0].Groups[1].Value } | Measure-Object -Maximum).Maximum
             [PSCustomObject]@{
                 Name                      = $modelName ?? 'Unknown'
                 NumberOfCores             = if ($physCores) { [int]$physCores } else { $null }
@@ -151,10 +151,10 @@ function Get-MemoryInfo {
     else {
         if (Test-Path '/proc/meminfo') {
             $memLines = Get-Content '/proc/meminfo'
-            $total     = ($memLines | Select-String '^MemTotal:\s+(\d+)')?.Matches[0]?.Groups[1]?.Value
+            $total = ($memLines | Select-String '^MemTotal:\s+(\d+)')?.Matches[0]?.Groups[1]?.Value
             $available = ($memLines | Select-String '^MemAvailable:\s+(\d+)')?.Matches[0]?.Groups[1]?.Value
             [PSCustomObject]@{
-                'TotalMemory(GB)'     = if ($total)     { [math]::Round([long]$total     * 1KB / 1GB, 2) } else { $null }
+                'TotalMemory(GB)'     = if ($total) { [math]::Round([long]$total * 1KB / 1GB, 2) } else { $null }
                 'AvailableMemory(GB)' = if ($available) { [math]::Round([long]$available * 1KB / 1GB, 2) } else { $null }
             }
         }
