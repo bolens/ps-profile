@@ -18,8 +18,10 @@ on:
     branches:
       - main
     paths:
-      - 'scripts/**/*.ps1'
-      - 'profile.d/**/*.ps1'
+      - 'scripts/utils/metrics/**'
+      - 'scripts/lib/metrics/**'
+      - 'scripts/data/**'
+      - '.github/workflows/metrics-collection.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

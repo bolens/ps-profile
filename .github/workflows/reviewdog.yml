@@ -3,6 +3,16 @@ name: Reviewdog - lint annotations
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - '**/*.psd1'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - 'cspell.json'
+      - 'cspell*.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/reviewdog.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

@@ -3,8 +3,24 @@ name: Dependencies - Validation
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - 'Modules/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'scripts/utils/dependencies/**'
+      - 'scripts/lib/**'
+      - '.github/workflows/dependency-validation.yml'
   push:
     branches: [ main ]
+    paths:
+      - 'Modules/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'scripts/utils/dependencies/**'
+      - 'scripts/lib/**'
+      - '.github/workflows/dependency-validation.yml'
   workflow_dispatch:
 
 env:

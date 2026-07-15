@@ -3,8 +3,24 @@ name: CI - PowerShell (matrix)
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/checks/**'
+      - 'scripts/lib/**'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/ci-powershell.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/checks/**'
+      - 'scripts/lib/**'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/ci-powershell.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

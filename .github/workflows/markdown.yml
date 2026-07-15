@@ -3,8 +3,22 @@ name: Docs - Markdown lint + link-check
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - '**/*.md'
+      - '.markdownlint*'
+      - 'markdownlint*'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/markdown.yml'
   push:
     branches: [ main ]
+    paths:
+      - '**/*.md'
+      - '.markdownlint*'
+      - 'markdownlint*'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/markdown.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

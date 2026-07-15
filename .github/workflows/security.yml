@@ -3,8 +3,22 @@ name: Security - Scan
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/utils/security/**'
+      - 'scripts/lib/**'
+      - '.github/workflows/security.yml'
   push:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/utils/security/**'
+      - 'scripts/lib/**'
+      - '.github/workflows/security.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

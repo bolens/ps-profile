@@ -3,8 +3,22 @@ name: Check comment-based help consistency
 on:
   push:
     branches: [ main ]
+    paths:
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - 'profile.d/**'
+      - 'scripts/checks/check-comment-help.ps1'
+      - 'Microsoft.PowerShell_profile.ps1'
+      - '.github/workflows/check-readmes.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - 'profile.d/**'
+      - 'scripts/checks/check-comment-help.ps1'
+      - 'Microsoft.PowerShell_profile.ps1'
+      - '.github/workflows/check-readmes.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"

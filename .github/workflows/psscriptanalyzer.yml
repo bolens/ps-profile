@@ -2,8 +2,20 @@ name: PSScriptAnalyzer lint
 
 on:
   pull_request:
+    paths:
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - '**/*.psd1'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/psscriptanalyzer.yml'
   push:
     branches: [ main ]
+    paths:
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - '**/*.psd1'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/psscriptanalyzer.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
