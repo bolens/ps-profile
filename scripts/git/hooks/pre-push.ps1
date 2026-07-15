@@ -2,30 +2,33 @@
 scripts/git/hooks/pre-push.ps1
 
 .SYNOPSIS
-    Runs validation and CI-aligned checks before pushing to remote.
+    Lightweight gate before push; heavy checks are opt-in.
 
 .DESCRIPTION
-    Invoked by the wrapper installed into .git/hooks/pre-push (via install-githooks.ps1),
-    which calls this file under scripts/git/hooks/. Runs validate-profile with the same
-    cspell/markdownlint gating as pre-commit, then runs changed CI Pester shards
-    (same filters as GitHub Actions) by default.
+    Invoked by the wrapper in .git/hooks/pre-push (via install-githooks.ps1).
 
-    Environment variables:
-    - PS_PROFILE_SKIP_PUSH_VALIDATE=1  Skip validate-profile
-    - PS_PROFILE_SKIP_PUSH_TESTS=1     Skip changed-shard Pester run
-    - PS_PROFILE_PUSH_TESTS=0          Skip changed-shard tests (legacy opt-out)
-    - PS_PROFILE_PUSH_TESTS=1          Force changed-shard tests (default is already on)
-    - PS_PROFILE_PUSH_TESTS_SINCE      Diff base for shards (default: origin/main)
+    Default behavior is intentionally fast so `git push` does not hang:
+    - Does NOT re-run validate-profile (pre-commit already covers format + validate).
+    - Does NOT run changed-shard Pester (use CI / opt-in env).
+
+    Opt-in heavier gates (expected to take minutes):
+    - PS_PROFILE_PUSH_VALIDATE=1  Run validate-profile (cspell, lint, markdownlint, …)
+    - PS_PROFILE_PUSH_TESTS=1     Run changed CI Pester shards (same filters as GHA)
+    - PS_PROFILE_PUSH_TESTS_SINCE Diff base for shards (default: origin/main)
+
+    Explicit skip (overrides opt-in):
+    - PS_PROFILE_SKIP_PUSH_VALIDATE=1
+    - PS_PROFILE_SKIP_PUSH_TESTS=1 or PS_PROFILE_PUSH_TESTS=0
 
 .EXAMPLE
     git push
 
-    This hook is automatically invoked by git before pushing.
+    Fast push (no validate / no local shard run).
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts/git/hooks/pre-push.ps1
+    PS_PROFILE_PUSH_TESTS=1 git push
 
-    Run the pre-push checks manually.
+    Also run changed-shard Pester before push.
 #>
 
 # This script lives at scripts/git/hooks/pre-push.ps1 → scripts/ is two levels up.
@@ -55,17 +58,18 @@ catch {
 }
 
 $psExe = Get-PowerShellExecutable
-$skipValidate = $env:PS_PROFILE_SKIP_PUSH_VALIDATE -eq '1'
 
-if (-not $skipValidate) {
+# Heavy validate is opt-in. Pre-commit already ran it on commits; repeating here
+# routinely stuck pushes for several minutes.
+$wantValidate = ($env:PS_PROFILE_PUSH_VALIDATE -eq '1') -and ($env:PS_PROFILE_SKIP_PUSH_VALIDATE -ne '1')
+if ($wantValidate) {
     $validate = Join-Path $repoRoot 'scripts' 'checks' 'validate-profile.ps1'
     if (-not (Test-Path -LiteralPath $validate)) {
         Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "pre-push: validate-profile not found: $validate"
     }
 
-    Write-ScriptMessage -Message 'pre-push: running validate-profile (security, lint, cspell, markdownlint, comment help, idempotency, duplicates)'
+    Write-ScriptMessage -Message 'pre-push: running validate-profile (PS_PROFILE_PUSH_VALIDATE=1)'
 
-    # Match pre-commit / CI: require cspell when local Node tooling is present.
     $localCspell = @(
         (Join-Path $repoRoot 'node_modules' '.bin' 'cspell')
         (Join-Path $repoRoot 'node_modules' '.bin' 'cspell.cmd')
@@ -81,23 +85,18 @@ if (-not $skipValidate) {
     }
 }
 else {
-    Write-ScriptMessage -Message 'pre-push: skipping validate-profile (PS_PROFILE_SKIP_PUSH_VALIDATE=1)'
+    Write-ScriptMessage -Message 'pre-push: skipping validate-profile (set PS_PROFILE_PUSH_VALIDATE=1 to enable; pre-commit already validated commits)'
 }
 
-# Changed CI shards — on by default (same filters as GitHub Actions Test - Pester).
-# Opt out: PS_PROFILE_SKIP_PUSH_TESTS=1 or PS_PROFILE_PUSH_TESTS=0
-$runPushTests = $true
-if (($env:PS_PROFILE_SKIP_PUSH_TESTS -eq '1') -or ($env:PS_PROFILE_PUSH_TESTS -eq '0')) {
-    $runPushTests = $false
-}
-if ($env:PS_PROFILE_PUSH_TESTS -eq '1') {
-    $runPushTests = $true
-}
+# Changed CI shards — opt-in only (can expand to many shards and hang pushes).
+$wantTests = ($env:PS_PROFILE_PUSH_TESTS -eq '1') -and
+($env:PS_PROFILE_SKIP_PUSH_TESTS -ne '1') -and
+($env:PS_PROFILE_PUSH_TESTS -ne '0')
 
-if ($runPushTests) {
+if ($wantTests) {
     $changedShards = Join-Path $repoRoot 'scripts' 'utils' 'code-quality' 'run-pester-changed-shards.ps1'
     if (Test-Path -LiteralPath $changedShards) {
-        Write-ScriptMessage -Message 'pre-push: running Pester CI shards for local changes (same filters as GitHub Actions)'
+        Write-ScriptMessage -Message 'pre-push: running Pester CI shards for local changes (PS_PROFILE_PUSH_TESTS=1)'
         $since = if ($env:PS_PROFILE_PUSH_TESTS_SINCE) { $env:PS_PROFILE_PUSH_TESTS_SINCE } else { 'origin/main' }
         & $psExe -NoProfile -File $changedShards -ChangedSince $since -IncludeUntracked -Quiet
         if ($LASTEXITCODE -ne 0) {
@@ -109,7 +108,7 @@ if ($runPushTests) {
     }
 }
 else {
-    Write-ScriptMessage -Message 'pre-push: skipping changed-shard tests (PS_PROFILE_SKIP_PUSH_TESTS=1 or PS_PROFILE_PUSH_TESTS=0)'
+    Write-ScriptMessage -Message 'pre-push: skipping changed-shard tests (set PS_PROFILE_PUSH_TESTS=1 to enable; CI runs shards on PR)'
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'pre-push: all checks passed'

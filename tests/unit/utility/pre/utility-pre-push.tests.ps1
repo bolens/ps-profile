@@ -30,7 +30,6 @@ function global:New-PrePushTestRepository {
         Set-Content -LiteralPath (Join-Path $cqDir 'run-pester-changed-shards.ps1') -Value "exit $ChangedShardsExitCode" -NoNewline
     }
 
-    # Mirror real layout: scripts/git/hooks/pre-push.ps1 (install-githooks wrappers call this path)
     $hooksDir = Join-Path $scriptsDir 'git' 'hooks'
     New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
     Copy-Item -LiteralPath $script:PrePushHookScript -Destination (Join-Path $hooksDir 'pre-push.ps1') -Force
@@ -87,58 +86,69 @@ BeforeAll {
 }
 
 Describe 'pre-push.ps1 execution' {
-    It 'Passes when validate-profile and changed-shards succeed' {
-        $repo = New-PrePushTestRepository -ValidateExitCode 0 -ChangedShardsExitCode 0
+    It 'Passes quickly by default without running validate or shard tests' {
+        $repo = New-PrePushTestRepository -ValidateExitCode 1 -ChangedShardsExitCode 1
         $result = Invoke-PrePushHook -RepositoryRoot $repo
         $result.ExitCode | Should -Be 0
-    }
-
-    It 'Prints validate-profile and changed-shard status before completing successfully' {
-        $repo = New-PrePushTestRepository -ValidateExitCode 0 -ChangedShardsExitCode 0
-        $result = Invoke-PrePushHook -RepositoryRoot $repo
-
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'pre-push: running validate-profile'
-        $result.Output | Should -Match 'pre-push: running Pester CI shards'
+        $result.Output | Should -Match 'skipping validate-profile'
+        $result.Output | Should -Match 'skipping changed-shard tests'
         $result.Output | Should -Match 'pre-push: all checks passed'
     }
 
-    It 'Fails when validate-profile returns a non-zero exit code' {
+    It 'Runs validate-profile when PS_PROFILE_PUSH_VALIDATE=1' {
+        $repo = New-PrePushTestRepository -ValidateExitCode 0 -ChangedShardsExitCode 1
+        $result = Invoke-PrePushHook -RepositoryRoot $repo -Environment @{
+            PS_PROFILE_PUSH_VALIDATE = '1'
+        }
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'running validate-profile'
+        $result.Output | Should -Match 'skipping changed-shard tests'
+    }
+
+    It 'Fails when opt-in validate-profile returns non-zero' {
         $repo = New-PrePushTestRepository -ValidateExitCode 1
-        $result = Invoke-PrePushHook -RepositoryRoot $repo
+        $result = Invoke-PrePushHook -RepositoryRoot $repo -Environment @{
+            PS_PROFILE_PUSH_VALIDATE = '1'
+        }
         $result.ExitCode | Should -BeIn @(1, 2)
         $result.Output | Should -Match 'validate-profile failed|pre-push: validate-profile failed'
     }
 
-    It 'Fails when validate-profile.ps1 is missing from the repository' {
+    It 'Fails when validate-profile.ps1 is missing and validate is opted in' {
         $repo = New-PrePushTestRepository -OmitValidateScript
-        $result = Invoke-PrePushHook -RepositoryRoot $repo
+        $result = Invoke-PrePushHook -RepositoryRoot $repo -Environment @{
+            PS_PROFILE_PUSH_VALIDATE = '1'
+        }
         $result.ExitCode | Should -BeIn @(1, 2, 3)
-        $result.Output | Should -Match 'validate-profile|Cannot bind|not found|failed'
+        $result.Output | Should -Match 'validate-profile|not found|failed'
     }
 
-    It 'Fails when changed-shard runner returns a non-zero exit code' {
+    It 'Runs changed-shard tests when PS_PROFILE_PUSH_TESTS=1' {
+        $repo = New-PrePushTestRepository -ValidateExitCode 1 -ChangedShardsExitCode 0
+        $result = Invoke-PrePushHook -RepositoryRoot $repo -Environment @{
+            PS_PROFILE_PUSH_TESTS = '1'
+        }
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'running Pester CI shards'
+        $result.Output | Should -Match 'skipping validate-profile'
+    }
+
+    It 'Fails when opt-in changed-shard runner returns non-zero' {
         $repo = New-PrePushTestRepository -ValidateExitCode 0 -ChangedShardsExitCode 1
-        $result = Invoke-PrePushHook -RepositoryRoot $repo
+        $result = Invoke-PrePushHook -RepositoryRoot $repo -Environment @{
+            PS_PROFILE_PUSH_TESTS = '1'
+        }
         $result.ExitCode | Should -BeIn @(1, 2)
         $result.Output | Should -Match 'changed-shard Pester run failed'
     }
 
-    It 'Skips changed-shard tests when PS_PROFILE_SKIP_PUSH_TESTS=1' {
+    It 'Skips opt-in tests when PS_PROFILE_SKIP_PUSH_TESTS=1' {
         $repo = New-PrePushTestRepository -ValidateExitCode 0 -ChangedShardsExitCode 1
         $result = Invoke-PrePushHook -RepositoryRoot $repo -Environment @{
+            PS_PROFILE_PUSH_TESTS      = '1'
             PS_PROFILE_SKIP_PUSH_TESTS = '1'
         }
         $result.ExitCode | Should -Be 0
         $result.Output | Should -Match 'skipping changed-shard tests'
-    }
-
-    It 'Skips validate-profile when PS_PROFILE_SKIP_PUSH_VALIDATE=1' {
-        $repo = New-PrePushTestRepository -ValidateExitCode 1 -ChangedShardsExitCode 0
-        $result = Invoke-PrePushHook -RepositoryRoot $repo -Environment @{
-            PS_PROFILE_SKIP_PUSH_VALIDATE = '1'
-        }
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'skipping validate-profile'
     }
 }
