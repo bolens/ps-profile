@@ -353,8 +353,8 @@ function global:Register-ToolWrapper {
         }
 
         if ($commandAvailable -and $commandInfo) {
-            # Command is available, execute it with provided arguments
-            & $commandInfo @Arguments
+            # Invoke by command name; & $commandInfo duplicates the name for Application commands.
+            & $captured.CommandName @Arguments
         }
         else {
             # Command not found - use standard error handling

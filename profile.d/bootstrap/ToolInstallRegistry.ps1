@@ -2287,7 +2287,15 @@ function global:Get-SystemPackageManagerFallbackChain {
     }
     
     # Define platform-specific package managers in priority order
-    $packageManagers = switch ($Platform) {
+    $normalizedPlatform = switch -Regex ($Platform) {
+        '^(?i)windows$' { 'Windows' }
+        '^(?i)linux$'   { 'Linux' }
+        '^(?i)macos$'   { 'macOS' }
+        default         { $Platform }
+    }
+
+    $packageManagers = @(
+        switch ($normalizedPlatform) {
         'Windows' {
             @(
                 @{ Name = 'scoop'; Command = 'scoop'; InstallCmd = "scoop install $ToolName" }
@@ -2316,6 +2324,28 @@ function global:Get-SystemPackageManagerFallbackChain {
             )
         }
     }
+    )
+
+    $packageManagers = @(
+        foreach ($entry in $packageManagers) {
+            if ($null -eq $entry) {
+                continue
+            }
+
+            if ($entry -is [hashtable] -and $entry.ContainsKey('Command')) {
+                $entry
+                continue
+            }
+
+            if ($entry -is [System.Collections.IDictionary]) {
+                @{
+                    Name       = [string]$entry.Name
+                    Command    = [string]$entry.Command
+                    InstallCmd = [string]$entry.InstallCmd
+                }
+            }
+        }
+    )
     
     # Check availability and build priority list
     $availableMethods = @()
@@ -2350,7 +2380,7 @@ function global:Get-SystemPackageManagerFallbackChain {
         Preferred     = $preferredMethod
         Available     = $availableMethods
         FallbackChain = $fallbackChain
-        Platform      = $Platform
+        Platform      = $normalizedPlatform
     }
 }
 

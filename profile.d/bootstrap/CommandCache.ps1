@@ -357,13 +357,16 @@ function global:Resolve-CommandExecutablePath {
     }
 
     if ($CommandInfo -is [System.Management.Automation.CommandInfo]) {
-        $fromSource = $null
-        if ($null -ne $CommandInfo.Source) {
-            $fromSource = Resolve-CommandExecutablePath -CommandInfo $CommandInfo.Source
-        }
+        $useSourcePath = $CommandInfo.CommandType -in @(
+            [System.Management.Automation.CommandTypes]::Application
+            [System.Management.Automation.CommandTypes]::ExternalScript
+        )
 
-        if (-not [string]::IsNullOrWhiteSpace($fromSource)) {
-            return $fromSource
+        if ($useSourcePath -and $null -ne $CommandInfo.Source) {
+            $fromSource = Resolve-CommandExecutablePath -CommandInfo $CommandInfo.Source
+            if (-not [string]::IsNullOrWhiteSpace($fromSource)) {
+                return $fromSource
+            }
         }
 
         if (-not [string]::IsNullOrWhiteSpace($CommandInfo.Name)) {
@@ -485,22 +488,17 @@ function global:Invoke-CachedYqCommand {
         throw 'yq command not found. Install mikefarah/yq (on Arch: sudo pacman -S go-yq).'
     }
 
-    $executable = Resolve-CommandExecutablePath -CommandInfo $yqCmd
-    if ([string]::IsNullOrWhiteSpace($executable)) {
-        throw 'yq command not found. Install mikefarah/yq (on Arch: sudo pacman -S go-yq).'
-    }
-
     $yqArguments = @($args)
     $pipedInput = @($input)
 
     if ($pipedInput.Count -gt 0) {
-        $pipedInput | & $executable @yqArguments
+        $pipedInput | & $yqCmd @yqArguments
     }
     elseif ($yqArguments.Count -gt 0) {
-        & $executable @yqArguments
+        & $yqCmd @yqArguments
     }
     else {
-        & $executable
+        & $yqCmd
     }
 }
 
