@@ -6,8 +6,9 @@ scripts/git/pre-commit.ps1
 
 .DESCRIPTION
     Cross-platform helper invoked by .git/hooks/pre-commit. It runs code formatting
-    first, adds any formatted files to the commit, then runs validation checks.
-    Ensures code quality before commits are finalized.
+    first, adds any formatted files to the commit, then runs validate-profile
+    (security, lint, cspell, markdownlint, comment help, idempotency, duplicates).
+    cspell is required when node tooling is available (same gate as CI).
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\git\pre-commit.ps1
@@ -70,7 +71,16 @@ if ($validateScript -and -not [string]::IsNullOrWhiteSpace($validateScript) -and
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Validation script not found: $validateScript"
 }
 
-Write-ScriptMessage -Message "Running validation..."
+Write-ScriptMessage -Message "Running validation (security, lint, cspell, markdownlint, comment help, idempotency, duplicates)..."
+# Match CI: require cspell / enable markdownlint when local Node tooling is present.
+$localCspell = @(
+    (Join-Path $repoRoot 'node_modules' '.bin' 'cspell')
+    (Join-Path $repoRoot 'node_modules' '.bin' 'cspell.cmd')
+) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+if ($localCspell -or (Get-Command pnpm -ErrorAction SilentlyContinue) -or (Get-Command cspell -ErrorAction SilentlyContinue)) {
+    $env:PS_PROFILE_REQUIRE_CSPELL = '1'
+}
+$env:PS_PROFILE_REQUIRE_MARKDOWNLINT = '1'
 $psExe = Get-PowerShellExecutable
 & $psExe -NoProfile -File $validateScript -ErrorAction SilentlyContinue
 if ($LASTEXITCODE -ne 0) {

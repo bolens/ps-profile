@@ -98,7 +98,7 @@ Describe 'Validation pipeline integration' {
             }
 
             $content = Get-Content -LiteralPath $script:CheckScripts.ValidateProfile -Raw
-            foreach ($checkName in @('security scan', 'lint', 'spellcheck', 'comment-based help check', 'idempotency', 'duplicate functions')) {
+            foreach ($checkName in @('security scan', 'lint', 'spellcheck', 'markdownlint', 'comment-based help check', 'idempotency', 'duplicate functions')) {
                 ($content -match [regex]::Escape($checkName)) | Should -Be $true -Because "validate-profile should orchestrate $checkName"
             }
         }
