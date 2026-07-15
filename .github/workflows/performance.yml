@@ -32,13 +32,27 @@ permissions:
 jobs:
   benchmark:
     runs-on: windows-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v7
       - name: Run Performance Benchmark
-        run: pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 3
+        timeout-minutes: 20
+        # Bound wall-clock: 2 full-profile iterations + 1 pass over fragments.
+        # Async I/O drain + no PSReadLine in fragment probes avoids CI hangs.
+        run: >
+          pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1
+          -Iterations 2
+          -FragmentIterations 1
+          -FragmentTimeoutSeconds 15
       - name: Update Performance Baseline
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 5 -UpdateBaseline
+        timeout-minutes: 20
+        run: >
+          pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1
+          -Iterations 3
+          -FragmentIterations 1
+          -FragmentTimeoutSeconds 15
+          -UpdateBaseline
       - name: Upload benchmark results
         uses: actions/upload-artifact@v7
         with:
@@ -46,3 +60,4 @@ jobs:
           path: |
             scripts/data/startup-benchmark.csv
             scripts/data/performance-baseline.json
+          if-no-files-found: warn

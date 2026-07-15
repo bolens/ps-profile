@@ -57,10 +57,12 @@ Describe 'benchmark-startup.ps1 execution' {
 
         $result = Invoke-BenchmarkStartupScript -ArgumentList @(
             '-Iterations', '1',
+            '-SkipFragmentTimings',
             '-WorkspaceRoot', $script:TestRepoRoot
         )
 
         $result.Output | Should -Match 'Measuring full profile startup'
+        $result.Output | Should -Match 'SkipFragmentTimings|Skipping per-fragment'
         $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
     }
 

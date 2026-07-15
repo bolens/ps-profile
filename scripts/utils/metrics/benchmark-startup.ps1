@@ -20,6 +20,19 @@
 .PARAMETER RegressionThreshold
     The threshold for performance regression.
 
+.PARAMETER FragmentIterations
+    Iterations for per-fragment timing. Defaults to -Iterations. Use 1 in CI to
+    keep fragment sweeps bounded.
+
+.PARAMETER SkipFragmentTimings
+    Skip the per-fragment loop (full-profile startup only). Preferred for PR
+    metrics collection where performance.yml already covers fragment timing.
+
+.PARAMETER FragmentTimeoutSeconds
+    Hard timeout per fragment probe before the child process tree is killed.
+    Defaults to 30. CI uses a lower value so hung fragments cannot dominate
+    the job wall-clock.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1
     pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 10
@@ -27,6 +40,9 @@
     pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -RegressionThreshold 1.2
     pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -WorkspaceRoot /home/username/Documents/PowerShell
     pwsh -NoProfile -File scripts/utils/benchmark-startup.ps1 -Iterations 5 -UpdateBaseline -RegressionThreshold 1.2 -WorkspaceRoot /home/username/Documents/PowerShell
+    pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 2 -FragmentIterations 1
+    pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -Iterations 1 -SkipFragmentTimings
+    pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 -FragmentTimeoutSeconds 15
 #>
 
 param(
@@ -54,8 +70,30 @@ param(
             }
             $true
         })]
-    [double]$RegressionThreshold = 1.5  # Allow 50% degradation before failing
+    [double]$RegressionThreshold = 1.5,  # Allow 50% degradation before failing
+
+    [ValidateScript({
+            if ($_ -le 0) {
+                throw "FragmentIterations must be a positive integer. Value provided: $_"
+            }
+            $true
+        })]
+    [int]$FragmentIterations = 0,
+
+    [switch]$SkipFragmentTimings,
+
+    [ValidateScript({
+            if ($_ -le 0) {
+                throw "FragmentTimeoutSeconds must be a positive number. Value provided: $_"
+            }
+            $true
+        })]
+    [int]$FragmentTimeoutSeconds = 30
 )
+
+if ($FragmentIterations -le 0) {
+    $FragmentIterations = $Iterations
+}
 
 # Import shared utilities directly (no barrel files)
 # Import PathResolution first (needed by ModuleImport)
@@ -136,13 +174,101 @@ function Time-Command {
     return $sw.Elapsed.TotalMilliseconds
 }
 
+function Stop-BenchmarkProcess {
+    param(
+        [Parameter(Mandatory)]
+        [System.Diagnostics.Process]$Process,
+
+        [int]$GraceMs = 5000
+    )
+
+    try {
+        if (-not $Process.HasExited) {
+            try {
+                $Process.Kill($true)
+            }
+            catch {
+                $Process.Kill()
+            }
+            [void]$Process.WaitForExit($GraceMs)
+        }
+    }
+    catch {
+        # best-effort
+    }
+}
+
+function Invoke-BenchmarkChildProcess {
+    <#
+    .SYNOPSIS
+        Starts a child process with a hard timeout and non-deadlocking I/O drain.
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$FileName,
+
+        [Parameter(Mandatory)]
+        [string]$Arguments,
+
+        [Parameter(Mandatory)]
+        [int]$TimeoutMs
+    )
+
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = $FileName
+    $startInfo.Arguments = $Arguments
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+
+    $proc = New-Object System.Diagnostics.Process
+    $proc.StartInfo = $startInfo
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    [void]$proc.Start()
+
+    # Drain pipes asynchronously BEFORE WaitForExit to avoid buffer-full deadlocks.
+    $stdoutTask = $proc.StandardOutput.ReadToEndAsync()
+    $stderrTask = $proc.StandardError.ReadToEndAsync()
+    $timedOut = $false
+
+    if (-not $proc.WaitForExit($TimeoutMs)) {
+        $timedOut = $true
+        Stop-BenchmarkProcess -Process $proc
+    }
+
+    $sw.Stop()
+
+    $drainMs = [Math]::Min(5000, [Math]::Max(1000, [int]($TimeoutMs / 10)))
+    try { [void]$stdoutTask.Wait($drainMs) } catch { }
+    try { [void]$stderrTask.Wait($drainMs) } catch { }
+
+    $stdout = ''
+    $stderr = ''
+    if ($stdoutTask.IsCompleted) {
+        try { $stdout = $stdoutTask.Result } catch { }
+    }
+    if ($stderrTask.IsCompleted) {
+        try { $stderr = $stderrTask.Result } catch { }
+    }
+
+    try { $proc.Dispose() } catch { }
+
+    return [pscustomobject]@{
+        TimedOut       = $timedOut
+        ElapsedMs      = $sw.Elapsed.TotalMilliseconds
+        StandardOutput = $stdout
+        StandardError  = $stderr
+    }
+}
+
 # Ensure we run from repository root
 Push-Location $WorkspaceRoot
 
 # Level 1: Basic operation start
 if ($debugLevel -ge 1) {
     Write-Verbose "[benchmark.startup] Starting startup benchmark"
-    Write-Verbose "[benchmark.startup] Iterations: $Iterations, Workspace root: $WorkspaceRoot"
+    Write-Verbose "[benchmark.startup] Iterations: $Iterations, FragmentIterations: $FragmentIterations, SkipFragmentTimings: $SkipFragmentTimings, Workspace root: $WorkspaceRoot"
     Write-Verbose "[benchmark.startup] Update baseline: $UpdateBaseline, Regression threshold: $RegressionThreshold"
 }
 
@@ -168,73 +294,32 @@ for ($i = 1; $i -le $Iterations; $i++) {
         $marker = "PS_STARTUP_READY_$([guid]::NewGuid().ToString('N'))"
         $profilePath = Join-Path $WorkspaceRoot 'Microsoft.PowerShell_profile.ps1'
 
-        $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-        $startInfo.FileName = Get-PowerShellExecutable
-        # Use minimal environment for faster benchmark execution
-        $startInfo.Arguments = "-NoProfile -Command `"`$env:PS_PROFILE_ENVIRONMENT = 'minimal'; `$env:PS_PROFILE_AUTOENABLE_PSREADLINE = '1'; Import-Module PSReadLine -ErrorAction SilentlyContinue; . '$($profilePath)'; Write-Output '$($marker)'`""
-        $startInfo.RedirectStandardOutput = $true
-        $startInfo.RedirectStandardError = $true
-        $startInfo.UseShellExecute = $false
-        $startInfo.CreateNoWindow = $true
-
-        $proc = New-Object System.Diagnostics.Process
-        $proc.StartInfo = $startInfo
-
-        $sw = [System.Diagnostics.Stopwatch]::StartNew()
-        $proc.Start() | Out-Null
+        $psExe = Get-PowerShellExecutable
+        $childArgs = "-NoProfile -Command `"`$env:PS_PROFILE_ENVIRONMENT = 'minimal'; `$env:PS_PROFILE_AUTOENABLE_PSREADLINE = '1'; Import-Module PSReadLine -ErrorAction SilentlyContinue; . '$($profilePath)'; Write-Output '$($marker)'`""
 
         # Compile regex pattern once for marker detection
         $markerRegex = [regex]::new([regex]::Escape($marker), [System.Text.RegularExpressions.RegexOptions]::Compiled)
-        
-        # Simplified approach: Wait for process with timeout, then read all output
-        # This avoids deadlocks from buffered output and complexity of async reading
+
         $timeoutSeconds = 120  # 2 minutes timeout for profile loading
         $timeoutMs = $timeoutSeconds * 1000
+        $child = Invoke-BenchmarkChildProcess -FileName $psExe -Arguments $childArgs -TimeoutMs $timeoutMs
         $markerFound = $false
-        
-        # Wait for process to exit with timeout
-        if (-not $proc.WaitForExit($timeoutMs)) {
-            # Process didn't exit within timeout
-            Write-ScriptMessage -Message "Profile load timed out after $timeoutSeconds seconds (iteration $i), killing process..." -IsWarning
-            try {
-                $proc.Kill()
-                $proc.WaitForExit(5000) | Out-Null
-            }
-            catch {
-                Write-ScriptMessage -Message "Failed to kill process: $_" -IsWarning
-            }
+
+        if ($child.TimedOut) {
+            Write-ScriptMessage -Message "Profile load timed out after $timeoutSeconds seconds (iteration $i), killed process tree." -IsWarning
         }
-        
-        $sw.Stop()
-        
-        # Read all output after process exits (or was killed)
-        $allOutput = $null
-        try {
-            $allOutput = $proc.StandardOutput.ReadToEnd()
-            if ($allOutput) {
-                $markerFound = $markerRegex.IsMatch($allOutput)
-            }
+
+        if ($child.StandardOutput) {
+            $markerFound = $markerRegex.IsMatch($child.StandardOutput)
         }
-        catch {
-            Write-ScriptMessage -Message "Failed to read output: $_" -IsWarning
+
+        if (-not $markerFound -and $child.StandardError) {
+            Write-ScriptMessage -Message "Profile load completed but marker not found (iteration $i). Error output: $($child.StandardError)" -IsWarning
         }
-        
-        # Read error output if marker not found
-        if (-not $markerFound) {
-            try {
-                $errorOutput = $proc.StandardError.ReadToEnd()
-                if ($errorOutput) {
-                    Write-ScriptMessage -Message "Profile load completed but marker not found (iteration $i). Error output: $errorOutput" -IsWarning
-                }
-            }
-            catch {
-                # Ignore errors reading error output
-            }
-        }
-        
-        $ms = $sw.Elapsed.TotalMilliseconds
+
+        $ms = $child.ElapsedMs
         $fullResults.Add($ms)
-        
+
         # Output timing for this iteration
         $formattedMs = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
             Format-LocaleNumber ([Math]::Round($ms, 2)) -Format 'N2'
@@ -290,147 +375,140 @@ if ($debugLevel -ge 1) {
 }
 
 $fragments = Get-ChildItem -Path (Join-Path $WorkspaceRoot 'profile.d') -Filter '*.ps1' | Sort-Object Name
-Write-ScriptMessage -Message "Measuring per-fragment load times ($($fragments.Count) fragments, $Iterations iterations each)..." -LogLevel Info
 # Use List for better performance than array concatenation
 $fragmentResults = [System.Collections.Generic.List[PSCustomObject]]::new()
 $fragmentCount = 0
 $failedFragments = [System.Collections.Generic.List[string]]::new()
 $fragmentMeasurementStartTime = Get-Date
-foreach ($frag in $fragments) {
-    $fragmentCount++
-    
-    # Level 1: Individual fragment measurement
-    if ($debugLevel -ge 1) {
-        Write-Verbose "[benchmark.startup] Measuring fragment: $($frag.Name) ($fragmentCount/$($fragments.Count))"
-    }
-    Write-ScriptMessage -Message "  Fragment $fragmentCount/$($fragments.Count): $($frag.Name)..." -LogLevel Debug
-    try {
-        $times = [System.Collections.Generic.List[double]]::new()
-        $fragmentIterationFailures = 0
-        for ($i = 1; $i -le $Iterations; $i++) {
-            try {
-                $scriptPath = $frag.FullName
-                $tempFrag = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "ps_profile_frag_$([guid]::NewGuid().ToString('N')).ps1")
-                $child = @"
-$env:PS_PROFILE_AUTOENABLE_PSREADLINE = '1'
-Import-Module PSReadLine -ErrorAction SilentlyContinue
+
+if ($SkipFragmentTimings) {
+    Write-ScriptMessage -Message "Skipping per-fragment load times (-SkipFragmentTimings)." -LogLevel Info
+}
+else {
+    Write-ScriptMessage -Message "Measuring per-fragment load times ($($fragments.Count) fragments, $FragmentIterations iterations each)..." -LogLevel Info
+    foreach ($frag in $fragments) {
+        $fragmentCount++
+
+        # Level 1: Individual fragment measurement
+        if ($debugLevel -ge 1) {
+            Write-Verbose "[benchmark.startup] Measuring fragment: $($frag.Name) ($fragmentCount/$($fragments.Count))"
+        }
+        Write-ScriptMessage -Message "  Fragment $fragmentCount/$($fragments.Count): $($frag.Name)..." -LogLevel Debug
+        try {
+            $times = [System.Collections.Generic.List[double]]::new()
+            $fragmentIterationFailures = 0
+            for ($i = 1; $i -le $FragmentIterations; $i++) {
+                $tempFrag = $null
+                try {
+                    $scriptPath = $frag.FullName
+                    $tempFrag = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), "ps_profile_frag_$([guid]::NewGuid().ToString('N')).ps1")
+                    # Avoid importing PSReadLine in headless CI probes — it can block
+                    # waiting on a console and burn the full fragment timeout.
+                    $childScript = @"
+`$ErrorActionPreference = 'Continue'
+`$env:PS_PROFILE_ENVIRONMENT = 'minimal'
 `$sw = [System.Diagnostics.Stopwatch]::StartNew()
 . '$($scriptPath)'
 `$sw.Stop()
 Write-Output `$sw.Elapsed.TotalMilliseconds
 "@
-                Set-Content -Path $tempFrag -Value $child -Encoding UTF8 -ErrorAction Stop
+                    Set-Content -Path $tempFrag -Value $childScript -Encoding UTF8 -ErrorAction Stop
 
-                $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-                $startInfo.FileName = Get-PowerShellExecutable
-                $startInfo.Arguments = "-NoProfile -File `"$tempFrag`""
-                $startInfo.RedirectStandardOutput = $true
-                $startInfo.RedirectStandardError = $true
-                $startInfo.UseShellExecute = $false
-                $startInfo.CreateNoWindow = $true
+                    $psExe = Get-PowerShellExecutable
+                    $timeoutMs = [Math]::Max(1000, $FragmentTimeoutSeconds * 1000)
+                    $child = Invoke-BenchmarkChildProcess -FileName $psExe -Arguments "-NoProfile -File `"$tempFrag`"" -TimeoutMs $timeoutMs
+                    $fragmentTimeout = [bool]$child.TimedOut
 
-                $proc = New-Object System.Diagnostics.Process
-                $proc.StartInfo = $startInfo
-                $proc.Start() | Out-Null
-                
-                # Wait for process with timeout
-                $timeoutMs = 30000  # 30 seconds per fragment
-                $fragmentTimeout = $false
-                if (-not $proc.WaitForExit($timeoutMs)) {
-                    $fragmentTimeout = $true
-                    try {
-                        $proc.Kill()
+                    if ($fragmentTimeout) {
                         if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
                             Write-StructuredWarning -Message "Fragment timed out" -OperationName 'benchmark.startup.fragment' -Context @{
                                 fragment        = $frag.Name
-                                timeout_seconds = $timeoutMs / 1000
+                                timeout_seconds = $FragmentTimeoutSeconds
                                 iteration       = $i
                             } -Code 'FragmentTimeout'
                         }
                         else {
-                            Write-Warning "Fragment $($frag.Name) timed out after $($timeoutMs/1000) seconds (iteration $i)"
+                            Write-Warning "Fragment $($frag.Name) timed out after $FragmentTimeoutSeconds seconds (iteration $i)"
                         }
                     }
-                    catch {
-                        # ignore errors when killing
+
+                    [double]$val = 0
+                    if (-not $fragmentTimeout) {
+                        $match = $numericRegex.Match([string]$child.StandardOutput)
+                        if ($match.Success) { [double]$val = [double]$match.Groups[1].Value }
+                    }
+                    $times.Add($val)
+
+                    if ($val -gt 0) {
+                        $formattedVal = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
+                            Format-LocaleNumber ([Math]::Round($val, 2)) -Format 'N2'
+                        }
+                        else {
+                            [Math]::Round($val, 2).ToString("N2")
+                        }
+                        Write-ScriptMessage -Message "    Iteration $($i)/$($FragmentIterations): $($formattedVal) ms" -LogLevel Debug
+                    }
+                    elseif ($fragmentTimeout) {
+                        Write-ScriptMessage -Message "    Iteration $($i)/$($FragmentIterations): TIMEOUT" -LogLevel Warning
+                        $fragmentIterationFailures++
+                    }
+
+                    Remove-Item -Path $tempFrag -Force -ErrorAction SilentlyContinue
+
+                    # Fail-fast: hung fragments are unlikely to succeed on retry.
+                    if ($fragmentTimeout) {
+                        break
                     }
                 }
-                
-                $out = $proc.StandardOutput.ReadToEnd()
-                [double]$val = 0
-                if (-not $fragmentTimeout) {
-                    $match = $numericRegex.Match($out)
-                    if ($match.Success) { [double]$val = [double]$match.Groups[1].Value }
-                }
-                $times.Add($val)
-                
-                # Output timing for this iteration
-                if ($val -gt 0) {
-                    $formattedVal = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
-                        Format-LocaleNumber ([Math]::Round($val, 2)) -Format 'N2'
+                catch {
+                    $fragmentIterationFailures++
+                    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+                        Write-StructuredWarning -Message "Failed to measure fragment" -OperationName 'benchmark.startup.fragment' -Context @{
+                            fragment         = $frag.Name
+                            iteration        = $i
+                            total_iterations = $FragmentIterations
+                        } -Code 'BenchmarkIterationFailed'
                     }
                     else {
-                        [Math]::Round($val, 2).ToString("N2")
+                        Write-ScriptMessage -Message "Failed to measure fragment $($frag.Name) (iteration $i): $($_.Exception.Message)" -IsWarning
                     }
-                    Write-ScriptMessage -Message "    Iteration $($i)/$($Iterations): $($formattedVal) ms" -LogLevel Debug
-                }
-                elseif ($fragmentTimeout) {
-                    Write-ScriptMessage -Message "    Iteration $($i)/$($Iterations): TIMEOUT" -LogLevel Warning
-                    $fragmentIterationFailures++
-                }
-                
-                Remove-Item -Path $tempFrag -Force -ErrorAction SilentlyContinue
-            }
-            catch {
-                $fragmentIterationFailures++
-                if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                    Write-StructuredWarning -Message "Failed to measure fragment" -OperationName 'benchmark.startup.fragment' -Context @{
-                        fragment         = $frag.Name
-                        iteration        = $i
-                        total_iterations = $Iterations
-                    } -Code 'BenchmarkIterationFailed'
-                }
-                else {
-                    Write-ScriptMessage -Message "Failed to measure fragment $($frag.Name) (iteration $i): $($_.Exception.Message)" -IsWarning
-                }
-                # Clean up temp file if it exists
-                if ($tempFrag -and (Test-Path -LiteralPath $tempFrag)) {
-                    Remove-Item -Path $tempFrag -Force -ErrorAction SilentlyContinue
+                    if ($tempFrag -and (Test-Path -LiteralPath $tempFrag)) {
+                        Remove-Item -Path $tempFrag -Force -ErrorAction SilentlyContinue
+                    }
                 }
             }
-        }
-        
-        # Calculate statistics safely
-        $meanMs = 0
-        $medianMs = 0
-        if ($times.Count -gt 0) {
-            $meanMs = [Math]::Round(($times | Measure-Object -Average).Average, 2)
-            $sorted = $times | Sort-Object
-            $medianIndex = [Math]::Floor($sorted.Count / 2)
-            $medianMs = [Math]::Round($sorted[$medianIndex], 2)
-        }
-        
-        if ($fragmentIterationFailures -gt 0) {
-            Write-ScriptMessage -Message "  Warning: $fragmentIterationFailures out of $Iterations iterations failed for fragment $($frag.Name)" -IsWarning
-        }
-        
-        $fragmentResults.Add([PSCustomObject]@{
-                Fragment   = $frag.Name
-                Iterations = $Iterations
-                MeanMs     = $meanMs
-                MedianMs   = $medianMs
-                Raw        = $times -join ','
-            })
-    }
-    catch {
-        $failedFragments.Add($frag.Name)
-        if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
-            Write-StructuredError -ErrorRecord $_ -OperationName 'benchmark.startup.fragment' -Context @{
-                fragment = $frag.Name
+
+            $meanMs = 0
+            $medianMs = 0
+            if ($times.Count -gt 0) {
+                $meanMs = [Math]::Round(($times | Measure-Object -Average).Average, 2)
+                $sorted = $times | Sort-Object
+                $medianIndex = [Math]::Floor($sorted.Count / 2)
+                $medianMs = [Math]::Round($sorted[$medianIndex], 2)
             }
+
+            if ($fragmentIterationFailures -gt 0) {
+                Write-ScriptMessage -Message "  Warning: $fragmentIterationFailures out of $FragmentIterations iterations failed for fragment $($frag.Name)" -IsWarning
+            }
+
+            $fragmentResults.Add([PSCustomObject]@{
+                    Fragment   = $frag.Name
+                    Iterations = $FragmentIterations
+                    MeanMs     = $meanMs
+                    MedianMs   = $medianMs
+                    Raw        = $times -join ','
+                })
         }
-        else {
-            Write-ScriptMessage -Message "Failed to measure fragment $($frag.Name): $($_.Exception.Message)" -IsWarning
+        catch {
+            $failedFragments.Add($frag.Name)
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'benchmark.startup.fragment' -Context @{
+                    fragment = $frag.Name
+                }
+            }
+            else {
+                Write-ScriptMessage -Message "Failed to measure fragment $($frag.Name): $($_.Exception.Message)" -IsWarning
+            }
         }
     }
 }
@@ -466,7 +544,12 @@ if ($debugLevel -ge 3) {
 # Print results
 Write-ScriptMessage -Message "Startup benchmark (ms) - iterations: $Iterations"
 $fullResultsArray = $fullResults.ToArray()
-$currentMean = [Math]::Round(($fullResultsArray | Measure-Object -Average).Average, 2)
+$currentMean = if ($fullResultsArray.Count -gt 0) {
+    [Math]::Round(($fullResultsArray | Measure-Object -Average).Average, 2)
+}
+else {
+    0
+}
 # Optimized: Use foreach loop instead of ForEach-Object
 $formattedTimes = [System.Collections.Generic.List[string]]::new()
 $hasFormatLocaleNumber = Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue
@@ -488,8 +571,15 @@ Write-ScriptMessage -Message "Full startup times (ms): $($formattedTimes -join '
 Write-ScriptMessage -Message "Full startup mean (ms): $currentMeanStr"
 
 Write-ScriptMessage -Message "Per-fragment dot-source timings (ms):"
-$fragmentResults | Sort-Object -Property MeanMs -Descending | Format-Table -AutoSize
-
+if ($fragmentResults.Count -gt 0) {
+    $fragmentResults | Sort-Object -Property MeanMs -Descending | Format-Table -AutoSize
+}
+elseif ($SkipFragmentTimings) {
+    Write-ScriptMessage -Message "  (skipped via -SkipFragmentTimings)"
+}
+else {
+    Write-ScriptMessage -Message "  (no fragment timings collected)" -IsWarning
+}
 # Performance regression detection
 $baselineFile = Join-Path $WorkspaceRoot 'scripts' 'data' 'performance-baseline.json'
 $regressionDetected = $false

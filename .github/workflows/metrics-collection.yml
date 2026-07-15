@@ -30,6 +30,7 @@ jobs:
   collect-metrics:
     name: Collect and Store Metrics
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       issues: write
@@ -42,32 +43,40 @@ jobs:
 
       - name: Collect Code Metrics
         id: collect-code-metrics
+        timeout-minutes: 5
         run: |
           pwsh -NoProfile -File scripts/utils/metrics/collect-code-metrics.ps1
         continue-on-error: true
 
       - name: Collect Performance Metrics (if available)
         id: collect-performance-metrics
+        timeout-minutes: 8
         run: |
           if [ -f "scripts/utils/metrics/benchmark-startup.ps1" ]; then
-            pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 || true
+            # PR/schedule metrics: one full-profile sample only. Fragment sweeps live in performance.yml.
+            pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1 \
+              -Iterations 1 \
+              -SkipFragmentTimings || true
           fi
         continue-on-error: true
 
       - name: Save Metrics Snapshot
         id: save-snapshot
+        timeout-minutes: 3
         run: |
           pwsh -NoProfile -File scripts/utils/metrics/save-metrics-snapshot.ps1 -IncludeCodeMetrics -IncludePerformanceMetrics
         continue-on-error: true
 
       - name: Generate Metrics Dashboard
         id: generate-dashboard
+        timeout-minutes: 3
         run: |
           pwsh -NoProfile -File scripts/utils/metrics/generate-dashboard.ps1 -IncludeHistorical || true
         continue-on-error: true
 
       - name: Export Metrics
         id: export-metrics
+        timeout-minutes: 3
         run: |
           pwsh -NoProfile -File scripts/utils/metrics/export-metrics.ps1 -IncludeCodeMetrics -IncludePerformance || true
         continue-on-error: true
