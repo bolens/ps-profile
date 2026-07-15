@@ -619,7 +619,26 @@ or use `task test -- <flags>`.
 ### CI shards (GitHub Actions)
 
 The `Test - Pester` workflow runs the suite as **parallel matrix jobs** instead of one
-multi-hour job. Each shard is a bounded path set executed via `run-pester-ci-shard.ps1`:
+multi-hour job. Shared filter rules in
+`scripts/utils/code-quality/modules/PesterCiShardFilter.psm1` select shards from the PR
+diff (docs-only / npm-lock PRs run zero Pester jobs). `workflow_dispatch` and CI-contract
+path changes enable the full suite.
+
+Locally (same rules as CI):
+
+```powershell
+# Working tree + staged changes
+just test-changed-shards -- -Quiet
+# Or vs a branch
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 -ChangedSince origin/main -Quiet
+# List only
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 -ListOnly
+```
+
+Pre-push can opt into the same run with `PS_PROFILE_PUSH_TESTS=1` (optional
+`PS_PROFILE_PUSH_TESTS_SINCE=origin/main`). Pre-commit stays format + validate only.
+
+Each enabled shard is a bounded path set executed via `run-pester-ci-shard.ps1`:
 
 ```powershell
 # List shard names (matches .github/workflows/test-pester.yml)
@@ -636,11 +655,15 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard 
 | Integration (non-conversion) | `integration-core` | `run-pester.ps1 -Parallel` |
 | Tools integration | `integration-tools` | `run-tools-integration-batch.ps1` |
 | Conversion integration | `conversion-data-structured`, `conversion-media` | conversion batch scripts |
-| Performance | `performance` (Windows job only) | `run-performance-batch.ps1` |
+| Performance | `performance` (Windows only) | `run-performance-batch.ps1` |
 | Coverage smoke | `coverage-smoke` (Ubuntu only) | `run-pester.ps1 -Coverage` on bootstrap + library |
 
+**OS matrix:** every enabled shard runs on Ubuntu (except `performance`). Windows also
+runs `unit-library`, `unit-profile-core`, `integration-tools`, `integration-core`, and
+`performance` when those shards are selected.
+
 Wall-clock time is dominated by the slowest shard; tune shards in `run-pester-ci-shard.ps1`
-when one bucket grows too large.
+and filter→shard maps in `.github/workflows/test-pester.yml` when buckets grow too large.
 
 ## Coverage Analysis
 

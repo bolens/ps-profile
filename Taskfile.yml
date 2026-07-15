@@ -78,6 +78,11 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 {{.CLI_ARGS}}
 
+  test-changed-shards:
+    desc: Run CI Pester shards for git changes (same filters as GitHub Actions)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 {{.CLI_ARGS}}
+
   test-coverage:
     desc: Run Pester Tests with Coverage
     cmds:

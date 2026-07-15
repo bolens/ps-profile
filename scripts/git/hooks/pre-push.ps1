@@ -39,5 +39,24 @@ if ($LASTEXITCODE -ne 0) {
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "pre-push: validate-profile failed"
 }
 
+# Changed CI shards (opt-in): set PS_PROFILE_PUSH_TESTS=1 to run them before push.
+# Skip with PS_PROFILE_SKIP_PUSH_TESTS=1. Pre-commit stays format+validate only.
+$runPushTests = $env:PS_PROFILE_PUSH_TESTS -eq '1'
+$skipPushTests = $env:PS_PROFILE_SKIP_PUSH_TESTS -eq '1'
+if ($runPushTests -and -not $skipPushTests) {
+    $changedShards = Join-Path $repoRoot 'scripts' 'utils' 'code-quality' 'run-pester-changed-shards.ps1'
+    if (Test-Path -LiteralPath $changedShards) {
+        Write-ScriptMessage -Message "pre-push: running Pester CI shards for local changes (PS_PROFILE_PUSH_TESTS=1)"
+        $since = if ($env:PS_PROFILE_PUSH_TESTS_SINCE) { $env:PS_PROFILE_PUSH_TESTS_SINCE } else { 'origin/main' }
+        & $psExe -NoProfile -File $changedShards -ChangedSince $since -IncludeUntracked -Quiet
+        if ($LASTEXITCODE -ne 0) {
+            Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "pre-push: changed-shard Pester run failed"
+        }
+    }
+}
+else {
+    Write-ScriptMessage -Message "pre-push: skipping changed-shard tests (set PS_PROFILE_PUSH_TESTS=1 to enable)"
+}
+
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "pre-push: all checks passed"
 
