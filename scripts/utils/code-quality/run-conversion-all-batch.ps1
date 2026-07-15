@@ -31,9 +31,9 @@
     pwsh -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1 -RelativePath data/encoding -Quiet
 #>
 param(
-    [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))),
-
     [string[]]$RelativePath = @(),
+
+    [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))),
 
     [switch]$Quiet,
 
@@ -42,6 +42,19 @@ param(
     [ValidateRange(0, 100)]
     [int]$Parallel = 0
 )
+
+$expectedRepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$conversionRootCheck = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
+if (-not (Test-Path -LiteralPath $conversionRootCheck)) {
+    if (Test-Path -LiteralPath (Join-Path $expectedRepoRoot 'tests' 'integration' 'conversion')) {
+        $RepoRoot = $expectedRepoRoot
+        $conversionRootCheck = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
+    }
+    else {
+        Write-Error "Invalid -RepoRoot '$RepoRoot'. Pass one -RelativePath value per invocation when calling via pwsh -File."
+        exit 2
+    }
+}
 
 $conversionRoot = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
 $batchRunner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-conversion-integration-batch.ps1'

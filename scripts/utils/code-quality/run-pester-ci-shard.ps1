@@ -242,15 +242,21 @@ switch ($definition.Kind) {
     }
   }
   'ConversionAllBatch' {
-    $args = @(
-      '-NoProfile'
-      '-NonInteractive'
-      '-File'
-      $conversionAllBatch
-      '-RelativePath'
-    ) + @($definition.Paths) + @('-Parallel', '4')
-    if ($Quiet) { $args += '-Quiet' }
-    Invoke-PesterCiShardRunner -RunnerArgs $args
+    foreach ($rel in $definition.Paths) {
+      Write-Host "Conversion all-batch path: $rel" -ForegroundColor Cyan
+      $args = @(
+        '-NoProfile'
+        '-NonInteractive'
+        '-File'
+        $conversionAllBatch
+        '-RelativePath'
+        $rel
+        '-Parallel'
+        '4'
+      )
+      if ($Quiet) { $args += '-Quiet' }
+      Invoke-PesterCiShardRunner -RunnerArgs $args
+    }
   }
   'PerformanceBatch' {
     $args = @('-NoProfile', '-NonInteractive', '-File', $performanceBatch)
