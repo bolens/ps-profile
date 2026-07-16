@@ -870,6 +870,15 @@ $PSScriptRoot = $testsDir
 $PSScriptRoot = $originalPSScriptRoot
 Write-Host "TestSupport.ps1 loaded" -ForegroundColor Green
 
+if (-not (Get-Command Get-TestPath -Scope Global -ErrorAction SilentlyContinue)) {
+    if (Get-Command Export-TestSupportGlobalFunctions -ErrorAction SilentlyContinue) {
+        Export-TestSupportGlobalFunctions
+    }
+    if (-not (Get-Command Get-TestPath -Scope Global -ErrorAction SilentlyContinue)) {
+        throw 'Get-TestPath was not exported to global scope after loading TestSupport.ps1'
+    }
+}
+
 # Re-apply confirmation suppression after TestSupport load (in case it was reset)
 $ConfirmPreference = 'None'
 $global:ConfirmPreference = 'None'

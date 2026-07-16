@@ -52,8 +52,10 @@ AfterAll {
 Describe 'ChocolateyDetection extended scenarios' {
     BeforeEach { Clear-ChocolateyTestEnvironment }
     AfterEach {
-        if (Get-Command Restore-AllMocks -ErrorAction SilentlyContinue) {
-            Restore-AllMocks
+        # Use module-qualified Get-Command so filtered Get-Command mocks cannot break cleanup.
+        $restoreMocks = Microsoft.PowerShell.Core\Get-Command -Name Restore-AllMocks -ErrorAction SilentlyContinue
+        if ($restoreMocks) {
+            & $restoreMocks
         }
     }
 
@@ -203,7 +205,7 @@ Describe 'ChocolateyDetection extended scenarios' {
 
         It 'Requires choco command when CheckCommand is specified' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
-            Mock Get-Command { return $null } -ParameterFilter { $Name -eq 'choco' }
+            Mock Get-Command { return $null } -ModuleName ChocolateyDetection -ParameterFilter { $Name -eq 'choco' }
 
             Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
@@ -219,7 +221,7 @@ Describe 'ChocolateyDetection extended scenarios' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
             $env:PS_PROFILE_DEBUG = '1'
             Enable-TestStructuredLogging
-            Mock Get-Command { return $null } -ParameterFilter { $Name -eq 'choco' }
+            Mock Get-Command { return $null } -ModuleName ChocolateyDetection -ParameterFilter { $Name -eq 'choco' }
 
             Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
@@ -235,7 +237,7 @@ Describe 'ChocolateyDetection extended scenarios' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
             $env:PS_PROFILE_DEBUG = '1'
             Remove-TestFunction -Name 'Write-StructuredWarning'
-            Mock Get-Command { return $null } -ParameterFilter { $Name -eq 'choco' }
+            Mock Get-Command { return $null } -ModuleName ChocolateyDetection -ParameterFilter { $Name -eq 'choco' }
 
             Test-ChocolateyInstalled -CheckCommand -WarningAction SilentlyContinue | Should -Be $false
         }

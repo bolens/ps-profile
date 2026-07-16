@@ -164,7 +164,7 @@ if (-not $PerFile) {
     $resultXml = Join-Path $resultDir 'test-results.xml'
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultDir)
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultXml)
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultXml

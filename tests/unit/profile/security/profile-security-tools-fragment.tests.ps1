@@ -124,7 +124,9 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
 
         It 'Calls Test-FragmentLoaded when the helper is available' {
             $global:TestFragmentLoadedCalls = [System.Collections.Generic.List[string]]::new()
-            $originalTestFragmentLoaded = Get-Command Test-FragmentLoaded -ErrorAction SilentlyContinue
+
+            # Module-exported helpers win over global stubs; remove them for this probe.
+            Remove-Module FragmentLoader, FragmentIdempotency -ErrorAction SilentlyContinue -Force
 
             function global:Test-FragmentLoaded {
                 param([string]$FragmentName)
@@ -135,6 +137,9 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
             try {
                 if (Get-Command Clear-FragmentLoaded -ErrorAction SilentlyContinue) {
                     Clear-FragmentLoaded -FragmentName 'security-tools'
+                }
+                if (Get-Variable -Name '__psprofile_fragment_loaded' -Scope Global -ErrorAction SilentlyContinue) {
+                    $global:__psprofile_fragment_loaded.Remove('security-tools')
                 }
 
                 if (Test-Path -LiteralPath $script:SecurityToolsPath) {
@@ -148,9 +153,6 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
             finally {
                 Remove-Item Function:\Test-FragmentLoaded -Force -ErrorAction SilentlyContinue
                 Remove-Item Function:\global:Test-FragmentLoaded -Force -ErrorAction SilentlyContinue
-                if ($originalTestFragmentLoaded) {
-                    Set-Item -Path Function:\global:Test-FragmentLoaded -Value $originalTestFragmentLoaded.ScriptBlock -Force
-                }
             }
         }
 
@@ -176,7 +178,9 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
 
         It 'Calls Set-FragmentLoaded when fragment loads successfully' {
             $global:SetFragmentLoadedCalls = [System.Collections.Generic.List[string]]::new()
-            $originalSetFragmentLoaded = Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue
+
+            # Module-exported helpers win over global stubs; remove them for this probe.
+            Remove-Module FragmentLoader, FragmentIdempotency -ErrorAction SilentlyContinue -Force
 
             function global:Set-FragmentLoaded {
                 param([string]$FragmentName)
@@ -190,20 +194,20 @@ Describe 'security-tools.ps1 - Fragment Loading and Registration' {
                 if (Get-Command Clear-FragmentLoaded -ErrorAction SilentlyContinue) {
                     Clear-FragmentLoaded -FragmentName 'security-tools'
                 }
+                if (Get-Variable -Name '__psprofile_fragment_loaded' -Scope Global -ErrorAction SilentlyContinue) {
+                    $global:__psprofile_fragment_loaded.Remove('security-tools')
+                }
 
                 if (Test-Path -LiteralPath $script:SecurityToolsPath) {
                     Remove-Item Function:\Invoke-GitLeaksScan -ErrorAction SilentlyContinue
                     . $script:SecurityToolsPath
                 }
 
-                $global:SetFragmentLoadedCalls | Should -Contain 'security-tools'
+                @($global:SetFragmentLoadedCalls) | Should -Contain 'security-tools'
             }
             finally {
                 Remove-Item Function:\Set-FragmentLoaded -Force -ErrorAction SilentlyContinue
                 Remove-Item Function:\global:Set-FragmentLoaded -Force -ErrorAction SilentlyContinue
-                if ($originalSetFragmentLoaded) {
-                    Set-Item -Path Function:\global:Set-FragmentLoaded -Value $originalSetFragmentLoaded.ScriptBlock -Force
-                }
             }
         }
 

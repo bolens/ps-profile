@@ -272,6 +272,7 @@ function Restore-TestSupportHelperFunctions {
     param()
 
     $helperFiles = @(
+        'TestSupportCoreFunctions.ps1'
         'TestPaths.ps1'
         'TestPythonHelpers.ps1'
         'TestReflectionHelpers.ps1'

@@ -119,6 +119,13 @@ $testSupportDir = Join-Path $PSScriptRoot 'TestSupport'
 
 # Load test support modules in dependency order
 if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and (Test-Path -LiteralPath $testSupportDir)) {
+    # Load CoreFunctions early so Export-TestSupportGlobalFunctions / Restore helpers
+    # exist even if TestMocks load is skipped or reordered.
+    $testSupportCoreFunctionsPath = Join-Path $testSupportDir 'TestSupportCoreFunctions.ps1'
+    if ($testSupportCoreFunctionsPath -and (Test-Path -LiteralPath $testSupportCoreFunctionsPath)) {
+        . $testSupportCoreFunctionsPath
+    }
+
     # Load TestPaths first (used by other modules)
     $testPathsPath = Join-Path $testSupportDir 'TestPaths.ps1'
     if ($testPathsPath -and -not [string]::IsNullOrWhiteSpace($testPathsPath) -and (Test-Path -LiteralPath $testPathsPath)) {

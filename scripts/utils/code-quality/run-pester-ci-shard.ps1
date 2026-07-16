@@ -236,7 +236,9 @@ switch ($definition.Kind) {
   'ConversionBatch' {
     foreach ($rel in $definition.Paths) {
       Write-Host "Conversion batch: $rel" -ForegroundColor Cyan
-      $args = @('-NoProfile', '-NonInteractive', '-File', $conversionBatch, '-RelativePath', $rel, '-Parallel', '4')
+      # Sequential: Pester 5.7 has no Run.Parallel; -Parallel was a no-op that
+      # still confused result aggregation on some hosts.
+      $args = @('-NoProfile', '-NonInteractive', '-File', $conversionBatch, '-RelativePath', $rel)
       if ($Quiet) { $args += '-Quiet' }
       Invoke-PesterCiShardRunner -RunnerArgs $args
     }
@@ -251,8 +253,6 @@ switch ($definition.Kind) {
         $conversionAllBatch
         '-RelativePath'
         $rel
-        '-Parallel'
-        '4'
       )
       if ($Quiet) { $args += '-Quiet' }
       Invoke-PesterCiShardRunner -RunnerArgs $args

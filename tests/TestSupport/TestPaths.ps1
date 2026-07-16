@@ -572,3 +572,21 @@ function Get-TestScriptPath {
     return $testScriptPath
 }
 
+# Promote path helpers to global immediately so Pester containers and conversion
+# tests that do not re-dot TestSupport can still resolve repository paths.
+foreach ($testPathHelperName in @(
+        'Get-TestRepoRoot'
+        'Get-TestPath'
+        'Get-TestSuitePath'
+        'Get-TestArtifactPath'
+        'New-TestTempDirectory'
+        'New-TestTempFile'
+        'Remove-TestArtifacts'
+        'Get-TestScriptPath'
+    )) {
+    $testPathHelper = Get-Command -Name $testPathHelperName -ErrorAction SilentlyContinue
+    if ($testPathHelper -and $testPathHelper.CommandType -eq 'Function') {
+        Set-Item -Path "Function:\global:$testPathHelperName" -Value $testPathHelper.ScriptBlock -Force
+    }
+}
+

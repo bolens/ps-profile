@@ -350,7 +350,11 @@ AfterAll {
 Describe 'FragmentLoading extended scenarios' {
     BeforeEach {
         Remove-Module FragmentLoader -ErrorAction SilentlyContinue -Force
-        Import-Module $script:FragmentLoadingPath -DisableNameChecking -Force
+        Import-Module $script:FragmentLoadingPath -DisableNameChecking -Force -Global
+        $depsCmd = Get-Command Get-FragmentDependencies -ErrorAction Stop
+        if ($depsCmd.ModuleName -ne 'FragmentLoading') {
+            throw "Get-FragmentDependencies resolved to '$($depsCmd.ModuleName)' instead of FragmentLoading"
+        }
     }
 
     Context 'Get-FragmentDependencies' {
