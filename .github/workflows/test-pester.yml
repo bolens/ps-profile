@@ -88,7 +88,15 @@ jobs:
             Register-PSRepository -Default
           }
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-          Install-Module -Name Pester -MinimumVersion 5.0.0 -Force -Scope CurrentUser
+          Install-Module -Name Pester -MinimumVersion 5.0.0 -MaximumVersion 5.99.99 -Force -Scope CurrentUser -AllowClobber
+          # Prefer 5.7.x when multiple 5.x builds are present; reject Pester 6+ (breaks coverage tracer teardown / mocks).
+          $pester5 = Get-Module -ListAvailable Pester |
+            Where-Object { $_.Version -ge [version]'5.0.0' -and $_.Version -lt [version]'6.0.0' } |
+            Sort-Object Version -Descending |
+            Select-Object -First 1
+          if (-not $pester5) { throw 'Pester 5.x is required but was not installed' }
+          Import-Module Pester -RequiredVersion $pester5.Version -Force
+          Write-Host "Installed Pester $($pester5.Version)"
       - name: Run Pester shard
         shell: pwsh
         run: |

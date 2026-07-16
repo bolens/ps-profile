@@ -327,7 +327,6 @@ function Clear-CommandTestStubs {
         'Get-NodePackageInstallRecommendation'
         'Get-Platform'
         'Import-Requirements'
-        'Get-RepoRoot'
         'CommandFailureProbe'
         'Import-ModuleSafely'
         'Test-FailingCommand'

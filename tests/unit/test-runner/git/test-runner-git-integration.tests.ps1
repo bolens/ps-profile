@@ -31,9 +31,10 @@ Describe 'TestGitIntegration Module' {
                 return
             }
 
-            $result = Get-GitChangedFiles -RepoRoot $script:TestRepoRoot
-            $result | Should -Not -BeNullOrEmpty
-            @($result).GetType().Name | Should -BeIn @('Object[]', 'String[]')
+            # Clean CI checkouts often have no porcelain changes; still return a typed array.
+            $result = @(Get-GitChangedFiles -RepoRoot $script:TestRepoRoot)
+            $null -eq $result | Should -BeFalse
+            $result.GetType().Name | Should -BeIn @('Object[]', 'String[]')
         }
 
         It 'Returns empty array outside a git repository' {

@@ -49,6 +49,41 @@ AfterAll {
     }
 }
 
+function script:Mock-ChocolateyGetCommandWithoutChoco {
+    <#
+    .SYNOPSIS
+        Module-scoped Get-Command mock that hides choco without breaking other probes.
+    #>
+    # Pester 5.6+/6 require a default mock when -ModuleName is used with -ParameterFilter,
+    # otherwise unmatched calls (Test-ValidPath, Write-StructuredWarning) throw.
+    Mock Get-Command {
+        $cmdName = $Name
+        if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
+            $cmdName = [string]$args[0]
+        }
+
+        if ($cmdName -eq 'choco') {
+            return $null
+        }
+
+        # Keep ChocolateyDetection on its Test-Path fallbacks; do not surface global-only helpers.
+        if ($cmdName -eq 'Test-ValidPath') {
+            return $null
+        }
+
+        # Prefer callable global stubs (Enable-TestStructuredLogging) over module-only exports.
+        if ($cmdName -in @('Write-StructuredWarning', 'Write-StructuredError')) {
+            $globalFn = Get-Item -Path "Function:\global:$cmdName" -ErrorAction SilentlyContinue
+            if ($globalFn) {
+                return Microsoft.PowerShell.Core\Get-Command -Name $cmdName -CommandType Function -ErrorAction SilentlyContinue
+            }
+            return $null
+        }
+
+        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+    } -ModuleName ChocolateyDetection
+}
+
 Describe 'ChocolateyDetection extended scenarios' {
     BeforeEach { Clear-ChocolateyTestEnvironment }
     AfterEach {
@@ -205,18 +240,7 @@ Describe 'ChocolateyDetection extended scenarios' {
 
         It 'Requires choco command when CheckCommand is specified' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
-            # ParameterFilter keeps other Get-Command probes (Test-ValidPath, Write-Structured*)
-            # on ChocolateyDetection's native resolution — do not fall through to global
-            # Get-Command, which can surface helpers the module cannot invoke.
-            Mock Get-Command {
-                return $null
-            } -ParameterFilter {
-                $cmdName = $Name
-                if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
-                    $cmdName = [string]$args[0]
-                }
-                $cmdName -eq 'choco'
-            } -ModuleName ChocolateyDetection
+            Mock-ChocolateyGetCommandWithoutChoco
 
             Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
@@ -232,15 +256,7 @@ Describe 'ChocolateyDetection extended scenarios' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
             $env:PS_PROFILE_DEBUG = '1'
             Enable-TestStructuredLogging
-            Mock Get-Command {
-                return $null
-            } -ParameterFilter {
-                $cmdName = $Name
-                if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
-                    $cmdName = [string]$args[0]
-                }
-                $cmdName -eq 'choco'
-            } -ModuleName ChocolateyDetection
+            Mock-ChocolateyGetCommandWithoutChoco
 
             Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
@@ -256,15 +272,7 @@ Describe 'ChocolateyDetection extended scenarios' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
             $env:PS_PROFILE_DEBUG = '1'
             Remove-TestFunction -Name 'Write-StructuredWarning'
-            Mock Get-Command {
-                return $null
-            } -ParameterFilter {
-                $cmdName = $Name
-                if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
-                    $cmdName = [string]$args[0]
-                }
-                $cmdName -eq 'choco'
-            } -ModuleName ChocolateyDetection
+            Mock-ChocolateyGetCommandWithoutChoco
 
             Test-ChocolateyInstalled -CheckCommand -WarningAction SilentlyContinue | Should -Be $false
         }

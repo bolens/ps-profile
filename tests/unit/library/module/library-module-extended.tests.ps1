@@ -328,7 +328,7 @@ Describe 'Module extended scenarios' {
                 }
                 'Install-Module'   = { throw 'install failure probe' }
             } -Body {
-                { Install-RequiredModule -ModuleName 'InstallFailureProbe' } | Should -Throw 'install failure probe'
+                { Install-RequiredModule -ModuleName 'InstallFailureProbe' } | Should -Throw '*install failure probe*'
             }
         }
 

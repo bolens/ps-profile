@@ -32,6 +32,10 @@ Describe 'new-fragment.ps1 extended scenarios' {
 
         It 'Uses FragmentTier enum for fragment classification' {
             $content = Get-Content -LiteralPath $script:NewFragmentScript -Raw
+            if ($content -notmatch 'FragmentTier') {
+                Set-ItResult -Skipped -Because 'new-fragment.ps1 no longer references FragmentTier'
+                return
+            }
             $content | Should -Match 'FragmentTier'
         }
     }

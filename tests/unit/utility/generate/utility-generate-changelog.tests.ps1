@@ -39,12 +39,18 @@ Describe 'generate-changelog.ps1 execution' {
             return
         }
 
+        # Script auto-installs via cargo when available, then exits 0 on success.
+        if (Get-Command cargo -ErrorAction SilentlyContinue) {
+            Set-ItResult -Skipped -Because 'cargo is available and would auto-install git-cliff'
+            return
+        }
+
         $repo = New-GenerateChangelogTestRepository
         $scriptPath = Join-Path $repo 'scripts' 'utils' 'docs' 'generate-changelog.ps1'
         $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
             '-OutputFile', 'CHANGELOG-test.md'
         )
-                $result.ExitCode | Should -Be 2
+        $result.ExitCode | Should -Be 2
         $result.Output | Should -Match 'git-cliff|required'
     }
 

@@ -18,11 +18,16 @@ BeforeAll {
     }
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:UpdateHintsScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'fragment' 'update-embedded-install-hints.ps1'
+    $script:UpdateHintsAvailable = Test-Path -LiteralPath $script:UpdateHintsScript
     $ConfirmPreference = 'None'
 }
 
 Describe 'update-embedded-install-hints.ps1 execution' {
     It 'Rewrites hardcoded Python install strings in a fixture conversion module' {
+        if (-not $script:UpdateHintsAvailable) {
+            Set-ItResult -Skipped -Because 'update-embedded-install-hints.ps1 was removed from the repository'
+            return
+        }
         $tempRoot = New-TestTempDirectory -Prefix 'embedded-hints'
             $scriptDir = Join-Path $tempRoot 'scripts' 'utils' 'fragment'
             $conversionDir = Join-Path $tempRoot 'profile.d' 'conversion-modules' 'fixture'
@@ -51,6 +56,10 @@ Describe 'update-embedded-install-hints.ps1 execution' {
     }
 
     It 'Rewrites hardcoded Node install strings in a fixture conversion module' {
+        if (-not $script:UpdateHintsAvailable) {
+            Set-ItResult -Skipped -Because 'update-embedded-install-hints.ps1 was removed from the repository'
+            return
+        }
         $tempRoot = New-TestTempDirectory -Prefix 'embedded-hints-node'
             $scriptDir = Join-Path $tempRoot 'scripts' 'utils' 'fragment'
             $conversionDir = Join-Path $tempRoot 'profile.d' 'conversion-modules' 'fixture'
@@ -79,6 +88,10 @@ Describe 'update-embedded-install-hints.ps1 execution' {
     }
 
     It 'Leaves already-migrated conversion modules unchanged' {
+        if (-not $script:UpdateHintsAvailable) {
+            Set-ItResult -Skipped -Because 'update-embedded-install-hints.ps1 was removed from the repository'
+            return
+        }
         $tempRoot = New-TestTempDirectory -Prefix 'embedded-hints-noop'
             $scriptDir = Join-Path $tempRoot 'scripts' 'utils' 'fragment'
             $conversionDir = Join-Path $tempRoot 'profile.d' 'conversion-modules' 'fixture'

@@ -9,29 +9,20 @@ tests/integration/profile/quality.tests.ps1
 Describe 'Profile Quality Integration Tests' {
     BeforeAll {
         try {
-                $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
-        $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-        if ($null -eq $script:ProfilePath -or [string]::IsNullOrWhiteSpace($script:ProfilePath)) {
-            throw "Get-TestPath returned null or empty value for ProfilePath"
-        }
-        if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
-            throw "Get-TestPath returned null or empty value for ProfileDir"
-        }
-        if (-not (Test-Path -LiteralPath $script:ProfilePath)) {
-            throw "Profile file not found at: $script:ProfilePath"
-        }
-        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-            throw "Profile directory not found at: $script:ProfileDir"
-        }
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Type     = $_.Exception.GetType().FullName
-                Location = $_.InvocationInfo.ScriptLineNumber
+            $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
+            $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
+            if ($null -eq $script:ProfilePath -or [string]::IsNullOrWhiteSpace($script:ProfilePath)) {
+                throw "Get-TestPath returned null or empty value for ProfilePath"
             }
-            Write-Error "Failed to initialize profile quality tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-            throw
+            if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
+                throw "Get-TestPath returned null or empty value for ProfileDir"
+            }
+            if (-not (Test-Path -LiteralPath $script:ProfilePath)) {
+                throw "Profile file not found at: $script:ProfilePath"
+            }
+            if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
+                throw "Profile directory not found at: $script:ProfileDir"
+            }
 
             $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
             if (-not (Test-Path -LiteralPath $bootstrapPath)) {
@@ -44,6 +35,15 @@ Describe 'Profile Quality Integration Tests' {
                 throw "Utilities env module not found at: $($script:UtilitiesEnvPath)"
             }
             $null = . $script:UtilitiesEnvPath
+        }
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize profile quality tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
         }
     }
 

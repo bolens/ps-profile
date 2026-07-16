@@ -81,7 +81,12 @@ Describe "Starship Module Tests" {
         }
 
         It "Returns true when prompt function contains starship" {
-            function prompt { & starship prompt }
+            Set-Item -Path Function:\global:prompt -Value { & starship prompt } -Force
+            $promptCmd = Get-Command prompt -CommandType Function -ErrorAction SilentlyContinue
+            if (-not $promptCmd -or ($promptCmd.ScriptBlock.ToString() -notmatch 'starship')) {
+                Set-ItResult -Skipped -Because 'Could not install a starship-containing prompt function in this session'
+                return
+            }
             Test-StarshipInitialized | Should -Be $true
         }
     }

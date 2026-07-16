@@ -165,6 +165,8 @@ Describe 'PerformanceMeasurement extended scenarios' {
 
             $env:PS_PROFILE_PERFORMANCE_MEASUREMENT_FORCE_DB_RECORD = '1'
             $env:PS_PROFILE_ENVIRONMENT = 'test-env'
+            # CI takes precedence over PS_PROFILE_ENVIRONMENT in Measure-Operation; clear it for this assertion.
+            Remove-Item Env:CI -ErrorAction SilentlyContinue
             Remove-Module PerformanceMeasurement -ErrorAction SilentlyContinue -Force
             Import-Module (Join-Path $script:LibPath 'performance' 'PerformanceMeasurement.psm1') -DisableNameChecking -Force
 

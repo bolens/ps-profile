@@ -886,37 +886,39 @@ $global:ConfirmPreference = 'None'
 # Initialize output utilities
 Initialize-OutputUtils -RepoRoot $repoRoot
 
-# Ensure Pester 5+ is available and imported
+# Ensure Pester 5.x is available and imported (Pester 6+ breaks CodeCoverage tracer teardown
+# when profile fragments install PostCommandLookupAction, and changes Mock ParameterFilter semantics).
+# Do NOT call Ensure-ModuleAvailable for Pester — Install-RequiredModule has no MaximumVersion and
+# may install Pester 6+. Install/import only the 5.x range explicitly.
 Write-Host "Checking Pester availability..." -ForegroundColor Yellow
 $requiredPesterVersion = [version]'5.0.0'
+$maxPesterVersion = [version]'5.99.99'
 
-try {
-    Ensure-ModuleAvailable -ModuleName 'Pester'
-}
-catch {
-    Write-Host "Failed to ensure Pester is available: $_" -ForegroundColor Red
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
-}
-
-$installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
-if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersion) {
+$installedPester = Get-Module -ListAvailable -Name 'Pester' |
+    Where-Object { $_.Version -ge $requiredPesterVersion -and $_.Version -le $maxPesterVersion } |
+    Sort-Object Version -Descending |
+    Select-Object -First 1
+if (-not $installedPester) {
     try {
-        Write-ScriptMessage -Message "Installing Pester $requiredPesterVersion or newer"
-        Install-RequiredModule -ModuleName 'Pester' -Scope 'CurrentUser' -Force
-        $installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
+        Write-ScriptMessage -Message "Installing Pester $requiredPesterVersion (maximum $maxPesterVersion)"
+        Install-Module -Name 'Pester' -MinimumVersion $requiredPesterVersion -MaximumVersion $maxPesterVersion -Scope 'CurrentUser' -Force -AllowClobber -ErrorAction Stop
+        $installedPester = Get-Module -ListAvailable -Name 'Pester' |
+            Where-Object { $_.Version -ge $requiredPesterVersion -and $_.Version -le $maxPesterVersion } |
+            Sort-Object Version -Descending |
+            Select-Object -First 1
     }
     catch {
         Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
 }
 
-if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersion) {
-    $message = "Pester $requiredPesterVersion or newer is required but could not be installed."
+if (-not $installedPester) {
+    $message = "Pester $requiredPesterVersion–$maxPesterVersion is required but could not be installed."
     Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -Message $message
 }
 
 try {
-    Import-Module -Name 'Pester' -MinimumVersion $requiredPesterVersion -Force -ErrorAction Stop
+    Import-Module -Name 'Pester' -RequiredVersion $installedPester.Version -Force -ErrorAction Stop
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_

@@ -26,8 +26,37 @@ scripts/lib/NodeJs.psm1
     The path to pnpm's global node_modules directory, or $null if not found.
 #>
 function Get-PnpmGlobalPath {
-    # Use Validation module if available
-    $useValidation = Get-Command Test-ValidPath -ErrorAction SilentlyContinue
+    # Prefer core Get-Command so Pester mocks of Get-Command cannot break the Validation probe.
+    $useValidation = $false
+    try {
+        $useValidation = $null -ne (Microsoft.PowerShell.Core\Get-Command -Name 'Test-ValidPath' -ErrorAction SilentlyContinue)
+    }
+    catch {
+        $useValidation = $false
+    }
+
+    # Local helper: Test-ValidPath when available, else Test-Path (never throw on missing helper).
+    $testPathExists = {
+        param([string]$Path, [string]$PathType = 'Any')
+        if (-not $Path -or [string]::IsNullOrWhiteSpace($Path)) {
+            return $false
+        }
+        if ($useValidation) {
+            try {
+                return [bool](Test-ValidPath -Path $Path -PathType $PathType)
+            }
+            catch {
+                # Fall through to Test-Path
+            }
+        }
+        if ($PathType -eq 'Directory') {
+            return (Test-Path -LiteralPath $Path -PathType Container)
+        }
+        if ($PathType -eq 'File') {
+            return (Test-Path -LiteralPath $Path -PathType Leaf)
+        }
+        return (Test-Path -LiteralPath $Path)
+    }
 
     # First, check common pnpm/Node.js-related environment variables (highest priority)
     $pnpmEnvVars = @('PNPM_HOME', 'PNPM_ROOT', 'NPM_CONFIG_PREFIX', 'NODE_PATH', 'NVM_DIR')
@@ -45,36 +74,18 @@ function Get-PnpmGlobalPath {
                 # PNPM_HOME typically points to the pnpm installation directory
                 # Check for global node_modules
                 $testPath = Join-Path $envValue 'node_modules'
-                $pathExists = if ($useValidation) {
-                    Test-ValidPath -Path $testPath -PathType Directory
-                }
-                else {
-                    $testPath -and -not [string]::IsNullOrWhiteSpace($testPath) -and (Test-Path -LiteralPath $testPath)
-                }
-                if ($pathExists) {
+                if (& $testPathExists -Path $testPath -PathType Directory) {
                     return $testPath
                 }
                 # Also check if the value itself is a node_modules path
-                $pathExists = if ($useValidation) {
-                    Test-ValidPath -Path $envValue -PathType Directory
-                }
-                else {
-                    $envValue -and -not [string]::IsNullOrWhiteSpace($envValue) -and (Test-Path -LiteralPath $envValue)
-                }
-                if ($pathExists -and $envValue -like '*node_modules*') {
+                if ((& $testPathExists -Path $envValue -PathType Directory) -and ($envValue -like '*node_modules*')) {
                     return $envValue
                 }
             }
             # For NPM_CONFIG_PREFIX - this points to npm global installation
             elseif ($envVar -eq 'NPM_CONFIG_PREFIX') {
                 $testPath = Join-Path $envValue 'node_modules'
-                $pathExists = if ($useValidation) {
-                    Test-ValidPath -Path $testPath -PathType Directory
-                }
-                else {
-                    $testPath -and -not [string]::IsNullOrWhiteSpace($testPath) -and (Test-Path -LiteralPath $testPath)
-                }
-                if ($pathExists) {
+                if (& $testPathExists -Path $testPath -PathType Directory) {
                     return $testPath
                 }
             }
@@ -83,13 +94,7 @@ function Get-PnpmGlobalPath {
                 $paths = $envValue -split ([System.IO.Path]::PathSeparator)
                 foreach ($path in $paths) {
                     if ($path -and -not [string]::IsNullOrWhiteSpace($path)) {
-                        $pathExists = if ($useValidation) {
-                            Test-ValidPath -Path $path -PathType Directory
-                        }
-                        else {
-                            $path -and -not [string]::IsNullOrWhiteSpace($path) -and (Test-Path -LiteralPath $path)
-                        }
-                        if ($pathExists) {
+                        if (& $testPathExists -Path $path -PathType Directory) {
                             return $path
                         }
                     }
@@ -99,24 +104,12 @@ function Get-PnpmGlobalPath {
             elseif ($envVar -eq 'NVM_DIR') {
                 # nvm typically has versions in versions/node directory
                 $testPath = Join-Path $envValue 'versions' 'node'
-                $pathExists = if ($useValidation) {
-                    Test-ValidPath -Path $testPath -PathType Directory
-                }
-                else {
-                    $testPath -and -not [string]::IsNullOrWhiteSpace($testPath) -and (Test-Path -LiteralPath $testPath)
-                }
-                if ($pathExists) {
+                if (& $testPathExists -Path $testPath -PathType Directory) {
                     # Return the first version's node_modules if available
                     $versions = Get-ChildItem -Path $testPath -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending
                     if ($versions) {
                         $latestVersionPath = Join-Path $versions[0].FullName 'lib' 'node_modules'
-                        $latestExists = if ($useValidation) {
-                            Test-ValidPath -Path $latestVersionPath -PathType Directory
-                        }
-                        else {
-                            $latestVersionPath -and -not [string]::IsNullOrWhiteSpace($latestVersionPath) -and (Test-Path -LiteralPath $latestVersionPath)
-                        }
-                        if ($latestExists) {
+                        if (& $testPathExists -Path $latestVersionPath -PathType Directory) {
                             return $latestVersionPath
                         }
                     }
@@ -143,16 +136,8 @@ function Get-PnpmGlobalPath {
                 if ($pnpmRoot) {
                     $pnpmGlobalPath = $pnpmRoot.ToString().Trim()
                     # Validate that the path exists
-                    if ($useValidation) {
-                        if (Test-ValidPath -Path $pnpmGlobalPath -PathType Directory) {
-                            return $pnpmGlobalPath
-                        }
-                    }
-                    else {
-                        # Fallback to manual validation
-                        if ($pnpmGlobalPath -and -not [string]::IsNullOrWhiteSpace($pnpmGlobalPath) -and (Test-Path -LiteralPath $pnpmGlobalPath)) {
-                            return $pnpmGlobalPath
-                        }
+                    if (& $testPathExists -Path $pnpmGlobalPath -PathType Directory) {
+                        return $pnpmGlobalPath
                     }
                 }
             }
