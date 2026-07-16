@@ -239,7 +239,7 @@ Describe 'ModuleImport extended scenarios' {
             Test-Path -LiteralPath $libPath | Should -Be $true
         }
 
-        It 'Throws when Get-RepoRoot is unavailable' {
+        It 'Self-heals when Get-RepoRoot is initially unavailable' {
             $uncachedScriptPath = Get-TestScriptPath -RelativePath 'scripts/utils/uncached-lib-path.ps1' -StartPath $PSScriptRoot
             if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
                 $cacheKey = if (Get-Command New-CacheKey -ErrorAction SilentlyContinue) {
@@ -254,7 +254,12 @@ Describe 'ModuleImport extended scenarios' {
             Remove-TestFunction -Name 'Get-RepoRoot'
 
             try {
-                { Get-LibPath -ScriptPath $uncachedScriptPath } | Should -Throw '*Get-RepoRoot*'
+                # Get-LibPath bootstraps PathResolution (and, failing that, walks up from the
+                # script path) so callers that import ModuleImport alone still resolve scripts/lib.
+                $resolved = Get-LibPath -ScriptPath $uncachedScriptPath
+                $resolved | Should -Not -BeNullOrEmpty
+                Test-Path -LiteralPath $resolved | Should -Be $true
+                (Split-Path -Leaf $resolved) | Should -Be 'lib'
             }
             finally {
                 Import-Module (Join-Path $script:LibPath 'path' 'PathResolution.psm1') -DisableNameChecking -Force -Global

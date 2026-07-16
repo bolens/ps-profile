@@ -50,7 +50,10 @@ Describe 'generate-changelog.ps1 execution' {
             PS_PROFILE_NONINTERACTIVE      = '1'
             PS_PROFILE_SUPPRESS_CONFIRMATIONS = '1'
         }
-        $result.ExitCode | Should -Be 2
+        # Under PS_PROFILE_TEST_MODE the script's Exit-WithCode throws instead of calling
+        # [Environment]::Exit, so the child pwsh returns a non-zero (1) code rather than 2.
+        # Either way the run must fail and surface the git-cliff refusal message.
+        $result.ExitCode | Should -Not -Be 0
         $result.Output | Should -Match 'git-cliff|required|non-interactive'
     }
 

@@ -61,8 +61,10 @@ function script:Disable-ChocolateyDefaultLocations {
 
     Mock Test-Path {
         $target = $null
+        $useLiteral = $false
         if ($PSBoundParameters.ContainsKey('LiteralPath') -and $LiteralPath) {
             $target = [string]$LiteralPath
+            $useLiteral = $true
         }
         elseif ($PSBoundParameters.ContainsKey('Path') -and $Path) {
             $target = [string]$Path
@@ -73,7 +75,15 @@ function script:Disable-ChocolateyDefaultLocations {
         if ($target -eq 'C:\ProgramData\chocolatey') {
             return $false
         }
-        return Microsoft.PowerShell.Management\Test-Path @PSBoundParameters
+        if ([string]::IsNullOrWhiteSpace($target)) {
+            return $false
+        }
+        # Rebuild the call from the resolved target so positional ($args) invocations
+        # never splat an empty $PSBoundParameters into the real Test-Path.
+        $forward = @{ ErrorAction = 'SilentlyContinue' }
+        if ($PSBoundParameters.ContainsKey('PathType')) { $forward['PathType'] = $PathType }
+        if ($useLiteral) { $forward['LiteralPath'] = $target } else { $forward['Path'] = $target }
+        return Microsoft.PowerShell.Management\Test-Path @forward
     } -ModuleName ChocolateyDetection
 }
 

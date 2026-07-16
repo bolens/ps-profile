@@ -19,6 +19,10 @@ BeforeAll {
     $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
+    # Drop any stale NodeJs instance first: a module left loaded by an earlier shard file can
+    # carry leaked Pester mock-bootstrap functions, surfacing as
+    # "Mock data are not setup for this scope" when this file mocks Get-Command -ModuleName NodeJs.
+    Remove-Module NodeJs -Force -ErrorAction SilentlyContinue
     Import-Module (Join-Path $script:LibPath 'runtime' 'NodeJs.psm1') -DisableNameChecking -Force
     Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
 
