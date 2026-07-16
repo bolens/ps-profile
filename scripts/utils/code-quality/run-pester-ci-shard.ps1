@@ -44,6 +44,11 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$ConfirmPreference = 'None'
+$global:ConfirmPreference = 'None'
+$env:PS_PROFILE_NONINTERACTIVE = '1'
+$env:PS_PROFILE_TEST_MODE = '1'
+$env:PS_PROFILE_SUPPRESS_CONFIRMATIONS = '1'
 
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
 $toolsBatch = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-tools-integration-batch.ps1'

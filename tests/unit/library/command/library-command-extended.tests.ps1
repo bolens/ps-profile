@@ -86,13 +86,25 @@ Describe 'Command extended scenarios' {
         }
 
         It 'Selects the Linux install command from a platform map' {
-            $installMap = @{
-                Windows = 'winget install Example'
-                Linux   = 'apt-get install -y example'
-                macOS   = 'brew install example'
-            }
+            $previousPlatform = $env:PS_PROFILE_PLATFORM_FORCE_NAME
+            $env:PS_PROFILE_PLATFORM_FORCE_NAME = 'Linux'
+            try {
+                $installMap = @{
+                    Windows = 'winget install Example'
+                    Linux   = 'apt-get install -y example'
+                    macOS   = 'brew install example'
+                }
 
-            Resolve-InstallCommand -InstallCommand $installMap | Should -Be 'apt-get install -y example'
+                Resolve-InstallCommand -InstallCommand $installMap | Should -Be 'apt-get install -y example'
+            }
+            finally {
+                if ($null -eq $previousPlatform) {
+                    Remove-Item Env:PS_PROFILE_PLATFORM_FORCE_NAME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_PLATFORM_FORCE_NAME = $previousPlatform
+                }
+            }
         }
     }
 
@@ -585,15 +597,26 @@ Describe 'Command extended scenarios' {
                     ExternalTools = @{
                         'demo-tool' = @{
                             InstallCommand = @{
-                                Linux = 'apt install demo-tool'
+                                Windows = 'winget install demo-tool'
+                                Linux   = 'apt install demo-tool'
                             }
                         }
                     }
                 }
             }
 
+            $expected = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
+                'Install with: winget install demo-tool'
+            }
+            elseif ($IsLinux) {
+                'Install with: apt install demo-tool'
+            }
+            else {
+                'Install with: scoop install demo-tool'
+            }
+
             Get-ToolInstallHint -ToolName 'demo-tool' -RepoRoot '/tmp/demo-repo' |
-                Should -Be 'Install with: apt install demo-tool'
+                Should -Be $expected
         }
 
         It 'Returns default hint when resolved install command is empty' {

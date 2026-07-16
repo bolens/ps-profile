@@ -282,8 +282,19 @@ QUOTED_DOUBLE="say \"hello\""
             $repoRoot = Join-Path $script:TempRoot 'walk-git-repo'
             $nestedDir = Join-Path $repoRoot 'nested' 'deep'
             New-Item -ItemType Directory -Path $nestedDir -Force | Out-Null
-            New-Item -ItemType File -Path (Join-Path $repoRoot '.git') -Force | Out-Null
+            New-Item -ItemType Directory -Path (Join-Path $repoRoot '.git') -Force | Out-Null
             'WALK_VAR=detected' | Set-Content -LiteralPath (Join-Path $repoRoot '.env') -Encoding UTF8
+
+            # Force the cwd walk path: ignore checkout Get-RepoRoot / $Profile resolution.
+            function global:Get-RepoRoot {
+                param([string]$ScriptPath)
+                throw 'forced miss for Initialize-EnvFiles walk fixture'
+            }
+            $hadProfile = Test-Path Variable:\global:Profile
+            $savedProfile = if ($hadProfile) { $global:Profile } else { $null }
+            if ($hadProfile) {
+                Remove-Variable -Name Profile -Scope Global -ErrorAction SilentlyContinue
+            }
 
             $previousLocation = Get-Location
             try {
@@ -294,6 +305,10 @@ QUOTED_DOUBLE="say \"hello\""
             finally {
                 Set-Location -LiteralPath $previousLocation.Path
                 Remove-Item Env:\WALK_VAR -ErrorAction SilentlyContinue
+                Remove-TestFunction -Name 'Get-RepoRoot'
+                if ($hadProfile) {
+                    Set-Variable -Name Profile -Scope Global -Value $savedProfile
+                }
             }
         }
 

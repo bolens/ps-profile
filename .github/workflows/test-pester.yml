@@ -88,19 +88,20 @@ jobs:
             Register-PSRepository -Default
           }
           Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-          Install-Module -Name Pester -MinimumVersion 5.0.0 -MaximumVersion 5.99.99 -Force -Scope CurrentUser -AllowClobber
-          # Prefer 5.7.x when multiple 5.x builds are present; reject Pester 6+ (breaks coverage tracer teardown / mocks).
+          # Pin to 5.7.x: Pester 5.9+ regresses Mock scoping ("Mock data are not setup for this scope")
+          # and TestDrive collisions across sequential containers; Pester 6+ breaks tracer teardown.
+          Install-Module -Name Pester -MinimumVersion 5.7.0 -MaximumVersion 5.7.99 -Force -Scope CurrentUser -AllowClobber
           $pester5 = Get-Module -ListAvailable Pester |
-            Where-Object { $_.Version -ge [version]'5.0.0' -and $_.Version -lt [version]'6.0.0' } |
+            Where-Object { $_.Version -ge [version]'5.7.0' -and $_.Version -lt [version]'5.8.0' } |
             Sort-Object Version -Descending |
             Select-Object -First 1
-          if (-not $pester5) { throw 'Pester 5.x is required but was not installed' }
+          if (-not $pester5) { throw 'Pester 5.7.x is required but was not installed' }
           Import-Module Pester -RequiredVersion $pester5.Version -Force
           Write-Host "Installed Pester $($pester5.Version)"
       - name: Run Pester shard
         shell: pwsh
         run: |
-          pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard '${{ matrix.shard }}' -Quiet
+          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard '${{ matrix.shard }}' -Quiet
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v7

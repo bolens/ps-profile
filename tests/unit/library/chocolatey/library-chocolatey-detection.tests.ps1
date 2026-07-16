@@ -36,6 +36,47 @@ AfterAll {
     }
 }
 
+function script:Disable-ChocolateyDefaultLocations {
+    <#
+    .SYNOPSIS
+        Point ProgramData at an empty temp dir and block the hardcoded C:\ProgramData\chocolatey fallback.
+    #>
+    $emptyProgramData = Join-Path $script:TempDir 'empty-programdata'
+    if (-not (Test-Path -LiteralPath $emptyProgramData)) {
+        New-Item -ItemType Directory -Path $emptyProgramData -Force | Out-Null
+    }
+    Mock-EnvironmentVariable -Name 'ProgramData' -Value $emptyProgramData
+
+    # Prefer Test-Path fallbacks so the hardcoded path mock below is effective.
+    Mock Get-Command {
+        $cmdName = $Name
+        if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
+            $cmdName = [string]$args[0]
+        }
+        if ($cmdName -eq 'Test-ValidPath') {
+            return $null
+        }
+        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+    } -ModuleName ChocolateyDetection
+
+    Mock Test-Path {
+        $target = $null
+        if ($PSBoundParameters.ContainsKey('LiteralPath') -and $LiteralPath) {
+            $target = [string]$LiteralPath
+        }
+        elseif ($PSBoundParameters.ContainsKey('Path') -and $Path) {
+            $target = [string]$Path
+        }
+        elseif ($args.Count -gt 0) {
+            $target = [string]$args[0]
+        }
+        if ($target -eq 'C:\ProgramData\chocolatey') {
+            return $false
+        }
+        return Microsoft.PowerShell.Management\Test-Path @PSBoundParameters
+    } -ModuleName ChocolateyDetection
+}
+
 Describe 'ChocolateyDetection Module' {
     Context 'Get-ChocolateyRoot' {
         AfterEach {
@@ -46,6 +87,7 @@ Describe 'ChocolateyDetection Module' {
 
         It 'Returns null when no Chocolatey installation is present' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $null
+            Disable-ChocolateyDefaultLocations
             Get-ChocolateyRoot | Should -BeNullOrEmpty
         }
 
@@ -72,6 +114,7 @@ Describe 'ChocolateyDetection Module' {
 
         It 'Returns null when Chocolatey root cannot be determined' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $null
+            Disable-ChocolateyDefaultLocations
 
             Get-ChocolateyLibPath | Should -BeNullOrEmpty
             Get-ChocolateyBinPath | Should -BeNullOrEmpty

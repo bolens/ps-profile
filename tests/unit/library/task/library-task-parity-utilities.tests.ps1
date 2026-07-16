@@ -16,7 +16,7 @@ BeforeAll {
         if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
         $current = $current.Parent
     }
-    $repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..' '..')).Path
+    $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ModulePath = Join-Path $repoRoot 'scripts' 'utils' 'task-parity' 'modules' 'TaskParityUtilities.psm1'
     Import-Module $script:ModulePath -DisableNameChecking -Force
 }

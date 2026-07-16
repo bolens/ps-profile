@@ -42,6 +42,46 @@ function script:Clear-ChocolateyTestEnvironment {
     }
 }
 
+function script:Disable-ChocolateyDefaultLocations {
+    <#
+    .SYNOPSIS
+        Isolate detection from a host Chocolatey install (ProgramData + hardcoded fallback).
+    #>
+    $emptyProgramData = Join-Path $script:TempDir 'empty-programdata'
+    if (-not (Test-Path -LiteralPath $emptyProgramData)) {
+        New-Item -ItemType Directory -Path $emptyProgramData -Force | Out-Null
+    }
+    Mock-EnvironmentVariable -Name 'ProgramData' -Value $emptyProgramData
+
+    Mock Get-Command {
+        $cmdName = $Name
+        if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
+            $cmdName = [string]$args[0]
+        }
+        if ($cmdName -eq 'Test-ValidPath') {
+            return $null
+        }
+        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+    } -ModuleName ChocolateyDetection
+
+    Mock Test-Path {
+        $target = $null
+        if ($PSBoundParameters.ContainsKey('LiteralPath') -and $LiteralPath) {
+            $target = [string]$LiteralPath
+        }
+        elseif ($PSBoundParameters.ContainsKey('Path') -and $Path) {
+            $target = [string]$Path
+        }
+        elseif ($args.Count -gt 0) {
+            $target = [string]$args[0]
+        }
+        if ($target -eq 'C:\ProgramData\chocolatey') {
+            return $false
+        }
+        return Microsoft.PowerShell.Management\Test-Path @PSBoundParameters
+    } -ModuleName ChocolateyDetection
+}
+
 AfterAll {
     Clear-ChocolateyTestEnvironment
     if ($script:TempDir -and (Test-Path -LiteralPath $script:TempDir)) {
@@ -99,6 +139,7 @@ Describe 'ChocolateyDetection extended scenarios' {
             $filePath = Join-Path $script:TempDir 'missing-choco.txt'
             New-Item -ItemType File -Path $filePath -Force | Out-Null
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $filePath
+            Disable-ChocolateyDefaultLocations
 
             Get-ChocolateyRoot | Should -BeNullOrEmpty
         }
@@ -154,6 +195,7 @@ Describe 'ChocolateyDetection extended scenarios' {
 
         It 'Logs verbose output when no Chocolatey root is found at debug level 2' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $null
+            Disable-ChocolateyDefaultLocations
             $env:PS_PROFILE_DEBUG = '2'
 
             Get-ChocolateyRoot | Should -BeNullOrEmpty

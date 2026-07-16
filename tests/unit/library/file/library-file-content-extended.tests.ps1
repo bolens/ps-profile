@@ -37,7 +37,7 @@ Describe 'FileContent extended scenarios' {
             $file = Join-Path $script:TempRoot 'present.txt'
             Set-Content -LiteralPath $file -Value 'payload' -Encoding UTF8
 
-            Read-FileContentOrNull -Path $file | Should -Match '^payload$'
+            Read-FileContentOrNull -Path $file | Should -Match '^payload\r?$'
         }
 
         It 'Returns null for missing files' {

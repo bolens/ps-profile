@@ -886,13 +886,13 @@ $global:ConfirmPreference = 'None'
 # Initialize output utilities
 Initialize-OutputUtils -RepoRoot $repoRoot
 
-# Ensure Pester 5.x is available and imported (Pester 6+ breaks CodeCoverage tracer teardown
-# when profile fragments install PostCommandLookupAction, and changes Mock ParameterFilter semantics).
-# Do NOT call Ensure-ModuleAvailable for Pester — Install-RequiredModule has no MaximumVersion and
-# may install Pester 6+. Install/import only the 5.x range explicitly.
+# Ensure Pester 5.7.x is available and imported.
+# - 5.9+ regresses Mock scoping ("Mock data are not setup for this scope") and TestDrive collisions
+# - 6+ breaks CodeCoverage tracer teardown when profile fragments install PostCommandLookupAction
+# Do NOT call Ensure-ModuleAvailable for Pester — Install-RequiredModule has no MaximumVersion.
 Write-Host "Checking Pester availability..." -ForegroundColor Yellow
-$requiredPesterVersion = [version]'5.0.0'
-$maxPesterVersion = [version]'5.99.99'
+$requiredPesterVersion = [version]'5.7.0'
+$maxPesterVersion = [version]'5.7.99'
 
 $installedPester = Get-Module -ListAvailable -Name 'Pester' |
     Where-Object { $_.Version -ge $requiredPesterVersion -and $_.Version -le $maxPesterVersion } |
@@ -1231,7 +1231,7 @@ try {
     # Handle Interactive mode
     if ($Interactive) {
         $interactiveInputAvailable = $false
-        if ($env:PS_PROFILE_NONINTERACTIVE -ne '1' -and $env:CI -ne 'true' -and $env:GITHUB_ACTIONS -ne 'true') {
+        if ($env:PS_PROFILE_NONINTERACTIVE -ne '1' -and $env:PS_PROFILE_TEST_MODE -ne '1' -and $env:CI -ne 'true' -and $env:GITHUB_ACTIONS -ne 'true') {
             try {
                 $interactiveInputAvailable = -not [Console]::IsInputRedirected
             }

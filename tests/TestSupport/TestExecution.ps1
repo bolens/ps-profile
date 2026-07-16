@@ -48,7 +48,8 @@ function Invoke-TestScriptFile {
     }
 
     try {
-        $output = & pwsh -NoProfile -File $ScriptPath @ArgumentList 2>&1 | Out-String
+        # Always non-interactive: unit/CI child scripts must never wait on Read-Host / ShouldProcess prompts.
+        $output = & pwsh -NoProfile -NonInteractive -File $ScriptPath @ArgumentList 2>&1 | Out-String
         return [pscustomobject]@{
             ExitCode = $LASTEXITCODE
             Output   = $output
@@ -80,6 +81,9 @@ function Invoke-TestPwshScript {
     $escapedRepoRoot = $repoRoot.Replace("'", "''")
     $scriptPrefix = @"
 `$env:PS_PROFILE_TEST_MODE = '1'
+`$env:PS_PROFILE_NONINTERACTIVE = '1'
+`$env:PS_PROFILE_SUPPRESS_CONFIRMATIONS = '1'
+`$ConfirmPreference = 'None'
 `$env:PS_PROFILE_REPO_ROOT = '$escapedRepoRoot'
 "@
 
@@ -110,7 +114,7 @@ function Invoke-TestPwshScript {
             throw "pwsh command not found. PowerShell Core must be installed to use this function."
         }
         
-        $output = & pwsh -NoProfile -File $tempFile 2>&1
+        $output = & pwsh -NoProfile -NonInteractive -File $tempFile 2>&1
         $exitCode = $LASTEXITCODE
         
         if ($exitCode -ne 0) {
