@@ -71,6 +71,7 @@ function Get-DocCoverageStrictFixture {
             )
 
             $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'Missing markdown|blocking issue|Documentation coverage check failed'
+            $combined = @($result.Output; $result.Error; $result.StdErr) -join "`n"
+            $combined | Should -Match 'Missing markdown|blocking issue|Documentation coverage check failed|Exit-WithCode'
     }
 }

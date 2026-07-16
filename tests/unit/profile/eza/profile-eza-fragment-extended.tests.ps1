@@ -14,6 +14,28 @@ function script:Import-EzaFragmentForTest {
         }
     }
 
+    # Drop dispatcher proxies / prior helpers so Set-AgentModeFunction can register.
+    $ezaHelpers = @(
+        'Get-ChildItemEza'
+        'Get-ChildItemEzaShort'
+        'Get-ChildItemEzaLong'
+        'Get-ChildItemEzaAll'
+        'Get-ChildItemEzaAllLong'
+        'Get-ChildItemEzaTree'
+        'Get-ChildItemEzaTreeAll'
+        'Get-ChildItemEzaGit'
+        'Get-ChildItemEzaLongGit'
+        'Get-ChildItemEzaBySize'
+        'Get-ChildItemEzaByTime'
+    )
+    Remove-TestFunction -Name $ezaHelpers
+    if (-not $global:AgentModeReplaceAllowed) {
+        $global:AgentModeReplaceAllowed = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    }
+    foreach ($helperName in $ezaHelpers) {
+        [void]$global:AgentModeReplaceAllowed.Add($helperName)
+    }
+
     if ($EnsureAvailable) {
         Mark-TestCommandsUnavailable -CommandNames @('eza')
         Set-TestCommandAvailabilityState -CommandName 'eza' -Available $true

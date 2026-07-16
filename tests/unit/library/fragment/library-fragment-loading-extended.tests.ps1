@@ -350,6 +350,8 @@ AfterAll {
 Describe 'FragmentLoading extended scenarios' {
     BeforeEach {
         Remove-Module FragmentLoader -ErrorAction SilentlyContinue -Force
+        # Drop leaked global stubs from prior Its so Get-Command resolves module helpers again.
+        Remove-TestFunction -Name @('Read-FileContent', 'Write-ScriptMessage', 'Write-Warning')
         Import-Module $script:FragmentLoadingPath -DisableNameChecking -Force -Global
         $depsCmd = Get-Command Get-FragmentDependencies -ErrorAction Stop
         if ($depsCmd.ModuleName -ne 'FragmentLoading') {
@@ -767,7 +769,7 @@ Describe 'FragmentLoading extended scenarios' {
                         Get-FragmentDependencies -FragmentFile $fragmentPath | Should -Be @()
             }
             finally {
-            Remove-Item -Path Function:Read-FileContent -ErrorAction SilentlyContinue -Force
+            Remove-TestFunction -Name 'Read-FileContent'
             if ($null -eq $originalDebug) {
                 Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
             }
@@ -799,7 +801,7 @@ Describe 'FragmentLoading extended scenarios' {
                 Get-FragmentDependencies -FragmentFile $fragmentPath | Should -Be @()
             }
             finally {
-                Remove-Item -Path Function:Write-ScriptMessage -ErrorAction SilentlyContinue -Force
+                Remove-TestFunction -Name 'Write-ScriptMessage'
                 if ($IsLinux -or $IsMacOS) {
                     if (Test-Path -LiteralPath $fragmentPath) {
                         chmod 644 $fragmentPath

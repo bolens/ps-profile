@@ -47,6 +47,7 @@ function Get-DeduplicatedDocumentedCommands {
     [OutputType([System.Collections.Generic.List[PSCustomObject]])]
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [System.Collections.Generic.List[PSCustomObject]]$Commands,
 
         [Parameter(Mandatory)]

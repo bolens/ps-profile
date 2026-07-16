@@ -41,18 +41,18 @@ Describe 'File Navigation Functions Integration Tests' {
         It '.. function navigates up one directory' {
             $testDir = $null
             $originalLocation = Get-Location
-            
+
             try {
                 $testDir = Join-Path $TestDrive 'level1\level2'
                 New-Item -ItemType Directory -Path $testDir -Force | Out-Null
 
                 Push-Location $testDir
-                                $before = Get-Location
+                $before = Get-Location
                 if (-not (Get-Command '..' -CommandType Function -ErrorAction SilentlyContinue)) {
                     Set-ItResult -Skipped -Because ".. function not available"
                     return
                 }
-                
+
                 ..
                 $after = Get-Location
                 $after.Path | Should -Match ([regex]::Escape((Split-Path $before.Path))) -Because ".. should navigate up one directory"
@@ -67,11 +67,8 @@ Describe 'File Navigation Functions Integration Tests' {
                 throw
             }
             finally {
-                Pop-Location
-            }
-            catch {
+                Pop-Location -ErrorAction SilentlyContinue
                 Set-Location $originalLocation -ErrorAction SilentlyContinue
-                throw
             }
         }
 

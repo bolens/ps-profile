@@ -169,7 +169,14 @@ if (-not $PerFile) {
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultXml
     $failLines = @(Get-PesterFailureLines -Output $run.Output)
-    $batchFailed = $run.ExitCode -ne 0 -or ($stats.Failed -gt 0)
+    # Prefer parsed Pester counts when available; child exit codes can be non-zero
+    # from non-terminating warnings even when FailedCount is 0.
+    $batchFailed = if ($stats.Failed -ge 0) {
+        $stats.Failed -gt 0
+    }
+    else {
+        $run.ExitCode -ne 0
+    }
 
     $color = if ($batchFailed) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
     Write-Host "  $($stats.Passed)P / $($stats.Failed)F / $($stats.Skipped)S in $([math]::Round($sw.Elapsed.TotalSeconds, 1))s" -ForegroundColor $color

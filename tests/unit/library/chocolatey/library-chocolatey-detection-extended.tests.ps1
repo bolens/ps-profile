@@ -205,7 +205,18 @@ Describe 'ChocolateyDetection extended scenarios' {
 
         It 'Requires choco command when CheckCommand is specified' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
-            Mock Get-Command { return $null } -ModuleName ChocolateyDetection -ParameterFilter { $Name -eq 'choco' }
+            # ParameterFilter keeps other Get-Command probes (Test-ValidPath, Write-Structured*)
+            # on ChocolateyDetection's native resolution — do not fall through to global
+            # Get-Command, which can surface helpers the module cannot invoke.
+            Mock Get-Command {
+                return $null
+            } -ParameterFilter {
+                $cmdName = $Name
+                if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
+                    $cmdName = [string]$args[0]
+                }
+                $cmdName -eq 'choco'
+            } -ModuleName ChocolateyDetection
 
             Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
@@ -221,7 +232,15 @@ Describe 'ChocolateyDetection extended scenarios' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
             $env:PS_PROFILE_DEBUG = '1'
             Enable-TestStructuredLogging
-            Mock Get-Command { return $null } -ModuleName ChocolateyDetection -ParameterFilter { $Name -eq 'choco' }
+            Mock Get-Command {
+                return $null
+            } -ParameterFilter {
+                $cmdName = $Name
+                if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
+                    $cmdName = [string]$args[0]
+                }
+                $cmdName -eq 'choco'
+            } -ModuleName ChocolateyDetection
 
             Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
@@ -237,7 +256,15 @@ Describe 'ChocolateyDetection extended scenarios' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
             $env:PS_PROFILE_DEBUG = '1'
             Remove-TestFunction -Name 'Write-StructuredWarning'
-            Mock Get-Command { return $null } -ModuleName ChocolateyDetection -ParameterFilter { $Name -eq 'choco' }
+            Mock Get-Command {
+                return $null
+            } -ParameterFilter {
+                $cmdName = $Name
+                if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
+                    $cmdName = [string]$args[0]
+                }
+                $cmdName -eq 'choco'
+            } -ModuleName ChocolateyDetection
 
             Test-ChocolateyInstalled -CheckCommand -WarningAction SilentlyContinue | Should -Be $false
         }

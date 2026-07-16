@@ -152,7 +152,7 @@ try { Write-Output 3 } catch { Write-Output 4 }
                 $ast | Should -Not -BeNullOrEmpty
             }
             finally {
-                Remove-Item -Path Function:Read-FileContent -ErrorAction SilentlyContinue -Force
+                Remove-TestFunction -Name 'Read-FileContent'
                 Import-Module (Join-Path $script:LibPath 'file' 'FileContent.psm1') -DisableNameChecking -Force
             }
         }

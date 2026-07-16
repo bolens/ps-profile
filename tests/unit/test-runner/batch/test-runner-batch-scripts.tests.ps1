@@ -93,10 +93,10 @@ Describe 'Batch test runner scripts' {
 
         It 'Fails when batch runner is missing at RepoRoot' {
             try {
-            $fakeRoot = New-TestTempDirectory -Prefix 'ConversionAllMissingRunner'
-                        $output = & pwsh -NoProfile -File $script:BatchScripts.ConversionAll -RepoRoot $fakeRoot 2>&1
-            $LASTEXITCODE | Should -Be 2
-            ($output -join ' ') | Should -Match 'Batch runner not found'
+                $fakeRoot = New-TestTempDirectory -Prefix 'ConversionAllMissingRunner'
+                $output = & pwsh -NoProfile -File $script:BatchScripts.ConversionAll -RepoRoot $fakeRoot 2>&1
+                $LASTEXITCODE | Should -Be 2
+                ($output -join ' ') | Should -Match 'Batch runner not found|Invalid -RepoRoot'
             }
             finally {
                 Remove-Item -LiteralPath $fakeRoot -Recurse -Force -ErrorAction SilentlyContinue

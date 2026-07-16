@@ -137,7 +137,14 @@ Describe 'FragmentLoader extended scenarios' {
 
     Context 'Test-FragmentLoaded' {
         It 'Detects fragments marked in the global load map' {
-            $global:__psprofile_fragment_loaded['mapped-fragment'] = $true
+            # FragmentLoader delegates to FragmentIdempotency when available, which
+            # tracks load state via <FragmentName>Loaded globals (not the hashtable).
+            if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
+                Set-FragmentLoaded -FragmentName 'mapped-fragment'
+            }
+            else {
+                $global:__psprofile_fragment_loaded['mapped-fragment'] = $true
+            }
 
             Test-FragmentLoaded -FragmentName 'mapped-fragment' | Should -Be $true
         }

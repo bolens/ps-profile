@@ -40,26 +40,33 @@ Describe 'profile.d/media-tools.ps1 extended scenarios' {
 
     It 'Convert-Video warns when ffmpeg and handbrake are unavailable' {
         try {
-        . (Join-Path $script:ProfileDir 'media-tools.ps1')
+            . (Join-Path $script:ProfileDir 'media-tools.ps1')
 
-        Mark-TestCommandsUnavailable -CommandNames @('ffmpeg', 'handbrake', 'handbrake-cli', 'HandBrakeCLI')
-        Set-TestCommandAvailabilityState -CommandName 'ffmpeg' -Available $false
-        Set-TestCommandAvailabilityState -CommandName 'handbrake' -Available $false
-        Set-TestCommandAvailabilityState -CommandName 'handbrake-cli' -Available $false
-        Set-TestCommandAvailabilityState -CommandName 'HandBrakeCLI' -Available $false
-        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-            Clear-TestCachedCommandCache | Out-Null
-        }
-        if ($global:MissingToolWarnings) {
-            foreach ($tool in @('ffmpeg', 'handbrake', 'handbrake-cli', 'HandBrakeCLI')) {
-                $null = $global:MissingToolWarnings.TryRemove($tool, [ref]$null)
+            Mark-TestCommandsUnavailable -CommandNames @('ffmpeg', 'handbrake', 'handbrake-cli', 'HandBrakeCLI')
+            Set-TestCommandAvailabilityState -CommandName 'ffmpeg' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'handbrake' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'handbrake-cli' -Available $false
+            Set-TestCommandAvailabilityState -CommandName 'HandBrakeCLI' -Available $false
+            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                Clear-TestCachedCommandCache | Out-Null
             }
-        }
 
-        $testInput = New-TestTempFile -Prefix 'media-tools-input' -Extension '.mp4' -Content 'not-a-video'
-        $testOutput = New-TestTempFile -Prefix 'media-tools-output' -Extension '.mkv'
-                $output = Convert-Video -InputPath $testInput -OutputPath $testOutput 2>&1 3>&1 | Out-String
-        $output | Should -Match 'ffmpeg|handbrake|not found'
+            if (-not $global:MissingToolWarnings) {
+                $global:MissingToolWarnings = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+            }
+            else {
+                foreach ($tool in @('ffmpeg', 'handbrake', 'handbrake-cli', 'HandBrakeCLI')) {
+                    $null = $global:MissingToolWarnings.TryRemove($tool, [ref]$null)
+                }
+            }
+            $global:CollectedMissingToolWarnings = [System.Collections.Generic.List[hashtable]]::new()
+
+            $testInput = New-TestTempFile -Prefix 'media-tools-input' -Extension '.mp4' -Content 'not-a-video'
+            $testOutput = New-TestTempFile -Prefix 'media-tools-output' -Extension '.mkv'
+            $null = Convert-Video -InputPath $testInput -OutputPath $testOutput 2>&1 3>&1
+
+            $collected = @($global:CollectedMissingToolWarnings | ForEach-Object { $_.Message; $_.Tool }) -join ' '
+            $collected | Should -Match 'ffmpeg|handbrake|not found'
         }
         finally {
             Remove-TestArtifacts

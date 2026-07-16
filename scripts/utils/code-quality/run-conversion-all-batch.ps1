@@ -46,7 +46,13 @@ param(
 $expectedRepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $conversionRootCheck = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
 if (-not (Test-Path -LiteralPath $conversionRootCheck)) {
-    if (Test-Path -LiteralPath (Join-Path $expectedRepoRoot 'tests' 'integration' 'conversion')) {
+    # Remap only when RepoRoot looks like a RelativePath binding mistake (e.g. pwsh -File
+    # with a bare data/foo arg). Do not remap intentional alternate/fake roots.
+    $repoRootIsRelativePathMistake = $RepoRoot -match '^(data|document|media)(/|\\|$)'
+    if ($repoRootIsRelativePathMistake -and (Test-Path -LiteralPath (Join-Path $expectedRepoRoot 'tests' 'integration' 'conversion'))) {
+        if ($RelativePath.Count -eq 0) {
+            $RelativePath = @($RepoRoot)
+        }
         $RepoRoot = $expectedRepoRoot
         $conversionRootCheck = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
     }
@@ -136,7 +142,12 @@ foreach ($rel in $paths) {
         $skipped = [int]$Matches[3]
     }
 
-    $batchFailed = $exitCode -ne 0 -or $failed -gt 0
+    $batchFailed = if ($failed -ge 0) {
+        $failed -gt 0
+    }
+    else {
+        $exitCode -ne 0
+    }
     $results += [pscustomobject]@{
         Path     = $rel
         Passed   = $passed
@@ -154,7 +165,14 @@ foreach ($rel in $paths) {
 Write-Host '--- Summary (conversion all) ---' -ForegroundColor Cyan
 $results | Format-Table -AutoSize
 
-$bad = @($results | Where-Object { $_.Failed -gt 0 -or $_.ExitCode -ne 0 })
+$bad = @($results | Where-Object {
+        if ($_.Failed -ge 0) {
+            $_.Failed -gt 0
+        }
+        else {
+            $_.ExitCode -ne 0
+        }
+    })
 if ($bad.Count -gt 0) {
     Write-Host "Sub-batches with failures: $($bad.Count)" -ForegroundColor Red
     exit 1

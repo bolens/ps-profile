@@ -207,3 +207,11 @@ function Initialize-FragmentPerformanceThresholds {
     $script:MaxLookupTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_LOOKUP_MS" -Default $LookupMs
 }
 
+# Promote execution helpers globally for integration tests that call them without re-dotting TestSupport.
+foreach ($testExecHelperName in @('Invoke-TestPwshScript', 'Invoke-TestScriptFile')) {
+    $testExecHelper = Get-Command -Name $testExecHelperName -ErrorAction SilentlyContinue
+    if ($testExecHelper -and $testExecHelper.CommandType -eq 'Function') {
+        Set-Item -Path "Function:\global:$testExecHelperName" -Value $testExecHelper.ScriptBlock -Force
+    }
+}
+

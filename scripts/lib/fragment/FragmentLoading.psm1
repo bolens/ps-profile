@@ -337,7 +337,7 @@ function Invoke-ParallelDependencyParsing {
                             }
                         }
                         else {
-                            Write-Error "[Invoke-ParallelDependencyParsing] Failed to create PowerShell instance for: ${filePath}"
+                            Write-Error "[Invoke-ParallelDependencyParsing] Failed to create PowerShell instance for: ${filePath}" -ErrorAction Continue
                         }
                     }
                     continue
@@ -365,7 +365,7 @@ function Invoke-ParallelDependencyParsing {
                             }
                         }
                         else {
-                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding script for ${filePath}: $($_.Exception.Message) | Type: $typeName"
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding script for ${filePath}: $($_.Exception.Message) | Type: $typeName" -ErrorAction Continue
                         }
                     }
                     # Level 3: Log detailed error information
@@ -397,7 +397,7 @@ function Invoke-ParallelDependencyParsing {
                             }
                         }
                         else {
-                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding argument for ${filePath}: $($_.Exception.Message) | Type: $typeName"
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding argument for ${filePath}: $($_.Exception.Message) | Type: $typeName" -ErrorAction Continue
                         }
                     }
                     # Level 3: Log detailed error information
@@ -439,7 +439,7 @@ function Invoke-ParallelDependencyParsing {
                                 }
                             }
                             else {
-                                Write-Error "[Invoke-ParallelDependencyParsing] BeginInvoke returned null for: ${filePath}"
+                                Write-Error "[Invoke-ParallelDependencyParsing] BeginInvoke returned null for: ${filePath}" -ErrorAction Continue
                             }
                         }
                         $powershell.Dispose()
@@ -457,7 +457,7 @@ function Invoke-ParallelDependencyParsing {
                             }
                         }
                         else {
-                            Write-Error "[Invoke-ParallelDependencyParsing] Error in BeginInvoke for ${filePath}: $($_.Exception.Message) | Type: $typeName"
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error in BeginInvoke for ${filePath}: $($_.Exception.Message) | Type: $typeName" -ErrorAction Continue
                         }
                     }
                     # Level 3: Log detailed error information
@@ -494,7 +494,7 @@ function Invoke-ParallelDependencyParsing {
                             }
                         }
                         else {
-                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding to runspaces list: $($_.Exception.Message) | Type: $typeName"
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding to runspaces list: $($_.Exception.Message) | Type: $typeName" -ErrorAction Continue
                         }
                     }
                     # Level 3: Log detailed error information
@@ -516,7 +516,7 @@ function Invoke-ParallelDependencyParsing {
                         }
                     }
                     else {
-                        Write-Error "[Invoke-ParallelDependencyParsing] Unexpected error setting up runspace for ${filePath}: $($_.Exception.Message) | Type: $typeName"
+                        Write-Error "[Invoke-ParallelDependencyParsing] Unexpected error setting up runspace for ${filePath}: $($_.Exception.Message) | Type: $typeName" -ErrorAction Continue
                     }
                 }
                 # Level 3: Log detailed error information
@@ -676,7 +676,7 @@ function Invoke-ParallelDependencyParsing {
                                             }
                                         }
                                         else {
-                                            Write-Error "[Invoke-ParallelDependencyParsing] PowerShell error for $($rs.FilePath): $($error.Exception.Message) | Type: $errorType | Category: $($error.CategoryInfo.Category)"
+                                            Write-Error "[Invoke-ParallelDependencyParsing] PowerShell error for $($rs.FilePath): $($error.Exception.Message) | Type: $errorType | Category: $($error.CategoryInfo.Category)" -ErrorAction Continue
                                         }
                                     }
                                     else {
@@ -693,7 +693,7 @@ function Invoke-ParallelDependencyParsing {
                                             }
                                         }
                                         else {
-                                            Write-Error "[Invoke-ParallelDependencyParsing] PowerShell error for $($rs.FilePath): $($error.Exception.Message) | Type: $errorType | Category: $($error.CategoryInfo.Category)"
+                                            Write-Error "[Invoke-ParallelDependencyParsing] PowerShell error for $($rs.FilePath): $($error.Exception.Message) | Type: $errorType | Category: $($error.CategoryInfo.Category)" -ErrorAction Continue
                                         }
                                     }
                                     # Level 3: Log detailed PowerShell error information
@@ -736,7 +736,7 @@ function Invoke-ParallelDependencyParsing {
                                         }
                                     }
                                     else {
-                                        Write-Error "[Invoke-ParallelDependencyParsing] Error adding result to list: $($_.Exception.Message) | Type: $typeName | Result type: $resultType"
+                                        Write-Error "[Invoke-ParallelDependencyParsing] Error adding result to list: $($_.Exception.Message) | Type: $typeName | Result type: $resultType" -ErrorAction Continue
                                     }
                                 }
                                 # Level 3: Log detailed error information
@@ -795,7 +795,7 @@ function Invoke-ParallelDependencyParsing {
                                 }
                             }
                             else {
-                                Write-Error "[Invoke-ParallelDependencyParsing] Error in EndInvoke for $($rs.FilePath): $($_.Exception.Message) | Type: $typeName"
+                                Write-Error "[Invoke-ParallelDependencyParsing] Error in EndInvoke for $($rs.FilePath): $($_.Exception.Message) | Type: $typeName" -ErrorAction Continue
                             }
                         }
                         # Level 3: Log detailed error information
@@ -873,7 +873,7 @@ function Invoke-ParallelDependencyParsing {
                                 }
                             }
                             else {
-                                Write-Error "[Invoke-ParallelDependencyParsing] Error adding timeout result: $($_.Exception.Message)"
+                                Write-Error "[Invoke-ParallelDependencyParsing] Error adding timeout result: $($_.Exception.Message)" -ErrorAction Continue
                             }
                         }
                     }
@@ -890,7 +890,7 @@ function Invoke-ParallelDependencyParsing {
                         }
                     }
                     else {
-                        Write-Error "[Invoke-ParallelDependencyParsing] Error processing runspace for $($rs.FilePath): $($_.Exception.Message) | Type: $typeName"
+                        Write-Error "[Invoke-ParallelDependencyParsing] Error processing runspace for $($rs.FilePath): $($_.Exception.Message) | Type: $typeName" -ErrorAction Continue
                     }
                 }
                 # Level 3: Log detailed error information
@@ -917,7 +917,7 @@ function Invoke-ParallelDependencyParsing {
                             }
                         }
                         else {
-                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding error result: $($_.Exception.Message)"
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding error result: $($_.Exception.Message)" -ErrorAction Continue
                         }
                     }
                     else {
@@ -935,7 +935,7 @@ function Invoke-ParallelDependencyParsing {
                             }
                         }
                         else {
-                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding error result: $($_.Exception.Message)"
+                            Write-Error "[Invoke-ParallelDependencyParsing] Error adding error result: $($_.Exception.Message)" -ErrorAction Continue
                         }
                     }
                 }
@@ -988,7 +988,7 @@ function Invoke-ParallelDependencyParsing {
                 }
             }
             else {
-                Write-Error "[Invoke-ParallelDependencyParsing] Error in parallel parsing: $($_.Exception.Message)"
+                Write-Error "[Invoke-ParallelDependencyParsing] Error in parallel parsing: $($_.Exception.Message)" -ErrorAction Continue
             }
         }
         # Level 3: Log detailed error information
@@ -1110,7 +1110,7 @@ function Invoke-ParallelDependencyParsing {
                     }
                 }
                 else {
-                    Write-Error "[Invoke-ParallelDependencyParsing] Error processing result: $($_.Exception.Message) | Type: $typeName"
+                    Write-Error "[Invoke-ParallelDependencyParsing] Error processing result: $($_.Exception.Message) | Type: $typeName" -ErrorAction Continue
                 }
             }
             # Level 3: Log detailed error information

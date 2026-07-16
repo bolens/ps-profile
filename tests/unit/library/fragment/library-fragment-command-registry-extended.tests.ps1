@@ -86,7 +86,7 @@ function Get-AstFragmentHelper {
 '@ | Set-Content -LiteralPath $fragmentPath -Encoding UTF8
 
             $libPath = Join-Path $script:RepoRoot 'scripts' 'lib'
-            Import-Module (Join-Path $libPath 'code-analysis' 'AstParsing.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+            Import-Module (Join-Path $libPath 'code-analysis' 'AstParsing.psm1') -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
 
             $count = Register-CommandsFromFragment -FragmentPath $fragmentPath -FragmentName 'ast-test'
             $count | Should -BeGreaterThan 0
