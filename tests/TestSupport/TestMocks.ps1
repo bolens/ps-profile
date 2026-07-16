@@ -70,6 +70,28 @@ function Reset-TestIsolationState {
         Clear-DispatcherTestStubs
     }
 
+    # Drop any global command-lookup handlers leaked by a prior test file (e.g. the fragment
+    # CommandDispatcher's CommandNotFoundAction or SmartPrompt/diagnostics PostCommandLookupAction).
+    # A leaked handler fires during Pester's own command resolution in later files and corrupts
+    # mock scope tracking, surfacing as "Mock data are not setup for this scope".
+    # Unregister first so the CommandDispatcher module clears its own $script:DispatcherRegistered
+    # flag (otherwise a later Register-CommandDispatcher no-ops without reinstalling the handler).
+    if (Get-Command Unregister-CommandDispatcher -ErrorAction SilentlyContinue) {
+        Unregister-CommandDispatcher | Out-Null
+    }
+
+    $invokeCommand = $ExecutionContext.SessionState.InvokeCommand
+    foreach ($handlerName in @('CommandNotFoundAction', 'PreCommandLookupAction', 'PostCommandLookupAction')) {
+        try {
+            if ($null -ne $invokeCommand.$handlerName) {
+                $invokeCommand.$handlerName = $null
+            }
+        }
+        catch {
+            # Property may be unavailable on some hosts; ignore.
+        }
+    }
+
     if (Get-Command Clear-LibraryTestEnvironmentVariables -ErrorAction SilentlyContinue) {
         Clear-LibraryTestEnvironmentVariables
     }
