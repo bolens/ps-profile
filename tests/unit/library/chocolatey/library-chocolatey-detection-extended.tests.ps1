@@ -58,7 +58,9 @@ function script:Disable-ChocolateyDefaultLocations {
         if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
             $cmdName = [string]$args[0]
         }
-        if ($cmdName -eq 'Test-ValidPath') {
+        # Hide Validation helpers and the real choco binary (Windows runners often have
+        # Chocolatey installed — CheckCommand tests must see it as unavailable).
+        if ($cmdName -in @('Test-ValidPath', 'choco')) {
             return $null
         }
         return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters

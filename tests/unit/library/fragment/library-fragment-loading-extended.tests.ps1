@@ -54,6 +54,15 @@ function script:Simulate-UnreadableFragmentFile {
     }
 
     # Windows cannot chmod away readability; force the module read path to fail.
+    # Ensure Read-FileContent is resolvable before Mock — FileContent may not be loaded
+    # in every shard ordering, and Pester 5 cannot mock a missing command.
+    if (-not (Get-Command Read-FileContent -ErrorAction SilentlyContinue)) {
+        function global:Read-FileContent {
+            param([Parameter(Mandatory)][string]$Path)
+            return Get-Content -LiteralPath $Path -Raw -ErrorAction Stop
+        }
+    }
+
     Mock Read-FileContent {
         throw [System.UnauthorizedAccessException]::new("Access to the path is denied.")
     } -ModuleName FragmentLoading
