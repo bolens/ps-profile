@@ -108,7 +108,8 @@ Describe 'ProfileFragmentConfig Module' {
                 -ProfileDir $script:RepoRoot `
                 -FragmentConfigModule $script:RealConfigModule
 
-            $result.FragmentLibDir | Should -Match ([regex]::Escape('scripts/lib/fragment'))
+            # Accept either path separator so the assertion holds on Windows (backslash) too.
+            $result.FragmentLibDir | Should -Match 'scripts[\\/]lib[\\/]fragment'
             $result.ProfileDExists | Should -Be $true
             @($result.AllFragments).Count | Should -BeGreaterThan 0
         }

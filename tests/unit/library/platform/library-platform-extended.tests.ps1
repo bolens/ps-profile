@@ -166,6 +166,9 @@ Describe 'Platform extended scenarios' {
 
         It 'Uses legacy else fallback with forced Darwin uname' {
             $env:PS_PROFILE_PLATFORM_FORCE_LEGACY_ELSE = '1'
+            # Force the platform to Unix so the uname branch is reached on Windows runners too
+            # (otherwise the real OSVersion.Platform resolves to Win32NT and uname is ignored).
+            $env:PS_PROFILE_PLATFORM_FORCE_OS_PLATFORM = 'Unix'
             $env:PS_PROFILE_PLATFORM_FORCE_UNAME = 'Darwin'
             $platform = Get-Platform
 

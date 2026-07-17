@@ -212,7 +212,11 @@ function Initialize-ProfileScoopLegacy {
                 $false 
             }
             if ($scoopShimsExists) {
-                if ($env:PATH -notlike "*$([regex]::Escape($scoopShims))*") {
+                # Split on the separator for an exact-entry check. A -like wildcard with
+                # [regex]::Escape doubles backslashes on Windows, so the duplicate guard would
+                # never match and the entry would be added on every call.
+                $pathEntries = @($env:PATH -split [regex]::Escape($pathSeparator))
+                if ($scoopShims -notin $pathEntries) {
                     $env:PATH = "$scoopShims$pathSeparator$env:PATH"
                 }
             }
@@ -223,7 +227,8 @@ function Initialize-ProfileScoopLegacy {
                 $false 
             }
             if ($scoopBinExists) {
-                if ($env:PATH -notlike "*$([regex]::Escape($scoopBin))*") {
+                $pathEntries = @($env:PATH -split [regex]::Escape($pathSeparator))
+                if ($scoopBin -notin $pathEntries) {
                     $env:PATH = "$scoopBin$pathSeparator$env:PATH"
                 }
             }
