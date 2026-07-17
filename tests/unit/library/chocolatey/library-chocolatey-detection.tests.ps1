@@ -149,6 +149,21 @@ Describe 'ChocolateyDetection Module' {
         It 'Requires choco command when CheckCommand is specified' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
 
+            # Windows CI runners usually have Chocolatey installed; hide the real binary so
+            # -CheckCommand exercises the "root found but command missing" branch. Also hide
+            # Test-ValidPath so Get-ChocolateyRoot stays on its Test-Path fallback (the
+            # Validation module is not imported in this test's isolated scope).
+            Mock Get-Command {
+                $cmdName = $Name
+                if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
+                    $cmdName = [string]$args[0]
+                }
+                if ($cmdName -in @('choco', 'Test-ValidPath')) {
+                    return $null
+                }
+                return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+            } -ModuleName ChocolateyDetection
+
             Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
     }
