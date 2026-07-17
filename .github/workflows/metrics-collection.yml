@@ -1,5 +1,9 @@
 name: Metrics Collection
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   schedule:
     # Run daily at 2 AM UTC
