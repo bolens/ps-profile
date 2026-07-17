@@ -70,7 +70,11 @@ function Set-PesterExecutionOptions {
 
             if ($Config.Run.PSObject.Properties.Name -contains 'Initialization') {
                 $Config.Run.Initialization = {
-                    $ErrorActionPreference = 'Stop'
+                    # Test bodies run with Continue (non-terminating errors), matching a
+                    # direct Invoke-Pester run and real profile loading. Forcing 'Stop'
+                    # here makes diagnostic Write-Error calls in resilient-loading code
+                    # terminate tests mid-flight and leak state across the shard.
+                    $ErrorActionPreference = 'Continue'
                     $ConfirmPreference = 'None'
                     $global:ConfirmPreference = 'None'
                     if (-not $global:PSDefaultParameterValues) {
