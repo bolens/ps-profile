@@ -141,8 +141,8 @@ function Get-PesterCiShardDefinitions {
     'unit-profile-conversion'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/conversion') }
     'unit-profile-core'          = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileCore; MaxParallelThreads = 1 }
     'unit-profile-infra'         = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileInfra }
-    'unit-profile-misc-a'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscA }
-    'unit-profile-misc-b'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscB }
+    'unit-profile-misc-a'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscA; MaxParallelThreads = 1 }
+    'unit-profile-misc-b'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscB; MaxParallelThreads = 1 }
     'integration-tools'          = @{ Kind = 'ToolsBatch' }
     'integration-core'           = @{ Kind = 'Pester'; Suite = 'Integration'; Paths = $integrationCore }
     'conversion-document'        = @{ Kind = 'ConversionBatch'; Paths = @('document') }

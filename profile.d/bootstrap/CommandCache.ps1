@@ -54,22 +54,23 @@ function global:Test-CachedCommand {
 
     # Test harness overrides win over assumed commands / real lookups so
     # Mark-TestCommandsUnavailable still works after bootstrap redefines this function.
-    if ($env:PS_PROFILE_TEST_MODE -eq '1') {
-        $overrideTable = Get-Variable -Name 'TestCommandAvailabilityOverrides' -Scope Global -ErrorAction SilentlyContinue
-        if ($null -ne $overrideTable -and $null -ne $overrideTable.Value) {
-            $overrides = $overrideTable.Value
-            if ($overrides.ContainsKey($normalizedName)) {
-                return [bool]$overrides[$normalizedName]
-            }
-            if ($overrides.ContainsKey($cacheKey)) {
-                return [bool]$overrides[$cacheKey]
-            }
+    # Honor whenever the override table is present (tests only); do not gate on
+    # PS_PROFILE_TEST_MODE — some shards clear or change that env mid-run.
+    $overrideTable = Get-Variable -Name 'TestCommandAvailabilityOverrides' -Scope Global -ErrorAction SilentlyContinue
+    if ($null -ne $overrideTable -and $null -ne $overrideTable.Value) {
+        $overrides = $overrideTable.Value
+        if ($overrides.ContainsKey($normalizedName)) {
+            return [bool]$overrides[$normalizedName]
+        }
+        if ($overrides.ContainsKey($cacheKey)) {
+            return [bool]$overrides[$cacheKey]
         }
     }
 
     # Check assumed commands first (bypasses actual command lookup for optional tools)
-    if ($global:AssumedAvailableCommands -and $global:AssumedAvailableCommands.ContainsKey($normalizedName)) {
-        $assumed = $global:AssumedAvailableCommands[$normalizedName]
+    $assumedTable = Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue
+    if ($null -ne $assumedTable -and $null -ne $assumedTable.Value -and $assumedTable.Value.ContainsKey($normalizedName)) {
+        $assumed = $assumedTable.Value[$normalizedName]
         if ($assumed -is [bool]) {
             return $assumed
         }
@@ -79,8 +80,9 @@ function global:Test-CachedCommand {
     $now = Get-Date
 
     # Check cache for existing entry that hasn't expired (if caching enabled)
-    if ($CacheTTLMinutes -gt 0 -and $global:TestCachedCommandCache.ContainsKey($cacheKey)) {
-        $entry = [pscustomobject]$global:TestCachedCommandCache[$cacheKey]
+    $cacheTable = Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue
+    if ($CacheTTLMinutes -gt 0 -and $null -ne $cacheTable -and $null -ne $cacheTable.Value -and $cacheTable.Value.ContainsKey($cacheKey)) {
+        $entry = [pscustomobject]$cacheTable.Value[$cacheKey]
         if ($entry -and $entry.Expires -gt $now) {
             return [bool]$entry.Result
         }
