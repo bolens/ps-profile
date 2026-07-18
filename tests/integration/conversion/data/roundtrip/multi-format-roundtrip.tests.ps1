@@ -46,6 +46,8 @@ Describe 'Multi-Format Roundtrip Conversion Tests' {
             Get-Command ConvertFrom-TomlToJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             Get-Command ConvertTo-CsvFromJson -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
             if (Skip-IfMikefarahYqUnavailable) { return }
+            # ConvertTo-TomlFromToon / ConvertFrom-TomlToJson require PSToml (same as format-chain).
+            if (Skip-IfModuleUnavailable -ModuleName PSToml -Context 'TOON/TOML roundtrip conversions') { return }
             $originalCsv = "name,value`nalice,123`nbob,456"
             $tempFile = Join-Path $TestDrive 'test.csv'
             Set-Content -Path $tempFile -Value $originalCsv

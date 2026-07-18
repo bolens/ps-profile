@@ -106,9 +106,47 @@ function Get-PesterRunStats {
 }
 
 function Get-PesterFailureLines {
-    param([string]$Output)
+    param(
+        [string]$Output,
+        [string]$ResultXmlPath
+    )
 
-    [regex]::Matches($Output, '(?m)^\s+\[-\].*') | ForEach-Object { $_.Value.Trim() }
+    $lines = [System.Collections.Generic.List[string]]::new()
+    [regex]::Matches($Output, '(?m)^\s+\[-\].*') | ForEach-Object { $lines.Add($_.Value.Trim()) }
+
+    $xmlCandidates = @()
+    if ($ResultXmlPath -and -not [string]::IsNullOrWhiteSpace($ResultXmlPath)) {
+        if (Test-Path -LiteralPath $ResultXmlPath -PathType Leaf) {
+            $xmlCandidates += $ResultXmlPath
+        }
+        elseif (Test-Path -LiteralPath $ResultXmlPath -PathType Container) {
+            $xmlCandidates += @(Get-ChildItem -LiteralPath $ResultXmlPath -Filter '*.xml' -Recurse -File -ErrorAction SilentlyContinue |
+                Select-Object -ExpandProperty FullName)
+        }
+    }
+
+    foreach ($xmlPath in $xmlCandidates) {
+        try {
+            [xml]$xml = Get-Content -LiteralPath $xmlPath -Raw -ErrorAction Stop
+            foreach ($case in @($xml.SelectNodes('//test-case[@result="Failure" or @result="Error"]'))) {
+                $name = [string]$case.GetAttribute('name')
+                $messageNode = $case.SelectSingleNode('.//failure/message')
+                $message = if ($messageNode) { [string]$messageNode.InnerText } else { '' }
+                if ([string]::IsNullOrWhiteSpace($name) -and [string]::IsNullOrWhiteSpace($message)) {
+                    continue
+                }
+                $summary = if ($message) { "${name}: $message" } else { $name }
+                if (-not [string]::IsNullOrWhiteSpace($summary) -and -not $lines.Contains($summary)) {
+                    $lines.Add($summary.Trim())
+                }
+            }
+        }
+        catch {
+            # Ignore unreadable result XML; output-based lines may still be available.
+        }
+    }
+
+    return @($lines)
 }
 
 function Invoke-ConversionBatchRunner {
@@ -171,7 +209,7 @@ if (-not $PerFile) {
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultXml
-    $failLines = @(Get-PesterFailureLines -Output $run.Output)
+    $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $resultXml)
     # Prefer parsed Pester counts when available; child exit codes can be non-zero
     # from non-terminating warnings even when FailedCount is 0.
     $batchFailed = if ($stats.Failed -ge 0) {

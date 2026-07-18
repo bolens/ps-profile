@@ -260,6 +260,8 @@ switch ($definition.Kind) {
     }
   }
   'ConversionAllBatch' {
+    $resultDir = Join-Path $RepoRoot 'tests' 'test-artifacts' ('ci-' + $normalizedShard)
+    $null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
     foreach ($rel in $definition.Paths) {
       Write-Host "Conversion all-batch path: $rel" -ForegroundColor Cyan
       $args = @(
@@ -272,6 +274,11 @@ switch ($definition.Kind) {
       )
       if ($Quiet) { $args += '-Quiet' }
       Invoke-PesterCiShardRunner -RunnerArgs $args
+    }
+    # Surface conversion-batch NUnit XML for the workflow artifact upload path.
+    $batchResults = Join-Path $RepoRoot 'tests' 'test-artifacts' 'conversion-batch'
+    if (Test-Path -LiteralPath $batchResults) {
+      Copy-Item -Path (Join-Path $batchResults '*') -Destination $resultDir -Recurse -Force -ErrorAction SilentlyContinue
     }
   }
   'PerformanceBatch' {
