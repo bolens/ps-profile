@@ -142,14 +142,8 @@ Describe 'PathResolution extended scenarios' {
 
             try {
                 InModuleScope -ModuleName PathResolution {
-                    Mock Get-Command {
-                        param($Name)
-                        if ($Name -eq 'Exit-WithCode') {
-                            return $null
-                        }
-
-                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
-                    }
+                    # ParameterFilter avoids Mock Get-Command recursion (stack overflow under coverage).
+                    Mock Get-Command -ParameterFilter { $Name -eq 'Exit-WithCode' } -MockWith { $null }
 
                     { Get-RepoRootSafe -ScriptPath $using:invalidPath -ExitOnError } | Should -Throw
                 }
@@ -376,14 +370,8 @@ Describe 'PathResolution extended scenarios' {
 
             try {
                 InModuleScope -ModuleName PathResolution {
-                    Mock Get-Command {
-                        param($Name)
-                        if ($Name -eq 'Exit-WithCode') {
-                            return $null
-                        }
-
-                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
-                    }
+                    # ParameterFilter avoids Mock Get-Command recursion (stack overflow under coverage).
+                    Mock Get-Command -ParameterFilter { $Name -eq 'Exit-WithCode' } -MockWith { $null }
 
                     { Get-RepoRootSafe -ScriptPath $using:invalidPath -ExitOnError } | Should -Throw
                 }
@@ -472,14 +460,8 @@ Describe 'PathResolution extended scenarios' {
 
             try {
                 InModuleScope -ModuleName PathResolution {
-                    Mock Get-Command {
-                        param($Name)
-                        if ($Name -eq 'Exit-WithCode') {
-                            return $null
-                        }
-
-                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
-                    }
+                    # ParameterFilter avoids Mock Get-Command recursion (stack overflow under coverage).
+                    Mock Get-Command -ParameterFilter { $Name -eq 'Exit-WithCode' } -MockWith { $null }
 
                     { Get-RepoRootSafe -ScriptPath $using:invalidPath -ExitOnError } | Should -Throw
                 }
@@ -629,14 +611,8 @@ Describe 'PathResolution extended scenarios' {
                 InModuleScope -ModuleName PathResolution -ArgumentList $invalidPath {
                     param([string]$InvalidPath)
 
-                    Mock Get-Command {
-                        param($Name)
-                        if ($Name -eq 'Exit-WithCode') {
-                            return $null
-                        }
-
-                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
-                    }
+                    # ParameterFilter avoids Mock Get-Command recursion (stack overflow under coverage).
+                    Mock Get-Command -ParameterFilter { $Name -eq 'Exit-WithCode' } -MockWith { $null }
 
                     { Get-RepoRootSafe -ScriptPath $InvalidPath -ExitOnError } | Should -Throw
                 }

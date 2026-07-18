@@ -36,6 +36,30 @@ function script:New-FakePythonExecutable {
         [int]$ScriptExitCode = 0
     )
 
+    # Windows CI cannot execute .sh probes via `& path`; use a .cmd shim there.
+    if ($IsWindows -or $env:OS -eq 'Windows_NT') {
+        $exePath = Join-Path $script:TempDir ("fake-python-{0}.cmd" -f (Get-Random))
+        $lines = New-Object System.Collections.Generic.List[string]
+        $null = $lines.Add('@echo off')
+        $null = $lines.Add('setlocal EnableExtensions')
+        $null = $lines.Add('if /I "%~1"=="--version" (')
+        $null = $lines.Add('  echo Python 3.11.0')
+        $null = $lines.Add("  exit /b $VersionExitCode")
+        $null = $lines.Add(')')
+        foreach ($entry in $PackageExitCodes.GetEnumerator()) {
+            $pkg = $entry.Key
+            $code = [int]$entry.Value
+            $null = $lines.Add("findstr /C:`"$pkg`" `"%~1`" >nul 2>&1 && exit /b $code")
+        }
+        $null = $lines.Add('if not "%~2"=="" if exist "%~2" (')
+        $null = $lines.Add("  echo $ScriptOutput")
+        $null = $lines.Add("  exit /b $ScriptExitCode")
+        $null = $lines.Add(')')
+        $null = $lines.Add('exit /b 0')
+        Set-Content -LiteralPath $exePath -Value ($lines -join "`r`n") -Encoding ASCII
+        return $exePath
+    }
+
     $exePath = Join-Path $script:TempDir ("fake-python-{0}.sh" -f (Get-Random))
     $lines = New-Object System.Collections.Generic.List[string]
     $null = $lines.Add('#!/bin/sh')

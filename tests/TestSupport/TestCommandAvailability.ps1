@@ -4,6 +4,7 @@
 # ===============================================
 
 $script:OriginalTestCachedCommand = $null
+$script:StubbedTestCachedCommand = $null
 $script:TestCachedCommandStubInstalled = $false
 
 <#
@@ -11,13 +12,19 @@ $script:TestCachedCommandStubInstalled = $false
     Installs a function wrapper for Test-CachedCommand that honors availability overrides.
 #>
 function Register-TestCommandAvailabilityStub {
-    if ($script:TestCachedCommandStubInstalled) {
-        return
-    }
-
     $existing = Get-Command Test-CachedCommand -ErrorAction SilentlyContinue
     if (-not $existing -or $existing.CommandType -ne 'Function') {
         return
+    }
+
+    # Bootstrap/profile often redefines Test-CachedCommand; re-wrap when that happens.
+    if ($script:TestCachedCommandStubInstalled -and $script:StubbedTestCachedCommand) {
+        $currentBlock = $existing.ScriptBlock
+        if ($currentBlock -eq $script:StubbedTestCachedCommand) {
+            return
+        }
+        $script:OriginalTestCachedCommand = $currentBlock
+        $script:TestCachedCommandStubInstalled = $false
     }
 
     if (-not $script:OriginalTestCachedCommand) {
@@ -57,6 +64,7 @@ function Register-TestCommandAvailabilityStub {
     }.GetNewClosure()
 
     Set-Item -Path 'Function:\global:Test-CachedCommand' -Value $wrapper -Force -ErrorAction SilentlyContinue
+    $script:StubbedTestCachedCommand = $wrapper
     $script:TestCachedCommandStubInstalled = $true
 }
 
@@ -76,6 +84,7 @@ function Clear-TestCommandAvailabilityStub {
         Set-Item -Path 'Function:\global:Test-CachedCommand' -Value $script:OriginalTestCachedCommand -Force -ErrorAction SilentlyContinue
     }
 
+    $script:StubbedTestCachedCommand = $null
     $script:TestCachedCommandStubInstalled = $false
 }
 

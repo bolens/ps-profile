@@ -50,13 +50,32 @@ function global:Test-CachedCommand {
     }
 
     $normalizedName = $Name.Trim()
+    $cacheKey = $normalizedName.ToLowerInvariant()
+
+    # Test harness overrides win over assumed commands / real lookups so
+    # Mark-TestCommandsUnavailable still works after bootstrap redefines this function.
+    if ($env:PS_PROFILE_TEST_MODE -eq '1') {
+        $overrideTable = Get-Variable -Name 'TestCommandAvailabilityOverrides' -Scope Global -ErrorAction SilentlyContinue
+        if ($null -ne $overrideTable -and $null -ne $overrideTable.Value) {
+            $overrides = $overrideTable.Value
+            if ($overrides.ContainsKey($normalizedName)) {
+                return [bool]$overrides[$normalizedName]
+            }
+            if ($overrides.ContainsKey($cacheKey)) {
+                return [bool]$overrides[$cacheKey]
+            }
+        }
+    }
 
     # Check assumed commands first (bypasses actual command lookup for optional tools)
     if ($global:AssumedAvailableCommands -and $global:AssumedAvailableCommands.ContainsKey($normalizedName)) {
+        $assumed = $global:AssumedAvailableCommands[$normalizedName]
+        if ($assumed -is [bool]) {
+            return $assumed
+        }
         return $true
     }
 
-    $cacheKey = $normalizedName.ToLowerInvariant()
     $now = Get-Date
 
     # Check cache for existing entry that hasn't expired (if caching enabled)

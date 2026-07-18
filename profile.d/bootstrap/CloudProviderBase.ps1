@@ -496,8 +496,9 @@ try {
             }
         }
         else {
-            Write-Error "Either Service/Action or Arguments must be provided."
-            return $null
+            $missingArgsMessage = 'Either Service/Action or Arguments must be provided.'
+            Write-Error $missingArgsMessage
+            throw $missingArgsMessage
         }
 
         # Build context

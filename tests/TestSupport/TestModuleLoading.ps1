@@ -1140,6 +1140,10 @@ function Initialize-SystemUtilityIntegration {
 
     Initialize-TestProfile -ProfileDir $ProfileDir -LoadBootstrap -LoadFilesFragment
 
+    if (Get-Command Register-TestCommandAvailabilityStub -ErrorAction SilentlyContinue) {
+        Register-TestCommandAvailabilityStub
+    }
+
     $systemFragment = Join-Path $ProfileDir 'system.ps1'
     if (Test-Path -LiteralPath $systemFragment) {
         $null = . $systemFragment
