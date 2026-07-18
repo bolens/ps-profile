@@ -35,20 +35,23 @@ Describe 'Profile Performance Regression Tests' {
             # These are based on the current baseline with a 3x safety margin for CI/test environments
             # Baseline: FullStartupMean ~2437ms, slowest fragment ~353ms (env.ps1)
             # Use 3x multiplier to account for system variance and CI environments
-            $baselineFile = Join-Path $PSScriptRoot '..\scripts\data\performance-baseline.json'
+            $baselineFile = $null
             $defaultLoadTime = 7500  # ~3x baseline (2437ms * 3 = 7311ms, rounded to 7500ms)
             $defaultFragmentTime = 1200  # ~3x slowest fragment (353ms * 3 = 1059ms, rounded to 1200ms)
             
             # Allow override via environment variables, but use baseline-based defaults
-            if (Test-Path -LiteralPath $baselineFile) {
-                                $baseline = Get-Content -LiteralPath $baselineFile -Raw | ConvertFrom-Json
-                if ($baseline.FullStartupMean -gt 0) {
-                    $defaultLoadTime = [Math]::Round($baseline.FullStartupMean * 3)
-                }
-                if ($baseline.Fragments -and $baseline.Fragments.Count -gt 0) {
-                    $maxFragment = ($baseline.Fragments | Measure-Object -Property MeanMs -Maximum).Maximum
-                    if ($maxFragment -gt 0) {
-                        $defaultFragmentTime = [Math]::Round($maxFragment * 3)
+            try {
+                $baselineFile = Join-Path (Get-TestRepoRoot -StartPath $PSScriptRoot) 'scripts' 'data' 'performance-baseline.json'
+                if (Test-Path -LiteralPath $baselineFile) {
+                    $baseline = Get-Content -LiteralPath $baselineFile -Raw | ConvertFrom-Json
+                    if ($baseline.FullStartupMean -gt 0) {
+                        $defaultLoadTime = [Math]::Round($baseline.FullStartupMean * 3)
+                    }
+                    if ($baseline.Fragments -and $baseline.Fragments.Count -gt 0) {
+                        $maxFragment = ($baseline.Fragments | Measure-Object -Property MeanMs -Maximum).Maximum
+                        if ($maxFragment -gt 0) {
+                            $defaultFragmentTime = [Math]::Round($maxFragment * 3)
+                        }
                     }
                 }
             }
@@ -56,7 +59,7 @@ Describe 'Profile Performance Regression Tests' {
                 # If baseline parsing fails, use hardcoded defaults
                 Write-Verbose "Failed to parse baseline file, using hardcoded defaults: $_" -Verbose
             }
-            
+
             $script:MaxLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_MAX_LOAD_MS' -Default $defaultLoadTime
             $script:MaxFragmentTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_MAX_FRAGMENT_MS' -Default $defaultFragmentTime
         }
@@ -302,12 +305,13 @@ Describe 'Profile Performance Regression Tests' {
     }
 
     BeforeEach {
+        # Kept for clarity; Context -Skip below is the primary gate.
         if ($script:SkipProfilePerformance) {
             Set-ItResult -Skipped -Because 'Profile performance regression tests require an isolated pwsh process (not nested inside run-pester)'
         }
     }
 
-    Context 'Profile Load Performance' {
+    Context 'Profile Load Performance' -Skip:($env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1') {
         It 'profile loads within acceptable time limit' {
             try {
                 # Use minimal environment for faster test execution
@@ -394,7 +398,7 @@ Describe 'Profile Performance Regression Tests' {
         }
     }
 
-    Context 'Fragment Count Impact' {
+    Context 'Fragment Count Impact' -Skip:($env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1') {
         It 'load time scales reasonably with fragment count' {
             # Use minimal environment for faster test execution
             $originalEnv = $env:PS_PROFILE_ENVIRONMENT
@@ -424,7 +428,7 @@ Describe 'Profile Performance Regression Tests' {
         }
     }
 
-    Context 'Memory Usage' {
+    Context 'Memory Usage' -Skip:($env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1') {
         It 'profile does not cause excessive memory growth' {
             try {
                 $before = [System.GC]::GetTotalMemory($false)
@@ -464,7 +468,7 @@ Describe 'Profile Performance Regression Tests' {
         }
     }
 
-    Context 'Batch Loading Performance' {
+    Context 'Batch Loading Performance' -Skip:($env:PS_PROFILE_TEST_RUNNER_ACTIVE -eq '1') {
         It 'batch loading mode performs similarly to sequential' {
             try {
             # Use minimal environment for faster test execution

@@ -3,6 +3,8 @@
 # Canonical TestSupport helpers restored between test files
 # ===============================================
 
+$script:SavedStructuredLoggingFunctions = @{}
+
 function Enable-TestStructuredLogging {
     <#
     .SYNOPSIS
@@ -16,8 +18,13 @@ function Enable-TestStructuredLogging {
     [CmdletBinding()]
     param()
 
-    if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-        return
+    foreach ($name in @('Write-StructuredWarning', 'Write-StructuredError', 'Write-WideEvent')) {
+        if (-not $script:SavedStructuredLoggingFunctions.ContainsKey($name)) {
+            $existing = Get-Command $name -ErrorAction SilentlyContinue
+            if ($existing -and $existing.CommandType -eq 'Function') {
+                $script:SavedStructuredLoggingFunctions[$name] = $existing.ScriptBlock
+            }
+        }
     }
 
     function global:Write-StructuredWarning {
@@ -40,6 +47,14 @@ function Enable-TestStructuredLogging {
             [string]$Code
         )
     }
+
+    function global:Write-WideEvent {
+        [CmdletBinding()]
+        param(
+            [string]$EventName,
+            [hashtable]$Data
+        )
+    }
 }
 
 function Disable-TestStructuredLogging {
@@ -51,6 +66,12 @@ function Disable-TestStructuredLogging {
     param()
 
     Remove-TestFunction -Name 'Write-StructuredWarning', 'Write-StructuredError', 'Write-WideEvent'
+
+    foreach ($entry in $script:SavedStructuredLoggingFunctions.GetEnumerator()) {
+        Set-Item -Path "Function:\global:$($entry.Key)" -Value $entry.Value -Force -ErrorAction SilentlyContinue
+    }
+
+    $script:SavedStructuredLoggingFunctions = @{}
 }
 
 function Remove-TestFunction {
@@ -379,12 +400,41 @@ function Clear-LibraryTestEnvironmentVariables {
     $names = @(
         'PS_PROFILE_DEBUG'
         'PS_PROFILE_PLATFORM_FORCE_NAME'
+        'PS_PROFILE_PLATFORM_FORCE_FALLBACK'
+        'PS_PROFILE_PLATFORM_FORCE_OS_PLATFORM'
+        'PS_PROFILE_PLATFORM_FORCE_UNAME'
+        'PS_PROFILE_PLATFORM_FORCE_NATURAL_WINDOWS'
+        'PS_PROFILE_PLATFORM_FORCE_NATURAL_MACOS'
+        'PS_PROFILE_PLATFORM_FORCE_NATURAL_FALLBACK'
+        'PS_PROFILE_PLATFORM_FORCE_LEGACY_ELSE'
+        'PS_PROFILE_PLATFORM_FORCE_FINAL_ELSE'
+        'PS_PROFILE_PLATFORM_PATHS_FORCE_NO_USER_HOME'
+        'PS_PROFILE_PLATFORM_PATHS_FORCE_USER_HOME'
+        'PS_PROFILE_PROMPT_FORCE_INIT_ERROR'
         'PS_PROFILE_COMMAND_DISABLE_STRUCTURED_WARNING'
         'PS_PROFILE_COMMAND_FORCE_CACHE_IMPORT_ERROR'
         'PS_PROFILE_COMMAND_FORCE_MANUAL_CACHE_IMPORT'
         'PS_PROFILE_COMMAND_FORCE_MANUAL_INSTALL_RESOLVE'
+        'PS_PROFILE_COLLECTIONS_DISABLE_STRUCTURED_WARNING'
+        'PS_PROFILE_COLLECTIONS_DISABLE_STRUCTURED_ERROR'
+        'PS_PROFILE_COLLECTIONS_FORCE_OBJECT_LIST_ERROR'
+        'PS_PROFILE_COLLECTIONS_FORCE_MAKE_GENERIC_NULL'
+        'PS_PROFILE_COLLECTIONS_FORCE_CREATE_INSTANCE_NULL'
+        'PS_PROFILE_COLLECTIONS_FORCE_STRING_LIST_ERROR'
+        'PS_PROFILE_COLLECTIONS_FORCE_STRING_LIST_NULL'
+        'PS_PROFILE_COLLECTIONS_FORCE_TYPED_LIST_ERROR'
+        'PS_PROFILE_COLLECTIONS_FORCE_TYPE_OBJ_NULL'
+        'PS_PROFILE_COLLECTIONS_FORCE_TYPED_MAKE_GENERIC_NULL'
+        'PS_PROFILE_COLLECTIONS_FORCE_TYPED_CREATE_INSTANCE_NULL'
+        'PS_PROFILE_FILESYSTEM_FORCE_MKDIR_ERROR'
+        'PS_PROFILE_FILESYSTEM_FORCE_UNAUTHORIZED_ACCESS'
+        'PS_PROFILE_FILESYSTEM_FORCE_GET_CHILD_ERROR'
         'PS_PROFILE_AUTO_LOAD_FRAGMENTS'
         'PS_PROFILE_AUTO_LOAD_TIMEOUT'
+        'XDG_CONFIG_HOME'
+        'XDG_DATA_HOME'
+        'XDG_DOWNLOAD_DIR'
+        'APPDATA'
         'PYTHON'
         'PYTHON_HOME'
         'PYTHON_ROOT'

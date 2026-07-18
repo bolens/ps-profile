@@ -35,6 +35,7 @@ Describe 'ProfilePrompt extended scenarios' {
         Clear-TestStartProcessCapture
         Enable-TestStructuredLogging
         Remove-Item Env:\PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+        Remove-Item Env:\PS_PROFILE_PROMPT_FORCE_INIT_ERROR -ErrorAction SilentlyContinue
         Remove-Item Function:\Initialize-Starship -ErrorAction SilentlyContinue
         Remove-Item Function:\global:Initialize-Starship -ErrorAction SilentlyContinue
         Remove-Item Function:\Update-PerformanceInsightsPrompt -ErrorAction SilentlyContinue
@@ -46,6 +47,7 @@ Describe 'ProfilePrompt extended scenarios' {
 
     AfterEach {
         Get-TestStartProcessCapture | Should -BeNullOrEmpty
+        Disable-TestStructuredLogging
     }
 
     Context 'Initialize-ProfilePrompt' {

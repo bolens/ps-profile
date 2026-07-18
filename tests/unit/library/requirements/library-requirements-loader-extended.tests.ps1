@@ -201,7 +201,9 @@ Describe 'RequirementsLoader extended scenarios' {
         }
 
         It 'Returns cached requirements without reloading the loader script' {
-            $loaderFile = Join-Path $script:RepoRoot 'requirements' 'load-requirements.ps1'
+            $repoRoot = Join-Path $script:TempDir ("repo-cache-{0}" -f ([Guid]::NewGuid().ToString('N')))
+            New-Item -ItemType Directory -Path (Join-Path $repoRoot 'requirements') -Force | Out-Null
+            $loaderFile = Join-Path $repoRoot 'requirements' 'load-requirements.ps1'
             @'
 @{
     PowerShellVersion = '7.4'
@@ -211,11 +213,11 @@ Describe 'RequirementsLoader extended scenarios' {
 }
 '@ | Set-Content -LiteralPath $loaderFile -Encoding UTF8
 
-            $first = Import-Requirements -RepoRoot $script:RepoRoot -UseCache
+            $first = Import-Requirements -RepoRoot $repoRoot -UseCache
             '@{ PowerShellVersion = ''9.9''; Modules = @{}; ExternalTools = @{}; PlatformRequirements = @{} }' |
                 Set-Content -LiteralPath $loaderFile -Encoding UTF8
 
-            $second = Import-Requirements -RepoRoot $script:RepoRoot -UseCache
+            $second = Import-Requirements -RepoRoot $repoRoot -UseCache
 
             $first.PowerShellVersion | Should -Be '7.4'
             $second.PowerShellVersion | Should -Be '7.4'

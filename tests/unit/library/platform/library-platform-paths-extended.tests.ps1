@@ -293,9 +293,13 @@ XDG_DOWNLOAD_DIR="$HOME/Downloads"
             New-Item -ItemType Directory -Path $fakeProfile -Force | Out-Null
             $originalHome = $env:HOME
             $originalProfile = $env:USERPROFILE
+            $originalXdgConfig = $env:XDG_CONFIG_HOME
+            $originalAppData = $env:APPDATA
 
             try {
                 Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                Remove-Item Env:XDG_CONFIG_HOME -ErrorAction SilentlyContinue
+                Remove-Item Env:APPDATA -ErrorAction SilentlyContinue
                 $env:USERPROFILE = $fakeProfile
                 Get-ConfigDirectory | Should -Be (Join-Path $fakeProfile '.config')
             }
@@ -312,6 +316,20 @@ XDG_DOWNLOAD_DIR="$HOME/Downloads"
                 }
                 else {
                     $env:USERPROFILE = $originalProfile
+                }
+
+                if ($null -eq $originalXdgConfig) {
+                    Remove-Item Env:XDG_CONFIG_HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:XDG_CONFIG_HOME = $originalXdgConfig
+                }
+
+                if ($null -eq $originalAppData) {
+                    Remove-Item Env:APPDATA -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:APPDATA = $originalAppData
                 }
             }
         }

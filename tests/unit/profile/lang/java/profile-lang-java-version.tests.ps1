@@ -32,7 +32,24 @@ function global:New-TestJavaInstallation {
 
     if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') {
         $javaPath = Join-Path $binDir 'java.exe'
-        Set-Content -Path $javaPath -Value "@echo openjdk version `"$Version.0.1`""
+        # A text file named .exe is not runnable on Windows; compile a tiny stub.
+        $code = @"
+using System;
+public static class JavaStub {
+    public static void Main(string[] args) {
+        Console.Error.WriteLine("openjdk version `"$Version.0.1`"");
+    }
+}
+"@
+        try {
+            Add-Type -TypeDefinition $code -OutputAssembly $javaPath -OutputType ConsoleApplication -ErrorAction Stop
+        }
+        catch {
+            # Fallback: cmd wrapper won't satisfy Set-JavaVersion's java.exe Test-Path,
+            # but leave a marker file for debugging.
+            Set-Content -Path (Join-Path $binDir 'java-stub-error.txt') -Value $_.Exception.Message
+            throw
+        }
     }
     else {
         $javaPath = Join-Path $binDir 'java'

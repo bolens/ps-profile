@@ -57,8 +57,22 @@ try {
             Write-Host "PowerShell: $($PSVersionTable.PSVersion)"
             Write-Host "PATH entries:"
             $env:Path -split ';' | ForEach-Object { Write-Host " - $_" }
-            Write-Host "Podman machine(s):"; podman machine list | Out-Host
-            Write-Host "Configured podman connections:"; podman system connection list | Out-Host
+            if (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) {
+                if (Test-CachedCommand 'podman') {
+                    Write-Host "Podman machine(s):"; podman machine list | Out-Host
+                    Write-Host "Configured podman connections:"; podman system connection list | Out-Host
+                }
+                else {
+                    Write-Host "Podman: not available"
+                }
+            }
+            elseif (Get-Command podman -ErrorAction SilentlyContinue) {
+                Write-Host "Podman machine(s):"; podman machine list | Out-Host
+                Write-Host "Configured podman connections:"; podman system connection list | Out-Host
+            }
+            else {
+                Write-Host "Podman: not available"
+            }
         }
 
         # Show profile startup time

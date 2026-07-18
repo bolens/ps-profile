@@ -133,12 +133,13 @@ function Get-PesterCiShardDefinitions {
   )
 
   return [ordered]@{
-    'unit-library'               = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/library') }
+    # Library tests mutate shared process env/globals; run serially to avoid cross-test pollution.
+    'unit-library'               = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/library'); MaxParallelThreads = 1 }
     'unit-utility'               = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/utility') }
     'unit-test-runner'           = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/test-runner') }
     'unit-support'               = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/test-support', 'tests/unit/validation') }
     'unit-profile-conversion'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/conversion') }
-    'unit-profile-core'          = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileCore }
+    'unit-profile-core'          = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileCore; MaxParallelThreads = 1 }
     'unit-profile-infra'         = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileInfra }
     'unit-profile-misc-a'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscA }
     'unit-profile-misc-b'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscB }
@@ -154,7 +155,7 @@ function Get-PesterCiShardDefinitions {
     'conversion-data-scientific' = @{ Kind = 'ConversionBatch'; Paths = @('data/scientific') }
     'conversion-data-misc'       = @{ Kind = 'ConversionAllBatch'; Paths = $convDataMisc }
     'performance'                = @{ Kind = 'PerformanceBatch' }
-    'coverage-smoke'             = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/bootstrap', 'tests/unit/library'); Coverage = $true }
+    'coverage-smoke'             = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/bootstrap', 'tests/unit/library'); Coverage = $true; MaxParallelThreads = 1 }
   }
 }
 
@@ -199,6 +200,9 @@ function Invoke-PesterShard {
   }
   if ($Coverage -or ($Definition.Contains('Coverage') -and $Definition.Coverage)) {
     $params.Coverage = $true
+  }
+  if ($Definition.ContainsKey('MaxParallelThreads') -and $Definition.MaxParallelThreads -gt 0) {
+    $params.MaxParallelThreads = $Definition.MaxParallelThreads
   }
 
   Write-Host ("Running: {0} -Suite {1} -Path ({2})" -f $runner, $Definition.Suite, ($paths -join ', ')) -ForegroundColor DarkGray

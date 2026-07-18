@@ -29,10 +29,10 @@ Set-AgentModeAlias -Name 'myip' -Target 'Get-MyIP'
     Executes speedtest-cli to measure internet connection speed.
 #>
 function Start-SpeedTest {
-    # 'speedtest' on Linux/macOS, 'speedtest.exe' on Windows; fall back to bare name
+    # Prefer real binaries only — ignore the 'speedtest' alias that points at this function.
     $stCmd = if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') { 'speedtest.exe' } else { 'speedtest' }
-    $stBin = Get-Command $stCmd -ErrorAction SilentlyContinue
-    if (-not $stBin) { $stBin = Get-Command 'speedtest' -ErrorAction SilentlyContinue }
+    $stBin = Get-Command $stCmd -CommandType Application -ErrorAction SilentlyContinue
+    if (-not $stBin) { $stBin = Get-Command 'speedtest' -CommandType Application -ErrorAction SilentlyContinue }
     if (-not $stBin) { Write-Warning "speedtest not found in PATH. Install speedtest-cli."; return }
     & $stBin.Source --accept-license
 }

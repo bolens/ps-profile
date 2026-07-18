@@ -54,15 +54,16 @@ function Get-PesterRunStats {
     $failed = -1
     $skipped = 0
 
-    if ($Output -match 'Tests Passed:\s*(\d+)') {
-        $passed = [int]$Matches[1]
-        if ($Output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
-        if ($Output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
-    }
-    elseif ($Output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
+    # Prefer the runner summary line (present even under -Quiet).
+    if ($Output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
         $passed = [int]$Matches[1]
         $failed = [int]$Matches[2]
         $skipped = [int]$Matches[3]
+    }
+    elseif ($Output -match 'Tests Passed:\s*(\d+)') {
+        $passed = [int]$Matches[1]
+        if ($Output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
+        if ($Output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
     }
 
     return [pscustomobject]@{

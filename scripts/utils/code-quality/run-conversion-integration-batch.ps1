@@ -68,15 +68,15 @@ function Get-PesterRunStats {
     $failed = -1
     $skipped = 0
 
-    if ($Output -match 'Tests Passed:\s*(\d+)') {
-        $passed = [int]$Matches[1]
-        if ($Output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
-        if ($Output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
-    }
-    elseif ($Output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
+    if ($Output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
         $passed = [int]$Matches[1]
         $failed = [int]$Matches[2]
         $skipped = [int]$Matches[3]
+    }
+    elseif ($Output -match 'Tests Passed:\s*(\d+)') {
+        $passed = [int]$Matches[1]
+        if ($Output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
+        if ($Output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
     }
     elseif ($ResultXmlPath -and (Test-Path -LiteralPath $ResultXmlPath)) {
         try {
@@ -86,9 +86,11 @@ function Get-PesterRunStats {
                 $total = [int]$root.total
                 $failures = [int]$root.failures + [int]$root.errors
                 $skippedCount = [int]$root.skipped + [int]$root.ignored
-                $passed = $total - $failures - $skippedCount
-                $failed = $failures
-                $skipped = $skippedCount
+                if ($total -gt 0) {
+                    $passed = $total - $failures - $skippedCount
+                    $failed = $failures
+                    $skipped = $skippedCount
+                }
             }
         }
         catch {
@@ -161,7 +163,8 @@ if (-not $PerFile) {
 
     $resultDir = Join-Path $RepoRoot 'tests' 'test-artifacts' 'conversion-batch'
     $null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
-    $resultXml = Join-Path $resultDir 'test-results.xml'
+    $resultXml = Join-Path $resultDir ('test-results-{0}.xml' -f ($RelativePath -replace '[/\\]', '-'))
+    Remove-Item -LiteralPath $resultXml -Force -ErrorAction SilentlyContinue
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
     $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultXml)

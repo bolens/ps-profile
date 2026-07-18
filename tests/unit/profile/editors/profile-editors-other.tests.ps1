@@ -49,6 +49,7 @@ BeforeAll {
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'editors.ps1')
+    Register-TestCommandAvailabilityStub
 
     $script:TestEditorPath = New-TestTempDirectory -Prefix 'EditorPath'
     $script:TestEditorFile = Join-Path $script:TestEditorPath 'script.ps1'

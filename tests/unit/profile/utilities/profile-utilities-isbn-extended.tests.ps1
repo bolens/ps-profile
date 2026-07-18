@@ -186,7 +186,10 @@ Describe 'utilities-isbn-extended.ps1 - search and editions' {
 
     It 'Returns the Out-GridView selection when -Pick is specified' {
         $gridView = Get-Command Out-GridView -ErrorAction SilentlyContinue
-        $gridViewBody = if ($gridView) { $gridView.ScriptBlock } else { $null }
+        $gridViewBody = $null
+        if ($gridView -and $gridView.CommandType -eq 'Function' -and $gridView.ScriptBlock) {
+            $gridViewBody = $gridView.ScriptBlock
+        }
 
         Set-Item -Path Function:\Out-GridView -Value {
             [CmdletBinding()]
@@ -255,7 +258,10 @@ Describe 'utilities-isbn-extended.ps1 - search and editions' {
 
     It 'Returns no results when -Pick is cancelled in Out-GridView' {
         $gridView = Get-Command Out-GridView -ErrorAction SilentlyContinue
-        $gridViewBody = if ($gridView) { $gridView.ScriptBlock } else { $null }
+        $gridViewBody = $null
+        if ($gridView -and $gridView.CommandType -eq 'Function' -and $gridView.ScriptBlock) {
+            $gridViewBody = $gridView.ScriptBlock
+        }
 
         Set-Item -Path Function:\Out-GridView -Value {
             [CmdletBinding()]
@@ -765,7 +771,9 @@ Describe 'utilities-isbn-extended.ps1 - utilities and workflows' {
     }
 
     It 'Show-IsbnCover returns the saved cover path when no viewer is available' {
-        Set-TestCommandAvailabilityState -CommandName 'xdg-open' -Available $false
+        foreach ($cmd in @('xdg-open', 'open', 'start', 'cmd', 'explorer', 'explorer.exe')) {
+            Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
+        }
 
         Setup-CapturingCommandMock -CommandName 'Invoke-RestMethod' -OnInvoke {
             return [PSCustomObject]@{

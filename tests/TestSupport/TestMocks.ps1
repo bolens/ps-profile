@@ -96,6 +96,10 @@ function Reset-TestIsolationState {
         Clear-LibraryTestEnvironmentVariables
     }
 
+    if (Get-Command Disable-TestStructuredLogging -ErrorAction SilentlyContinue) {
+        Disable-TestStructuredLogging
+    }
+
     if (Get-Command Clear-RuntimeTestGlobals -ErrorAction SilentlyContinue) {
         Clear-RuntimeTestGlobals
     }
@@ -154,6 +158,38 @@ function Reset-TestIsolationState {
             'ErrorHandlingLoaded'
         )) {
         Set-Variable -Name $flagName -Scope Global -Value $false -Force -ErrorAction SilentlyContinue
+    }
+
+    # Drop shared public helpers so Ensure-Utilities / Ensure-DevTools / conversion
+    # can re-register their implementations. Leaving lazy Ensure-DevTools wrappers
+    # behind after clearing DevToolsInitialized causes CommandNotFoundException
+    # for Ensure-DevTools in later files (datetime/encoding unit tests).
+    $sharedEnsureCommands = @(
+        'ConvertFrom-Epoch', 'ConvertTo-Epoch', 'Get-Epoch', 'Get-DateTime'
+        'ConvertTo-UrlEncoded', 'ConvertFrom-UrlEncoded'
+        'ConvertTo-HtmlEncoded', 'ConvertFrom-HtmlEncoded'
+        '_ConvertFrom-Epoch', '_ConvertTo-Epoch'
+        '_ConvertTo-UrlEncoded', '_ConvertFrom-UrlEncoded'
+        '_ConvertTo-HtmlEncoded', '_ConvertFrom-HtmlEncoded'
+        'ConvertFrom-AsciiToUrl'
+    )
+    if (Get-Command Remove-TestFunction -ErrorAction SilentlyContinue) {
+        Remove-TestFunction -Name $sharedEnsureCommands
+    }
+    else {
+        foreach ($name in $sharedEnsureCommands) {
+            Remove-Item -Path "Function:\$name" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$name" -Force -ErrorAction SilentlyContinue
+        }
+    }
+    foreach ($aliasName in @(
+            'from-epoch', 'to-epoch', 'epoch', 'now'
+            'url-encode', 'url-decode', 'html-encode', 'html-decode'
+            'epoch-to-date', 'date-to-epoch', 'ascii-to-url'
+            'speedtest'
+        )) {
+        Remove-Item -Path "Alias:\$aliasName" -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "Alias:\global:$aliasName" -Force -ErrorAction SilentlyContinue
     }
 
     foreach ($globalName in @(

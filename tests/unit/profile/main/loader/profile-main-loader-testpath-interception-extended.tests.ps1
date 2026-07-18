@@ -28,7 +28,7 @@ Describe 'Microsoft.PowerShell_profile.ps1 Test-Path interception extended scena
 `$env:PS_PROFILE_DEBUG_TESTPATH = '1'
 `$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
 . '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Intercept script path: $escapedIntercept' -Quiet) { 'INTERCEPT_PATH_LOG_OK' }
+if (Select-String -Path `$log -Pattern 'Intercept script path: $escapedIntercept' -SimpleMatch -Quiet) { 'INTERCEPT_PATH_LOG_OK' }
 "@
 
         $result | Should -Match 'INTERCEPT_PATH_LOG_OK'
