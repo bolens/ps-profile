@@ -96,6 +96,12 @@ function Reset-TestIsolationState {
         Clear-LibraryTestEnvironmentVariables
     }
 
+    # Shard isolation: keep test-mode Exit-WithCode semantics and non-terminating
+    # diagnostics even when individual tests clear these for in-process probes.
+    $env:PS_PROFILE_TEST_MODE = '1'
+    $ErrorActionPreference = 'Continue'
+    $global:ErrorActionPreference = 'Continue'
+
     if (Get-Command Disable-TestStructuredLogging -ErrorAction SilentlyContinue) {
         Disable-TestStructuredLogging
     }

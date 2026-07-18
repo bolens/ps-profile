@@ -37,6 +37,12 @@ AfterAll {
 }
 
 Describe 'PathResolution extended scenarios' {
+    AfterEach {
+        if (Get-Command Disable-TestStructuredLogging -ErrorAction SilentlyContinue) {
+            Disable-TestStructuredLogging
+        }
+    }
+
     Context 'Get-ProfileDirectory' {
         It 'Resolves profile.d under the repository root' {
             $profileDir = Get-ProfileDirectory -ScriptPath $PSScriptRoot
@@ -397,7 +403,8 @@ Describe 'PathResolution extended scenarios' {
             $invalidPath = Join-Path $outsideRoot 'scripts/missing.ps1'
             New-Item -ItemType Directory -Path (Split-Path $invalidPath) -Force | Out-Null
 
-            Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+            Disable-TestStructuredLogging
+            Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
 
             try {
                 # PS_PROFILE_TEST_MODE rethrows the captured ErrorRecord from Exit-WithCode.
@@ -550,7 +557,8 @@ Describe 'PathResolution extended scenarios' {
             $invalidPath = Join-Path $outsideRoot 'scripts/missing.ps1'
             New-Item -ItemType Directory -Path (Split-Path $invalidPath) -Force | Out-Null
 
-            Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+            Disable-TestStructuredLogging
+            Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
             Remove-Variable -Name EXIT_SETUP_ERROR -Scope Global -ErrorAction SilentlyContinue
 
             try {
@@ -752,8 +760,9 @@ Describe 'PathResolution extended scenarios' {
             $env:PS_PROFILE_DEBUG = '0'
 
             try {
-                Get-RepoRootSafe -ScriptPath $invalidPath -ExitOnError -ErrorAction SilentlyContinue |
-                    Should -BeNullOrEmpty
+                # ExitOnError must terminate even when Exit-WithCode / structured logging are disabled.
+                { Get-RepoRootSafe -ScriptPath $invalidPath -ExitOnError } |
+                    Should -Throw '*Repository root not found*'
             }
             finally {
                 if ($null -eq $originalStructuredFlag) {

@@ -112,6 +112,7 @@ function Import-Requirements {
     }
 
     # Check cache if enabled
+    $cacheKey = $null
     if ($UseCache -and (Get-Command Get-CachedValue -ErrorAction SilentlyContinue)) {
         # Use CacheKey module if available for consistent key generation
         $cacheKey = if (Get-Command New-CacheKey -ErrorAction SilentlyContinue) {
@@ -128,6 +129,15 @@ function Import-Requirements {
                 Write-Host "  [requirements-loader.import] Using cached requirements from $RepoRoot" -ForegroundColor DarkGray
             }
             return $cachedResult
+        }
+    }
+    elseif ($UseCache) {
+        # Cache helpers missing: still build a key so Set-CachedValue can run if available later
+        $cacheKey = if (Get-Command New-CacheKey -ErrorAction SilentlyContinue) {
+            New-CacheKey -Prefix 'Requirements' -Components @($RepoRoot)
+        }
+        else {
+            "Requirements_$RepoRoot"
         }
     }
 
@@ -151,7 +161,7 @@ function Import-Requirements {
             $requirements = & $requirementsLoaderPath
             
             # Cache result if enabled
-            if ($UseCache -and (Get-Command Set-CachedValue -ErrorAction SilentlyContinue)) {
+            if ($UseCache -and $cacheKey -and (Get-Command Set-CachedValue -ErrorAction SilentlyContinue)) {
                 Set-CachedValue -Key $cacheKey -Value $requirements -ExpirationSeconds 300
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {

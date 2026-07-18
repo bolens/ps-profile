@@ -55,20 +55,25 @@ function Get-PythonPath {
         if ($envValue -and -not [string]::IsNullOrWhiteSpace($envValue)) {
             # For VIRTUAL_ENV and CONDA_PREFIX, these point to the environment root
             if ($envVar -eq 'VIRTUAL_ENV' -or $envVar -eq 'CONDA_PREFIX') {
-                # Check for Python executable in the environment
-                $pythonExe = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
-                    Join-Path $envValue 'Scripts' 'python.exe'
-                }
-                else {
-                    Join-Path $envValue 'bin' 'python'
-                }
-                $pythonExists = & $testPathValidated -Path $pythonExe -PathType File
-                if ($pythonExists) {
-                    $debugLevel = 0
-                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
-                        Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                # Check both Windows (Scripts/) and Unix (bin/) layouts — conda/venv
+                # on Windows may use either, and tests exercise the portable bin/ layout.
+                $pythonCandidates = @(
+                    (Join-Path $envValue 'Scripts' 'python.exe')
+                    (Join-Path $envValue 'Scripts' 'python')
+                    (Join-Path $envValue 'bin' 'python.exe')
+                    (Join-Path $envValue 'bin' 'python')
+                    (Join-Path $envValue 'python.exe')
+                    (Join-Path $envValue 'python')
+                )
+                foreach ($pythonExe in $pythonCandidates) {
+                    $pythonExists = & $testPathValidated -Path $pythonExe -PathType File
+                    if ($pythonExists) {
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                        }
+                        return $pythonExe
                     }
-                    return $pythonExe
                 }
             }
             # For PYTHON_HOME, PYTHON_ROOT, PYTHON - these might point directly to Python or its directory
@@ -85,30 +90,23 @@ function Get-PythonPath {
             }
             else {
                 # PYTHON_HOME or PYTHON_ROOT - check for python.exe or python in bin/Scripts
-                $pythonExe = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
-                    Join-Path $envValue 'python.exe'
-                }
-                else {
-                    Join-Path $envValue 'python'
-                }
-                $pythonExists = & $testPathValidated -Path $pythonExe -PathType File
-                if ($pythonExists) {
-                    return $pythonExe
-                }
-                # Try bin/python or Scripts/python.exe
-                $pythonExe = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
-                    Join-Path $envValue 'Scripts' 'python.exe'
-                }
-                else {
-                    Join-Path $envValue 'bin' 'python'
-                }
-                $pythonExists = & $testPathValidated -Path $pythonExe -PathType File
-                if ($pythonExists) {
-                    $debugLevel = 0
-                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
-                        Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                $pythonCandidates = @(
+                    (Join-Path $envValue 'python.exe')
+                    (Join-Path $envValue 'python')
+                    (Join-Path $envValue 'Scripts' 'python.exe')
+                    (Join-Path $envValue 'Scripts' 'python')
+                    (Join-Path $envValue 'bin' 'python.exe')
+                    (Join-Path $envValue 'bin' 'python')
+                )
+                foreach ($pythonExe in $pythonCandidates) {
+                    $pythonExists = & $testPathValidated -Path $pythonExe -PathType File
+                    if ($pythonExists) {
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                        }
+                        return $pythonExe
                     }
-                    return $pythonExe
                 }
             }
         }

@@ -376,6 +376,9 @@ function Get-RepoRootSafe {
                 else {
                     Exit-WithCode -ExitCode 2 -ErrorRecord $_
                 }
+                # Exit-WithCode should throw (test mode) or exit the process; if it
+                # returns, still surface a terminating error for callers.
+                throw $_
             }
             else {
                 # ExitCodes module not available yet; surface a terminating error
@@ -389,7 +392,7 @@ function Get-RepoRootSafe {
                             }
                         }
                         else {
-                            Write-Error $errorMessage -ErrorAction Stop
+                            Write-Error $errorMessage -ErrorAction Continue
                         }
                     }
                     # Level 3: Log detailed error information
@@ -406,9 +409,12 @@ function Get-RepoRootSafe {
                         }
                     }
                     else {
-                        Write-Error $errorMessage -ErrorAction Stop
+                        Write-Error $errorMessage -ErrorAction Continue
                     }
                 }
+
+                # Structured-logging test stubs are no-ops; ExitOnError must still terminate.
+                throw $_
             }
         }
         else {

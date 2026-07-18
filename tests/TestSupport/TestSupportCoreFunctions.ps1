@@ -453,6 +453,10 @@ function Clear-LibraryTestEnvironmentVariables {
         'PS_NODE_PACKAGE_MANAGER'
         'PS_PROFILE_REPO_ROOT'
         'LOCALAPPDATA'
+        'PS_PROFILE_PATH_DISABLE_STRUCTURED_ERROR'
+        'PS_PROFILE_PATH_DISABLE_EXIT_WITH_CODE'
+        'PS_PROFILE_PATH_FORCE_MANUAL_IMPORT'
+        'PS_PROFILE_PATH_SKIP_VALIDATION'
     )
 
     if ($AdditionalNames) {

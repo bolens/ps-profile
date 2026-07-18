@@ -36,6 +36,11 @@ Describe 'ExitCodes extended scenarios' {
         Remove-Item Env:\PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
     }
 
+    AfterEach {
+        # Restore so later files in the same Invoke-Pester process keep Exit-WithCode throws.
+        $env:PS_PROFILE_TEST_MODE = '1'
+    }
+
     Context 'Exit-WithCode in test mode' {
         It 'Throws instead of exiting when PS_PROFILE_TEST_MODE is enabled' {
             $testScript = Join-Path $script:TempDir 'exit-test-mode.ps1'

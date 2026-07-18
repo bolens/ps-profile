@@ -420,12 +420,16 @@ function Add-ScoopToPath {
 
     $pathSeparator = [System.IO.Path]::PathSeparator
     $added = $false
+    $pathEntries = @($env:PATH -split [regex]::Escape($pathSeparator) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 
     # Add shims directory
     if ($AddShims) {
         $shimsPath = Get-ScoopShimsPath -ScoopRoot $ScoopRoot
-        if ($shimsPath -and $env:PATH -notlike "*$([regex]::Escape($shimsPath))*") {
+        # -like + [regex]::Escape is wrong: -like uses wildcards, not regex, so
+        # escaped backslashes never match Windows PATH entries.
+        if ($shimsPath -and ($pathEntries -notcontains $shimsPath)) {
             $env:PATH = "$shimsPath$pathSeparator$env:PATH"
+            $pathEntries = @($shimsPath) + $pathEntries
             $added = $true
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
@@ -443,8 +447,9 @@ function Add-ScoopToPath {
     # Add bin directory
     if ($AddBin) {
         $binPath = Get-ScoopBinPath -ScoopRoot $ScoopRoot
-        if ($binPath -and $env:PATH -notlike "*$([regex]::Escape($binPath))*") {
+        if ($binPath -and ($pathEntries -notcontains $binPath)) {
             $env:PATH = "$binPath$pathSeparator$env:PATH"
+            $pathEntries = @($binPath) + $pathEntries
             $added = $true
             $debugLevel = 0
             if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {

@@ -244,7 +244,23 @@ function Expand-UserDirectoryPath {
         return $PathValue
     }
 
-    return $PathValue.Replace('$HOME', $userHome)
+    $expanded = $PathValue.Replace('$HOME', $userHome)
+
+    # user-dirs.dirs uses Unix separators; normalize to the host Join-Path layout.
+    if ($expanded.StartsWith($userHome, [System.StringComparison]::OrdinalIgnoreCase)) {
+        $remainder = $expanded.Substring($userHome.Length).TrimStart([char[]]@('/', '\'))
+        if ([string]::IsNullOrWhiteSpace($remainder)) {
+            return $userHome
+        }
+
+        $result = $userHome
+        foreach ($segment in ($remainder -split '[\\/]+' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })) {
+            $result = Join-Path $result $segment
+        }
+        return $result
+    }
+
+    return $expanded
 }
 
 <#
@@ -352,7 +368,8 @@ function Get-UserDirectory {
         return $configuredPath
     }
 
-    if (Get-Command xdg-user-dir -ErrorAction SilentlyContinue) {
+    $forcedHome = [Environment]::GetEnvironmentVariable('PS_PROFILE_PLATFORM_PATHS_FORCE_USER_HOME')
+    if ([string]::IsNullOrWhiteSpace($forcedHome) -and (Get-Command xdg-user-dir -ErrorAction SilentlyContinue)) {
         $xdgName = switch ($Name) {
             'Desktop' { 'DESKTOP' }
             'Downloads' { 'DOWNLOAD' }
@@ -376,7 +393,9 @@ function Get-UserDirectory {
             default { $null }
         }
 
-        if ($null -ne $specialFolder) {
+        # When tests (or hosts) force a user home, skip OS special folders so
+        # ~/Name fallbacks remain deterministic across Windows and Unix.
+        if ($null -ne $specialFolder -and [string]::IsNullOrWhiteSpace($forcedHome)) {
             $specialPath = [System.Environment]::GetFolderPath($specialFolder)
             if ($specialPath -and -not [string]::IsNullOrWhiteSpace($specialPath)) {
                 return $specialPath

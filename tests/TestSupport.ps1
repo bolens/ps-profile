@@ -8,7 +8,13 @@
 # Suppress all confirmation prompts for non-interactive test execution
 # Tests should never require user input - always run non-interactively
 # This must be set at the very top, before any operations that might prompt
-$ErrorActionPreference = 'Stop'
+#
+# Use Continue (not Stop): many library/profile helpers emit diagnostic Write-Error
+# while continuing (resilient fragment loading, Exit-WithCode before throw, etc.).
+# Stop turns those into terminating errors, aborts tests mid-flight, and leaks
+# TestDrive / env / module state across the shard. Pester 5.7 has no Run.Initialization
+# to reset this per worker, so TestSupport must not force Stop for test bodies.
+$ErrorActionPreference = 'Continue'
 $ConfirmPreference = 'None'
 $global:ConfirmPreference = 'None'
 

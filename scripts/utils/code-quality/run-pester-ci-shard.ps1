@@ -191,7 +191,6 @@ function Invoke-PesterShard {
   $params = @{
     Suite          = $Definition.Suite
     Path           = $paths
-    Parallel       = $true
     CI             = $true
     TestResultPath = $resultDir
   }
@@ -201,8 +200,16 @@ function Invoke-PesterShard {
   if ($Coverage -or ($Definition.Contains('Coverage') -and $Definition.Coverage)) {
     $params.Coverage = $true
   }
-  if ($Definition.ContainsKey('MaxParallelThreads') -and $Definition.MaxParallelThreads -gt 0) {
+  # Pester 5.7 has no Run.Parallel / MaximumThreadCount / Initialization.
+  # Only enable -Parallel when the shard asks for more than one thread; serial
+  # shards must omit it so containers stay fully sequential (avoids TestDrive
+  # collisions from aborted parallel container setup on Windows).
+  if ($Definition.ContainsKey('MaxParallelThreads') -and $Definition.MaxParallelThreads -gt 1) {
     $params.MaxParallelThreads = $Definition.MaxParallelThreads
+    $params.Parallel = $true
+  }
+  elseif (-not ($Definition.ContainsKey('MaxParallelThreads') -and $Definition.MaxParallelThreads -eq 1)) {
+    $params.Parallel = $true
   }
 
   Write-Host ("Running: {0} -Suite {1} -Path ({2})" -f $runner, $Definition.Suite, ($paths -join ', ')) -ForegroundColor DarkGray
