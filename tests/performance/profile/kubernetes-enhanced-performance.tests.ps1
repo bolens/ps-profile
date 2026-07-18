@@ -78,9 +78,24 @@ Describe 'kubernetes-enhanced.ps1 - Performance Tests' {
             . (Join-Path $script:ProfileDir 'kubernetes-enhanced.ps1')
         }
 
-        It 'Exec-KubePod executes quickly when tools not available' {
-            Set-TestCommandAvailabilityState -CommandName 'kubectl' -Available $false
+        BeforeEach {
+            Mark-TestCommandsUnavailable -CommandNames @(
+                'kubectl', 'helm', 'minikube', 'k9s', 'kind',
+                'scoop', 'choco', 'brew', 'apt', 'apt-get', 'dnf', 'yum', 'pacman', 'zypper', 'winget'
+            )
+            Set-Item -Path 'Function:\global:Invoke-MissingToolWarning' -Value {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType = 'generic',
+                    [string]$DefaultInstallCommand,
+                    [string]$Tool,
+                    [string]$InstallPackageName,
+                    [string]$AdditionalHint
+                )
+            } -Force -ErrorAction SilentlyContinue
+        }
 
+        It 'Exec-KubePod executes quickly when tools not available' {
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             Exec-KubePod -Pod 'test-pod' -Command 'ls' -ErrorAction SilentlyContinue
             $stopwatch.Stop()

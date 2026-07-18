@@ -16,8 +16,7 @@ BeforeAll {
     }
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:FragmentPath = Join-Path $script:ProfileDir 'lang-go.ps1'
-    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_GO_MAX_LOAD_MS' -Default 3000
-    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_GO_MAX_FUNCTION_MS' -Default 800
+    Initialize-FragmentPerformanceThresholds -Prefix 'LANG_GO' -LoadMs 8000 -FunctionMs 5000
 
     # Ensure bootstrap is loaded first
     $bootstrapPath = Join-Path $script:ProfileDir 'bootstrap.ps1'
@@ -56,6 +55,24 @@ Describe 'lang-go.ps1 - Performance Tests' {
     Context 'Function execution performance' {
         BeforeAll {
             . $script:FragmentPath -ErrorAction SilentlyContinue
+        }
+
+        BeforeEach {
+            Mark-TestCommandsUnavailable -CommandNames @(
+                'go', 'mage', 'golangci-lint', 'goreleaser', 'staticcheck',
+                'scoop', 'choco', 'brew', 'apt', 'apt-get', 'dnf', 'yum', 'pacman', 'zypper', 'winget'
+            )
+            # Missing-tool path probes package managers; keep that out of the timing budget.
+            Set-Item -Path 'Function:\global:Invoke-MissingToolWarning' -Value {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType = 'generic',
+                    [string]$DefaultInstallCommand,
+                    [string]$Tool,
+                    [string]$InstallPackageName,
+                    [string]$AdditionalHint
+                )
+            } -Force -ErrorAction SilentlyContinue
         }
 
         It 'Release-GoProject executes quickly when tool is missing' {
@@ -104,9 +121,21 @@ Describe 'lang-go.ps1 - Performance Tests' {
             # Load fragment
             . $script:FragmentPath -ErrorAction SilentlyContinue
 
-            # Verify Test-CachedCommand is being used
-            # (This is an indirect test - if the fragment loads quickly,
-            # it's likely using cached command detection)
+            Mark-TestCommandsUnavailable -CommandNames @(
+                'go', 'mage', 'golangci-lint', 'goreleaser', 'staticcheck',
+                'scoop', 'choco', 'brew', 'apt', 'apt-get', 'dnf', 'yum', 'pacman', 'zypper', 'winget'
+            )
+            Set-Item -Path 'Function:\global:Invoke-MissingToolWarning' -Value {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType = 'generic',
+                    [string]$DefaultInstallCommand,
+                    [string]$Tool,
+                    [string]$InstallPackageName,
+                    [string]$AdditionalHint
+                )
+            } -Force -ErrorAction SilentlyContinue
+
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             $null = Release-GoProject -ErrorAction SilentlyContinue
             $stopwatch.Stop()

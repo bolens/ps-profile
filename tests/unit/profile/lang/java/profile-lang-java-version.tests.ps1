@@ -41,14 +41,33 @@ public static class JavaStub {
     }
 }
 "@
+        $compiled = $false
         try {
             Add-Type -TypeDefinition $code -OutputAssembly $javaPath -OutputType ConsoleApplication -ErrorAction Stop
+            $compiled = $true
         }
         catch {
-            # Fallback: cmd wrapper won't satisfy Set-JavaVersion's java.exe Test-Path,
-            # but leave a marker file for debugging.
-            Set-Content -Path (Join-Path $binDir 'java-stub-error.txt') -Value $_.Exception.Message
-            throw
+            # pwsh 7.4+ / CoreCLR often rejects OutputType ConsoleApplication.
+            # Prefer a real java.exe from the host (CI toolcache) when available.
+            $realJavaCandidates = @(
+                $(if ($env:JAVA_HOME) { Join-Path $env:JAVA_HOME 'bin' 'java.exe' } else { $null })
+                $(if ($env:JDK_HOME) { Join-Path $env:JDK_HOME 'bin' 'java.exe' } else { $null })
+                (Get-Command java.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue)
+            ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
+
+            $realJava = $realJavaCandidates | Select-Object -First 1
+            if ($realJava) {
+                Copy-Item -LiteralPath $realJava -Destination $javaPath -Force
+                $compiled = $true
+            }
+            else {
+                Set-Content -Path (Join-Path $binDir 'java-stub-error.txt') -Value $_.Exception.Message
+                throw
+            }
+        }
+
+        if (-not $compiled -or -not (Test-Path -LiteralPath $javaPath)) {
+            throw "Failed to create test java.exe at $javaPath"
         }
     }
     else {

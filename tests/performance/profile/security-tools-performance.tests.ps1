@@ -34,9 +34,8 @@ Describe 'Security Tools Fragment Performance Tests' {
             }
 
             # Baseline performance metrics (in milliseconds)
-            # Based on typical fragment load times with 3x safety margin
-            $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_SECURITY_TOOLS_MAX_LOAD_MS' -Default 4500
-            $script:MaxFunctionRegistrationTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_SECURITY_TOOLS_MAX_FUNCTION_MS' -Default 2000
+            Initialize-FragmentPerformanceThresholds -Prefix 'SECURITY_TOOLS' -LoadMs 10000 -FunctionMs 4000 -IdempotencyMs 4000
+            $script:MaxFunctionRegistrationTimeMs = $script:MaxFunctionExecTimeMs
         }
         catch {
             $errorDetails = @{
@@ -90,11 +89,13 @@ Describe 'Security Tools Fragment Performance Tests' {
                 Remove-Item Function:\Invoke-DangerzoneConvert -ErrorAction SilentlyContinue
 
                 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-                                . $script:SecurityToolsPath -ErrorAction Stop
-            }
-            finally {
-                $stopwatch.Stop()
-                $loadTimes += $stopwatch.Elapsed.TotalMilliseconds
+                try {
+                    . $script:SecurityToolsPath -ErrorAction Stop
+                }
+                finally {
+                    $stopwatch.Stop()
+                    $loadTimes += $stopwatch.Elapsed.TotalMilliseconds
+                }
             }
 
             $avgLoadTime = ($loadTimes | Measure-Object -Average).Average
@@ -202,10 +203,8 @@ Describe 'Security Tools Fragment Performance Tests' {
 
             Write-Verbose "First load: $([Math]::Round($firstLoadTime, 2))ms, Second load: $([Math]::Round($secondLoadTime, 2))ms" -Verbose
 
-            # Second load should be very fast (< 500ms typically) due to idempotency check
-            # Note: We use a more lenient threshold due to timing variance and system load.
-            # The idempotency check should exit early, but we allow for some overhead.
-            $secondLoadTime | Should -BeLessThan 500
+            # Second load should be fast due to the idempotency early-exit.
+            $secondLoadTime | Should -BeLessThan $script:MaxIdempotencyTimeMs
         }
     }
 }

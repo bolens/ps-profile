@@ -121,6 +121,23 @@ foreach ($file in $files) {
     $suffix = if ($stats.Crash) { ' (crash/unparsed)' } else { '' }
     $color = if ($stats.Failed -gt 0 -or $stats.Crash) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
     Write-Host "  $($stats.Passed)P / $($stats.Failed)F / $($stats.Skipped)S$suffix" -ForegroundColor $color
+
+    # Under -Quiet, surface a short failure excerpt so CI logs remain actionable.
+    if ($Quiet -and ($stats.Failed -gt 0 -or $stats.Crash)) {
+        $failureLines = @(
+            $output -split "`n" |
+                Where-Object {
+                    $_ -match '^\s*\[-(FAIL|ERROR)\]|Expected:|But was:|Because:|ErrorMessage|CommandNotFoundException|RuntimeException|at\s+.+\.tests\.ps1:'
+                } |
+                Select-Object -First 40
+        )
+        if ($failureLines.Count -gt 0) {
+            Write-Host '  --- failure excerpt ---' -ForegroundColor DarkYellow
+            foreach ($line in $failureLines) {
+                Write-Host "  $line" -ForegroundColor DarkYellow
+            }
+        }
+    }
 }
 
 Write-Host ''

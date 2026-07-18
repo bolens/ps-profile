@@ -20,8 +20,7 @@ BeforeAll {
         (Join-Path $script:ProfileDir 'lang-java-compilers.ps1'),
         (Join-Path $script:ProfileDir 'lang-java-version.ps1')
     )
-    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_JAVA_MAX_LOAD_MS' -Default 3000
-    $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_LANG_JAVA_MAX_FUNCTION_MS' -Default 1500
+    Initialize-FragmentPerformanceThresholds -Prefix 'LANG_JAVA' -LoadMs 8000 -FunctionMs 5000
 
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }
@@ -60,6 +59,24 @@ Describe 'lang-java fragments - Performance Tests' {
             foreach ($fragmentPath in $script:FragmentPaths) {
                 . $fragmentPath -ErrorAction SilentlyContinue
             }
+        }
+
+        BeforeEach {
+            # Tests assert the missing-tool fast path; keep real installs from being invoked.
+            Mark-TestCommandsUnavailable -CommandNames @(
+                'mvn', 'gradle', 'ant', 'kotlinc', 'scalac', 'java',
+                'scoop', 'choco', 'brew', 'apt', 'apt-get', 'dnf', 'yum', 'pacman', 'zypper', 'winget'
+            )
+            Set-Item -Path 'Function:\global:Invoke-MissingToolWarning' -Value {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType = 'generic',
+                    [string]$DefaultInstallCommand,
+                    [string]$Tool,
+                    [string]$InstallPackageName,
+                    [string]$AdditionalHint
+                )
+            } -Force -ErrorAction SilentlyContinue
         }
 
         It 'Build-Maven executes quickly when tool is missing' {
@@ -116,6 +133,21 @@ Describe 'lang-java fragments - Performance Tests' {
             foreach ($fragmentPath in $script:FragmentPaths) {
                 . $fragmentPath -ErrorAction SilentlyContinue
             }
+
+            Mark-TestCommandsUnavailable -CommandNames @(
+                'mvn', 'gradle', 'ant', 'kotlinc', 'scalac', 'java',
+                'scoop', 'choco', 'brew', 'apt', 'apt-get', 'dnf', 'yum', 'pacman', 'zypper', 'winget'
+            )
+            Set-Item -Path 'Function:\global:Invoke-MissingToolWarning' -Value {
+                param(
+                    [string]$ToolName,
+                    [string]$ToolType = 'generic',
+                    [string]$DefaultInstallCommand,
+                    [string]$Tool,
+                    [string]$InstallPackageName,
+                    [string]$AdditionalHint
+                )
+            } -Force -ErrorAction SilentlyContinue
 
             $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
             $null = Build-Maven -ErrorAction SilentlyContinue

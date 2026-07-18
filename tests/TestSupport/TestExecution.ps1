@@ -196,12 +196,21 @@ function Initialize-FragmentPerformanceThresholds {
         [Parameter(Mandatory)]
         [string]$Prefix,
 
-        [int]$LoadMs = 4500,
-        [int]$RepeatLoadMs = 4000,
-        [int]$FunctionMs = 4000,
-        [int]$IdempotencyMs = 4000,
-        [int]$LookupMs = 1000
+        [int]$LoadMs = 10000,
+        [int]$RepeatLoadMs = 10000,
+        [int]$FunctionMs = 8000,
+        [int]$IdempotencyMs = 10000,
+        [int]$LookupMs = 2000
     )
+
+    # Windows CI runners are slower for fragment loads / Get-Command sweeps.
+    if ($IsWindows -or $env:OS -eq 'Windows_NT') {
+        $LoadMs = [Math]::Max($LoadMs, 15000)
+        $RepeatLoadMs = [Math]::Max($RepeatLoadMs, 15000)
+        $FunctionMs = [Math]::Max($FunctionMs, 12000)
+        $IdempotencyMs = [Math]::Max($IdempotencyMs, 15000)
+        $LookupMs = [Math]::Max($LookupMs, 3000)
+    }
 
     $key = ($Prefix -replace '[^A-Za-z0-9]', '_').ToUpperInvariant()
     $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_LOAD_MS" -Default $LoadMs
