@@ -287,13 +287,25 @@ if (-not $PerFile) {
 Write-Host "Mode: per-file (slow)" -ForegroundColor DarkGray
 Write-Host ''
 
+$resultDir = Join-Path $RepoRoot 'tests' 'test-artifacts' 'conversion-batch'
+$null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
+
 $results = @()
 foreach ($file in $files) {
     $relName = $file.FullName.Substring($conversionRoot.Length).TrimStart('/', '\')
     Write-Host "=== $relName ===" -ForegroundColor Cyan
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName)
-    $stats = Get-PesterRunStats -Output $run.Output
-    $failLines = @(Get-PesterFailureLines -Output $run.Output)
+    $fileResultDir = Join-Path $resultDir (('pf-' + ($relName -replace '[\\/:\*\?"<>\|]', '-')).Trim('-'))
+    if (Test-Path -LiteralPath $fileResultDir) {
+        Remove-Item -LiteralPath $fileResultDir -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+    $null = New-Item -ItemType Directory -Path $fileResultDir -Force -ErrorAction SilentlyContinue
+
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName -ResultPath $fileResultDir)
+    $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath (Join-Path $fileResultDir 'test-results.xml')
+    if ($stats.Failed -lt 0) {
+        $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $fileResultDir
+    }
+    $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $fileResultDir)
 
     $results += [pscustomobject]@{
         File     = $relName

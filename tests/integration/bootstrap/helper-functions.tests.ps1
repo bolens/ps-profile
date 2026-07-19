@@ -247,14 +247,15 @@ Describe 'Bootstrap Helper Functions' {
 
         It 'Set-AgentModeAlias returns false when alias already exists' {
             try {
-                        $existingAlias = 'ls'
-            if (-not (Get-Command -Name $existingAlias -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "Test requires existing alias: $existingAlias"
-                return
-            }
-            
-            $result = Set-AgentModeAlias -Name $existingAlias -Target 'Get-Command'
-            $result | Should -Be $false -Because "Set-AgentModeAlias should return false when alias already exists"
+                $existingAlias = "test_existing_alias_$(Get-Random)"
+                Set-Alias -Name $existingAlias -Value 'Write-Output' -Scope Global -Force
+                try {
+                    $result = Set-AgentModeAlias -Name $existingAlias -Target 'Get-Command'
+                    $result | Should -Be $false -Because "Set-AgentModeAlias should return false when alias already exists"
+                }
+                finally {
+                    Remove-Item -Path "Alias:\$existingAlias" -Force -ErrorAction SilentlyContinue
+                }
             }
             catch {
                 $errorDetails = @{

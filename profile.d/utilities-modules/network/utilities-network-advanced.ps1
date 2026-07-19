@@ -92,8 +92,10 @@ function Invoke-WithRetry {
         $completed = $false
 
         try {
-            # Use runspace for timeout operation (much faster than job)
-            $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1)
+            # Use a default session state so built-in cmdlets exist inside the
+            # timeout runspace (bare pools can omit them on some Windows hosts).
+            $initialSessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault2()
+            $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1, $initialSessionState, $Host)
             $runspacePool.Open()
 
             $powershell = [PowerShell]::Create()
@@ -172,9 +174,18 @@ function Invoke-WithRetry {
                 $runspacePool = $null
             }
 
-            # Check if this is a retryable error using Retry module if available
+            # Check if this is a retryable error using Retry module if available.
+            # Prefer command lookup that cannot itself throw CommandNotFoundException
+            # when the session is partially stubbed (seen on Windows CI).
             $isRetryable = $false
-            if (Get-Command Test-IsRetryableError -ErrorAction SilentlyContinue) {
+            $retryTester = $null
+            try {
+                $retryTester = Microsoft.PowerShell.Core\Get-Command -Name Test-IsRetryableError -ErrorAction SilentlyContinue
+            }
+            catch {
+                $retryTester = $null
+            }
+            if ($retryTester) {
                 $isRetryable = Test-IsRetryableError -Exception $_.Exception
             }
             else {

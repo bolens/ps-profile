@@ -61,16 +61,17 @@ Describe 'Network Utils Module' {
         }
 
         It 'retries on failure and succeeds' {
-            Set-Variable -Name NetworkRetryAttemptCount -Value 0 -Scope Global -Force
+            $state = [pscustomobject]@{ Attempt = 0 }
             $script = {
-                $global:NetworkRetryAttemptCount = 1 + [int]$global:NetworkRetryAttemptCount
-                if ($global:NetworkRetryAttemptCount -lt 2) {
+                param($state)
+                $state.Attempt = 1 + [int]$state.Attempt
+                if ($state.Attempt -lt 2) {
                     throw 'connection failed'
                 }
                 return 'success on attempt 2'
             }
 
-            $result = Invoke-WithRetry -ScriptBlock $script -MaxRetries 3 -RetryDelaySeconds 0 -TimeoutSeconds 5
+            $result = Invoke-WithRetry -ScriptBlock $script -ArgumentList $state -MaxRetries 3 -RetryDelaySeconds 0 -TimeoutSeconds 5
             $result | Should -Be 'success on attempt 2'
         }
 

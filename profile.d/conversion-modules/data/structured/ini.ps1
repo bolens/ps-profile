@@ -113,9 +113,11 @@ function Initialize-FileConversion-Ini {
             }
         }
         catch {
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-json' -Context @{
-                input_path = $InputPath
-                output_path = $OutputPath
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                }
             }
             
             # Level 2: Error details
@@ -213,11 +215,13 @@ function Initialize-FileConversion-Ini {
         }
         catch {
             $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-json' -Context @{
-                input_path = $InputPath
-                output_path = $OutputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-json' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
             }
             
             # Level 2: Error details
@@ -291,12 +295,14 @@ function Initialize-FileConversion-Ini {
         }
         catch {
             $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-yaml' -Context @{
-                input_path = $InputPath
-                output_path = $OutputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-                yq_exit_code = $LASTEXITCODE
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
             }
             
             # Level 2: Error details
@@ -369,12 +375,14 @@ function Initialize-FileConversion-Ini {
         }
         catch {
             $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-yaml' -Context @{
-                input_path = $InputPath
-                output_path = $OutputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-                yq_exit_code = $LASTEXITCODE
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-yaml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
             }
             
             # Level 2: Error details
@@ -443,11 +451,13 @@ function Initialize-FileConversion-Ini {
         }
         catch {
             $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-xml' -Context @{
-                input_path = $InputPath
-                output_path = $OutputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-xml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
             }
             
             # Level 2: Error details
@@ -519,11 +529,13 @@ function Initialize-FileConversion-Ini {
         }
         catch {
             $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-xml' -Context @{
-                input_path = $InputPath
-                output_path = $OutputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-xml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                }
             }
             
             # Level 2: Error details
@@ -603,12 +615,14 @@ function Initialize-FileConversion-Ini {
         }
         catch {
             $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-toml' -Context @{
-                input_path = $InputPath
-                output_path = $OutputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-                pstoml_available = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.to-toml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    pstoml_available = (Get-Module -Name PSToml -ErrorAction SilentlyContinue) -ne $null
+                }
             }
             
             # Level 2: Error details
@@ -681,12 +695,14 @@ function Initialize-FileConversion-Ini {
         }
         catch {
             $inputSize = if ($InputPath -and (Test-Path -LiteralPath $InputPath)) { (Get-Item -LiteralPath $InputPath).Length } else { 0 }
-            Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-toml' -Context @{
-                input_path = $InputPath
-                output_path = $OutputPath
-                input_size_bytes = $inputSize
-                error_type = $_.Exception.GetType().FullName
-                yq_exit_code = $LASTEXITCODE
+            if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
+                Write-StructuredError -ErrorRecord $_ -OperationName 'conversion.ini.from-toml' -Context @{
+                    input_path = $InputPath
+                    output_path = $OutputPath
+                    input_size_bytes = $inputSize
+                    error_type = $_.Exception.GetType().FullName
+                    yq_exit_code = $LASTEXITCODE
+                }
             }
             
             # Level 2: Error details
