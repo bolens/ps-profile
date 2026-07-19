@@ -98,8 +98,10 @@ function global:Set-AgentModeFunction {
 .SYNOPSIS
     Registers a collision-safe alias in the global scope.
 .DESCRIPTION
-    Creates an alias only when it does not already exist. Optionally returns
-    the alias definition string for diagnostic scenarios.
+    Creates an alias only when no alias, function, filter, or cmdlet already
+    owns the name. External Application commands on PATH do not block
+    registration (aliases take precedence). Optionally returns the alias
+    definition string for diagnostic scenarios.
 .PARAMETER Name
     Alias name to register.
 .PARAMETER Target
@@ -131,7 +133,15 @@ function global:Set-AgentModeAlias {
         return $false
     }
 
-    if (Get-Command -Name $Name -ErrorAction SilentlyContinue) {
+    # Skip when an alias already exists (idempotent / collision-safe).
+    if (Get-Alias -Name $Name -ErrorAction SilentlyContinue) {
+        return $false
+    }
+
+    # Prefer profile aliases over PATH apps. Bare Get-Command also matches
+    # Application and can permanently block short aliases like `now`.
+    $blocking = @(Get-Command -Name $Name -CommandType Function, Filter, Cmdlet -ErrorAction SilentlyContinue)
+    if ($blocking.Count -gt 0) {
         return $false
     }
 

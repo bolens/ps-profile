@@ -149,6 +149,50 @@ function New-BatchRunnerArgs {
     return $args
 }
 
+function Get-PesterFailureLines {
+    param(
+        [string]$Output,
+        [string]$ResultXmlPath
+    )
+
+    $lines = [System.Collections.Generic.List[string]]::new()
+    [regex]::Matches($Output, '(?m)^\s+\[-\].*') | ForEach-Object { $lines.Add($_.Value.Trim()) }
+
+    $xmlCandidates = @()
+    if ($ResultXmlPath -and -not [string]::IsNullOrWhiteSpace($ResultXmlPath)) {
+        if (Test-Path -LiteralPath $ResultXmlPath -PathType Leaf) {
+            $xmlCandidates += $ResultXmlPath
+        }
+        elseif (Test-Path -LiteralPath $ResultXmlPath -PathType Container) {
+            $xmlCandidates += @(Get-ChildItem -LiteralPath $ResultXmlPath -Filter '*.xml' -Recurse -File -ErrorAction SilentlyContinue |
+                Select-Object -ExpandProperty FullName)
+        }
+    }
+
+    foreach ($xmlPath in $xmlCandidates) {
+        try {
+            [xml]$xml = Get-Content -LiteralPath $xmlPath -Raw -ErrorAction Stop
+            foreach ($case in @($xml.SelectNodes('//test-case[@result="Failure" or @result="Error"]'))) {
+                $name = [string]$case.GetAttribute('name')
+                $messageNode = $case.SelectSingleNode('.//failure/message')
+                $message = if ($messageNode) { [string]$messageNode.InnerText } else { '' }
+                if ([string]::IsNullOrWhiteSpace($name) -and [string]::IsNullOrWhiteSpace($message)) {
+                    continue
+                }
+                $summary = if ($message) { "${name}: $message" } else { $name }
+                if (-not [string]::IsNullOrWhiteSpace($summary) -and -not $lines.Contains($summary)) {
+                    $lines.Add($summary.Trim())
+                }
+            }
+        }
+        catch {
+            # Ignore unreadable result XML; output-based lines may still be available.
+        }
+    }
+
+    return @($lines)
+}
+
 $label = if ([string]::IsNullOrWhiteSpace($RelativePath)) { 'tools' } else { "tools/$RelativePath" }
 Write-Host "Batch: $label ($($files.Count) files)" -ForegroundColor Cyan
 
@@ -181,12 +225,25 @@ if ($SingleSession) {
 Write-Host 'Mode: per-file (default for tools isolation)' -ForegroundColor DarkGray
 Write-Host ''
 
+$resultDir = Join-Path $RepoRoot 'tests' 'test-artifacts' 'tools-batch'
+$null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
+
 $results = @()
 foreach ($file in $files) {
     $relName = $file.FullName.Substring($toolsRoot.Length).TrimStart('/', '\')
     Write-Host "=== $relName ===" -ForegroundColor Cyan
-    $run = Invoke-ToolsBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName)
-    $stats = Get-PesterRunStats -Output $run.Output
+    $fileResultDir = Join-Path $resultDir (($relName -replace '[\\/:\*\?"<>\|]', '-').Trim('-'))
+    if (Test-Path -LiteralPath $fileResultDir) {
+        Remove-Item -LiteralPath $fileResultDir -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+    $null = New-Item -ItemType Directory -Path $fileResultDir -Force -ErrorAction SilentlyContinue
+
+    $run = Invoke-ToolsBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName -ResultPath $fileResultDir)
+    $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath (Join-Path $fileResultDir 'test-results.xml')
+    if ($stats.Failed -lt 0) {
+        $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $fileResultDir
+    }
+    $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $fileResultDir)
 
     $results += [pscustomobject]@{
         File     = $relName
@@ -195,11 +252,11 @@ foreach ($file in $files) {
         Skipped  = $stats.Skipped
     }
 
-    $color = if ($stats.Failed -gt 0) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
+    $color = if ($stats.Failed -gt 0 -or ($stats.Failed -lt 0 -and $run.ExitCode -ne 0)) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
     Write-Host "  $($stats.Passed)P / $($stats.Failed)F / $($stats.Skipped)S" -ForegroundColor $color
-    if ($stats.Failed -gt 0) {
-        [regex]::Matches($run.Output, '(?m)^\s+\[-\].*') | Select-Object -First 5 | ForEach-Object {
-            Write-Host "    $($_.Value.Trim())" -ForegroundColor DarkRed
+    if ($failLines.Count -gt 0) {
+        $failLines | Select-Object -First 5 | ForEach-Object {
+            Write-Host "    $_" -ForegroundColor DarkRed
         }
     }
 }

@@ -145,6 +145,14 @@ Describe 'utilities-datetime.ps1 - Get-DateTime and aliases' {
             @{ Name = 'now'; Target = 'Get-DateTime' }
         )
 
+        # Isolation resets may remove aliases while leaving UtilitiesLoaded set, so
+        # re-apply datetime registrations before asserting.
+        foreach ($case in $cases) {
+            Remove-Item -Path "Alias:\$($case.Name)" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$($case.Name)" -Force -ErrorAction SilentlyContinue
+        }
+        . (Join-Path $script:ProfileDir 'utilities-modules' 'data' 'utilities-datetime.ps1')
+
         foreach ($case in $cases) {
             # Prefer Get-Alias: autocomplete proxies can make Get-Command return a Function
             # without ResolvedCommandName (StrictMode then throws PropertyNotFoundException).

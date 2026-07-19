@@ -120,8 +120,12 @@ Describe 'Network Utils Module' {
 
         It 'handles HTTP request failure gracefully' {
             $result = Invoke-HttpRequestWithRetry -Uri 'http://127.0.0.1:1/' -Method 'GET' -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue
-            # Failure may surface as $false or $null depending on retry/timeout behavior
-            @($false, $null) | Should -Contain $result
+            # Failure may surface as $false, $null, or an empty collection depending on
+            # EndInvoke wrapping / retry timeout behavior across platforms.
+            $failed = ($null -eq $result) -or ($result -eq $false) -or (
+                $result -is [System.Collections.ICollection] -and $result.Count -eq 0
+            )
+            $failed | Should -BeTrue -Because "HTTP to a closed local port should not report success (got: $(ConvertTo-Json -InputObject $result -Compress -Depth 3 -ErrorAction SilentlyContinue))"
         }
     }
 

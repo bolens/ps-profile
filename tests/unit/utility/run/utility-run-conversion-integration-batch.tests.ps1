@@ -133,7 +133,7 @@ exit 1
             $result.Output | Should -Match '0P / 1F / 0S|failed'
     }
 
-    It 'Filters by NamePattern and passes matching files via a single -Path binding' {
+    It 'Filters by NamePattern and runs matching files per-file' {
         $tempRoot = New-TestTempDirectory -Prefix 'conversion-batch-namepattern'
         $conversionDir = Join-Path $tempRoot 'tests' 'integration' 'conversion' 'np-batch'
         $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
@@ -149,17 +149,17 @@ param(
     [string[]]$TestFile
 )
 $path = @($TestFile)[0]
-if (-not $path -or -not (Test-Path -LiteralPath $path -PathType Container)) {
-    Write-Error "expected staged directory -Path, got: $path"
+if (-not $path -or -not (Test-Path -LiteralPath $path -PathType Leaf)) {
+    Write-Error "expected per-file -Path, got: $path"
     exit 2
 }
-$names = @(Get-ChildItem -LiteralPath $path -Filter '*.tests.ps1' -File | Select-Object -ExpandProperty Name)
-if ($names -contains 'zeta.tests.ps1') { Write-Error 'NamePattern leaked non-matching file'; exit 2 }
-if ($names -notcontains 'alpha.tests.ps1' -or $names -notcontains 'beta.tests.ps1') {
-    Write-Error "expected alpha+beta, got: $($names -join ',')"
+$name = [System.IO.Path]::GetFileName($path)
+if ($name -eq 'zeta.tests.ps1') { Write-Error 'NamePattern leaked non-matching file'; exit 2 }
+if ($name -notin @('alpha.tests.ps1', 'beta.tests.ps1')) {
+    Write-Error "unexpected file: $name"
     exit 2
 }
-Write-Host 'Tests Passed: 2, Failed: 0, Skipped: 0'
+Write-Host 'Tests Passed: 1, Failed: 0, Skipped: 0'
 exit 0
 '@
         Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
@@ -174,7 +174,7 @@ exit 0
         $result.ExitCode | Should -Be 0
         $result.Output | Should -Match 'NamePattern=\^\[a-m\]'
         $result.Output | Should -Match '\(2 files\)'
-        $result.Output | Should -Match '2P / 0F / 0S'
+        $result.Output | Should -Match 'using -PerFile'
         $result.Output | Should -Match 'All tests passed in batch'
     }
 

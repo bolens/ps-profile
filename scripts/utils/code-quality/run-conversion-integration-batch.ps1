@@ -26,8 +26,8 @@
 
 .PARAMETER NamePattern
     Optional case-insensitive regex matched against each test file basename
-    (e.g. '^[a-m]' for CI shard splits). When set, matching files are staged
-    into a temp directory so single-session mode still uses one directory -Path.
+    (e.g. '^[a-m]' for CI shard splits). When set, runs use -PerFile isolation
+    (staging under test-artifacts is unsafe because Remove-TestArtifacts wipes it).
 
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 -RelativePath data/structured
@@ -205,37 +205,17 @@ function New-BatchRunnerArgs {
     return $args
 }
 
-function New-NamePatternStagingDirectory {
-    <#
-    .SYNOPSIS
-        Copies NamePattern-matched test files into a staging directory for single-session runs.
-
-    .DESCRIPTION
-        run-pester accepts a directory -Path cleanly, but cannot take repeated -Path file
-        flags (and comma-joined paths do not bind as [string[]] via arg arrays). Staging
-        preserves single-session semantics while restricting the file set.
-    #>
-    param(
-        [Parameter(Mandatory)]
-        [System.IO.FileInfo[]]$Files,
-
-        [Parameter(Mandatory)]
-        [string]$StagingRoot
-    )
-
-    if (Test-Path -LiteralPath $StagingRoot) {
-        Remove-Item -LiteralPath $StagingRoot -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
-    }
-    $null = New-Item -ItemType Directory -Path $StagingRoot -Force
-    foreach ($file in $Files) {
-        Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $StagingRoot $file.Name) -Force
-    }
-    return $StagingRoot
-}
-
 $label = $RelativePath -replace '[/\\]', '/'
 if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
     $label = "$label (NamePattern=$NamePattern)"
+    # Staging filtered files under tests/test-artifacts breaks conversion tests:
+    # AfterEach Remove-TestArtifacts wipes the staged scripts mid-run, and
+    # NamePattern hashes like ^markdown vs ^(?!markdown) collided on sanitized
+    # artifact names. Per-file isolation avoids both issues.
+    if (-not $PerFile) {
+        $PerFile = $true
+        Write-Host 'NamePattern set: using -PerFile (staging is unsafe for conversion tests)' -ForegroundColor DarkGray
+    }
 }
 Write-Host "Batch: $label ($($files.Count) files)" -ForegroundColor Cyan
 
@@ -245,14 +225,7 @@ if (-not $PerFile) {
 
     $resultDir = Join-Path $RepoRoot 'tests' 'test-artifacts' 'conversion-batch'
     $null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
-    $resultKey = if ([string]::IsNullOrWhiteSpace($NamePattern)) {
-        ($RelativePath -replace '[/\\]', '-')
-    }
-    else {
-        # Stable artifact name for filtered shards
-        $safePattern = ($NamePattern -replace '[^A-Za-z0-9]+', '-').Trim('-')
-        '{0}-{1}' -f ($RelativePath -replace '[/\\]', '-'), $safePattern
-    }
+    $resultKey = ($RelativePath -replace '[/\\]', '-')
     # run-pester -TestResultPath expects a directory (not a .xml file path).
     $resultPath = Join-Path $resultDir $resultKey
     if (Test-Path -LiteralPath $resultPath) {
@@ -261,19 +234,8 @@ if (-not $PerFile) {
     $null = New-Item -ItemType Directory -Path $resultPath -Force -ErrorAction SilentlyContinue
     $resultXml = Join-Path $resultPath 'test-results.xml'
 
-    # When NamePattern filters the set, stage matching files into a temp directory
-    # so run-pester still receives a single directory -Path (multi-file -Path
-    # bindings are unsupported through the child pwsh arg array).
-    $sessionTarget = if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
-        $stagingRoot = Join-Path $resultDir ('staged-{0}' -f $resultKey)
-        New-NamePatternStagingDirectory -Files $files -StagingRoot $stagingRoot
-    }
-    else {
-        $testDir
-    }
-
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $sessionTarget -ResultPath $resultPath)
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultPath)
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultXml
