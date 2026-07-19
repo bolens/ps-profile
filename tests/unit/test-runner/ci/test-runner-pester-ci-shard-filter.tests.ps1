@@ -7,12 +7,15 @@ Describe 'PesterCiShardFilter' {
 
     It 'Returns no shards for docs-only changes' {
         $shards = Resolve-PesterCiShards -ChangedFiles @('docs/api/README.md', 'README.md')
-        $shards.Count | Should -Be 0
+        @($shards).Count | Should -Be 0
     }
 
     It 'Maps conversion module changes to conversion shards' {
         $shards = Resolve-PesterCiShards -ChangedFiles @('profile.d/conversion-modules/data/core/csv.ps1')
-        $shards | Should -Contain 'conversion-document'
+        $shards | Should -Contain 'conversion-document-markdown'
+        $shards | Should -Contain 'conversion-document-other'
+        $shards | Should -Contain 'conversion-data-structured-a'
+        $shards | Should -Contain 'conversion-data-structured-b'
         $shards | Should -Contain 'conversion-media'
         $shards | Should -Contain 'unit-profile-conversion'
         $shards | Should -Not -Contain 'unit-library'
@@ -23,17 +26,49 @@ Describe 'PesterCiShardFilter' {
         $shards | Should -Be @('coverage-smoke', 'unit-library')
     }
 
+    It 'Maps unit-profile-core paths to split core shards' {
+        $shards = Resolve-PesterCiShards -ChangedFiles @('tests/unit/profile/lang/java/profile-lang-java-version.tests.ps1')
+        $shards | Should -Contain 'unit-profile-core-lang'
+        $shards | Should -Contain 'unit-profile-core-files'
+        $shards | Should -Contain 'coverage-smoke'
+        $shards | Should -Not -Contain 'unit-profile-core'
+    }
+
+    It 'Maps tools integration changes to all tools letter shards' {
+        $shards = Resolve-PesterCiShards -ChangedFiles @('tests/integration/tools/git.tests.ps1')
+        $shards | Should -Contain 'integration-tools-a'
+        $shards | Should -Contain 'integration-tools-e'
+        $shards | Should -Contain 'integration-tools-m'
+        $shards | Should -Contain 'integration-tools-s'
+        $shards | Should -Not -Contain 'integration-tools'
+    }
+
     It 'Enables full suite for CI contract changes' {
         $shards = Resolve-PesterCiShards -ChangedFiles @('.github/workflows/test-pester.yml')
         $shards.Count | Should -Be (Get-PesterCiAllShards).Count
     }
 
-    It 'Builds Ubuntu-first matrix with Windows includes' {
-        $matrix = Get-PesterCiShardMatrix -Shards @('unit-library', 'conversion-media', 'performance')
+    It 'Builds Ubuntu-first matrix with Windows includes and Windows-only performance' {
+        $matrix = Get-PesterCiShardMatrix -Shards @(
+            'unit-library'
+            'conversion-media'
+            'performance-lang-core'
+            'performance-profile-a'
+        )
         $matrix | Where-Object { $_.os -eq 'ubuntu-latest' -and $_.shard -eq 'unit-library' } | Should -Not -BeNullOrEmpty
         $matrix | Where-Object { $_.os -eq 'windows-latest' -and $_.shard -eq 'unit-library' } | Should -Not -BeNullOrEmpty
-        $matrix | Where-Object { $_.os -eq 'ubuntu-latest' -and $_.shard -eq 'performance' } | Should -BeNullOrEmpty
-        $matrix | Where-Object { $_.os -eq 'windows-latest' -and $_.shard -eq 'performance' } | Should -Not -BeNullOrEmpty
+        $matrix | Where-Object { $_.os -eq 'ubuntu-latest' -and $_.shard -like 'performance*' } | Should -BeNullOrEmpty
+        $matrix | Where-Object { $_.os -eq 'windows-latest' -and $_.shard -eq 'performance-lang-core' } | Should -Not -BeNullOrEmpty
+        $matrix | Where-Object { $_.os -eq 'windows-latest' -and $_.shard -eq 'performance-profile-a' } | Should -Not -BeNullOrEmpty
         $matrix | Where-Object { $_.os -eq 'windows-latest' -and $_.shard -eq 'conversion-media' } | Should -BeNullOrEmpty
+    }
+
+    It 'Does not expose retired fat shard names in the full set' {
+        $all = Get-PesterCiAllShards
+        $all | Should -Not -Contain 'integration-tools'
+        $all | Should -Not -Contain 'unit-profile-core'
+        $all | Should -Not -Contain 'conversion-document'
+        $all | Should -Not -Contain 'conversion-data-structured'
+        $all | Should -Not -Contain 'performance'
     }
 }

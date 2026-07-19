@@ -15,6 +15,32 @@ function Get-PesterCiFilterRules {
     [OutputType([hashtable])]
     param()
 
+    $unitProfileCoreShards = @(
+        'unit-profile-core-lang'
+        'unit-profile-core-files'
+        'unit-profile-core-boot-main'
+        'unit-profile-core-git-util-sys'
+    )
+    $integrationToolsShards = @(
+        'integration-tools-a'
+        'integration-tools-e'
+        'integration-tools-m'
+        'integration-tools-s'
+    )
+    $performanceShards = @(
+        'performance-lang-core'
+        'performance-profile-a'
+        'performance-profile-b'
+    )
+    $conversionDocumentShards = @(
+        'conversion-document-markdown'
+        'conversion-document-other'
+    )
+    $conversionStructuredShards = @(
+        'conversion-data-structured-a'
+        'conversion-data-structured-b'
+    )
+
     return [ordered]@{
         ci_contract = @{
             Patterns = @(
@@ -41,10 +67,14 @@ function Get-PesterCiFilterRules {
             ExcludePrefixes = @('profile.d/conversion-modules/')
             Shards = @(
                 'unit-library', 'unit-utility', 'unit-support'
-                'unit-profile-conversion', 'unit-profile-core', 'unit-profile-infra'
+                'unit-profile-conversion'
+            ) + $unitProfileCoreShards + @(
+                'unit-profile-infra'
                 'unit-profile-misc-a', 'unit-profile-misc-b'
-                'integration-core', 'integration-tools', 'coverage-smoke', 'performance'
-            )
+                'integration-core'
+            ) + $integrationToolsShards + @(
+                'coverage-smoke'
+            ) + $performanceShards
         }
         conversion = @{
             Patterns = @(
@@ -53,8 +83,11 @@ function Get-PesterCiFilterRules {
                 'tests/unit/profile/conversion/**'
             )
             Shards = @(
-                'unit-profile-conversion', 'conversion-document', 'conversion-media'
-                'conversion-data-structured', 'conversion-data-units', 'conversion-data-encoding'
+                'unit-profile-conversion'
+            ) + $conversionDocumentShards + @(
+                'conversion-media'
+            ) + $conversionStructuredShards + @(
+                'conversion-data-units', 'conversion-data-encoding'
                 'conversion-data-binary', 'conversion-data-compression', 'conversion-data-scientific'
                 'conversion-data-misc'
             )
@@ -94,7 +127,7 @@ function Get-PesterCiFilterRules {
                 'tests/unit/profile/utilities/**'
                 'tests/unit/profile/system/**'
             )
-            Shards = @('unit-profile-core', 'coverage-smoke')
+            Shards = @($unitProfileCoreShards + @('coverage-smoke'))
         }
         unit_profile_infra = @{
             Patterns = @(
@@ -148,7 +181,7 @@ function Get-PesterCiFilterRules {
                 'tests/integration/tools/**'
                 'scripts/utils/code-quality/run-tools-integration-batch.ps1'
             )
-            Shards = @('integration-tools')
+            Shards = @($integrationToolsShards)
         }
         integration_core = @{
             Patterns = @(
@@ -172,7 +205,7 @@ function Get-PesterCiFilterRules {
                 'tests/performance/**'
                 'scripts/utils/code-quality/run-performance-batch.ps1'
             )
-            Shards = @('performance')
+            Shards = @($performanceShards)
         }
     }
 }
@@ -184,13 +217,20 @@ function Get-PesterCiAllShards {
 
     return @(
         'unit-library', 'unit-utility', 'unit-test-runner', 'unit-support'
-        'unit-profile-conversion', 'unit-profile-core', 'unit-profile-infra'
+        'unit-profile-conversion'
+        'unit-profile-core-lang', 'unit-profile-core-files'
+        'unit-profile-core-boot-main', 'unit-profile-core-git-util-sys'
+        'unit-profile-infra'
         'unit-profile-misc-a', 'unit-profile-misc-b'
-        'integration-tools', 'integration-core'
-        'conversion-document', 'conversion-media'
-        'conversion-data-structured', 'conversion-data-units', 'conversion-data-encoding'
+        'integration-tools-a', 'integration-tools-e', 'integration-tools-m', 'integration-tools-s'
+        'integration-core'
+        'conversion-document-markdown', 'conversion-document-other', 'conversion-media'
+        'conversion-data-structured-a', 'conversion-data-structured-b'
+        'conversion-data-units', 'conversion-data-encoding'
         'conversion-data-binary', 'conversion-data-compression', 'conversion-data-scientific'
-        'conversion-data-misc', 'performance', 'coverage-smoke'
+        'conversion-data-misc'
+        'performance-lang-core', 'performance-profile-a', 'performance-profile-b'
+        'coverage-smoke'
     )
 }
 
@@ -199,7 +239,14 @@ function Get-PesterCiWindowsShards {
     [OutputType([string[]])]
     param()
 
-    return @('unit-library', 'unit-profile-core', 'integration-tools', 'integration-core', 'performance')
+    return @(
+        'unit-library'
+        'unit-profile-core-lang', 'unit-profile-core-files'
+        'unit-profile-core-boot-main', 'unit-profile-core-git-util-sys'
+        'integration-tools-a', 'integration-tools-e', 'integration-tools-m', 'integration-tools-s'
+        'integration-core'
+        'performance-lang-core', 'performance-profile-a', 'performance-profile-b'
+    )
 }
 
 function Test-PesterCiPathMatch {
@@ -296,7 +343,8 @@ function Resolve-PesterCiShards {
         })
 
     if ($files.Count -eq 0) {
-        return @()
+        # Unary comma preserves empty [string[]] (bare `return @()` unwraps to $null).
+        return , [string[]]@()
     }
 
     foreach ($ruleName in $rules.Keys) {
@@ -319,7 +367,11 @@ function Resolve-PesterCiShards {
         }
     }
 
-    return @($shards | Sort-Object)
+    $ordered = [string[]]@($shards | Sort-Object)
+    if ($ordered.Count -eq 0) {
+        return , [string[]]@()
+    }
+    return $ordered
 }
 
 function Get-PesterCiShardMatrix {
@@ -339,7 +391,8 @@ function Get-PesterCiShardMatrix {
     $include = [System.Collections.Generic.List[object]]::new()
 
     foreach ($shard in ($Shards | Sort-Object -Unique)) {
-        if ($shard -ne 'performance') {
+        # Performance shards are Windows-only (historically flaky / slow on Ubuntu).
+        if ($shard -notlike 'performance*') {
             $include.Add([pscustomobject]@{ os = 'ubuntu-latest'; shard = $shard })
         }
         if ($shard -in $windowsShards) {

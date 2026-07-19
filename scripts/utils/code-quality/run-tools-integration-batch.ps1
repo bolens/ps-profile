@@ -20,6 +20,10 @@
 .PARAMETER Quiet
     Pass -Quiet to run-pester.
 
+.PARAMETER NamePattern
+    Optional case-insensitive regex matched against each test file basename
+    (e.g. '^[0-9a-d]' for CI shard splits).
+
 .EXAMPLE
     pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1
 
@@ -33,7 +37,9 @@ param(
 
     [switch]$SingleSession,
 
-    [switch]$Quiet
+    [switch]$Quiet,
+
+    [string]$NamePattern = ''
 )
 
 $toolsRoot = Join-Path $RepoRoot 'tests' 'integration' 'tools'
@@ -52,8 +58,13 @@ if (-not (Test-Path -LiteralPath $testDir)) {
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
 $files = @(Get-ChildItem -Path $testDir -Filter '*.tests.ps1' -File -Recurse | Sort-Object FullName)
 
+if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
+    $files = @($files | Where-Object { $_.Name -match $NamePattern })
+}
+
 if ($files.Count -eq 0) {
-    Write-Error "No *.tests.ps1 files under: $testDir"
+    $hint = if ([string]::IsNullOrWhiteSpace($NamePattern)) { '' } else { " (NamePattern: $NamePattern)" }
+    Write-Error "No *.tests.ps1 files under: $testDir$hint"
     exit 2
 }
 

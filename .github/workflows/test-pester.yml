@@ -80,6 +80,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.any == 'true'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.changes.outputs.matrix) }}

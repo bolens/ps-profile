@@ -10,6 +10,10 @@
 .PARAMETER Filter
     Optional glob-style name filter (e.g. lang-go-).
 
+.PARAMETER PathPattern
+    Optional case-insensitive regex matched against each file path relative to
+    tests/performance/ using forward slashes (e.g. '^profile/[0-9a-m]').
+
 .PARAMETER RepoRoot
     Repository root directory.
 
@@ -21,11 +25,16 @@
 
 .EXAMPLE
     pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 -Filter lang-
+
+.EXAMPLE
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 -PathPattern '^profile/[n-z]'
 #>
 param(
     [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))),
 
     [string]$Filter = '',
+
+    [string]$PathPattern = '',
 
     [switch]$Quiet
 )
@@ -41,9 +50,22 @@ $files = @(Get-ChildItem -Path $perfRoot -Filter '*.tests.ps1' -File -Recurse | 
 if (-not [string]::IsNullOrWhiteSpace($Filter)) {
     $files = @($files | Where-Object { $_.Name -like "*$Filter*" })
 }
+if (-not [string]::IsNullOrWhiteSpace($PathPattern)) {
+    $files = @($files | Where-Object {
+            $rel = $_.FullName
+            if ($rel.StartsWith($perfRoot, [StringComparison]::OrdinalIgnoreCase)) {
+                $rel = $rel.Substring($perfRoot.Length).TrimStart('\', '/')
+            }
+            ($rel -replace '\\', '/') -match $PathPattern
+        })
+}
 
 if ($files.Count -eq 0) {
-    Write-Error "No performance test files matched under: $perfRoot (filter: '$Filter')"
+    $hint = @()
+    if (-not [string]::IsNullOrWhiteSpace($Filter)) { $hint += "Filter='$Filter'" }
+    if (-not [string]::IsNullOrWhiteSpace($PathPattern)) { $hint += "PathPattern='$PathPattern'" }
+    $suffix = if ($hint.Count -gt 0) { ' ({0})' -f ($hint -join ', ') } else { '' }
+    Write-Error "No performance test files matched under: $perfRoot$suffix"
     exit 2
 }
 
@@ -91,7 +113,15 @@ function New-PerformanceRunnerArgs {
     return $args
 }
 
-$label = if ([string]::IsNullOrWhiteSpace($Filter)) { 'performance' } else { "performance ($Filter*)" }
+$label = if (-not [string]::IsNullOrWhiteSpace($PathPattern)) {
+    "performance (PathPattern=$PathPattern)"
+}
+elseif (-not [string]::IsNullOrWhiteSpace($Filter)) {
+    "performance ($Filter*)"
+}
+else {
+    'performance'
+}
 Write-Host "Batch: $label ($($files.Count) files)" -ForegroundColor Cyan
 Write-Host 'Mode: per-file' -ForegroundColor DarkGray
 Write-Host ''

@@ -72,16 +72,6 @@ function Get-PesterCiShardDefinitions {
     'tests/integration/cloud-provider'
   )
 
-  $unitProfileCore = @(
-    'tests/unit/profile/lang'
-    'tests/unit/profile/files'
-    'tests/unit/profile/bootstrap'
-    'tests/unit/profile/main'
-    'tests/unit/profile/git'
-    'tests/unit/profile/utilities'
-    'tests/unit/profile/system'
-  )
-
   $unitProfileInfra = @(
     'tests/unit/profile/dev-tools'
     'tests/unit/profile/cloud'
@@ -139,22 +129,32 @@ function Get-PesterCiShardDefinitions {
     'unit-test-runner'           = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/test-runner') }
     'unit-support'               = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/test-support', 'tests/unit/validation') }
     'unit-profile-conversion'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/conversion') }
-    'unit-profile-core'          = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileCore; MaxParallelThreads = 1 }
+    'unit-profile-core-lang'     = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/lang'); MaxParallelThreads = 1 }
+    'unit-profile-core-files'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/files'); MaxParallelThreads = 1 }
+    'unit-profile-core-boot-main' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/bootstrap', 'tests/unit/profile/main'); MaxParallelThreads = 1 }
+    'unit-profile-core-git-util-sys' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/git', 'tests/unit/profile/utilities', 'tests/unit/profile/system'); MaxParallelThreads = 1 }
     'unit-profile-infra'         = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileInfra }
     'unit-profile-misc-a'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscA; MaxParallelThreads = 1 }
     'unit-profile-misc-b'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscB; MaxParallelThreads = 1 }
-    'integration-tools'          = @{ Kind = 'ToolsBatch' }
+    'integration-tools-a'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[0-9a-d]' }
+    'integration-tools-e'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[e-l]' }
+    'integration-tools-m'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[m-r]' }
+    'integration-tools-s'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[s-z]' }
     'integration-core'           = @{ Kind = 'Pester'; Suite = 'Integration'; Paths = $integrationCore }
-    'conversion-document'        = @{ Kind = 'ConversionBatch'; Paths = @('document') }
+    'conversion-document-markdown' = @{ Kind = 'ConversionBatch'; Paths = @('document'); NamePattern = '^markdown' }
+    'conversion-document-other'  = @{ Kind = 'ConversionBatch'; Paths = @('document'); NamePattern = '^(?!markdown)' }
     'conversion-media'           = @{ Kind = 'ConversionAllBatch'; Paths = $convMedia }
-    'conversion-data-structured' = @{ Kind = 'ConversionBatch'; Paths = @('data/structured') }
+    'conversion-data-structured-a' = @{ Kind = 'ConversionBatch'; Paths = @('data/structured'); NamePattern = '^[a-m]' }
+    'conversion-data-structured-b' = @{ Kind = 'ConversionBatch'; Paths = @('data/structured'); NamePattern = '^[n-z]' }
     'conversion-data-units'      = @{ Kind = 'ConversionBatch'; Paths = @('data/units') }
     'conversion-data-encoding'   = @{ Kind = 'ConversionBatch'; Paths = @('data/encoding') }
     'conversion-data-binary'     = @{ Kind = 'ConversionAllBatch'; Paths = @('data/binary', 'data/binary-to-text') }
     'conversion-data-compression'  = @{ Kind = 'ConversionBatch'; Paths = @('data/compression') }
     'conversion-data-scientific' = @{ Kind = 'ConversionBatch'; Paths = @('data/scientific') }
     'conversion-data-misc'       = @{ Kind = 'ConversionAllBatch'; Paths = $convDataMisc }
-    'performance'                = @{ Kind = 'PerformanceBatch' }
+    'performance-lang-core'      = @{ Kind = 'PerformanceBatch'; PathPattern = '^(lang|core|test-runner)/' }
+    'performance-profile-a'      = @{ Kind = 'PerformanceBatch'; PathPattern = '^profile/[0-9a-m]' }
+    'performance-profile-b'      = @{ Kind = 'PerformanceBatch'; PathPattern = '^profile/[n-z]' }
     'coverage-smoke'             = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/bootstrap', 'tests/unit/library'); Coverage = $true; MaxParallelThreads = 1 }
   }
 }
@@ -247,6 +247,14 @@ switch ($definition.Kind) {
   'ToolsBatch' {
     $args = @('-NoProfile', '-NonInteractive', '-File', $toolsBatch)
     if ($Quiet) { $args += '-Quiet' }
+    if ($definition.ContainsKey('NamePattern') -and -not [string]::IsNullOrWhiteSpace([string]$definition.NamePattern)) {
+      $args += '-NamePattern'
+      $args += [string]$definition.NamePattern
+    }
+    if ($definition.ContainsKey('RelativePath') -and -not [string]::IsNullOrWhiteSpace([string]$definition.RelativePath)) {
+      $args += '-RelativePath'
+      $args += [string]$definition.RelativePath
+    }
     Invoke-PesterCiShardRunner -RunnerArgs $args
   }
   'ConversionBatch' {
@@ -256,6 +264,10 @@ switch ($definition.Kind) {
       # still confused result aggregation on some hosts.
       $args = @('-NoProfile', '-NonInteractive', '-File', $conversionBatch, '-RelativePath', $rel)
       if ($Quiet) { $args += '-Quiet' }
+      if ($definition.ContainsKey('NamePattern') -and -not [string]::IsNullOrWhiteSpace([string]$definition.NamePattern)) {
+        $args += '-NamePattern'
+        $args += [string]$definition.NamePattern
+      }
       Invoke-PesterCiShardRunner -RunnerArgs $args
     }
   }
@@ -284,6 +296,14 @@ switch ($definition.Kind) {
   'PerformanceBatch' {
     $args = @('-NoProfile', '-NonInteractive', '-File', $performanceBatch)
     if ($Quiet) { $args += '-Quiet' }
+    if ($definition.ContainsKey('Filter') -and -not [string]::IsNullOrWhiteSpace([string]$definition.Filter)) {
+      $args += '-Filter'
+      $args += [string]$definition.Filter
+    }
+    if ($definition.ContainsKey('PathPattern') -and -not [string]::IsNullOrWhiteSpace([string]$definition.PathPattern)) {
+      $args += '-PathPattern'
+      $args += [string]$definition.PathPattern
+    }
     Invoke-PesterCiShardRunner -RunnerArgs $args
   }
   default {

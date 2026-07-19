@@ -24,6 +24,11 @@
 .PARAMETER Parallel
     Pass -Parallel to run-pester for parallel test execution within the session.
 
+.PARAMETER NamePattern
+    Optional case-insensitive regex matched against each test file basename
+    (e.g. '^[a-m]' for CI shard splits). When set, single-session mode runs
+    only the matching files (not the entire RelativePath directory).
+
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 -RelativePath data/structured
 
@@ -40,7 +45,9 @@ param(
     [switch]$Quiet,
 
     [ValidateRange(0, 100)]
-    [int]$Parallel = 0
+    [int]$Parallel = 0,
+
+    [string]$NamePattern = ''
 )
 
 $conversionRoot = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
@@ -53,8 +60,13 @@ if (-not (Test-Path -LiteralPath $testDir)) {
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
 $files = @(Get-ChildItem -Path $testDir -Filter '*.tests.ps1' -File -Recurse | Sort-Object FullName)
 
+if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
+    $files = @($files | Where-Object { $_.Name -match $NamePattern })
+}
+
 if ($files.Count -eq 0) {
-    Write-Error "No *.tests.ps1 files under: $testDir"
+    $hint = if ([string]::IsNullOrWhiteSpace($NamePattern)) { '' } else { " (NamePattern: $NamePattern)" }
+    Write-Error "No *.tests.ps1 files under: $testDir$hint"
     exit 2
 }
 
@@ -165,7 +177,8 @@ function Invoke-ConversionBatchRunner {
 
 function New-BatchRunnerArgs {
     param(
-        [string]$TargetPath,
+        [Parameter(Mandatory)]
+        [string[]]$TargetPath,
         [string]$ResultPath
     )
 
@@ -175,9 +188,11 @@ function New-BatchRunnerArgs {
         $runner
         '-Suite'
         'Integration'
-        '-Path'
-        $TargetPath
     )
+    foreach ($pathItem in $TargetPath) {
+        $args += '-Path'
+        $args += $pathItem
+    }
     if ($Quiet) {
         $args += '-Quiet'
     }
@@ -193,6 +208,9 @@ function New-BatchRunnerArgs {
 }
 
 $label = $RelativePath -replace '[/\\]', '/'
+if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
+    $label = "$label (NamePattern=$NamePattern)"
+}
 Write-Host "Batch: $label ($($files.Count) files)" -ForegroundColor Cyan
 
 if (-not $PerFile) {
@@ -201,11 +219,28 @@ if (-not $PerFile) {
 
     $resultDir = Join-Path $RepoRoot 'tests' 'test-artifacts' 'conversion-batch'
     $null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
-    $resultXml = Join-Path $resultDir ('test-results-{0}.xml' -f ($RelativePath -replace '[/\\]', '-'))
+    $resultKey = if ([string]::IsNullOrWhiteSpace($NamePattern)) {
+        ($RelativePath -replace '[/\\]', '-')
+    }
+    else {
+        # Stable artifact name for filtered shards
+        $safePattern = ($NamePattern -replace '[^A-Za-z0-9]+', '-').Trim('-')
+        '{0}-{1}' -f ($RelativePath -replace '[/\\]', '-'), $safePattern
+    }
+    $resultXml = Join-Path $resultDir ('test-results-{0}.xml' -f $resultKey)
     Remove-Item -LiteralPath $resultXml -Force -ErrorAction SilentlyContinue
 
+    # When NamePattern filters the set, pass matching files so the session
+    # does not re-discover the whole RelativePath directory.
+    $sessionTargets = if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
+        @($files | ForEach-Object { $_.FullName })
+    }
+    else {
+        @($testDir)
+    }
+
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultXml)
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $sessionTargets -ResultPath $resultXml)
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultXml
