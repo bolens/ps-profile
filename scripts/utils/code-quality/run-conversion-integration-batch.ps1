@@ -26,8 +26,8 @@
 
 .PARAMETER NamePattern
     Optional case-insensitive regex matched against each test file basename
-    (e.g. '^[a-m]' for CI shard splits). When set, single-session mode runs
-    only the matching files (not the entire RelativePath directory).
+    (e.g. '^[a-m]' for CI shard splits). When set, matching files are staged
+    into a temp directory so single-session mode still uses one directory -Path.
 
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 -RelativePath data/structured
@@ -178,7 +178,7 @@ function Invoke-ConversionBatchRunner {
 function New-BatchRunnerArgs {
     param(
         [Parameter(Mandatory)]
-        [string[]]$TargetPath,
+        [string]$TargetPath,
         [string]$ResultPath
     )
 
@@ -188,11 +188,9 @@ function New-BatchRunnerArgs {
         $runner
         '-Suite'
         'Integration'
+        '-Path'
+        $TargetPath
     )
-    foreach ($pathItem in $TargetPath) {
-        $args += '-Path'
-        $args += $pathItem
-    }
     if ($Quiet) {
         $args += '-Quiet'
     }
@@ -205,6 +203,34 @@ function New-BatchRunnerArgs {
         $args += $ResultPath
     }
     return $args
+}
+
+function New-NamePatternStagingDirectory {
+    <#
+    .SYNOPSIS
+        Copies NamePattern-matched test files into a staging directory for single-session runs.
+
+    .DESCRIPTION
+        run-pester accepts a directory -Path cleanly, but cannot take repeated -Path file
+        flags (and comma-joined paths do not bind as [string[]] via arg arrays). Staging
+        preserves single-session semantics while restricting the file set.
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [System.IO.FileInfo[]]$Files,
+
+        [Parameter(Mandatory)]
+        [string]$StagingRoot
+    )
+
+    if (Test-Path -LiteralPath $StagingRoot) {
+        Remove-Item -LiteralPath $StagingRoot -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+    $null = New-Item -ItemType Directory -Path $StagingRoot -Force
+    foreach ($file in $Files) {
+        Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $StagingRoot $file.Name) -Force
+    }
+    return $StagingRoot
 }
 
 $label = $RelativePath -replace '[/\\]', '/'
@@ -227,24 +253,35 @@ if (-not $PerFile) {
         $safePattern = ($NamePattern -replace '[^A-Za-z0-9]+', '-').Trim('-')
         '{0}-{1}' -f ($RelativePath -replace '[/\\]', '-'), $safePattern
     }
-    $resultXml = Join-Path $resultDir ('test-results-{0}.xml' -f $resultKey)
-    Remove-Item -LiteralPath $resultXml -Force -ErrorAction SilentlyContinue
+    # run-pester -TestResultPath expects a directory (not a .xml file path).
+    $resultPath = Join-Path $resultDir $resultKey
+    if (Test-Path -LiteralPath $resultPath) {
+        Remove-Item -LiteralPath $resultPath -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+    $null = New-Item -ItemType Directory -Path $resultPath -Force -ErrorAction SilentlyContinue
+    $resultXml = Join-Path $resultPath 'test-results.xml'
 
-    # When NamePattern filters the set, pass matching files so the session
-    # does not re-discover the whole RelativePath directory.
-    $sessionTargets = if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
-        @($files | ForEach-Object { $_.FullName })
+    # When NamePattern filters the set, stage matching files into a temp directory
+    # so run-pester still receives a single directory -Path (multi-file -Path
+    # bindings are unsupported through the child pwsh arg array).
+    $sessionTarget = if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
+        $stagingRoot = Join-Path $resultDir ('staged-{0}' -f $resultKey)
+        New-NamePatternStagingDirectory -Files $files -StagingRoot $stagingRoot
     }
     else {
-        @($testDir)
+        $testDir
     }
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $sessionTargets -ResultPath $resultXml)
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $sessionTarget -ResultPath $resultPath)
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultXml
-    $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $resultXml)
+    if ($stats.Failed -lt 0) {
+        # Prefer the runner's default XML name when present under the result directory.
+        $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultPath
+    }
+    $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $resultPath)
     # Prefer parsed Pester counts when available; child exit codes can be non-zero
     # from non-terminating warnings even when FailedCount is 0.
     $batchFailed = if ($stats.Failed -ge 0) {
@@ -258,6 +295,11 @@ if (-not $PerFile) {
     Write-Host "  $($stats.Passed)P / $($stats.Failed)F / $($stats.Skipped)S in $([math]::Round($sw.Elapsed.TotalSeconds, 1))s" -ForegroundColor $color
     if ($failLines.Count -gt 0) {
         $failLines | Select-Object -First 5 | ForEach-Object { Write-Host "    $_" -ForegroundColor DarkRed }
+    }
+    elseif ($batchFailed -and $stats.Failed -lt 0 -and -not [string]::IsNullOrWhiteSpace($run.Output)) {
+        # Runner crashed / misconfigured before emitting Pester counts — surface the reason.
+        ($run.Output -split "`n" | Where-Object { $_ -match '\S' } | Select-Object -Last 12) |
+            ForEach-Object { Write-Host "    $_" -ForegroundColor DarkRed }
     }
 
     Write-Host ''

@@ -132,4 +132,69 @@ exit 1
             $result.Output | Should -Match 'Batch: failing-batch'
             $result.Output | Should -Match '0P / 1F / 0S|failed'
     }
+
+    It 'Filters by NamePattern and passes matching files via a single -Path binding' {
+        $tempRoot = New-TestTempDirectory -Prefix 'conversion-batch-namepattern'
+        $conversionDir = Join-Path $tempRoot 'tests' 'integration' 'conversion' 'np-batch'
+        $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
+        $null = New-Item -ItemType Directory -Path $conversionDir -Force
+        $null = New-Item -ItemType Directory -Path $runnerDir -Force
+        $null = New-Item -ItemType File -Path (Join-Path $conversionDir 'alpha.tests.ps1') -Force
+        $null = New-Item -ItemType File -Path (Join-Path $conversionDir 'beta.tests.ps1') -Force
+        $null = New-Item -ItemType File -Path (Join-Path $conversionDir 'zeta.tests.ps1') -Force
+
+        $stubRunner = @'
+param(
+    [Alias('Path')]
+    [string[]]$TestFile
+)
+$path = @($TestFile)[0]
+if (-not $path -or -not (Test-Path -LiteralPath $path -PathType Container)) {
+    Write-Error "expected staged directory -Path, got: $path"
+    exit 2
+}
+$names = @(Get-ChildItem -LiteralPath $path -Filter '*.tests.ps1' -File | Select-Object -ExpandProperty Name)
+if ($names -contains 'zeta.tests.ps1') { Write-Error 'NamePattern leaked non-matching file'; exit 2 }
+if ($names -notcontains 'alpha.tests.ps1' -or $names -notcontains 'beta.tests.ps1') {
+    Write-Error "expected alpha+beta, got: $($names -join ',')"
+    exit 2
+}
+Write-Host 'Tests Passed: 2, Failed: 0, Skipped: 0'
+exit 0
+'@
+        Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
+
+        $result = Invoke-TestScriptFile -ScriptPath $script:RunConversionBatchScript -ArgumentList @(
+            '-RepoRoot', $tempRoot,
+            '-RelativePath', 'np-batch',
+            '-NamePattern', '^[a-m]',
+            '-Quiet'
+        )
+
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'NamePattern=\^\[a-m\]'
+        $result.Output | Should -Match '\(2 files\)'
+        $result.Output | Should -Match '2P / 0F / 0S'
+        $result.Output | Should -Match 'All tests passed in batch'
+    }
+
+    It 'Fails when NamePattern matches no files' {
+        $tempRoot = New-TestTempDirectory -Prefix 'conversion-batch-np-empty'
+        $conversionDir = Join-Path $tempRoot 'tests' 'integration' 'conversion' 'np-empty'
+        $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
+        $null = New-Item -ItemType Directory -Path $conversionDir -Force
+        $null = New-Item -ItemType Directory -Path $runnerDir -Force
+        $null = New-Item -ItemType File -Path (Join-Path $conversionDir 'zeta.tests.ps1') -Force
+        Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value 'param(); exit 0' -Encoding UTF8
+
+        $result = Invoke-TestScriptFile -ScriptPath $script:RunConversionBatchScript -ArgumentList @(
+            '-RepoRoot', $tempRoot,
+            '-RelativePath', 'np-empty',
+            '-NamePattern', '^[a-m]'
+        )
+
+        $result.ExitCode | Should -Be 2
+        $result.Output | Should -Match 'No \*\.tests\.ps1 files'
+        $result.Output | Should -Match 'NamePattern'
+    }
 }

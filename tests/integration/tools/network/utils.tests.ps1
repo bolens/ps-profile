@@ -97,8 +97,9 @@ Describe 'Network Utils Module' {
         }
 
         It 'returns false for failed connectivity test' {
-            # Test with invalid host that will fail
-            $result = Test-NetworkConnectivity -Target "invalid.host.invalid" -Port 80 -TimeoutSeconds 1 -ErrorAction SilentlyContinue
+            # Prefer a closed local port over a fake DNS name — some CI DNS
+            # resolvers hijack NXDOMAIN and can yield a false-positive connect.
+            $result = Test-NetworkConnectivity -Target '127.0.0.1' -Port 65535 -TimeoutSeconds 1 -ErrorAction SilentlyContinue
             $result | Should -Be $false
         }
 
@@ -147,7 +148,7 @@ Describe 'Network Utils Module' {
 
             $result = Resolve-HostWithRetry -HostName 'example.com'
             $result | Should -Not -BeNullOrEmpty
-            $result.HostName | Should -Be 'example.com'
+            $result.HostName | Should -Match '(?i)^example\.com\.?$'
         }
 
         It 'handles DNS resolution failure' {
@@ -157,6 +158,13 @@ Describe 'Network Utils Module' {
 
             $result = Resolve-HostWithRetry -HostName 'nonexistent.domain' -TimeoutSeconds 1
             $result | Should -Be $null
+        }
+    }
+
+    AfterEach {
+        # Resolve-HostWithRetry stubs Invoke-WithRetry; clear so later files stay isolated.
+        if (Get-Command Clear-CommandTestStubs -ErrorAction SilentlyContinue) {
+            Clear-CommandTestStubs
         }
     }
 }
