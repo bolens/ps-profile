@@ -85,15 +85,20 @@ function Invoke-WithRetry {
 
         $powershell = $null
         $runspacePool = $null
+        # Initialize before try so StrictMode never sees an unset read if BeginInvoke fails mid-setup.
+        $timeoutMs = [Math]::Max(0, $TimeoutSeconds) * 1000
+        $pollIntervalMs = 50
+        $elapsedMs = 0
+        $completed = $false
 
         try {
             # Use runspace for timeout operation (much faster than job)
             $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1)
             $runspacePool.Open()
-            
+
             $powershell = [PowerShell]::Create()
             $powershell.RunspacePool = $runspacePool
-            
+
             # Wrap the scriptblock to accept arguments
             $wrapperScript = {
                 param($ScriptBlock, $ArgumentList)
@@ -104,18 +109,13 @@ function Invoke-WithRetry {
                     & $ScriptBlock
                 }
             }
-            
+
             $null = $powershell.AddScript($wrapperScript)
             $null = $powershell.AddArgument($ScriptBlock)
             $null = $powershell.AddArgument($ArgumentList)
             $handle = $powershell.BeginInvoke()
 
             # Wait for completion or timeout using polling (STA-compatible)
-            $timeoutMs = $TimeoutSeconds * 1000
-            $pollIntervalMs = 50
-            $elapsedMs = 0
-            $completed = $false
-
             while ($elapsedMs -lt $timeoutMs) {
                 if ($handle.IsCompleted) {
                     $completed = $true
@@ -134,7 +134,7 @@ function Invoke-WithRetry {
                 throw "Operation timed out after $TimeoutSeconds seconds"
             }
 
-            # Get the result
+            # Get the result (EndInvoke returns Collection[PSObject]; unwrap single values)
             $result = $powershell.EndInvoke($handle)
             $powershell.Dispose()
             $runspacePool.Close()
@@ -142,6 +142,9 @@ function Invoke-WithRetry {
             $powershell = $null
             $runspacePool = $null
 
+            if ($null -ne $result -and $result -is [System.Collections.IList] -and $result.Count -eq 1) {
+                return $result[0]
+            }
             return $result
 
         }

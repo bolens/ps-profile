@@ -197,6 +197,11 @@ foreach ($file in $files) {
 
     $color = if ($stats.Failed -gt 0) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
     Write-Host "  $($stats.Passed)P / $($stats.Failed)F / $($stats.Skipped)S" -ForegroundColor $color
+    if ($stats.Failed -gt 0) {
+        [regex]::Matches($run.Output, '(?m)^\s+\[-\].*') | Select-Object -First 5 | ForEach-Object {
+            Write-Host "    $($_.Value.Trim())" -ForegroundColor DarkRed
+        }
+    }
 }
 
 Write-Host ''

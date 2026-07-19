@@ -113,17 +113,13 @@ Describe 'Network Utils Module' {
 
     Context 'Invoke-HttpRequestWithRetry' {
         It 'function exists and can be called' {
-            Get-Command Invoke-HttpRequestWithRetry -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Function uses System.Net.WebRequest directly, so we test that it handles errors gracefully
-            # Test with invalid URL that will fail quickly
-            $result = Invoke-HttpRequestWithRetry -Uri "http://invalid.url.invalid" -Method "GET" -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue
-            # Result should be false (request failed) but function should not throw
-            { Invoke-HttpRequestWithRetry -Uri "http://invalid.url.invalid" -Method "GET" -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue } | Should -Not -Throw
+            Get-Command Invoke-HttpRequestWithRetry -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            # Closed local port — avoid fake DNS names that CI resolvers may hijack.
+            { Invoke-HttpRequestWithRetry -Uri 'http://127.0.0.1:1/' -Method 'GET' -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
 
         It 'handles HTTP request failure gracefully' {
-            # Test with invalid URL that will fail
-            $result = Invoke-HttpRequestWithRetry -Uri "http://invalid.url.invalid" -Method "GET" -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue
+            $result = Invoke-HttpRequestWithRetry -Uri 'http://127.0.0.1:1/' -Method 'GET' -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue
             # Failure may surface as $false or $null depending on retry/timeout behavior
             @($false, $null) | Should -Contain $result
         }
@@ -148,7 +144,7 @@ Describe 'Network Utils Module' {
 
             $result = Resolve-HostWithRetry -HostName 'example.com'
             $result | Should -Not -BeNullOrEmpty
-            $result.HostName | Should -Match '(?i)^example\.com\.?$'
+            @($result)[0].HostName | Should -Match '(?i)^example\.com\.?$'
         }
 
         It 'handles DNS resolution failure' {
@@ -162,9 +158,9 @@ Describe 'Network Utils Module' {
     }
 
     AfterEach {
-        # Resolve-HostWithRetry stubs Invoke-WithRetry; clear so later files stay isolated.
-        if (Get-Command Clear-CommandTestStubs -ErrorAction SilentlyContinue) {
-            Clear-CommandTestStubs
+        # Resolve-HostWithRetry stubs Invoke-WithRetry; restore the real implementation.
+        if (Get-Command Restore-TestProfileFunctionStubs -ErrorAction SilentlyContinue) {
+            Restore-TestProfileFunctionStubs
         }
     }
 }

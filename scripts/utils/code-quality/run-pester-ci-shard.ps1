@@ -133,7 +133,7 @@ function Get-PesterCiShardDefinitions {
     'unit-profile-core-files'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/files'); MaxParallelThreads = 1 }
     'unit-profile-core-boot-main' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/bootstrap', 'tests/unit/profile/main'); MaxParallelThreads = 1 }
     'unit-profile-core-git-util-sys' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/git', 'tests/unit/profile/utilities', 'tests/unit/profile/system'); MaxParallelThreads = 1 }
-    'unit-profile-infra'         = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileInfra }
+    'unit-profile-infra'         = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileInfra; MaxParallelThreads = 1 }
     'unit-profile-misc-a'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscA; MaxParallelThreads = 1 }
     'unit-profile-misc-b'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscB; MaxParallelThreads = 1 }
     'integration-tools-a'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[0-9a-d]' }
