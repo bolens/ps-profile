@@ -12,10 +12,12 @@ Describe 'PesterCiShardFilter' {
 
     It 'Maps conversion module changes to conversion shards' {
         $shards = Resolve-PesterCiShards -ChangedFiles @('profile.d/conversion-modules/data/core/csv.ps1')
-        $shards | Should -Contain 'conversion-document-markdown'
+        $shards | Should -Contain 'conversion-document-markdown-core'
+        $shards | Should -Contain 'conversion-document-markdown-extra'
         $shards | Should -Contain 'conversion-document-other'
         $shards | Should -Contain 'conversion-data-structured-a'
-        $shards | Should -Contain 'conversion-data-structured-b'
+        $shards | Should -Contain 'conversion-data-structured-n'
+        $shards | Should -Contain 'conversion-data-structured-t'
         $shards | Should -Contain 'conversion-media'
         $shards | Should -Contain 'unit-profile-conversion'
         $shards | Should -Not -Contain 'unit-library'
@@ -36,11 +38,16 @@ Describe 'PesterCiShardFilter' {
 
     It 'Maps tools integration changes to all tools letter shards' {
         $shards = Resolve-PesterCiShards -ChangedFiles @('tests/integration/tools/git.tests.ps1')
-        $shards | Should -Contain 'integration-tools-a'
-        $shards | Should -Contain 'integration-tools-e'
+        $shards | Should -Contain 'integration-tools-ab'
+        $shards | Should -Contain 'integration-tools-c'
+        $shards | Should -Contain 'integration-tools-d'
+        $shards | Should -Contain 'integration-tools-eh'
+        $shards | Should -Contain 'integration-tools-il'
         $shards | Should -Contain 'integration-tools-m'
         $shards | Should -Contain 'integration-tools-s'
         $shards | Should -Not -Contain 'integration-tools'
+        $shards | Should -Not -Contain 'integration-tools-a'
+        $shards | Should -Not -Contain 'integration-tools-e'
     }
 
     It 'Enables full suite for CI contract changes' {
@@ -66,9 +73,19 @@ Describe 'PesterCiShardFilter' {
     It 'Does not expose retired fat shard names in the full set' {
         $all = Get-PesterCiAllShards
         $all | Should -Not -Contain 'integration-tools'
+        $all | Should -Not -Contain 'integration-tools-a'
+        $all | Should -Not -Contain 'integration-tools-e'
         $all | Should -Not -Contain 'unit-profile-core'
+        $all | Should -Not -Contain 'unit-profile-core-boot-main'
         $all | Should -Not -Contain 'conversion-document'
+        $all | Should -Not -Contain 'conversion-document-markdown'
         $all | Should -Not -Contain 'conversion-data-structured'
+        $all | Should -Not -Contain 'conversion-data-structured-b'
         $all | Should -Not -Contain 'performance'
+        $all | Should -Contain 'unit-profile-core-bootstrap'
+        $all | Should -Contain 'unit-profile-core-main'
+        $all | Should -Contain 'integration-tools-eh'
+        $all | Should -Contain 'conversion-document-markdown-core'
+        $all | Should -Contain 'conversion-data-structured-n'
     }
 }

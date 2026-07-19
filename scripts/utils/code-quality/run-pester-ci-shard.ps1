@@ -131,21 +131,32 @@ function Get-PesterCiShardDefinitions {
     'unit-profile-conversion'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/conversion') }
     'unit-profile-core-lang'     = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/lang'); MaxParallelThreads = 1 }
     'unit-profile-core-files'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/files'); MaxParallelThreads = 1 }
-    'unit-profile-core-boot-main' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/bootstrap', 'tests/unit/profile/main'); MaxParallelThreads = 1 }
+    # bootstrap/main stay serial (shared globals) but are separate jobs so neither
+    # alone approaches the 90m job timeout (~20–40 files each).
+    'unit-profile-core-bootstrap' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/bootstrap'); MaxParallelThreads = 1 }
+    'unit-profile-core-main'     = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/main'); MaxParallelThreads = 1 }
     'unit-profile-core-git-util-sys' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/git', 'tests/unit/profile/utilities', 'tests/unit/profile/system'); MaxParallelThreads = 1 }
     'unit-profile-infra'         = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileInfra; MaxParallelThreads = 1 }
     'unit-profile-misc-a'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscA; MaxParallelThreads = 1 }
     'unit-profile-misc-b'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscB; MaxParallelThreads = 1 }
-    'integration-tools-a'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[0-9a-d]' }
-    'integration-tools-e'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[e-l]' }
+    # tools-a (28 PerFile jobs) timed out at 90m; keep letter buckets ~8–12 files.
+    'integration-tools-ab'       = @{ Kind = 'ToolsBatch'; NamePattern = '^[0-9a-b]' }
+    'integration-tools-c'        = @{ Kind = 'ToolsBatch'; NamePattern = '^c' }
+    'integration-tools-d'        = @{ Kind = 'ToolsBatch'; NamePattern = '^d' }
+    # tools-e (e-l) was ~24 PerFile jobs — near the size that timed out at 90m.
+    'integration-tools-eh'       = @{ Kind = 'ToolsBatch'; NamePattern = '^[e-h]' }
+    'integration-tools-il'       = @{ Kind = 'ToolsBatch'; NamePattern = '^[i-l]' }
     'integration-tools-m'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[m-r]' }
     'integration-tools-s'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[s-z]' }
     'integration-core'           = @{ Kind = 'Pester'; Suite = 'Integration'; Paths = $integrationCore }
-    'conversion-document-markdown' = @{ Kind = 'ConversionBatch'; Paths = @('document'); NamePattern = '^markdown' }
+    # markdown shard is only 3 files but each is heavy under PerFile; split core vs extras.
+    'conversion-document-markdown-core' = @{ Kind = 'ConversionBatch'; Paths = @('document'); NamePattern = '^markdown\.tests' }
+    'conversion-document-markdown-extra' = @{ Kind = 'ConversionBatch'; Paths = @('document'); NamePattern = '^markdown-' }
     'conversion-document-other'  = @{ Kind = 'ConversionBatch'; Paths = @('document'); NamePattern = '^(?!markdown)' }
     'conversion-media'           = @{ Kind = 'ConversionAllBatch'; Paths = $convMedia }
     'conversion-data-structured-a' = @{ Kind = 'ConversionBatch'; Paths = @('data/structured'); NamePattern = '^[a-m]' }
-    'conversion-data-structured-b' = @{ Kind = 'ConversionBatch'; Paths = @('data/structured'); NamePattern = '^[n-z]' }
+    'conversion-data-structured-n' = @{ Kind = 'ConversionBatch'; Paths = @('data/structured'); NamePattern = '^[n-s]' }
+    'conversion-data-structured-t' = @{ Kind = 'ConversionBatch'; Paths = @('data/structured'); NamePattern = '^[t-z]' }
     'conversion-data-units'      = @{ Kind = 'ConversionBatch'; Paths = @('data/units') }
     'conversion-data-encoding'   = @{ Kind = 'ConversionBatch'; Paths = @('data/encoding') }
     'conversion-data-binary'     = @{ Kind = 'ConversionAllBatch'; Paths = @('data/binary', 'data/binary-to-text') }

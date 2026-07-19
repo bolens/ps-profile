@@ -18,12 +18,16 @@ function Get-PesterCiFilterRules {
     $unitProfileCoreShards = @(
         'unit-profile-core-lang'
         'unit-profile-core-files'
-        'unit-profile-core-boot-main'
+        'unit-profile-core-bootstrap'
+        'unit-profile-core-main'
         'unit-profile-core-git-util-sys'
     )
     $integrationToolsShards = @(
-        'integration-tools-a'
-        'integration-tools-e'
+        'integration-tools-ab'
+        'integration-tools-c'
+        'integration-tools-d'
+        'integration-tools-eh'
+        'integration-tools-il'
         'integration-tools-m'
         'integration-tools-s'
     )
@@ -33,12 +37,14 @@ function Get-PesterCiFilterRules {
         'performance-profile-b'
     )
     $conversionDocumentShards = @(
-        'conversion-document-markdown'
+        'conversion-document-markdown-core'
+        'conversion-document-markdown-extra'
         'conversion-document-other'
     )
     $conversionStructuredShards = @(
         'conversion-data-structured-a'
-        'conversion-data-structured-b'
+        'conversion-data-structured-n'
+        'conversion-data-structured-t'
     )
 
     return [ordered]@{
@@ -219,13 +225,15 @@ function Get-PesterCiAllShards {
         'unit-library', 'unit-utility', 'unit-test-runner', 'unit-support'
         'unit-profile-conversion'
         'unit-profile-core-lang', 'unit-profile-core-files'
-        'unit-profile-core-boot-main', 'unit-profile-core-git-util-sys'
+        'unit-profile-core-bootstrap', 'unit-profile-core-main', 'unit-profile-core-git-util-sys'
         'unit-profile-infra'
         'unit-profile-misc-a', 'unit-profile-misc-b'
-        'integration-tools-a', 'integration-tools-e', 'integration-tools-m', 'integration-tools-s'
+        'integration-tools-ab', 'integration-tools-c', 'integration-tools-d'
+        'integration-tools-eh', 'integration-tools-il', 'integration-tools-m', 'integration-tools-s'
         'integration-core'
-        'conversion-document-markdown', 'conversion-document-other', 'conversion-media'
-        'conversion-data-structured-a', 'conversion-data-structured-b'
+        'conversion-document-markdown-core', 'conversion-document-markdown-extra'
+        'conversion-document-other', 'conversion-media'
+        'conversion-data-structured-a', 'conversion-data-structured-n', 'conversion-data-structured-t'
         'conversion-data-units', 'conversion-data-encoding'
         'conversion-data-binary', 'conversion-data-compression', 'conversion-data-scientific'
         'conversion-data-misc'
@@ -242,8 +250,9 @@ function Get-PesterCiWindowsShards {
     return @(
         'unit-library'
         'unit-profile-core-lang', 'unit-profile-core-files'
-        'unit-profile-core-boot-main', 'unit-profile-core-git-util-sys'
-        'integration-tools-a', 'integration-tools-e', 'integration-tools-m', 'integration-tools-s'
+        'unit-profile-core-bootstrap', 'unit-profile-core-main', 'unit-profile-core-git-util-sys'
+        'integration-tools-ab', 'integration-tools-c', 'integration-tools-d'
+        'integration-tools-eh', 'integration-tools-il', 'integration-tools-m', 'integration-tools-s'
         'integration-core'
         'performance-lang-core', 'performance-profile-a', 'performance-profile-b'
     )
