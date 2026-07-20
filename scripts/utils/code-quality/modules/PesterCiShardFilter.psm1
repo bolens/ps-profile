@@ -54,6 +54,8 @@ function Get-PesterCiFilterRules {
         ci_contract = @{
             Patterns = @(
                 '.github/workflows/test-pester.yml'
+                '.github/actions/setup-arch-linux/**'
+                '.devcontainer/install-pwsh-linux.sh'
                 'PSScriptAnalyzerSettings.psd1'
                 'scripts/utils/code-quality/run-pester.ps1'
                 'scripts/utils/code-quality/run-pester-ci-shard.ps1'
@@ -263,6 +265,27 @@ function Get-PesterCiWindowsShards {
     )
 }
 
+function Get-PesterCiArchShards {
+    <#
+    .SYNOPSIS
+        Shards also run on Arch Linux (via archlinux container on ubuntu-latest).
+
+    .DESCRIPTION
+        Curated subset for Arch coverage without doubling the full Ubuntu suite.
+        Prefer core library/profile smoke plus one integration shard.
+    #>
+    [CmdletBinding()]
+    [OutputType([string[]])]
+    param()
+
+    return @(
+        'unit-library'
+        'unit-profile-core-bootstrap'
+        'integration-core'
+        'coverage-smoke'
+    )
+}
+
 function Test-PesterCiPathMatch {
     <#
     .SYNOPSIS
@@ -402,15 +425,34 @@ function Get-PesterCiShardMatrix {
     )
 
     $windowsShards = @(Get-PesterCiWindowsShards)
+    $archShards = @(Get-PesterCiArchShards)
     $include = [System.Collections.Generic.List[object]]::new()
 
     foreach ($shard in ($Shards | Sort-Object -Unique)) {
         # Performance shards are Windows-only (historically flaky / slow on Ubuntu).
         if ($shard -notlike 'performance*') {
-            $include.Add([pscustomobject]@{ os = 'ubuntu-latest'; shard = $shard })
+            $include.Add([pscustomobject]@{
+                    label     = 'ubuntu-latest'
+                    os        = 'ubuntu-latest'
+                    container = $null
+                    shard     = $shard
+                })
         }
         if ($shard -in $windowsShards) {
-            $include.Add([pscustomobject]@{ os = 'windows-latest'; shard = $shard })
+            $include.Add([pscustomobject]@{
+                    label     = 'windows-latest'
+                    os        = 'windows-latest'
+                    container = $null
+                    shard     = $shard
+                })
+        }
+        if ($shard -in $archShards) {
+            $include.Add([pscustomobject]@{
+                    label     = 'arch-latest'
+                    os        = 'ubuntu-latest'
+                    container = 'archlinux:latest'
+                    shard     = $shard
+                })
         }
     }
 
@@ -421,6 +463,7 @@ Export-ModuleMember -Function @(
     'Get-PesterCiFilterRules'
     'Get-PesterCiAllShards'
     'Get-PesterCiWindowsShards'
+    'Get-PesterCiArchShards'
     'Test-PesterCiPathMatch'
     'Resolve-PesterCiShards'
     'Get-PesterCiShardMatrix'

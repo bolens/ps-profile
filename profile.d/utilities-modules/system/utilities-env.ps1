@@ -303,7 +303,9 @@ function Remove-Path {
         Set-EnvVar -Name 'PATH' -Value $newPath -Global
     }
     else {
-        $env:PATH = $newPath
+        # Prefer empty string over $null so consumers comparing to '' stay consistent;
+        # on Unix, assigning '' may still clear the process env entry.
+        $env:PATH = if ($null -eq $newPath) { '' } else { $newPath }
     }
 }
 

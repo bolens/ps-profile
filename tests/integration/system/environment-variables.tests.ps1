@@ -95,7 +95,8 @@ Describe 'Environment Variables Integration Tests' {
             $originalPath = $env:PATH
                         $env:PATH = 'C:\SinglePath'
             Remove-Path -Path 'C:\SinglePath'
-            $env:PATH | Should -Be ''
+            # Unix PowerShell clears the variable when assigned ''; Windows keeps ''.
+            ($null -eq $env:PATH -or $env:PATH -eq '') | Should -Be $true
             }
             finally {
                 $env:PATH = $originalPath

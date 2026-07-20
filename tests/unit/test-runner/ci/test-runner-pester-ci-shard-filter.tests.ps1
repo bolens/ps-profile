@@ -55,19 +55,33 @@ Describe 'PesterCiShardFilter' {
         $shards.Count | Should -Be (Get-PesterCiAllShards).Count
     }
 
-    It 'Builds Ubuntu-first matrix with Windows includes and Windows-only performance' {
+    It 'Builds Ubuntu-first matrix with Windows/Arch includes and Windows-only performance' {
         $matrix = Get-PesterCiShardMatrix -Shards @(
             'unit-library'
             'conversion-media'
             'performance-lang-core'
             'performance-profile-a'
+            'coverage-smoke'
         )
-        $matrix | Where-Object { $_.os -eq 'ubuntu-latest' -and $_.shard -eq 'unit-library' } | Should -Not -BeNullOrEmpty
-        $matrix | Where-Object { $_.os -eq 'windows-latest' -and $_.shard -eq 'unit-library' } | Should -Not -BeNullOrEmpty
-        $matrix | Where-Object { $_.os -eq 'ubuntu-latest' -and $_.shard -like 'performance*' } | Should -BeNullOrEmpty
-        $matrix | Where-Object { $_.os -eq 'windows-latest' -and $_.shard -eq 'performance-lang-core' } | Should -Not -BeNullOrEmpty
-        $matrix | Where-Object { $_.os -eq 'windows-latest' -and $_.shard -eq 'performance-profile-a' } | Should -Not -BeNullOrEmpty
-        $matrix | Where-Object { $_.os -eq 'windows-latest' -and $_.shard -eq 'conversion-media' } | Should -BeNullOrEmpty
+        $matrix | Where-Object { $_.label -eq 'ubuntu-latest' -and $_.shard -eq 'unit-library' } | Should -Not -BeNullOrEmpty
+        $matrix | Where-Object { $_.label -eq 'windows-latest' -and $_.shard -eq 'unit-library' } | Should -Not -BeNullOrEmpty
+        $matrix | Where-Object { $_.label -eq 'arch-latest' -and $_.shard -eq 'unit-library' } | Should -Not -BeNullOrEmpty
+        $archUnit = $matrix | Where-Object { $_.label -eq 'arch-latest' -and $_.shard -eq 'unit-library' } | Select-Object -First 1
+        $archUnit.container | Should -Be 'archlinux:latest'
+        $archUnit.os | Should -Be 'ubuntu-latest'
+        $matrix | Where-Object { $_.label -eq 'ubuntu-latest' -and $_.shard -like 'performance*' } | Should -BeNullOrEmpty
+        $matrix | Where-Object { $_.label -eq 'windows-latest' -and $_.shard -eq 'performance-lang-core' } | Should -Not -BeNullOrEmpty
+        $matrix | Where-Object { $_.label -eq 'windows-latest' -and $_.shard -eq 'performance-profile-a' } | Should -Not -BeNullOrEmpty
+        $matrix | Where-Object { $_.label -eq 'windows-latest' -and $_.shard -eq 'conversion-media' } | Should -BeNullOrEmpty
+        $matrix | Where-Object { $_.label -eq 'arch-latest' -and $_.shard -eq 'conversion-media' } | Should -BeNullOrEmpty
+        $matrix | Where-Object { $_.label -eq 'arch-latest' -and $_.shard -eq 'coverage-smoke' } | Should -Not -BeNullOrEmpty
+    }
+
+    It 'Exposes a curated Arch shard set' {
+        $arch = Get-PesterCiArchShards
+        $arch | Should -Contain 'unit-library'
+        $arch | Should -Contain 'coverage-smoke'
+        $arch | Should -Not -Contain 'conversion-media'
     }
 
     It 'Does not expose retired fat shard names in the full set' {
