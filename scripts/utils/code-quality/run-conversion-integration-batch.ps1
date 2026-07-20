@@ -170,15 +170,61 @@ function Get-PesterFailureLines {
 
 function Invoke-ConversionBatchRunner {
     param(
-        [string[]]$RunnerArgs
+        [string[]]$RunnerArgs,
+
+        [int]$TimeoutSeconds = 0
     )
 
     # Child pwsh process keeps run-pester isolated (in-process runs fail en masse).
-    $output = & pwsh @RunnerArgs 2>&1 | Out-String
-    $exitCode = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 }
+    # Do not pass -Timeout to run-pester: Invoke-PesterWithTimeout uses a runspace
+    # that breaks integration TestSupport/TestDrive setup (0P / all F).
+    if ($TimeoutSeconds -le 0) {
+        $output = & pwsh @RunnerArgs 2>&1 | Out-String
+        $exitCode = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 }
+        return [pscustomobject]@{
+            Output   = $output
+            ExitCode = $exitCode
+            TimedOut = $false
+        }
+    }
+
+    $pwshExe = (Get-Command pwsh -ErrorAction Stop).Source
+    $argString = ($RunnerArgs | ForEach-Object {
+            if ($_ -match '[\s"]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
+        }) -join ' '
+
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = $pwshExe
+    $psi.Arguments = $argString
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+
+    $process = [System.Diagnostics.Process]::Start($psi)
+    $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+    if ($timedOut) {
+        try { $process.Kill($true) } catch { }
+        $stdout = $process.StandardOutput.ReadToEnd()
+        $stderr = $process.StandardError.ReadToEnd()
+        $output = $stdout + $stderr
+        if ($output -notmatch 'Timed out after') {
+            $output += "`nTimed out after ${TimeoutSeconds}s`n"
+        }
+        return [pscustomobject]@{
+            Output   = $output
+            ExitCode = 1
+            TimedOut = $true
+        }
+    }
+
+    $stdout = $process.StandardOutput.ReadToEnd()
+    $stderr = $process.StandardError.ReadToEnd()
+    $output = $stdout + $stderr
     return [pscustomobject]@{
         Output   = $output
-        ExitCode = $exitCode
+        ExitCode = $process.ExitCode
+        TimedOut = $false
     }
 }
 
@@ -208,10 +254,6 @@ function New-BatchRunnerArgs {
     if ($ResultPath) {
         $args += '-TestResultPath'
         $args += $ResultPath
-    }
-    if ($PerFileTimeoutSeconds -gt 0) {
-        $args += '-Timeout'
-        $args += $PerFileTimeoutSeconds
     }
     return $args
 }
@@ -246,7 +288,7 @@ if (-not $PerFile) {
     $resultXml = Join-Path $resultPath 'test-results.xml'
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultPath)
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultPath) -TimeoutSeconds $PerFileTimeoutSeconds
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultXml
@@ -311,7 +353,7 @@ foreach ($file in $files) {
     }
     $null = New-Item -ItemType Directory -Path $fileResultDir -Force -ErrorAction SilentlyContinue
 
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName -ResultPath $fileResultDir)
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName -ResultPath $fileResultDir) -TimeoutSeconds $PerFileTimeoutSeconds
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath (Join-Path $fileResultDir 'test-results.xml')
     if ($stats.Failed -lt 0) {
         $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $fileResultDir
@@ -325,7 +367,7 @@ foreach ($file in $files) {
         }
     }
     $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $fileResultDir)
-    if ($run.ExitCode -ne 0 -and $failLines.Count -eq 0 -and $run.Output -match 'timed out') {
+    if ($run.ExitCode -ne 0 -and $failLines.Count -eq 0 -and ($run.TimedOut -or $run.Output -match 'Timed out after')) {
         $failLines = @("Timed out after ${PerFileTimeoutSeconds}s")
     }
 

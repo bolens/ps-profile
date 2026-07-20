@@ -121,13 +121,59 @@ function Get-PesterRunStats {
 }
 
 function Invoke-ToolsBatchRunner {
-    param([string[]]$RunnerArgs)
+    param(
+        [string[]]$RunnerArgs,
 
-    $output = & pwsh -NonInteractive @RunnerArgs 2>&1 | Out-String
-    $exitCode = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 }
+        [int]$TimeoutSeconds = 0
+    )
+
+    if ($TimeoutSeconds -le 0) {
+        $output = & pwsh -NonInteractive @RunnerArgs 2>&1 | Out-String
+        $exitCode = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 }
+        return [pscustomobject]@{
+            Output   = $output
+            ExitCode = $exitCode
+            TimedOut = $false
+        }
+    }
+
+    $pwshExe = (Get-Command pwsh -ErrorAction Stop).Source
+    $allArgs = @('-NonInteractive') + $RunnerArgs
+    $argString = ($allArgs | ForEach-Object {
+            if ($_ -match '[\s"]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
+        }) -join ' '
+
+    $psi = [System.Diagnostics.ProcessStartInfo]::new()
+    $psi.FileName = $pwshExe
+    $psi.Arguments = $argString
+    $psi.UseShellExecute = $false
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.CreateNoWindow = $true
+
+    $process = [System.Diagnostics.Process]::Start($psi)
+    $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+    if ($timedOut) {
+        try { $process.Kill($true) } catch { }
+        $stdout = $process.StandardOutput.ReadToEnd()
+        $stderr = $process.StandardError.ReadToEnd()
+        $output = $stdout + $stderr
+        if ($output -notmatch 'Timed out after') {
+            $output += "`nTimed out after ${TimeoutSeconds}s`n"
+        }
+        return [pscustomobject]@{
+            Output   = $output
+            ExitCode = 1
+            TimedOut = $true
+        }
+    }
+
+    $stdout = $process.StandardOutput.ReadToEnd()
+    $stderr = $process.StandardError.ReadToEnd()
     return [pscustomobject]@{
-        Output   = $output
-        ExitCode = $exitCode
+        Output   = $stdout + $stderr
+        ExitCode = $process.ExitCode
+        TimedOut = $false
     }
 }
 
@@ -152,10 +198,6 @@ function New-BatchRunnerArgs {
     if ($ResultPath) {
         $args += '-TestResultPath'
         $args += $ResultPath
-    }
-    if ($PerFileTimeoutSeconds -gt 0) {
-        $args += '-Timeout'
-        $args += $PerFileTimeoutSeconds
     }
     return $args
 }
@@ -215,7 +257,7 @@ if ($SingleSession) {
     $null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $run = Invoke-ToolsBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultDir)
+    $run = Invoke-ToolsBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultDir) -TimeoutSeconds $PerFileTimeoutSeconds
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath (Join-Path $resultDir 'test-results.xml')
@@ -249,7 +291,7 @@ foreach ($file in $files) {
     }
     $null = New-Item -ItemType Directory -Path $fileResultDir -Force -ErrorAction SilentlyContinue
 
-    $run = Invoke-ToolsBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName -ResultPath $fileResultDir)
+    $run = Invoke-ToolsBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName -ResultPath $fileResultDir) -TimeoutSeconds $PerFileTimeoutSeconds
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath (Join-Path $fileResultDir 'test-results.xml')
     if ($stats.Failed -lt 0) {
         $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $fileResultDir
@@ -262,7 +304,7 @@ foreach ($file in $files) {
         }
     }
     $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $fileResultDir)
-    if ($run.ExitCode -ne 0 -and $failLines.Count -eq 0 -and $run.Output -match 'timed out') {
+    if ($run.ExitCode -ne 0 -and $failLines.Count -eq 0 -and ($run.TimedOut -or $run.Output -match 'Timed out after')) {
         $failLines = @("Timed out after ${PerFileTimeoutSeconds}s")
     }
 
