@@ -17,6 +17,8 @@ on:
       - 'docs/api/**'
       - 'PSScriptAnalyzerSettings.psd1'
       - '.github/workflows/validate-profile.yml'
+      - '.github/actions/setup-arch-linux/**'
+      - '.devcontainer/install-pwsh-linux.sh'
   pull_request:
     branches: [ main ]
     paths:
@@ -29,9 +31,12 @@ on:
       - 'docs/api/**'
       - 'PSScriptAnalyzerSettings.psd1'
       - '.github/workflows/validate-profile.yml'
+      - '.github/actions/setup-arch-linux/**'
+      - '.devcontainer/install-pwsh-linux.sh'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  POWERSHELL_TELEMETRY_OPTOUT: "1"
 
 jobs:
   api-docs:
@@ -157,25 +162,47 @@ jobs:
           if-no-files-found: ignore
 
   validate:
+    name: Validate on ${{ matrix.label }} (${{ matrix.powershell }})
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     permissions:
       contents: read
     strategy:
+      fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
-        powershell: [pwsh]
         include:
-          - os: windows-latest
+          - label: windows-latest
+            os: windows-latest
+            container: null
+            powershell: pwsh
+          - label: ubuntu-latest
+            os: ubuntu-latest
+            container: null
+            powershell: pwsh
+          - label: windows-latest
+            os: windows-latest
+            container: null
             powershell: powershell
+          # Arch has no hosted runner: host on ubuntu-latest, run inside archlinux container.
+          - label: arch-latest
+            os: ubuntu-latest
+            container: archlinux:latest
+            powershell: pwsh
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup PowerShell (Linux)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Setup PowerShell (Debian/Ubuntu)
+        if: matrix.label == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y powershell
+
+      - name: Setup Arch Linux
+        if: matrix.label == 'arch-latest'
+        uses: ./.github/actions/setup-arch-linux
+        with:
+          pwsh-version: 7.4.7
 
       - name: Install PSScriptAnalyzer (optional)
         run: ${{ matrix.powershell }} -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force -Confirm:$false" || true
@@ -192,7 +219,7 @@ jobs:
       - name: Upload validation artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: validation-results-${{ matrix.os }}-${{ matrix.powershell }}
+          name: validation-results-${{ matrix.label }}-${{ matrix.powershell }}
           path: |
             scripts/data/startup-benchmark.csv
             scripts/data/performance-baseline.json

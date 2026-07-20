@@ -15,6 +15,8 @@ on:
       - 'scripts/lib/**'
       - 'PSScriptAnalyzerSettings.psd1'
       - '.github/workflows/ci-powershell.yml'
+      - '.github/actions/setup-arch-linux/**'
+      - '.devcontainer/install-pwsh-linux.sh'
   pull_request:
     branches: [ main ]
     paths:
@@ -25,24 +27,45 @@ on:
       - 'scripts/lib/**'
       - 'PSScriptAnalyzerSettings.psd1'
       - '.github/workflows/ci-powershell.yml'
+      - '.github/actions/setup-arch-linux/**'
+      - '.devcontainer/install-pwsh-linux.sh'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  POWERSHELL_TELEMETRY_OPTOUT: "1"
 
 permissions:
   contents: read
 
 jobs:
   validate:
-    name: Validate on ${{ matrix.os }} / PowerShell ${{ matrix.pwsh }}
+    name: Validate on ${{ matrix.label }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        pwsh: [7.2, 7.4]
+        include:
+          - label: ubuntu-latest
+            os: ubuntu-latest
+            container: null
+          - label: windows-latest
+            os: windows-latest
+            container: null
+          # Arch has no hosted runner: host on ubuntu-latest, run inside archlinux container.
+          - label: arch-latest
+            os: ubuntu-latest
+            container: archlinux:latest
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v7
+      - name: Setup Arch Linux
+        if: matrix.label == 'arch-latest'
+        uses: ./.github/actions/setup-arch-linux
+        with:
+          pwsh-version: 7.4.7
       - name: Install PSScriptAnalyzer
-        run: pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force"
+        shell: pwsh
+        run: Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force
       - name: Validate profile (lint + idempotency)
+        shell: pwsh
         run: pwsh -NoProfile -File scripts/checks/validate-profile.ps1

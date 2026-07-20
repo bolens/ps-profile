@@ -11,6 +11,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  POWERSHELL_TELEMETRY_OPTOUT: "1"
 
 permissions:
   contents: read
@@ -62,7 +63,12 @@ jobs:
             @{ include = @($include) } | ConvertTo-Json -Compress -Depth 5
           }
           else {
-            @{ include = @(@{ os = 'ubuntu-latest'; shard = 'unit-library' }) } | ConvertTo-Json -Compress -Depth 5
+            @{ include = @(@{
+                  label     = 'ubuntu-latest'
+                  os        = 'ubuntu-latest'
+                  container = $null
+                  shard     = 'unit-library'
+                }) } | ConvertTo-Json -Compress -Depth 5
           }
 
           $output = @(
@@ -76,16 +82,22 @@ jobs:
           Write-Host "Matrix jobs: $($include.Count)"
 
   test:
-    name: test (${{ matrix.os }}, ${{ matrix.shard }})
+    name: test (${{ matrix.label }}, ${{ matrix.shard }})
     needs: changes
     if: needs.changes.outputs.any == 'true'
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.changes.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v7
+      - name: Setup Arch Linux
+        if: matrix.label == 'arch-latest'
+        uses: ./.github/actions/setup-arch-linux
+        with:
+          pwsh-version: 7.4.7
       - name: Install Pester
         shell: pwsh
         run: |
@@ -111,11 +123,11 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: pester-${{ matrix.os }}-${{ matrix.shard }}
+          name: pester-${{ matrix.label }}-${{ matrix.shard }}
           path: tests/test-artifacts/ci-${{ matrix.shard }}/**
           if-no-files-found: ignore
       - name: Upload coverage report
-        if: matrix.shard == 'coverage-smoke'
+        if: matrix.shard == 'coverage-smoke' && matrix.label == 'ubuntu-latest'
         uses: actions/upload-artifact@v7
         with:
           name: coverage-ubuntu-smoke
