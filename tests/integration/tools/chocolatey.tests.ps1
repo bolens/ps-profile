@@ -53,38 +53,56 @@ Describe 'Chocolatey Tools Integration Tests' {
     }
 
     Context 'Graceful degradation when choco is unavailable' {
-        BeforeAll {
-            if ($global:CollectedMissingToolWarnings) {
-                $global:CollectedMissingToolWarnings.Clear()
-            }
-            if ($global:MissingToolWarnings) {
-                $global:MissingToolWarnings.Clear()
-            }
-            if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-                Clear-TestCachedCommandCache | Out-Null
-            }
-            if (Get-Command Unregister-CommandDispatcher -ErrorAction SilentlyContinue) {
-                Unregister-CommandDispatcher -ErrorAction SilentlyContinue
-            }
-            Remove-Item Function:choco -ErrorAction SilentlyContinue
-            Remove-Item Function:global:choco -ErrorAction SilentlyContinue
-
-            # Run before the available Context so helpers were never defined in this process.
-            Set-TestCommandAvailabilityState -CommandName 'choco' -Available $false
-            if (-not (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue)) {
-                throw 'Test-CachedCommand is required to simulate missing choco'
-            }
-            if (Test-CachedCommand choco) {
-                throw 'Test-CachedCommand still reports choco available after Set-TestCommandAvailabilityState -Available:$false'
-            }
-
-            $output = & { . (Join-Path $script:ProfileDir 'chocolatey.ps1') } 2>&1 3>&1 | Out-String
-            $script:MissingChocoOutput = $output
-        }
-
         It 'Functions are not created when choco is unavailable' {
-            Get-Command Install-ChocoPackage -CommandType Function -ErrorAction SilentlyContinue |
-                Should -BeNullOrEmpty
+            # Scoop-style: assert inside the isolation block so session leftovers and
+            # fragment-dispatcher proxies cannot pollute Get-Command after & { } exits.
+            $installCommand = & {
+                if ($global:CollectedMissingToolWarnings) {
+                    $global:CollectedMissingToolWarnings.Clear()
+                }
+                if ($global:MissingToolWarnings) {
+                    $global:MissingToolWarnings.Clear()
+                }
+                if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                    Clear-TestCachedCommandCache | Out-Null
+                }
+                if (Get-Command Unregister-CommandDispatcher -ErrorAction SilentlyContinue) {
+                    Unregister-CommandDispatcher -ErrorAction SilentlyContinue | Out-Null
+                }
+                $invokeCommand = $ExecutionContext.SessionState.InvokeCommand
+                if ($null -ne $invokeCommand.CommandNotFoundAction) {
+                    $invokeCommand.CommandNotFoundAction = $null
+                }
+
+                Remove-Item Function:choco -ErrorAction SilentlyContinue
+                Remove-Item Function:global:choco -ErrorAction SilentlyContinue
+                if (Get-Command Remove-TestFunction -ErrorAction SilentlyContinue) {
+                    Remove-TestFunction -Name @(
+                        'Install-ChocoPackage', 'Remove-ChocoPackage', 'Update-ChocoPackages',
+                        'Test-ChocoOutdated', 'Update-ChocoSelf', 'Clear-ChocoCache',
+                        'Find-ChocoPackage', 'Get-ChocoPackage', 'Get-ChocoPackageInfo',
+                        'Export-ChocoPackages', 'Import-ChocoPackages'
+                    ) | Out-Null
+                }
+
+                Set-TestCommandAvailabilityState -CommandName 'choco' -Available $false | Out-Null
+                if (-not (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue)) {
+                    throw 'Test-CachedCommand is required to simulate missing choco'
+                }
+                if (Test-CachedCommand choco) {
+                    throw 'Test-CachedCommand still reports choco available after Set-TestCommandAvailabilityState -Available:$false'
+                }
+
+                . (Join-Path $script:ProfileDir 'chocolatey.ps1')
+                @(Get-Command Install-ChocoPackage -CommandType Function -ErrorAction SilentlyContinue |
+                    Where-Object {
+                        # Ignore external modules (e.g. ChocoMan) and dispatcher proxies.
+                        [string]::IsNullOrEmpty($_.ModuleName) -and
+                        $_.ScriptBlock.ToString() -notmatch 'Load-FragmentForCommand'
+                    })
+            }
+
+            $installCommand | Should -BeNullOrEmpty
         }
 
         It 'Emits missing-tool warning when choco is unavailable' {
@@ -95,8 +113,30 @@ Describe 'Chocolatey Tools Integration Tests' {
                 }
             }
 
-            Assert-TestMissingToolWarning -Output $script:MissingChocoOutput -Pattern 'choco not found'
-            Assert-TestOutputContainsInstallCommand -Output $script:MissingChocoOutput -ToolName 'chocolatey'
+            $output = & {
+                if ($global:CollectedMissingToolWarnings) {
+                    $global:CollectedMissingToolWarnings.Clear()
+                }
+                if ($global:MissingToolWarnings) {
+                    $global:MissingToolWarnings.Clear()
+                }
+                if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
+                    Clear-TestCachedCommandCache | Out-Null
+                }
+                if (Get-Command Unregister-CommandDispatcher -ErrorAction SilentlyContinue) {
+                    Unregister-CommandDispatcher -ErrorAction SilentlyContinue | Out-Null
+                }
+                $invokeCommand = $ExecutionContext.SessionState.InvokeCommand
+                if ($null -ne $invokeCommand.CommandNotFoundAction) {
+                    $invokeCommand.CommandNotFoundAction = $null
+                }
+
+                Set-TestCommandAvailabilityState -CommandName 'choco' -Available $false | Out-Null
+                . (Join-Path $script:ProfileDir 'chocolatey.ps1')
+            } 2>&1 3>&1 | Out-String
+
+            Assert-TestMissingToolWarning -Output $output -Pattern 'choco not found'
+            Assert-TestOutputContainsInstallCommand -Output $output -ToolName 'chocolatey'
         }
     }
 

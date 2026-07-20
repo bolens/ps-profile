@@ -390,5 +390,23 @@ if (Test-CachedCommand choco) {
     Set-AgentModeAlias -Name 'chorestore' -Target 'Import-ChocoPackages'
 }
 else {
+    # Drop helpers left from a prior available load (Windows keeps Function:\global: entries).
+    foreach ($chocoHelper in @(
+            'Install-ChocoPackage', 'Remove-ChocoPackage', 'Update-ChocoPackages',
+            'Test-ChocoOutdated', 'Update-ChocoSelf', 'Clear-ChocoCache',
+            'Find-ChocoPackage', 'Get-ChocoPackage', 'Get-ChocoPackageInfo',
+            'Export-ChocoPackages', 'Import-ChocoPackages'
+        )) {
+        Remove-Item -Path "Function:\$chocoHelper" -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "Function:\global:$chocoHelper" -Force -ErrorAction SilentlyContinue
+    }
+    foreach ($chocoAlias in @(
+            'choinstall', 'choadd', 'chouninstall', 'choremove', 'chooutdated',
+            'choupgrade', 'choselfupdate', 'chocleanup', 'choclean', 'chosearch',
+            'chofind', 'cholist', 'choinfo', 'choexport', 'chobackup', 'choimport', 'chorestore'
+        )) {
+        Remove-Item -Path "Alias:\$chocoAlias" -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "Alias:\global:$chocoAlias" -Force -ErrorAction SilentlyContinue
+    }
     Invoke-MissingToolWarning -ToolName 'chocolatey' -Tool 'choco'
 }
