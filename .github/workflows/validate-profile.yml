@@ -189,6 +189,15 @@ jobs:
             container: archlinux:latest
             powershell: pwsh
     steps:
+      # Arch images ship without git; checkout then uses a REST archive (no .git).
+      - name: Bootstrap Arch git for checkout
+        if: matrix.label == 'arch-latest'
+        shell: bash
+        run: |
+          set -euo pipefail
+          pacman -Sy --noconfirm
+          pacman -S --noconfirm git
+
       - name: Checkout
         uses: actions/checkout@v7
 

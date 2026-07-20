@@ -92,6 +92,14 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.changes.outputs.matrix) }}
     steps:
+      # Arch images ship without git; checkout then uses a REST archive (no .git).
+      - name: Bootstrap Arch git for checkout
+        if: matrix.label == 'arch-latest'
+        shell: bash
+        run: |
+          set -euo pipefail
+          pacman -Sy --noconfirm
+          pacman -S --noconfirm git
       - uses: actions/checkout@v7
       - name: Setup Arch Linux
         if: matrix.label == 'arch-latest'
