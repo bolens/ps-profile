@@ -45,7 +45,16 @@ Describe 'Developer Tools Integration Tests' {
             throw "Bootstrap file not found at: $bootstrapPath"
         }
         . $bootstrapPath
-        
+
+        # Prevent fragment CommandNotFoundAction from storming during module promotion.
+        if (Get-Command Unregister-CommandDispatcher -ErrorAction SilentlyContinue) {
+            Unregister-CommandDispatcher -ErrorAction SilentlyContinue | Out-Null
+        }
+        $invokeCommand = $ExecutionContext.SessionState.InvokeCommand
+        if ($null -ne $invokeCommand.CommandNotFoundAction) {
+            $invokeCommand.CommandNotFoundAction = $null
+        }
+
         Ensure-DevToolsModulesLoaded -ProfileDir $script:ProfileDir
         
         $filesPath = Join-Path $script:ProfileDir 'files.ps1'
