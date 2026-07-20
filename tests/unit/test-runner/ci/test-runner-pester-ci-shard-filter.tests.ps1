@@ -77,6 +77,19 @@ Describe 'PesterCiShardFilter' {
         $matrix | Where-Object { $_.label -eq 'arch-latest' -and $_.shard -eq 'coverage-smoke' } | Should -Not -BeNullOrEmpty
     }
 
+    It 'Accepts empty or blank shard lists without throwing' {
+        @(Get-PesterCiShardMatrix -Shards @()) | Should -HaveCount 0
+        @(Get-PesterCiShardMatrix -Shards @('')) | Should -HaveCount 0
+        @(Get-PesterCiShardMatrix -Shards $null) | Should -HaveCount 0
+    }
+
+    It 'Returns a true empty array for workflow-only changes with no Pester shards' {
+        $shards = @(Resolve-PesterCiShards -ChangedFiles @('.github/workflows/codeql.yml'))
+        $shards.Count | Should -Be 0
+        @($shards | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) | Should -HaveCount 0
+        @(Get-PesterCiShardMatrix -Shards ([string[]]@($shards))) | Should -HaveCount 0
+    }
+
     It 'Exposes a curated Arch shard set' {
         $arch = Get-PesterCiArchShards
         $arch | Should -Contain 'unit-library'

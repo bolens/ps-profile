@@ -57,7 +57,10 @@ jobs:
             }
           }
 
-          $include = @(Get-PesterCiShardMatrix -Shards $shards)
+          # Coerce to [string[]] so empty "no matching shards" stays an empty array
+          # (bare @() / $null can bind as '' and fail Mandatory [string[]]).
+          $shardList = [string[]]@($shards | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+          $include = @(Get-PesterCiShardMatrix -Shards $shardList)
           $any = $include.Count -gt 0
           $matrix = if ($any) {
             @{ include = @($include) } | ConvertTo-Json -Compress -Depth 5
