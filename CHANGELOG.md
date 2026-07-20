@@ -1,8 +1,29 @@
+## [1.10.10] - 2026-07-20
+
+### 🐛 Bug Fixes
+
+- *(security)* Harden workflows and stabilize Pester CI
+
+### 💼 Other
+
+- *(deps)* Bump protobufjs in the npm_and_yarn group across 1 directory
+- *(deps-dev)* Bump cspell from 10.0.0 to 10.0.1
+- *(deps-dev)* Bump @cspell/dict-npm from 5.2.38 to 5.2.41
+
+### ⚙️ Miscellaneous Tasks
+
+- *(deps)* Bump pnpm/action-setup from 4 to 6
+- *(deps)* Bump actions/checkout from 4 to 6
+- *(deps)* Bump actions/github-script from 8 to 9
 ## [1.10.9] - 2026-06-14
 
 ### 🐛 Bug Fixes
 
 - *(ci)* Drop doc cache restore from freshness check
+
+### ⚙️ Miscellaneous Tasks
+
+- *(release)* 1.10.9 [skip ci]
 ## [1.10.8] - 2026-06-14
 
 ### 🐛 Bug Fixes
