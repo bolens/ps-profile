@@ -41,19 +41,32 @@ function script:Get-FragmentTierResult {
 function script:Simulate-UnreadableFragmentFile {
     <#
     .SYNOPSIS
-        Make a fragment unreadable for parse-failure tests (chmod on Unix; module Mock on Windows).
+        Make a fragment unreadable for parse-failure tests (chmod on Unix; module Mock on Windows/root).
     #>
     param(
         [Parameter(Mandatory)]
         [string]$Path
     )
 
+    $runningAsRoot = $false
     if ($IsLinux -or $IsMacOS) {
+        try {
+            $uid = & id -u 2>$null
+            $runningAsRoot = ($uid -eq '0')
+        }
+        catch {
+            $runningAsRoot = $false
+        }
+    }
+
+    # Non-root Unix: chmod 000 blocks reads. Root (e.g. Arch CI containers) can still
+    # read mode-000 files, so fall through to the same mocks Windows uses.
+    if (($IsLinux -or $IsMacOS) -and -not $runningAsRoot) {
         chmod 000 $Path
         return 'chmod'
     }
 
-    # Windows cannot chmod away readability; force the module read path to fail.
+    # Windows / root Unix: force the module read path to fail.
     # Ensure Read-FileContent is resolvable before Mock — FileContent may not be loaded
     # in every shard ordering, and Pester 5 cannot mock a missing command.
     if (-not (Get-Command Read-FileContent -ErrorAction SilentlyContinue)) {

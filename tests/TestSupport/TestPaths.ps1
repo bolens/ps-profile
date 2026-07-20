@@ -7,12 +7,16 @@
 .SYNOPSIS
     Locates the repository root directory for the tests.
 .DESCRIPTION
-    Prefers GITHUB_WORKSPACE / PS_PROFILE_REPO_ROOT when they point at this repo,
-    then walks up from the supplied start path until it finds a .git entry or the
-    profile markers (archive checkouts without .git).
+    Prefers an explicit PS_PROFILE_REPO_ROOT when set, then walks up from the
+    supplied start path until it finds a .git entry or the profile markers
+    (archive checkouts without .git).
 
     Marker logic is inlined so this function stays self-contained after promotion
     to Function:\global:Get-TestRepoRoot (Pester containers).
+
+    GITHUB_WORKSPACE is intentionally not used as a short-circuit: CI always sets
+    it, which would make isolation tests that start outside the repo succeed
+    incorrectly.
 .PARAMETER StartPath
     The path to begin searching from; defaults to the calling script root.
 .OUTPUTS
@@ -40,11 +44,9 @@ function Get-TestRepoRoot {
         return (Test-Path -LiteralPath $profileScript) -and (Test-Path -LiteralPath $profileDir)
     }
 
-    foreach ($envName in @('PS_PROFILE_REPO_ROOT', 'GITHUB_WORKSPACE')) {
-        $candidate = [Environment]::GetEnvironmentVariable($envName)
-        if ($candidate -and (Test-RepoRootMarkerLocal -Path $candidate)) {
-            return ([System.IO.Path]::GetFullPath($candidate))
-        }
+    $explicitRoot = [Environment]::GetEnvironmentVariable('PS_PROFILE_REPO_ROOT')
+    if ($explicitRoot -and (Test-RepoRootMarkerLocal -Path $explicitRoot)) {
+        return ([System.IO.Path]::GetFullPath($explicitRoot))
     }
 
     $current = Get-Item -LiteralPath $StartPath

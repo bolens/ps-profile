@@ -151,7 +151,7 @@ Describe 'Preference-Aware Install Hints - Integration Tests (Fallback Chains)' 
             $result = Get-PreferenceAwareInstallHint -ToolName 'generic-tool-xyz' -ToolType 'generic'
             $result | Should -Not -BeNullOrEmpty
             # Should suggest system package manager
-            $result | Should -Match 'scoop|brew|apt|winget|choco'
+            $result | Should -Match 'scoop|brew|apt|winget|choco|pacman|yum|dnf'
         }
         
         It 'Falls back from tool-specific to language-specific to system' {
