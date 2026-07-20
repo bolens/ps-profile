@@ -188,43 +188,49 @@ function Invoke-ConversionBatchRunner {
         }
     }
 
+    # Redirect to temp files (not pipes): WaitForExit + unread redirected pipes
+    # deadlocks once the OS pipe buffer fills — which looks like a 600s "hang".
     $pwshExe = (Get-Command pwsh -ErrorAction Stop).Source
-    $argString = ($RunnerArgs | ForEach-Object {
-            if ($_ -match '[\s"]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
-        }) -join ' '
-
-    $psi = [System.Diagnostics.ProcessStartInfo]::new()
-    $psi.FileName = $pwshExe
-    $psi.Arguments = $argString
-    $psi.UseShellExecute = $false
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
-    $psi.CreateNoWindow = $true
-
-    $process = [System.Diagnostics.Process]::Start($psi)
-    $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
-    if ($timedOut) {
-        try { $process.Kill($true) } catch { }
-        $stdout = $process.StandardOutput.ReadToEnd()
-        $stderr = $process.StandardError.ReadToEnd()
-        $output = $stdout + $stderr
-        if ($output -notmatch 'Timed out after') {
-            $output += "`nTimed out after ${TimeoutSeconds}s`n"
+    $stdoutPath = [System.IO.Path]::GetTempFileName()
+    $stderrPath = [System.IO.Path]::GetTempFileName()
+    try {
+        $process = Start-Process -FilePath $pwshExe -ArgumentList $RunnerArgs -NoNewWindow -PassThru `
+            -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+        $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+        if ($timedOut) {
+            try {
+                Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+                $process.WaitForExit(5000) | Out-Null
+            }
+            catch { }
         }
+        else {
+            # Ensure async file writers flush
+            $process.WaitForExit() | Out-Null
+        }
+
+        $stdout = if (Test-Path -LiteralPath $stdoutPath) { Get-Content -LiteralPath $stdoutPath -Raw -ErrorAction SilentlyContinue } else { '' }
+        $stderr = if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath -Raw -ErrorAction SilentlyContinue } else { '' }
+        $output = [string]$stdout + [string]$stderr
+        if ($timedOut) {
+            if ($output -notmatch 'Timed out after') {
+                $output += "`nTimed out after ${TimeoutSeconds}s`n"
+            }
+            return [pscustomobject]@{
+                Output   = $output
+                ExitCode = 1
+                TimedOut = $true
+            }
+        }
+
         return [pscustomobject]@{
             Output   = $output
-            ExitCode = 1
-            TimedOut = $true
+            ExitCode = $process.ExitCode
+            TimedOut = $false
         }
     }
-
-    $stdout = $process.StandardOutput.ReadToEnd()
-    $stderr = $process.StandardError.ReadToEnd()
-    $output = $stdout + $stderr
-    return [pscustomobject]@{
-        Output   = $output
-        ExitCode = $process.ExitCode
-        TimedOut = $false
+    finally {
+        Remove-Item -LiteralPath $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -288,7 +294,9 @@ if (-not $PerFile) {
     $resultXml = Join-Path $resultPath 'test-results.xml'
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultPath) -TimeoutSeconds $PerFileTimeoutSeconds
+    # Single-session batches can exceed PerFileTimeoutSeconds legitimately;
+    # only PerFile mode uses the hang watchdog.
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultPath) -TimeoutSeconds 0
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultXml

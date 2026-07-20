@@ -137,43 +137,48 @@ function Invoke-ToolsBatchRunner {
         }
     }
 
+    # File redirects avoid WaitForExit + pipe-buffer deadlock.
     $pwshExe = (Get-Command pwsh -ErrorAction Stop).Source
-    $allArgs = @('-NonInteractive') + $RunnerArgs
-    $argString = ($allArgs | ForEach-Object {
-            if ($_ -match '[\s"]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ }
-        }) -join ' '
-
-    $psi = [System.Diagnostics.ProcessStartInfo]::new()
-    $psi.FileName = $pwshExe
-    $psi.Arguments = $argString
-    $psi.UseShellExecute = $false
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
-    $psi.CreateNoWindow = $true
-
-    $process = [System.Diagnostics.Process]::Start($psi)
-    $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
-    if ($timedOut) {
-        try { $process.Kill($true) } catch { }
-        $stdout = $process.StandardOutput.ReadToEnd()
-        $stderr = $process.StandardError.ReadToEnd()
-        $output = $stdout + $stderr
-        if ($output -notmatch 'Timed out after') {
-            $output += "`nTimed out after ${TimeoutSeconds}s`n"
+    $allArgs = @('-NonInteractive') + @($RunnerArgs)
+    $stdoutPath = [System.IO.Path]::GetTempFileName()
+    $stderrPath = [System.IO.Path]::GetTempFileName()
+    try {
+        $process = Start-Process -FilePath $pwshExe -ArgumentList $allArgs -NoNewWindow -PassThru `
+            -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+        $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+        if ($timedOut) {
+            try {
+                Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+                $process.WaitForExit(5000) | Out-Null
+            }
+            catch { }
         }
+        else {
+            $process.WaitForExit() | Out-Null
+        }
+
+        $stdout = if (Test-Path -LiteralPath $stdoutPath) { Get-Content -LiteralPath $stdoutPath -Raw -ErrorAction SilentlyContinue } else { '' }
+        $stderr = if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath -Raw -ErrorAction SilentlyContinue } else { '' }
+        $output = [string]$stdout + [string]$stderr
+        if ($timedOut) {
+            if ($output -notmatch 'Timed out after') {
+                $output += "`nTimed out after ${TimeoutSeconds}s`n"
+            }
+            return [pscustomobject]@{
+                Output   = $output
+                ExitCode = 1
+                TimedOut = $true
+            }
+        }
+
         return [pscustomobject]@{
             Output   = $output
-            ExitCode = 1
-            TimedOut = $true
+            ExitCode = $process.ExitCode
+            TimedOut = $false
         }
     }
-
-    $stdout = $process.StandardOutput.ReadToEnd()
-    $stderr = $process.StandardError.ReadToEnd()
-    return [pscustomobject]@{
-        Output   = $stdout + $stderr
-        ExitCode = $process.ExitCode
-        TimedOut = $false
+    finally {
+        Remove-Item -LiteralPath $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -257,7 +262,7 @@ if ($SingleSession) {
     $null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $run = Invoke-ToolsBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultDir) -TimeoutSeconds $PerFileTimeoutSeconds
+    $run = Invoke-ToolsBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultDir) -TimeoutSeconds 0
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath (Join-Path $resultDir 'test-results.xml')

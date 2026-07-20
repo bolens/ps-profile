@@ -58,6 +58,19 @@ Describe 'Chocolatey Tools Integration Tests' {
             . (Join-Path $script:ProfileDir 'chocolatey.ps1')
         }
 
+        AfterAll {
+            # Prevent helper functions from leaking into the unavailable Context
+            # (Windows runners often keep Function:\global:Name after Context ends).
+            if (Get-Command Remove-TestFunction -ErrorAction SilentlyContinue) {
+                Remove-TestFunction -Name @(
+                    'Install-ChocoPackage', 'Remove-ChocoPackage', 'Update-ChocoPackages',
+                    'Test-ChocoOutdated', 'Update-ChocoSelf', 'Clear-ChocoCache',
+                    'Find-ChocoPackage', 'Get-ChocoPackage', 'Get-ChocoPackageInfo',
+                    'Export-ChocoPackages', 'Import-ChocoPackages'
+                )
+            }
+        }
+
         BeforeEach {
             Clear-TestCommandInvocationCapture
         }
@@ -456,18 +469,34 @@ Describe 'Chocolatey Tools Integration Tests' {
             if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
                 Clear-TestCachedCommandCache | Out-Null
             }
+            if (Get-Command Unregister-CommandDispatcher -ErrorAction SilentlyContinue) {
+                Unregister-CommandDispatcher -ErrorAction SilentlyContinue
+            }
             Remove-Item Function:choco -ErrorAction SilentlyContinue
             Remove-Item Function:global:choco -ErrorAction SilentlyContinue
-            Set-TestCommandAvailabilityState -CommandName 'choco' -Available $false
 
             # Remove session + global function drive entries left by the available Context
             # (plain Remove-Item Function:$_ leaves Function:\global:Name on Windows).
-            Remove-TestFunction -Name @(
+            $chocoHelpers = @(
                 'Install-ChocoPackage', 'Remove-ChocoPackage', 'Update-ChocoPackages',
                 'Test-ChocoOutdated', 'Update-ChocoSelf', 'Clear-ChocoCache',
                 'Find-ChocoPackage', 'Get-ChocoPackage', 'Get-ChocoPackageInfo',
                 'Export-ChocoPackages', 'Import-ChocoPackages'
             )
+            if (Get-Command Remove-TestFunction -ErrorAction SilentlyContinue) {
+                Remove-TestFunction -Name $chocoHelpers
+            }
+            else {
+                foreach ($name in $chocoHelpers) {
+                    Remove-Item "Function:$name" -Force -ErrorAction SilentlyContinue
+                    Remove-Item "Function:\global:$name" -Force -ErrorAction SilentlyContinue
+                }
+            }
+
+            Set-TestCommandAvailabilityState -CommandName 'choco' -Available $false
+            if ((Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) -and (Test-CachedCommand choco)) {
+                throw 'Test-CachedCommand still reports choco available after Set-TestCommandAvailabilityState -Available:$false'
+            }
 
             $output = & { . (Join-Path $script:ProfileDir 'chocolatey.ps1') } 2>&1 3>&1 | Out-String
             $script:MissingChocoOutput = $output
