@@ -5,38 +5,14 @@
 
 <#
 .SYNOPSIS
-    Returns $true when a directory looks like this repository's root.
-.DESCRIPTION
-    Accepts a real Git checkout (.git present) or an archive-style checkout
-    (profile entrypoint + profile.d), which GitHub Actions uses when git is
-    missing from the job container PATH at checkout time.
-#>
-function Test-TestRepoRootMarker {
-    param(
-        [Parameter(Mandatory)]
-        [string]$Path
-    )
-
-    if ([string]::IsNullOrWhiteSpace($Path)) {
-        return $false
-    }
-
-    if (Test-Path -LiteralPath (Join-Path $Path '.git')) {
-        return $true
-    }
-
-    $profileScript = Join-Path $Path 'Microsoft.PowerShell_profile.ps1'
-    $profileDir = Join-Path $Path 'profile.d'
-    return (Test-Path -LiteralPath $profileScript) -and (Test-Path -LiteralPath $profileDir)
-}
-
-<#
-.SYNOPSIS
     Locates the repository root directory for the tests.
 .DESCRIPTION
     Prefers GITHUB_WORKSPACE / PS_PROFILE_REPO_ROOT when they point at this repo,
     then walks up from the supplied start path until it finds a .git entry or the
     profile markers (archive checkouts without .git).
+
+    Marker logic is inlined so this function stays self-contained after promotion
+    to Function:\global:Get-TestRepoRoot (Pester containers).
 .PARAMETER StartPath
     The path to begin searching from; defaults to the calling script root.
 .OUTPUTS
@@ -48,16 +24,32 @@ function Get-TestRepoRoot {
         [string]$StartPath = $PSScriptRoot
     )
 
+    function Test-RepoRootMarkerLocal {
+        param([string]$Path)
+
+        if ([string]::IsNullOrWhiteSpace($Path)) {
+            return $false
+        }
+
+        if (Test-Path -LiteralPath (Join-Path $Path '.git')) {
+            return $true
+        }
+
+        $profileScript = Join-Path $Path 'Microsoft.PowerShell_profile.ps1'
+        $profileDir = Join-Path $Path 'profile.d'
+        return (Test-Path -LiteralPath $profileScript) -and (Test-Path -LiteralPath $profileDir)
+    }
+
     foreach ($envName in @('PS_PROFILE_REPO_ROOT', 'GITHUB_WORKSPACE')) {
         $candidate = [Environment]::GetEnvironmentVariable($envName)
-        if ($candidate -and (Test-TestRepoRootMarker -Path $candidate)) {
+        if ($candidate -and (Test-RepoRootMarkerLocal -Path $candidate)) {
             return ([System.IO.Path]::GetFullPath($candidate))
         }
     }
 
     $current = Get-Item -LiteralPath $StartPath
     while ($null -ne $current) {
-        if (Test-TestRepoRootMarker -Path $current.FullName) {
+        if (Test-RepoRootMarkerLocal -Path $current.FullName) {
             return $current.FullName
         }
         $current = $current.Parent

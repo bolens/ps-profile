@@ -201,6 +201,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Trust workspace for git (Arch container)
+        if: matrix.label == 'arch-latest'
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Setup PowerShell (Debian/Ubuntu)
         if: matrix.label == 'ubuntu-latest'
         run: |
