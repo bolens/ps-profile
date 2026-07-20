@@ -138,9 +138,27 @@ Describe 'utilities-datetime.ps1 - Get-DateTime and aliases' {
     }
 
     It 'Registers epoch conversion aliases that resolve to the underlying functions' {
-        (Get-Command from-epoch -ErrorAction SilentlyContinue).ResolvedCommandName | Should -Be 'ConvertFrom-Epoch'
-        (Get-Command to-epoch -ErrorAction SilentlyContinue).ResolvedCommandName | Should -Be 'ConvertTo-Epoch'
-        (Get-Command epoch -ErrorAction SilentlyContinue).ResolvedCommandName | Should -Be 'Get-Epoch'
-        (Get-Command now -ErrorAction SilentlyContinue).ResolvedCommandName | Should -Be 'Get-DateTime'
+        $cases = @(
+            @{ Name = 'from-epoch'; Target = 'ConvertFrom-Epoch' }
+            @{ Name = 'to-epoch'; Target = 'ConvertTo-Epoch' }
+            @{ Name = 'epoch'; Target = 'Get-Epoch' }
+            @{ Name = 'now'; Target = 'Get-DateTime' }
+        )
+
+        # Isolation resets may remove aliases while leaving UtilitiesLoaded set, so
+        # re-apply datetime registrations before asserting.
+        foreach ($case in $cases) {
+            Remove-Item -Path "Alias:\$($case.Name)" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$($case.Name)" -Force -ErrorAction SilentlyContinue
+        }
+        . (Join-Path $script:ProfileDir 'utilities-modules' 'data' 'utilities-datetime.ps1')
+
+        foreach ($case in $cases) {
+            # Prefer Get-Alias: autocomplete proxies can make Get-Command return a Function
+            # without ResolvedCommandName (StrictMode then throws PropertyNotFoundException).
+            $alias = Get-Alias -Name $case.Name -ErrorAction SilentlyContinue
+            $alias | Should -Not -BeNullOrEmpty -Because "alias '$($case.Name)' should be registered"
+            $alias.ResolvedCommandName | Should -Be $case.Target
+        }
     }
 }

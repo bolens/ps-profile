@@ -16,10 +16,21 @@ BeforeAll {
     }
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     $script:DatabaseClientsPath = Join-Path $script:ProfileDir 'database-clients.ps1'
-    $script:MaxLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_LOAD_MS' -Default 4500
-    $script:MaxFunctionRegistrationTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_FUNCTION_MS' -Default 1000
-    $script:MaxAliasResolutionTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_ALIAS_MS' -Default 1000
-    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_IDEMPOTENCY_MS' -Default 2000
+    $loadDefault = 4500
+    $functionDefault = 1000
+    $aliasDefault = 1000
+    $idempotencyDefault = 2000
+    # Windows CI runners are slower for fragment loads / Get-Command sweeps.
+    if ($IsWindows -or $env:OS -eq 'Windows_NT') {
+        $loadDefault = 30000
+        $functionDefault = 10000
+        $aliasDefault = 10000
+        $idempotencyDefault = 20000
+    }
+    $script:MaxLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_LOAD_MS' -Default $loadDefault
+    $script:MaxFunctionRegistrationTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_FUNCTION_MS' -Default $functionDefault
+    $script:MaxAliasResolutionTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_ALIAS_MS' -Default $aliasDefault
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_IDEMPOTENCY_MS' -Default $idempotencyDefault
 
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
 }

@@ -15,6 +15,18 @@
 
 Describe 'Binary Format Conversion Integration Tests' {
     BeforeAll {
+        if (-not (Get-Command Get-TestPath -ErrorAction SilentlyContinue)) {
+            $current = Get-Item $PSScriptRoot
+            while ($null -ne $current) {
+                $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+                if (Test-Path -LiteralPath $testSupportPath) {
+                    . $testSupportPath
+                    break
+                }
+                if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
+                $current = $current.Parent
+            }
+        }
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegrationForTestFile -ProfileDir $script:ProfileDir -TestScriptPath (Join-Path $PSScriptRoot 'binary-formats.tests.ps1')
     }

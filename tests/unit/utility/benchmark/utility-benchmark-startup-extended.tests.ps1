@@ -29,6 +29,14 @@ Describe 'benchmark-startup.ps1 extended scenarios' {
             $content | Should -Match '\.PARAMETER UpdateBaseline'
         }
 
+        It 'Documents FragmentIterations, SkipFragmentTimings, and FragmentTimeoutSeconds for CI bounds' {
+            $content = Get-Content -LiteralPath $script:BenchmarkScript -Raw
+            $content | Should -Match '\.PARAMETER FragmentIterations'
+            $content | Should -Match '\.PARAMETER SkipFragmentTimings'
+            $content | Should -Match '\.PARAMETER FragmentTimeoutSeconds'
+            $content | Should -Match 'Invoke-BenchmarkChildProcess'
+        }
+
         It 'Documents RegressionThreshold for baseline comparison' {
             $content = Get-Content -LiteralPath $script:BenchmarkScript -Raw
             $content | Should -Match 'RegressionThreshold'

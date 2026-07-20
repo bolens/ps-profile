@@ -123,6 +123,36 @@ function Get-LibPath {
 
     # Resolve repository root first, then construct scripts/lib path
     if (-not (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue)) {
+        # Bootstrap PathResolution when callers import ModuleImport alone (common in scripts).
+        $moduleImportDir = $PSScriptRoot
+        if (-not $moduleImportDir -and $PSCommandPath) {
+            $moduleImportDir = Split-Path -Parent $PSCommandPath
+        }
+        $pathResolutionCandidate = Join-Path $moduleImportDir 'path' 'PathResolution.psm1'
+        if (Test-Path -LiteralPath $pathResolutionCandidate) {
+            Import-Module $pathResolutionCandidate -DisableNameChecking -ErrorAction SilentlyContinue
+        }
+    }
+
+    if (-not (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue)) {
+        # Last-resort walk from ScriptPath so ExitCodes/Logging can load before PathResolution.
+        $probe = $ScriptPath
+        if (Test-Path -LiteralPath $probe -PathType Leaf) {
+            $probe = Split-Path -Parent $probe
+        }
+        while ($probe) {
+            $candidateLib = Join-Path $probe 'scripts' 'lib'
+            if (Test-Path -LiteralPath $candidateLib -PathType Container) {
+                $resolvedLibPath = (Resolve-Path -LiteralPath $candidateLib).Path
+                if (Get-Command Set-CachedValue -ErrorAction SilentlyContinue) {
+                    Set-CachedValue -Key $cacheKey -Value $resolvedLibPath -ExpirationSeconds 3600
+                }
+                return $resolvedLibPath
+            }
+            $parent = Split-Path -Parent $probe
+            if (-not $parent -or $parent -eq $probe) { break }
+            $probe = $parent
+        }
         throw "Get-RepoRoot function not available. PathResolution module may not be loaded."
     }
 

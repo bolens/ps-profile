@@ -413,7 +413,8 @@ Describe 'JsonUtilities extended scenarios' {
             $env:PS_PROFILE_DEBUG = '3'
 
             try {
-                { Read-JsonFile -Path $file -ErrorAction Stop } | Should -Throw '*Failed to read JSON file*'
+                $err = { Read-JsonFile -Path $file -ErrorAction Stop } | Should -Throw -PassThru
+                $err.Exception.Message | Should -Match 'Failed to read JSON file|Conversion from JSON failed|Invalid character'
             }
             finally {
                 if ($null -eq $originalDebug) {

@@ -21,9 +21,7 @@ BeforeAll {
 Describe 'Caching Functions' {
     AfterEach {
         foreach ($key in 'TestKey', 'TestKey2', 'TestKey3', 'TestKey_Nonexistent') {
-                        Clear-CachedValue -Key $key -ErrorAction SilentlyContinue
-        }
-        catch {
+            Clear-CachedValue -Key $key -ErrorAction SilentlyContinue
         }
     }
 

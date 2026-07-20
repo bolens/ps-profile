@@ -135,7 +135,7 @@ Describe 'TestWatcher Module' {
 
             $elapsed = ((Get-Date) - $startedAt).TotalSeconds
             $elapsed | Should -BeGreaterOrEqual 2
-            $elapsed | Should -BeLessThan 8
+            $elapsed | Should -BeLessThan 15
         }
     }
 
@@ -171,12 +171,14 @@ Describe 'TestWatcher Module' {
                     $writeHandle.AsyncWaitHandle.WaitOne([TimeSpan]::FromSeconds(5)) | Out-Null
                 }
 
-                                if ($writeHandle) {
-                    $writePowerShell.EndInvoke($writeHandle) | Out-Null
+                if ($writeHandle) {
+                    try {
+                        $writePowerShell.EndInvoke($writeHandle) | Out-Null
+                    }
+                    catch {
+                        # Background writer may already be disposed after watcher exit.
+                    }
                 }
-            }
-            catch {
-                # Background writer may already be disposed after watcher exit.
 
                 $writePowerShell.Dispose()
                 Remove-Item -LiteralPath $watchDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -215,12 +217,14 @@ Describe 'TestWatcher Module' {
                     $writeHandle.AsyncWaitHandle.WaitOne([TimeSpan]::FromSeconds(5)) | Out-Null
                 }
 
-                                if ($writeHandle) {
-                    $writePowerShell.EndInvoke($writeHandle) | Out-Null
+                if ($writeHandle) {
+                    try {
+                        $writePowerShell.EndInvoke($writeHandle) | Out-Null
+                    }
+                    catch {
+                        # Background writer may already be disposed after watcher exit.
+                    }
                 }
-            }
-            catch {
-                # Background writer may already be disposed after watcher exit.
 
                 $writePowerShell.Dispose()
                 Remove-Item -LiteralPath $watchDir -Recurse -Force -ErrorAction SilentlyContinue

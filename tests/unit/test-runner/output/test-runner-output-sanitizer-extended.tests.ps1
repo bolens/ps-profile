@@ -33,7 +33,7 @@ Describe 'OutputSanitizer extended scenarios' {
             $converted = Convert-TestOutputLine -Text $line
 
             $converted | Should -Not -Match [regex]::Escape($script:TestRepoRoot)
-            $converted | Should -Match 'tests/unit/library-common\.tests\.ps1'
+            $converted | Should -Match 'tests/unit/library/common/library-common\.tests\.ps1'
         }
 
         It 'Rewrites quoted paths inside output lines' {

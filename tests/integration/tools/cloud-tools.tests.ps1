@@ -23,6 +23,7 @@ BeforeAll {
 
 Describe 'Cloud Tools Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
             throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -39,15 +40,16 @@ Describe 'Cloud Tools Integration Tests' {
             throw "Bootstrap file not found at: $bootstrapPath"
         }
         . $bootstrapPath
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize cloud tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize cloud tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'AWS CLI helpers (aws.ps1)' {
@@ -63,16 +65,18 @@ Describe 'Cloud Tools Integration Tests' {
         }
 
         It 'Creates Invoke-Aws function' {
+            try {
                         Get-Command Invoke-Aws -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty -Because "Invoke-Aws function should be created"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Function = 'Invoke-Aws'
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Invoke-Aws function creation test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Function = 'Invoke-Aws'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Invoke-Aws function creation test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Creates aws alias for Invoke-Aws' {
@@ -107,14 +111,16 @@ Describe 'Cloud Tools Integration Tests' {
 
         It 'aws-profile alias sets AWS_PROFILE environment variable' {
             if (Get-Command Set-AwsProfile -CommandType Function -ErrorAction SilentlyContinue) {
-                $originalProfile = $env:AWS_PROFILE
-                                Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
-                Set-Alias -Name aws-profile -Value Set-AwsProfile -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
-                aws-profile 'test-profile' 2>&1 | Out-Null
-                $env:AWS_PROFILE | Should -Be 'test-profile'
-            }
-            finally {
-                $env:AWS_PROFILE = $originalProfile
+                try {
+                    $originalProfile = $env:AWS_PROFILE
+                    Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
+                    Set-Alias -Name aws-profile -Value Set-AwsProfile -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
+                    aws-profile 'test-profile' 2>&1 | Out-Null
+                    $env:AWS_PROFILE | Should -Be 'test-profile'
+                }
+                finally {
+                    $env:AWS_PROFILE = $originalProfile
+                }
             }
         }
 
@@ -129,14 +135,16 @@ Describe 'Cloud Tools Integration Tests' {
 
         It 'aws-region alias sets AWS_REGION environment variable' {
             if (Get-Command Set-AwsRegion -CommandType Function -ErrorAction SilentlyContinue) {
-                $originalRegion = $env:AWS_REGION
-                                Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
-                Set-Alias -Name aws-region -Value Set-AwsRegion -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
-                aws-region 'us-east-1' 2>&1 | Out-Null
-                $env:AWS_REGION | Should -Be 'us-east-1'
-            }
-            finally {
-                $env:AWS_REGION = $originalRegion
+                try {
+                    $originalRegion = $env:AWS_REGION
+                    Set-TestCommandAvailabilityState -CommandName 'aws' -Available $true
+                    Set-Alias -Name aws-region -Value Set-AwsRegion -Scope Global -Force -ErrorAction SilentlyContinue | Out-Null
+                    aws-region 'us-east-1' 2>&1 | Out-Null
+                    $env:AWS_REGION | Should -Be 'us-east-1'
+                }
+                finally {
+                    $env:AWS_REGION = $originalRegion
+                }
             }
         }
     }

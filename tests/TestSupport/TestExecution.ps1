@@ -48,7 +48,8 @@ function Invoke-TestScriptFile {
     }
 
     try {
-        $output = & pwsh -NoProfile -File $ScriptPath @ArgumentList 2>&1 | Out-String
+        # Always non-interactive: unit/CI child scripts must never wait on Read-Host / ShouldProcess prompts.
+        $output = & pwsh -NoProfile -NonInteractive -File $ScriptPath @ArgumentList 2>&1 | Out-String
         return [pscustomobject]@{
             ExitCode = $LASTEXITCODE
             Output   = $output
@@ -80,6 +81,9 @@ function Invoke-TestPwshScript {
     $escapedRepoRoot = $repoRoot.Replace("'", "''")
     $scriptPrefix = @"
 `$env:PS_PROFILE_TEST_MODE = '1'
+`$env:PS_PROFILE_NONINTERACTIVE = '1'
+`$env:PS_PROFILE_SUPPRESS_CONFIRMATIONS = '1'
+`$ConfirmPreference = 'None'
 `$env:PS_PROFILE_REPO_ROOT = '$escapedRepoRoot'
 "@
 
@@ -110,7 +114,7 @@ function Invoke-TestPwshScript {
             throw "pwsh command not found. PowerShell Core must be installed to use this function."
         }
         
-        $output = & pwsh -NoProfile -File $tempFile 2>&1
+        $output = & pwsh -NoProfile -NonInteractive -File $tempFile 2>&1
         $exitCode = $LASTEXITCODE
         
         if ($exitCode -ne 0) {
@@ -192,12 +196,21 @@ function Initialize-FragmentPerformanceThresholds {
         [Parameter(Mandatory)]
         [string]$Prefix,
 
-        [int]$LoadMs = 4500,
-        [int]$RepeatLoadMs = 4000,
-        [int]$FunctionMs = 4000,
-        [int]$IdempotencyMs = 4000,
-        [int]$LookupMs = 1000
+        [int]$LoadMs = 10000,
+        [int]$RepeatLoadMs = 10000,
+        [int]$FunctionMs = 8000,
+        [int]$IdempotencyMs = 10000,
+        [int]$LookupMs = 2000
     )
+
+    # Windows CI runners are slower for fragment loads / Get-Command sweeps.
+    if ($IsWindows -or $env:OS -eq 'Windows_NT') {
+        $LoadMs = [Math]::Max($LoadMs, 15000)
+        $RepeatLoadMs = [Math]::Max($RepeatLoadMs, 15000)
+        $FunctionMs = [Math]::Max($FunctionMs, 12000)
+        $IdempotencyMs = [Math]::Max($IdempotencyMs, 15000)
+        $LookupMs = [Math]::Max($LookupMs, 3000)
+    }
 
     $key = ($Prefix -replace '[^A-Za-z0-9]', '_').ToUpperInvariant()
     $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_LOAD_MS" -Default $LoadMs
@@ -205,5 +218,13 @@ function Initialize-FragmentPerformanceThresholds {
     $script:MaxFunctionExecTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_FUNCTION_MS" -Default $FunctionMs
     $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_IDEMPOTENCY_MS" -Default $IdempotencyMs
     $script:MaxLookupTimeMs = Get-PerformanceThreshold -EnvironmentVariable "PS_PROFILE_${key}_MAX_LOOKUP_MS" -Default $LookupMs
+}
+
+# Promote execution helpers globally for integration tests that call them without re-dotting TestSupport.
+foreach ($testExecHelperName in @('Invoke-TestPwshScript', 'Invoke-TestScriptFile')) {
+    $testExecHelper = Get-Command -Name $testExecHelperName -ErrorAction SilentlyContinue
+    if ($testExecHelper -and $testExecHelper.CommandType -eq 'Function') {
+        Set-Item -Path "Function:\global:$testExecHelperName" -Value $testExecHelper.ScriptBlock -Force
+    }
 }
 

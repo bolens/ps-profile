@@ -30,10 +30,7 @@ Describe 'BSON to YAML Conversion Tests' {
                 Set-ItResult -Skipped -Because $skipMessage
                 return
             }
-            if (-not (Get-Command yq -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because "yq not available"
-                return
-            }
+            if (Skip-IfMikefarahYqUnavailable) { return }
             if (-not (Test-NpmPackageAvailable -PackageName 'bson')) {
                 Set-ItResult -Skipped -Because (Get-TestToolSkipMessage -ToolName 'bson' -ToolType 'node-package' -Context 'bson package not installed')
                 return

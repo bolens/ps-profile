@@ -151,10 +151,10 @@ const fs = require('fs');
                 $jsonContent = Get-Content -LiteralPath $tempJson -Raw -ErrorAction Stop
                 $jsonData = $jsonContent | ConvertFrom-Json -ErrorAction Stop
                 if ($jsonData -is [array]) {
-                    $jsonData | Export-Csv -Path $OutputPath -NoTypeInformation -ErrorAction Stop
+                    $jsonData | Export-Csv -Path $OutputPath -ErrorAction Stop
                 }
                 elseif ($jsonData -is [PSCustomObject]) {
-                    @($jsonData) | Export-Csv -Path $OutputPath -NoTypeInformation -ErrorAction Stop
+                    @($jsonData) | Export-Csv -Path $OutputPath -ErrorAction Stop
                 }
                 else {
                     throw "Arrow data must be an array or object"

@@ -5,9 +5,10 @@ scripts/checks/validate-profile.ps1
     Runs comprehensive validation checks on the PowerShell profile.
 
 .DESCRIPTION
-    Runs format, security scan, lint, spellcheck, comment-based help check, and
-    idempotency checks. Fails if any step fails. This is the main validation script
-    used in CI/CD pipelines and git hooks.
+    Runs security scan, lint, spellcheck (cspell via PATH/node_modules/pnpm/npx),
+    optional markdownlint when Node tooling is present, comment-based help,
+    idempotency, and duplicate-function checks. Fails if any step fails. Used by
+    CI/CD pipelines and git hooks (pre-commit runs format first, then this script).
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\checks\validate-profile.ps1
@@ -50,6 +51,7 @@ $format = Join-Path $utilsDir 'code-quality' 'run-format.ps1'
 $security = Join-Path $utilsDir 'security' 'run-security-scan.ps1'
 $lint = Join-Path $utilsDir 'code-quality' 'run-lint.ps1'
 $spellcheck = Join-Path $utilsDir 'code-quality' 'spellcheck.ps1'
+$markdownlint = Join-Path $utilsDir 'code-quality' 'run-markdownlint.ps1'
 $idemp = Join-Path $scriptDir 'check-idempotency.ps1'
 $fragReadme = Join-Path $scriptDir 'check-comment-help.ps1'
 
@@ -60,11 +62,27 @@ $psExe = Get-PowerShellExecutable
 $duplicateCheck = Join-Path $utilsDir 'metrics' 'find-duplicate-functions.ps1'
 
 # Run validation checks in sequence
-# Note: format is run separately in pre-commit hook before validation
+# Note: format is run separately in pre-commit hook before validation.
+# spellcheck resolves cspell from PATH, node_modules/.bin, pnpm exec, then npx.
+# markdownlint runs when local Node tooling is present (hooks / developer machines).
 $checks = @(
     @{ Name = 'security scan'; Path = $security }
     @{ Name = 'lint'; Path = $lint }
     @{ Name = 'spellcheck'; Path = $spellcheck }
+)
+
+$hasNodeTooling = (
+    (Test-Path -LiteralPath (Join-Path $repoRoot 'node_modules' '.bin' 'markdownlint')) -or
+    (Test-Path -LiteralPath (Join-Path $repoRoot 'node_modules' '.bin' 'markdownlint.cmd')) -or
+    [bool](Get-Command pnpm -ErrorAction SilentlyContinue) -or
+    [bool](Get-Command markdownlint -ErrorAction SilentlyContinue) -or
+    $env:PS_PROFILE_REQUIRE_MARKDOWNLINT -eq '1'
+)
+if ($hasNodeTooling) {
+    $checks += @{ Name = 'markdownlint'; Path = $markdownlint }
+}
+
+$checks += @(
     @{ Name = 'comment-based help check'; Path = $fragReadme }
     @{ Name = 'idempotency'; Path = $idemp }
     @{ Name = 'duplicate functions'; Path = $duplicateCheck }
@@ -78,5 +96,11 @@ foreach ($check in $checks) {
     }
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Validation: security + lint + spellcheck + comment help + idempotency + duplicate functions passed"
+$successMessage = if ($hasNodeTooling) {
+    'Validation: security + lint + spellcheck + markdownlint + comment help + idempotency + duplicate functions passed'
+}
+else {
+    'Validation: security + lint + spellcheck + comment help + idempotency + duplicate functions passed'
+}
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
 

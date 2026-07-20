@@ -958,4 +958,3 @@ Set-AgentModeAlias -Name 'db-import' -Target 'Import-Database'
 Set-AgentModeAlias -Name 'db-backup' -Target 'Backup-Database'
 Set-AgentModeAlias -Name 'db-restore' -Target 'Restore-Database'
 Set-AgentModeAlias -Name 'db-schema' -Target 'Get-DatabaseSchema'
-

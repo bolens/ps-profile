@@ -37,6 +37,12 @@ AfterAll {
 }
 
 Describe 'PathResolution extended scenarios' {
+    AfterEach {
+        if (Get-Command Disable-TestStructuredLogging -ErrorAction SilentlyContinue) {
+            Disable-TestStructuredLogging
+        }
+    }
+
     Context 'Get-ProfileDirectory' {
         It 'Resolves profile.d under the repository root' {
             $profileDir = Get-ProfileDirectory -ScriptPath $PSScriptRoot
@@ -136,14 +142,8 @@ Describe 'PathResolution extended scenarios' {
 
             try {
                 InModuleScope -ModuleName PathResolution {
-                    Mock Get-Command {
-                        param($Name)
-                        if ($Name -eq 'Exit-WithCode') {
-                            return $null
-                        }
-
-                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
-                    }
+                    # ParameterFilter avoids Mock Get-Command recursion (stack overflow under coverage).
+                    Mock Get-Command -ParameterFilter { $Name -eq 'Exit-WithCode' } -MockWith { $null }
 
                     { Get-RepoRootSafe -ScriptPath $using:invalidPath -ExitOnError } | Should -Throw
                 }
@@ -370,14 +370,8 @@ Describe 'PathResolution extended scenarios' {
 
             try {
                 InModuleScope -ModuleName PathResolution {
-                    Mock Get-Command {
-                        param($Name)
-                        if ($Name -eq 'Exit-WithCode') {
-                            return $null
-                        }
-
-                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
-                    }
+                    # ParameterFilter avoids Mock Get-Command recursion (stack overflow under coverage).
+                    Mock Get-Command -ParameterFilter { $Name -eq 'Exit-WithCode' } -MockWith { $null }
 
                     { Get-RepoRootSafe -ScriptPath $using:invalidPath -ExitOnError } | Should -Throw
                 }
@@ -397,23 +391,17 @@ Describe 'PathResolution extended scenarios' {
             $invalidPath = Join-Path $outsideRoot 'scripts/missing.ps1'
             New-Item -ItemType Directory -Path (Split-Path $invalidPath) -Force | Out-Null
 
-            Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+            Disable-TestStructuredLogging
+            Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
 
             try {
-                InModuleScope -ModuleName PathResolution -ArgumentList $invalidPath {
-                    param([string]$InvalidPath)
-
-                    Mock Exit-WithCode {
-                        param($ExitCode, $ErrorRecord)
-                        throw "Exit-WithCode invoked with code $ExitCode"
-                    }
-
-                    { Get-RepoRootSafe -ScriptPath $InvalidPath -ExitOnError } |
-                        Should -Throw '*Exit-WithCode invoked with code*'
-                }
+                # PS_PROFILE_TEST_MODE rethrows the captured ErrorRecord from Exit-WithCode.
+                { Get-RepoRootSafe -ScriptPath $invalidPath -ExitOnError } |
+                    Should -Throw '*Repository root not found*'
             }
             finally {
                 Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
             }
         }
 
@@ -472,14 +460,8 @@ Describe 'PathResolution extended scenarios' {
 
             try {
                 InModuleScope -ModuleName PathResolution {
-                    Mock Get-Command {
-                        param($Name)
-                        if ($Name -eq 'Exit-WithCode') {
-                            return $null
-                        }
-
-                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
-                    }
+                    # ParameterFilter avoids Mock Get-Command recursion (stack overflow under coverage).
+                    Mock Get-Command -ParameterFilter { $Name -eq 'Exit-WithCode' } -MockWith { $null }
 
                     { Get-RepoRootSafe -ScriptPath $using:invalidPath -ExitOnError } | Should -Throw
                 }
@@ -557,24 +539,18 @@ Describe 'PathResolution extended scenarios' {
             $invalidPath = Join-Path $outsideRoot 'scripts/missing.ps1'
             New-Item -ItemType Directory -Path (Split-Path $invalidPath) -Force | Out-Null
 
-            Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
+            Disable-TestStructuredLogging
+            Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
             Remove-Variable -Name EXIT_SETUP_ERROR -Scope Global -ErrorAction SilentlyContinue
 
             try {
-                InModuleScope -ModuleName PathResolution -ArgumentList $invalidPath {
-                    param([string]$InvalidPath)
-
-                    Mock Exit-WithCode {
-                        param($ExitCode, $ErrorRecord)
-                        throw "Exit-WithCode invoked with code $ExitCode"
-                    }
-
-                    { Get-RepoRootSafe -ScriptPath $InvalidPath -ExitOnError } |
-                        Should -Throw '*Exit-WithCode invoked with code 2*'
-                }
+                # PS_PROFILE_TEST_MODE rethrows the captured ErrorRecord from Exit-WithCode.
+                { Get-RepoRootSafe -ScriptPath $invalidPath -ExitOnError } |
+                    Should -Throw '*Repository root not found*'
             }
             finally {
                 Remove-Module ExitCodes -ErrorAction SilentlyContinue -Force
+                Import-Module (Join-Path $script:LibPath 'core' 'ExitCodes.psm1') -DisableNameChecking -Force -Global -ErrorAction SilentlyContinue
             }
         }
 
@@ -635,14 +611,8 @@ Describe 'PathResolution extended scenarios' {
                 InModuleScope -ModuleName PathResolution -ArgumentList $invalidPath {
                     param([string]$InvalidPath)
 
-                    Mock Get-Command {
-                        param($Name)
-                        if ($Name -eq 'Exit-WithCode') {
-                            return $null
-                        }
-
-                        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
-                    }
+                    # ParameterFilter avoids Mock Get-Command recursion (stack overflow under coverage).
+                    Mock Get-Command -ParameterFilter { $Name -eq 'Exit-WithCode' } -MockWith { $null }
 
                     { Get-RepoRootSafe -ScriptPath $InvalidPath -ExitOnError } | Should -Throw
                 }
@@ -766,8 +736,9 @@ Describe 'PathResolution extended scenarios' {
             $env:PS_PROFILE_DEBUG = '0'
 
             try {
-                Get-RepoRootSafe -ScriptPath $invalidPath -ExitOnError -ErrorAction SilentlyContinue |
-                    Should -BeNullOrEmpty
+                # ExitOnError must terminate even when Exit-WithCode / structured logging are disabled.
+                { Get-RepoRootSafe -ScriptPath $invalidPath -ExitOnError } |
+                    Should -Throw '*Repository root not found*'
             }
             finally {
                 if ($null -eq $originalStructuredFlag) {

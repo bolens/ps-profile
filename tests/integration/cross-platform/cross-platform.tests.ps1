@@ -2,6 +2,7 @@
 
 Describe 'Cross-Platform Compatibility Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         $script:ProfilePath = Get-TestPath -RelativePath 'Microsoft.PowerShell_profile.ps1' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
@@ -16,15 +17,16 @@ Describe 'Cross-Platform Compatibility Integration Tests' {
         if (-not (Test-Path -LiteralPath $script:ProfilePath)) {
             throw "Profile file not found at: $script:ProfilePath"
         }
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize cross-platform tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize cross-platform tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'Platform path helpers' {
@@ -52,6 +54,7 @@ Describe 'Cross-Platform Compatibility Integration Tests' {
         }
 
         It 'functions work with both Windows and Unix-style paths' {
+            try {
             . (Join-Path $script:ProfileDir 'bootstrap.ps1')
             . (Join-Path $script:ProfileDir 'files.ps1')
             $navigationModule = Join-Path $script:ProfileDir 'files-modules' 'navigation' 'files-navigation.ps1'
@@ -74,9 +77,10 @@ Describe 'Cross-Platform Compatibility Integration Tests' {
             else {
                 Set-ItResult -Skipped -Because ".. function not available"
             }
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
     }
 }

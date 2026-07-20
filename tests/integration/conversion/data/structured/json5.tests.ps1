@@ -101,6 +101,7 @@ Describe 'JSON5 Format Conversion Tests' {
         }
 
         It 'ConvertFrom-Json5ToJson handles missing json5 package gracefully when Node.js is available' {
+            try {
             if (-not $script:NodeAvailable) {
                 Set-ItResult -Skipped -Because "Node.js is not available"
                 return
@@ -119,28 +120,30 @@ Describe 'JSON5 Format Conversion Tests' {
             if ($jsonFile -and -not [string]::IsNullOrWhiteSpace($jsonFile) -and (Test-Path -LiteralPath $jsonFile)) {
                 $jsonFile | Should -Exist
             }
-        }
-        catch {
-            $errorMessage = $_.Exception.Message
-            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-            
-            if ($errorMessage -match 'json5.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'json5') {
-                $installCommand = Resolve-TestToolInstallCommand -ToolName 'json5' -ToolType 'node-package'
-                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                }
-                elseif ($errorMessage -match 'json5' -or $fullError -match 'json5') {
-                    Write-Host "json5 package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match 'json5'
-                }
             }
-            else {
-                throw
+            catch {
+                $errorMessage = $_.Exception.Message
+                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+                if ($errorMessage -match 'json5.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'json5') {
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'json5' -ToolType 'node-package'
+                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                    }
+                    elseif ($errorMessage -match 'json5' -or $fullError -match 'json5') {
+                        Write-Host "json5 package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match 'json5'
+                    }
+                }
+                else {
+                    throw
+                }
             }
         }
 
         It 'ConvertTo-Json5FromJson handles missing json5 package gracefully when Node.js is available' {
+            try {
             if (-not $script:NodeAvailable) {
                 Set-ItResult -Skipped -Because "Node.js is not available"
                 return
@@ -159,24 +162,25 @@ Describe 'JSON5 Format Conversion Tests' {
             if ($json5File -and -not [string]::IsNullOrWhiteSpace($json5File) -and (Test-Path -LiteralPath $json5File)) {
                 $json5File | Should -Exist
             }
-        }
-        catch {
-            $errorMessage = $_.Exception.Message
-            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-            
-            if ($errorMessage -match 'json5.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'json5') {
-                $installCommand = Resolve-TestToolInstallCommand -ToolName 'json5' -ToolType 'node-package'
-                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                }
-                elseif ($errorMessage -match 'json5' -or $fullError -match 'json5') {
-                    Write-Host "json5 package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match 'json5'
-                }
             }
-            else {
-                throw
+            catch {
+                $errorMessage = $_.Exception.Message
+                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+                if ($errorMessage -match 'json5.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'json5') {
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'json5' -ToolType 'node-package'
+                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                    }
+                    elseif ($errorMessage -match 'json5' -or $fullError -match 'json5') {
+                        Write-Host "json5 package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match 'json5'
+                    }
+                }
+                else {
+                    throw
+                }
             }
         }
     }

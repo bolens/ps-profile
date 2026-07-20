@@ -28,9 +28,9 @@ Describe 'bootstrap.ps1 extended scenarios' {
         It 'Loads GlobalState before downstream bootstrap modules during execution' {
             $loadOrder = @(
                 'GlobalState.ps1',
+                'FunctionRegistration.ps1',
                 'ErrorHandlingStandard.ps1',
                 'CommandCache.ps1',
-                'FunctionRegistration.ps1',
                 'ModulePathCache.ps1',
                 'ModuleLoading.ps1'
             )
@@ -48,7 +48,7 @@ Describe 'bootstrap.ps1 extended scenarios' {
 
         It 'Dot-sources expected bootstrap module files from profile.d/bootstrap' {
             foreach ($moduleName in @(
-                    'GlobalState.ps1', 'ErrorHandlingStandard.ps1', 'FunctionRegistration.ps1',
+                    'GlobalState.ps1', 'FunctionRegistration.ps1', 'ErrorHandlingStandard.ps1',
                     'ModuleLoading.ps1', 'UserHome.ps1', 'PlatformPaths.ps1'
                 )) {
                 Test-Path -LiteralPath (Join-Path $script:BootstrapDir $moduleName) | Should -Be $true
@@ -77,14 +77,16 @@ Describe 'bootstrap.ps1 extended scenarios' {
         }
 
         It 'Preserves existing function bodies on repeated Set-AgentModeFunction calls' {
+            try {
             $funcName = "BootstrapExtended_$([Guid]::NewGuid().ToString('N'))"
                         Set-AgentModeFunction -Name $funcName -Body { 'first-body' } | Should -Be $true
             Set-AgentModeFunction -Name $funcName -Body { 'second-body' } | Should -Be $false
             & $funcName | Should -Be 'first-body'
-        }
-        finally {
-            Remove-Item -Path "Function:\$funcName" -Force -ErrorAction SilentlyContinue
-            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -Path "Function:\$funcName" -Force -ErrorAction SilentlyContinue
+                Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+            }
         }
     }
 

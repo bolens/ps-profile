@@ -24,6 +24,15 @@
 .PARAMETER Parallel
     Pass -Parallel to run-pester for parallel test execution within the session.
 
+.PARAMETER NamePattern
+    Optional case-insensitive regex matched against each test file basename
+    (e.g. '^[a-m]' for CI shard splits). When set, runs use -PerFile isolation
+    (staging under test-artifacts is unsafe because Remove-TestArtifacts wipes it).
+
+.PARAMETER PerFileTimeoutSeconds
+    Abort each PerFile run-pester process after this many seconds (default: 600).
+    Prevents a single hung file from burning the full 90m CI job timeout.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 -RelativePath data/structured
 
@@ -40,7 +49,12 @@ param(
     [switch]$Quiet,
 
     [ValidateRange(0, 100)]
-    [int]$Parallel = 0
+    [int]$Parallel = 0,
+
+    [string]$NamePattern = '',
+
+    [ValidateRange(0, 7200)]
+    [int]$PerFileTimeoutSeconds = 600
 )
 
 $conversionRoot = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
@@ -53,8 +67,13 @@ if (-not (Test-Path -LiteralPath $testDir)) {
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
 $files = @(Get-ChildItem -Path $testDir -Filter '*.tests.ps1' -File -Recurse | Sort-Object FullName)
 
+if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
+    $files = @($files | Where-Object { $_.Name -match $NamePattern })
+}
+
 if ($files.Count -eq 0) {
-    Write-Error "No *.tests.ps1 files under: $testDir"
+    $hint = if ([string]::IsNullOrWhiteSpace($NamePattern)) { '' } else { " (NamePattern: $NamePattern)" }
+    Write-Error "No *.tests.ps1 files under: $testDir$hint"
     exit 2
 }
 
@@ -68,15 +87,15 @@ function Get-PesterRunStats {
     $failed = -1
     $skipped = 0
 
-    if ($Output -match 'Tests Passed:\s*(\d+)') {
-        $passed = [int]$Matches[1]
-        if ($Output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
-        if ($Output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
-    }
-    elseif ($Output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
+    if ($Output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
         $passed = [int]$Matches[1]
         $failed = [int]$Matches[2]
         $skipped = [int]$Matches[3]
+    }
+    elseif ($Output -match 'Tests Passed:\s*(\d+)') {
+        $passed = [int]$Matches[1]
+        if ($Output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
+        if ($Output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
     }
     elseif ($ResultXmlPath -and (Test-Path -LiteralPath $ResultXmlPath)) {
         try {
@@ -86,9 +105,11 @@ function Get-PesterRunStats {
                 $total = [int]$root.total
                 $failures = [int]$root.failures + [int]$root.errors
                 $skippedCount = [int]$root.skipped + [int]$root.ignored
-                $passed = $total - $failures - $skippedCount
-                $failed = $failures
-                $skipped = $skippedCount
+                if ($total -gt 0) {
+                    $passed = $total - $failures - $skippedCount
+                    $failed = $failures
+                    $skipped = $skippedCount
+                }
             }
         }
         catch {
@@ -104,27 +125,118 @@ function Get-PesterRunStats {
 }
 
 function Get-PesterFailureLines {
-    param([string]$Output)
+    param(
+        [string]$Output,
+        [string]$ResultXmlPath
+    )
 
-    [regex]::Matches($Output, '(?m)^\s+\[-\].*') | ForEach-Object { $_.Value.Trim() }
+    $lines = [System.Collections.Generic.List[string]]::new()
+    [regex]::Matches($Output, '(?m)^\s+\[-\].*') | ForEach-Object { $lines.Add($_.Value.Trim()) }
+
+    $xmlCandidates = @()
+    if ($ResultXmlPath -and -not [string]::IsNullOrWhiteSpace($ResultXmlPath)) {
+        if (Test-Path -LiteralPath $ResultXmlPath -PathType Leaf) {
+            $xmlCandidates += $ResultXmlPath
+        }
+        elseif (Test-Path -LiteralPath $ResultXmlPath -PathType Container) {
+            $xmlCandidates += @(Get-ChildItem -LiteralPath $ResultXmlPath -Filter '*.xml' -Recurse -File -ErrorAction SilentlyContinue |
+                Select-Object -ExpandProperty FullName)
+        }
+    }
+
+    foreach ($xmlPath in $xmlCandidates) {
+        try {
+            [xml]$xml = Get-Content -LiteralPath $xmlPath -Raw -ErrorAction Stop
+            foreach ($case in @($xml.SelectNodes('//test-case[@result="Failure" or @result="Error"]'))) {
+                $name = [string]$case.GetAttribute('name')
+                $messageNode = $case.SelectSingleNode('.//failure/message')
+                $message = if ($messageNode) { [string]$messageNode.InnerText } else { '' }
+                if ([string]::IsNullOrWhiteSpace($name) -and [string]::IsNullOrWhiteSpace($message)) {
+                    continue
+                }
+                $summary = if ($message) { "${name}: $message" } else { $name }
+                if (-not [string]::IsNullOrWhiteSpace($summary) -and -not $lines.Contains($summary)) {
+                    $lines.Add($summary.Trim())
+                }
+            }
+        }
+        catch {
+            # Ignore unreadable result XML; output-based lines may still be available.
+        }
+    }
+
+    return @($lines)
 }
 
 function Invoke-ConversionBatchRunner {
     param(
-        [string[]]$RunnerArgs
+        [string[]]$RunnerArgs,
+
+        [int]$TimeoutSeconds = 0
     )
 
     # Child pwsh process keeps run-pester isolated (in-process runs fail en masse).
-    $output = & pwsh @RunnerArgs 2>&1 | Out-String
-    $exitCode = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 }
-    return [pscustomobject]@{
-        Output   = $output
-        ExitCode = $exitCode
+    # Do not pass -Timeout to run-pester: Invoke-PesterWithTimeout uses a runspace
+    # that breaks integration TestSupport/TestDrive setup (0P / all F).
+    if ($TimeoutSeconds -le 0) {
+        $output = & pwsh @RunnerArgs 2>&1 | Out-String
+        $exitCode = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 }
+        return [pscustomobject]@{
+            Output   = $output
+            ExitCode = $exitCode
+            TimedOut = $false
+        }
+    }
+
+    # Redirect to temp files (not pipes): WaitForExit + unread redirected pipes
+    # deadlocks once the OS pipe buffer fills — which looks like a 600s "hang".
+    $pwshExe = (Get-Command pwsh -ErrorAction Stop).Source
+    $stdoutPath = [System.IO.Path]::GetTempFileName()
+    $stderrPath = [System.IO.Path]::GetTempFileName()
+    try {
+        $process = Start-Process -FilePath $pwshExe -ArgumentList $RunnerArgs -NoNewWindow -PassThru `
+            -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+        $timedOut = -not $process.WaitForExit($TimeoutSeconds * 1000)
+        if ($timedOut) {
+            try {
+                Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
+                $process.WaitForExit(5000) | Out-Null
+            }
+            catch { }
+        }
+        else {
+            # Ensure async file writers flush
+            $process.WaitForExit() | Out-Null
+        }
+
+        $stdout = if (Test-Path -LiteralPath $stdoutPath) { Get-Content -LiteralPath $stdoutPath -Raw -ErrorAction SilentlyContinue } else { '' }
+        $stderr = if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath -Raw -ErrorAction SilentlyContinue } else { '' }
+        $output = [string]$stdout + [string]$stderr
+        if ($timedOut) {
+            if ($output -notmatch 'Timed out after') {
+                $output += "`nTimed out after ${TimeoutSeconds}s`n"
+            }
+            return [pscustomobject]@{
+                Output   = $output
+                ExitCode = 1
+                TimedOut = $true
+            }
+        }
+
+        return [pscustomobject]@{
+            Output   = $output
+            ExitCode = $process.ExitCode
+            TimedOut = $false
+        }
+    }
+    finally {
+        Remove-Item -LiteralPath $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
     }
 }
 
 function New-BatchRunnerArgs {
     param(
+        [Parameter(Mandatory)]
         [string]$TargetPath,
         [string]$ResultPath
     )
@@ -153,6 +265,17 @@ function New-BatchRunnerArgs {
 }
 
 $label = $RelativePath -replace '[/\\]', '/'
+if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
+    $label = "$label (NamePattern=$NamePattern)"
+    # Staging filtered files under tests/test-artifacts breaks conversion tests:
+    # AfterEach Remove-TestArtifacts wipes the staged scripts mid-run, and
+    # NamePattern hashes like ^markdown vs ^(?!markdown) collided on sanitized
+    # artifact names. Per-file isolation avoids both issues.
+    if (-not $PerFile) {
+        $PerFile = $true
+        Write-Host 'NamePattern set: using -PerFile (staging is unsafe for conversion tests)' -ForegroundColor DarkGray
+    }
+}
 Write-Host "Batch: $label ($($files.Count) files)" -ForegroundColor Cyan
 
 if (-not $PerFile) {
@@ -161,20 +284,45 @@ if (-not $PerFile) {
 
     $resultDir = Join-Path $RepoRoot 'tests' 'test-artifacts' 'conversion-batch'
     $null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
-    $resultXml = Join-Path $resultDir 'test-results.xml'
+    $resultKey = ($RelativePath -replace '[/\\]', '-')
+    # run-pester -TestResultPath expects a directory (not a .xml file path).
+    $resultPath = Join-Path $resultDir $resultKey
+    if (Test-Path -LiteralPath $resultPath) {
+        Remove-Item -LiteralPath $resultPath -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+    $null = New-Item -ItemType Directory -Path $resultPath -Force -ErrorAction SilentlyContinue
+    $resultXml = Join-Path $resultPath 'test-results.xml'
 
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultDir)
+    # Single-session batches can exceed PerFileTimeoutSeconds legitimately;
+    # only PerFile mode uses the hang watchdog.
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $testDir -ResultPath $resultPath) -TimeoutSeconds 0
     $sw.Stop()
 
     $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultXml
-    $failLines = @(Get-PesterFailureLines -Output $run.Output)
-    $batchFailed = $run.ExitCode -ne 0 -or ($stats.Failed -gt 0)
+    if ($stats.Failed -lt 0) {
+        # Prefer the runner's default XML name when present under the result directory.
+        $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $resultPath
+    }
+    $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $resultPath)
+    # Prefer parsed Pester counts when available; child exit codes can be non-zero
+    # from non-terminating warnings even when FailedCount is 0.
+    $batchFailed = if ($stats.Failed -ge 0) {
+        $stats.Failed -gt 0
+    }
+    else {
+        $run.ExitCode -ne 0
+    }
 
     $color = if ($batchFailed) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
     Write-Host "  $($stats.Passed)P / $($stats.Failed)F / $($stats.Skipped)S in $([math]::Round($sw.Elapsed.TotalSeconds, 1))s" -ForegroundColor $color
     if ($failLines.Count -gt 0) {
         $failLines | Select-Object -First 5 | ForEach-Object { Write-Host "    $_" -ForegroundColor DarkRed }
+    }
+    elseif ($batchFailed -and $stats.Failed -lt 0 -and -not [string]::IsNullOrWhiteSpace($run.Output)) {
+        # Runner crashed / misconfigured before emitting Pester counts — surface the reason.
+        ($run.Output -split "`n" | Where-Object { $_ -match '\S' } | Select-Object -Last 12) |
+            ForEach-Object { Write-Host "    $_" -ForegroundColor DarkRed }
     }
 
     Write-Host ''
@@ -200,13 +348,36 @@ if (-not $PerFile) {
 Write-Host "Mode: per-file (slow)" -ForegroundColor DarkGray
 Write-Host ''
 
+$resultDir = Join-Path $RepoRoot 'tests' 'test-artifacts' 'conversion-batch'
+$null = New-Item -ItemType Directory -Path $resultDir -Force -ErrorAction SilentlyContinue
+
 $results = @()
 foreach ($file in $files) {
     $relName = $file.FullName.Substring($conversionRoot.Length).TrimStart('/', '\')
     Write-Host "=== $relName ===" -ForegroundColor Cyan
-    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName)
-    $stats = Get-PesterRunStats -Output $run.Output
-    $failLines = @(Get-PesterFailureLines -Output $run.Output)
+    $fileResultDir = Join-Path $resultDir (('pf-' + ($relName -replace '[\\/:\*\?"<>\|]', '-')).Trim('-'))
+    if (Test-Path -LiteralPath $fileResultDir) {
+        Remove-Item -LiteralPath $fileResultDir -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+    $null = New-Item -ItemType Directory -Path $fileResultDir -Force -ErrorAction SilentlyContinue
+
+    $run = Invoke-ConversionBatchRunner -RunnerArgs (New-BatchRunnerArgs -TargetPath $file.FullName -ResultPath $fileResultDir) -TimeoutSeconds $PerFileTimeoutSeconds
+    $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath (Join-Path $fileResultDir 'test-results.xml')
+    if ($stats.Failed -lt 0) {
+        $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $fileResultDir
+    }
+    # Timeout / crash: no Pester summary — treat non-zero exit as a failure so the batch fails.
+    if ($run.ExitCode -ne 0 -and $stats.Failed -le 0) {
+        $stats = [pscustomobject]@{
+            Passed  = [Math]::Max(0, $stats.Passed)
+            Failed  = 1
+            Skipped = [Math]::Max(0, $stats.Skipped)
+        }
+    }
+    $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $fileResultDir)
+    if ($run.ExitCode -ne 0 -and $failLines.Count -eq 0 -and ($run.TimedOut -or $run.Output -match 'Timed out after')) {
+        $failLines = @("Timed out after ${PerFileTimeoutSeconds}s")
+    }
 
     $results += [pscustomobject]@{
         File     = $relName

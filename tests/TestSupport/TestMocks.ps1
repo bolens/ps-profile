@@ -70,8 +70,40 @@ function Reset-TestIsolationState {
         Clear-DispatcherTestStubs
     }
 
+    # Drop any global command-lookup handlers leaked by a prior test file (e.g. the fragment
+    # CommandDispatcher's CommandNotFoundAction or SmartPrompt/diagnostics PostCommandLookupAction).
+    # A leaked handler fires during Pester's own command resolution in later files and corrupts
+    # mock scope tracking, surfacing as "Mock data are not setup for this scope".
+    # Unregister first so the CommandDispatcher module clears its own $script:DispatcherRegistered
+    # flag (otherwise a later Register-CommandDispatcher no-ops without reinstalling the handler).
+    if (Get-Command Unregister-CommandDispatcher -ErrorAction SilentlyContinue) {
+        Unregister-CommandDispatcher | Out-Null
+    }
+
+    $invokeCommand = $ExecutionContext.SessionState.InvokeCommand
+    foreach ($handlerName in @('CommandNotFoundAction', 'PreCommandLookupAction', 'PostCommandLookupAction')) {
+        try {
+            if ($null -ne $invokeCommand.$handlerName) {
+                $invokeCommand.$handlerName = $null
+            }
+        }
+        catch {
+            # Property may be unavailable on some hosts; ignore.
+        }
+    }
+
     if (Get-Command Clear-LibraryTestEnvironmentVariables -ErrorAction SilentlyContinue) {
         Clear-LibraryTestEnvironmentVariables
+    }
+
+    # Shard isolation: keep test-mode Exit-WithCode semantics and non-terminating
+    # diagnostics even when individual tests clear these for in-process probes.
+    $env:PS_PROFILE_TEST_MODE = '1'
+    $ErrorActionPreference = 'Continue'
+    $global:ErrorActionPreference = 'Continue'
+
+    if (Get-Command Disable-TestStructuredLogging -ErrorAction SilentlyContinue) {
+        Disable-TestStructuredLogging
     }
 
     if (Get-Command Clear-RuntimeTestGlobals -ErrorAction SilentlyContinue) {
@@ -134,6 +166,38 @@ function Reset-TestIsolationState {
         Set-Variable -Name $flagName -Scope Global -Value $false -Force -ErrorAction SilentlyContinue
     }
 
+    # Drop shared public helpers so Ensure-Utilities / Ensure-DevTools / conversion
+    # can re-register their implementations. Leaving lazy Ensure-DevTools wrappers
+    # behind after clearing DevToolsInitialized causes CommandNotFoundException
+    # for Ensure-DevTools in later files (datetime/encoding unit tests).
+    $sharedEnsureCommands = @(
+        'ConvertFrom-Epoch', 'ConvertTo-Epoch', 'Get-Epoch', 'Get-DateTime'
+        'ConvertTo-UrlEncoded', 'ConvertFrom-UrlEncoded'
+        'ConvertTo-HtmlEncoded', 'ConvertFrom-HtmlEncoded'
+        '_ConvertFrom-Epoch', '_ConvertTo-Epoch'
+        '_ConvertTo-UrlEncoded', '_ConvertFrom-UrlEncoded'
+        '_ConvertTo-HtmlEncoded', '_ConvertFrom-HtmlEncoded'
+        'ConvertFrom-AsciiToUrl'
+    )
+    if (Get-Command Remove-TestFunction -ErrorAction SilentlyContinue) {
+        Remove-TestFunction -Name $sharedEnsureCommands
+    }
+    else {
+        foreach ($name in $sharedEnsureCommands) {
+            Remove-Item -Path "Function:\$name" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$name" -Force -ErrorAction SilentlyContinue
+        }
+    }
+    foreach ($aliasName in @(
+            'from-epoch', 'to-epoch', 'epoch', 'now'
+            'url-encode', 'url-decode', 'html-encode', 'html-decode'
+            'epoch-to-date', 'date-to-epoch', 'ascii-to-url'
+            'speedtest'
+        )) {
+        Remove-Item -Path "Alias:\$aliasName" -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "Alias:\global:$aliasName" -Force -ErrorAction SilentlyContinue
+    }
+
     foreach ($globalName in @(
             'OriginalErrorActionPreference'
             'PSProfileOriginalVerbosePreference'
@@ -155,6 +219,14 @@ function Reset-TestIsolationState {
 
     if (Get-Command Initialize-TestMocks -ErrorAction SilentlyContinue) {
         Initialize-TestMocks
+    }
+
+    if (Get-Command Restore-TestSupportHelperFunctions -ErrorAction SilentlyContinue) {
+        Restore-TestSupportHelperFunctions
+    }
+
+    if (Get-Command Export-TestSupportGlobalFunctions -ErrorAction SilentlyContinue) {
+        Export-TestSupportGlobalFunctions
     }
 }
 
@@ -669,6 +741,10 @@ function Initialize-TestProfileGlobals {
         $global:AssumedAvailableCommands = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
     }
 
+    if (-not (Get-Variable -Name 'TestCommandAvailabilityOverrides' -Scope Global -ErrorAction SilentlyContinue)) {
+        $global:TestCommandAvailabilityOverrides = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    }
+
     if (-not (Get-Variable -Name 'MissingToolWarnings' -Scope Global -ErrorAction SilentlyContinue)) {
         $global:MissingToolWarnings = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
     }
@@ -691,6 +767,14 @@ function Restore-TestSupportFunctions {
     $testCommandAvailabilityPath = Join-Path $PSScriptRoot 'TestCommandAvailability.ps1'
     if (Test-Path -LiteralPath $testCommandAvailabilityPath) {
         . $testCommandAvailabilityPath
+    }
+
+    if (Get-Command Restore-TestSupportHelperFunctions -ErrorAction SilentlyContinue) {
+        Restore-TestSupportHelperFunctions
+    }
+
+    if (Get-Command Export-TestSupportGlobalFunctions -ErrorAction SilentlyContinue) {
+        Export-TestSupportGlobalFunctions
     }
 }
 

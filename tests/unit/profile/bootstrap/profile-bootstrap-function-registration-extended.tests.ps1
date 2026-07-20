@@ -28,14 +28,16 @@ Describe 'profile.d/bootstrap/FunctionRegistration.ps1 extended scenarios' {
     }
 
     It 'Set-AgentModeFunction does not overwrite existing function bodies' {
+        try {
         $funcName = "BootstrapReg_$([Guid]::NewGuid().ToString('N'))"
                 Set-AgentModeFunction -Name $funcName -Body { 'first-body' } | Should -Be $true
         Set-AgentModeFunction -Name $funcName -Body { 'second-body' } | Should -Be $false
         & $funcName | Should -Be 'first-body'
-    }
-    finally {
-        Remove-Item -Path "Function:\$funcName" -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+        }
+        finally {
+            Remove-Item -Path "Function:\$funcName" -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "Function:\global:$funcName" -Force -ErrorAction SilentlyContinue
+        }
     }
 
     It 'Preserves registration helper bodies on repeated module loads' {

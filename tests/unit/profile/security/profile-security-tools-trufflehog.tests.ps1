@@ -68,27 +68,31 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
         }
 
         It 'Uses default path when not specified' {
+            try {
             Setup-CapturingCommandMock -CommandName 'trufflehog' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
                         $result = Invoke-TruffleHogScan -ErrorAction SilentlyContinue
             $result | Should -Not -BeNullOrEmpty
             $global:TestCommandInvocationCaptures.Count | Should -Be 1
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Handles trufflehog execution errors gracefully' {
+            try {
             Set-TestCommandThrowingMock -CommandName 'trufflehog' -Message 'Execution failed'
 
             $result = $null
                         $result = Invoke-TruffleHogScan -Path $script:TestRepoPath -ErrorAction SilentlyContinue
-        }
-        catch {
-            $result = $null
+            }
+            catch {
+                $result = $null
 
-            $result | Should -BeNullOrEmpty
+                $result | Should -BeNullOrEmpty
+            }
         }
 
         It 'Validates OutputFormat parameter' {
@@ -107,14 +111,16 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
         }
 
         It 'Handles empty string path' {
+            try {
             Setup-CapturingCommandMock -CommandName 'trufflehog' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
                         $result = Invoke-TruffleHogScan -Path '' -ErrorAction SilentlyContinue
             $result | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Handles trufflehog path not found' {
@@ -126,14 +132,16 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
         }
 
         It 'Uses default path when trufflehog path is whitespace' {
+            try {
             Setup-CapturingCommandMock -CommandName 'trufflehog' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
                         $result = Invoke-TruffleHogScan -Path '   ' -ErrorAction SilentlyContinue
             $result | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Handles multiple pipeline inputs' {

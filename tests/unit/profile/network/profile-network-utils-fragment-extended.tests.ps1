@@ -40,8 +40,8 @@ Describe 'profile.d/network-utils.ps1 extended scenarios' {
     It 'Invoke-WithRetry executes without error for a simple script block' {
         . (Join-Path $script:ProfileDir 'network-utils.ps1')
 
-        $result = Invoke-WithRetry -ScriptBlock { 'network-utils probe' } -MaxRetries 1
-        $result | Should -Be 'network-utils probe'
+        $result = Invoke-WithRetry -ScriptBlock { 'network-utils probe' } -MaxRetries 1 -TimeoutSeconds 5 -RetryDelaySeconds 0
+        @($result)[0] | Should -Be 'network-utils probe'
     }
 
     It 'Skips re-initialization when network utilities are already loaded' {

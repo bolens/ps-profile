@@ -55,14 +55,16 @@ Describe 'Git Integration Tests' {
         }
 
         It 'git shortcuts handle non-git directories' {
+            try {
             $nonGitDir = Join-Path $TestDrive 'non_git'
             New-Item -ItemType Directory -Path $nonGitDir -Force | Out-Null
 
             Push-Location $nonGitDir
                         { gs } | Should -Not -Throw
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Ensure-GitHelper is idempotent' {
@@ -154,15 +156,17 @@ Describe 'Git Integration Tests' {
         }
 
         It 'Test-GitRepositoryContext returns false outside repo' {
+            try {
             $nonGitDir = Join-Path $TestDrive 'non_git_context'
             New-Item -ItemType Directory -Path $nonGitDir -Force | Out-Null
 
             Push-Location $nonGitDir
                         $result = Test-GitRepositoryContext
             $result | Should -Be $false
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Test-GitRepositoryHasCommits returns false in empty repo' {

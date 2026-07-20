@@ -10,6 +10,7 @@ function global:New-ValidateProfileTestRepository {
         [int]$SecurityExitCode = 0,
         [int]$LintExitCode = 0,
         [int]$SpellcheckExitCode = 0,
+        [int]$MarkdownlintExitCode = 0,
         [int]$CommentHelpExitCode = 0,
         [int]$IdempotencyExitCode = 0,
         [int]$DuplicateExitCode = 0
@@ -28,6 +29,7 @@ function global:New-ValidateProfileTestRepository {
         @{ Relative = 'utils/security/run-security-scan.ps1'; ExitCode = $SecurityExitCode }
         @{ Relative = 'utils/code-quality/run-lint.ps1'; ExitCode = $LintExitCode }
         @{ Relative = 'utils/code-quality/spellcheck.ps1'; ExitCode = $SpellcheckExitCode }
+        @{ Relative = 'utils/code-quality/run-markdownlint.ps1'; ExitCode = $MarkdownlintExitCode }
         @{ Relative = 'checks/check-comment-help.ps1'; ExitCode = $CommentHelpExitCode }
         @{ Relative = 'checks/check-idempotency.ps1'; ExitCode = $IdempotencyExitCode }
         @{ Relative = 'utils/metrics/find-duplicate-functions.ps1'; ExitCode = $DuplicateExitCode }
@@ -61,13 +63,21 @@ function global:Invoke-ValidateProfileScript {
     $scriptPath = Join-Path $RepositoryRoot 'scripts' 'checks' 'validate-profile.ps1'
     Push-Location $RepositoryRoot
     try {
-    $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
-    return [pscustomobject]@{
-        ExitCode = $LASTEXITCODE
-        Output   = $output
-    }
+        $previousRequireMarkdown = $env:PS_PROFILE_REQUIRE_MARKDOWNLINT
+        $env:PS_PROFILE_REQUIRE_MARKDOWNLINT = '1'
+        $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
+        return [pscustomobject]@{
+            ExitCode = $LASTEXITCODE
+            Output   = $output
+        }
     }
     finally {
+        if ($null -eq $previousRequireMarkdown) {
+            Remove-Item Env:PS_PROFILE_REQUIRE_MARKDOWNLINT -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PS_PROFILE_REQUIRE_MARKDOWNLINT = $previousRequireMarkdown
+        }
         Pop-Location
     }
 }
@@ -116,6 +126,13 @@ Describe 'validate-profile.ps1 execution' {
         $result.Output | Should -Match 'spellcheck failed|Running spellcheck'
     }
 
+    It 'Fails when the markdownlint stub returns a non-zero exit code' {
+        $repo = New-ValidateProfileTestRepository -MarkdownlintExitCode 1
+        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
+        $result.ExitCode | Should -BeIn @(1, 2)
+        $result.Output | Should -Match 'markdownlint failed|Running markdownlint'
+    }
+
     It 'Fails when the idempotency stub returns a non-zero exit code' {
         $repo = New-ValidateProfileTestRepository -IdempotencyExitCode 1
         $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
@@ -141,6 +158,6 @@ Describe 'validate-profile.ps1 execution' {
         $repo = New-ValidateProfileTestRepository
         $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
         $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'Validation: security \+ lint \+ spellcheck \+ comment help \+ idempotency \+ duplicate functions passed'
+        $result.Output | Should -Match 'Validation: security \+ lint \+ spellcheck \+ markdownlint \+ comment help \+ idempotency \+ duplicate functions passed'
     }
 }

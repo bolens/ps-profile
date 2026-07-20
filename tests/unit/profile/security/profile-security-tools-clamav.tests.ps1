@@ -95,15 +95,17 @@ Describe 'security-tools.ps1 - Invoke-ClamAVScan' {
         }
 
         It 'Handles clamscan execution errors gracefully' {
+            try {
             Set-TestCommandThrowingMock -CommandName 'clamscan' -Message 'Execution failed'
 
             $result = $null
                         $result = Invoke-ClamAVScan -Path $script:TestRepoPath -ErrorAction SilentlyContinue
-        }
-        catch {
-            $result = $null
+            }
+            catch {
+                $result = $null
 
-            $result | Should -BeNullOrEmpty
+                $result | Should -BeNullOrEmpty
+            }
         }
 
         It 'Tests ClamAV with recursive flag' {

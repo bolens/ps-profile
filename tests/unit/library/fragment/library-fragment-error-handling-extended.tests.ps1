@@ -45,6 +45,7 @@ function script:Clear-FragmentErrorTestEnvironment {
     }
 
     Clear-CommandTestStubs
+    Remove-TestFunction -Name @('Write-ScriptMessage', 'Write-Warning', 'Write-ProfileError', 'Test-FragmentWarningSuppressed')
 }
 
 AfterAll {
@@ -94,18 +95,18 @@ Describe 'FragmentErrorHandling extended scenarios' {
         It 'Uses Write-ScriptMessage when structured logging is unavailable for missing files' {
             $missingPath = Join-Path $script:TempDir 'missing-scriptmessage.ps1'
             $env:PS_PROFILE_DEBUG = '1'
-            $messages = [System.Collections.Generic.List[string]]::new()
+            $script:CapturedMessages = [System.Collections.Generic.List[string]]::new()
 
             Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
             function global:Write-ScriptMessage {
                 param([string]$Message, [switch]$IsWarning, [switch]$IsError)
-                $null = $messages.Add($Message)
+                $null = $script:CapturedMessages.Add($Message)
             }
 
             try {
                 $result = Invoke-FragmentSafely -FragmentName 'missing-scriptmessage' -FragmentPath $missingPath
                 $result | Should -Be $false
-                @($messages | Where-Object { $_ -like '*not found*' }).Count | Should -BeGreaterThan 0
+                @($script:CapturedMessages | Where-Object { $_ -like '*not found*' }).Count | Should -BeGreaterThan 0
             }
             finally {
                 Remove-TestFunction -Name @('Write-ScriptMessage', 'Write-StructuredWarning', 'Write-StructuredError')
@@ -203,18 +204,18 @@ Describe 'FragmentErrorHandling extended scenarios' {
         It 'Uses Write-Warning for missing files when structured logging is unavailable' {
             $missingPath = Join-Path $script:TempDir 'missing-write-warning.ps1'
             $env:PS_PROFILE_DEBUG = '1'
-            $warnings = [System.Collections.Generic.List[string]]::new()
-            Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
+            $script:CapturedWarnings = [System.Collections.Generic.List[string]]::new()
+            Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError', 'Write-ScriptMessage')
 
             function global:Write-Warning {
                 param([string]$Message)
-                $null = $warnings.Add($Message)
+                $null = $script:CapturedWarnings.Add($Message)
             }
 
             try {
                 $result = Invoke-FragmentSafely -FragmentName 'missing-write-warning' -FragmentPath $missingPath
                 $result | Should -Be $false
-                @($warnings | Where-Object { $_ -like '*not found*' }).Count | Should -BeGreaterThan 0
+                @($script:CapturedWarnings | Where-Object { $_ -like '*not found*' }).Count | Should -BeGreaterThan 0
             }
             finally {
                 Remove-TestFunction -Name @('Write-Warning', 'Write-StructuredWarning', 'Write-StructuredError')
@@ -241,12 +242,12 @@ Describe 'FragmentErrorHandling extended scenarios' {
             Set-Content -LiteralPath $forcedPath -Value '# probe' -Encoding UTF8
             $env:PS_PROFILE_FRAGMENT_ERROR_FORCE_GET_ITEM_FAIL = '1'
             $env:PS_PROFILE_DEBUG = '1'
-            $messages = [System.Collections.Generic.List[string]]::new()
+            $script:CapturedMessages = [System.Collections.Generic.List[string]]::new()
             Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
 
             function global:Write-ScriptMessage {
                 param([string]$Message, [switch]$IsWarning, [switch]$IsError)
-                $null = $messages.Add($Message)
+                $null = $script:CapturedMessages.Add($Message)
             }
 
             function global:Test-CachedCommand {
@@ -257,7 +258,7 @@ Describe 'FragmentErrorHandling extended scenarios' {
             try {
                 $result = Invoke-FragmentSafely -FragmentName 'forced-scriptmessage' -FragmentPath $forcedPath
                 $result | Should -Be $false
-                @($messages | Where-Object { $_ -like '*Cannot access fragment file*' }).Count | Should -BeGreaterThan 0
+                @($script:CapturedMessages | Where-Object { $_ -like '*Cannot access fragment file*' }).Count | Should -BeGreaterThan 0
             }
             finally {
                 Remove-TestFunction -Name @('Write-ScriptMessage', 'Test-CachedCommand', 'Write-StructuredWarning', 'Write-StructuredError')
@@ -278,12 +279,12 @@ Describe 'FragmentErrorHandling extended scenarios' {
 
         It 'Uses Write-ScriptMessage for script block failures when structured logging is unavailable' {
             $env:PS_PROFILE_DEBUG = '1'
-            $messages = [System.Collections.Generic.List[string]]::new()
+            $script:CapturedMessages = [System.Collections.Generic.List[string]]::new()
             Remove-TestFunction -Name @('Write-StructuredWarning', 'Write-StructuredError')
 
             function global:Write-ScriptMessage {
                 param([string]$Message, [switch]$IsWarning, [switch]$IsError)
-                $null = $messages.Add($Message)
+                $null = $script:CapturedMessages.Add($Message)
             }
 
             function global:Test-CachedCommand {
@@ -295,7 +296,7 @@ Describe 'FragmentErrorHandling extended scenarios' {
                 $block = { throw 'scriptmessage outer failure' }
                 $result = Invoke-FragmentSafely -FragmentName 'scriptmessage-outer' -FragmentPath 'dummy.ps1' -ScriptBlock $block
                 $result | Should -Be $false
-                @($messages | Where-Object { $_ -like '*Failed to load profile fragment*' }).Count | Should -BeGreaterThan 0
+                @($script:CapturedMessages | Where-Object { $_ -like '*Failed to load profile fragment*' }).Count | Should -BeGreaterThan 0
             }
             finally {
                 Remove-TestFunction -Name @('Write-ScriptMessage', 'Test-CachedCommand', 'Write-StructuredWarning', 'Write-StructuredError')

@@ -39,10 +39,20 @@ function Get-TestNodeModuleSearchPaths {
         }
     }
 
-    foreach ($candidate in @(
-            "$env:LOCALAPPDATA\pnpm\global\5\node_modules"
-            (Join-Path $env:HOME '.local/share/pnpm/global/5/node_modules')
-        )) {
+    $fallbackCandidates = @()
+    if ($env:LOCALAPPDATA) {
+        $fallbackCandidates += Join-Path $env:LOCALAPPDATA 'pnpm\global\5\node_modules'
+    }
+
+    $homeDirectory = $env:HOME
+    if ([string]::IsNullOrWhiteSpace($homeDirectory)) {
+        $homeDirectory = $env:USERPROFILE
+    }
+    if (-not [string]::IsNullOrWhiteSpace($homeDirectory)) {
+        $fallbackCandidates += Join-Path $homeDirectory '.local/share/pnpm/global/5/node_modules'
+    }
+
+    foreach ($candidate in $fallbackCandidates) {
         if ($candidate -and (Test-Path -LiteralPath $candidate)) {
             $paths.Add($candidate)
         }
@@ -73,6 +83,10 @@ function Get-TestNodeModuleSearchPaths {
     }
 
     foreach ($repoRoot in @($repoRoots | Select-Object -Unique)) {
+        if ([string]::IsNullOrWhiteSpace($repoRoot)) {
+            continue
+        }
+
         $localModules = Join-Path $repoRoot 'node_modules'
         if (Test-Path -LiteralPath $localModules) {
             $paths.Add($localModules)

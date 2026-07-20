@@ -61,7 +61,8 @@ Describe 'profile.d/system/FileOperations.ps1 extended scenarios' {
         Push-Location $searchRoot
         try {
             $matches = @(Find-File 'match-me.txt')
-            $matches | Should -Contain 'nested/match-me.txt'
+            $normalized = @($matches | ForEach-Object { ($_ -replace '\\', '/').TrimStart('./') })
+            $normalized | Should -Contain 'nested/match-me.txt'
         }
         finally {
             Pop-Location

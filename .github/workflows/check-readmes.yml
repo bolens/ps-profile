@@ -1,19 +1,40 @@
 name: Check comment-based help consistency
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
+    paths:
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - 'profile.d/**'
+      - 'scripts/checks/check-comment-help.ps1'
+      - 'Microsoft.PowerShell_profile.ps1'
+      - '.github/workflows/check-readmes.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - 'profile.d/**'
+      - 'scripts/checks/check-comment-help.ps1'
+      - 'Microsoft.PowerShell_profile.ps1'
+      - '.github/workflows/check-readmes.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
 
 jobs:
   validate-comment-help:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Run comment-based help check
         run: pwsh -NoProfile -File .\scripts\checks\check-comment-help.ps1
         shell: pwsh

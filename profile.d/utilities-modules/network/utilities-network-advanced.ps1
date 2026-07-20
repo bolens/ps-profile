@@ -85,15 +85,22 @@ function Invoke-WithRetry {
 
         $powershell = $null
         $runspacePool = $null
+        # Initialize before try so StrictMode never sees an unset read if BeginInvoke fails mid-setup.
+        $timeoutMs = [Math]::Max(0, $TimeoutSeconds) * 1000
+        $pollIntervalMs = 50
+        $elapsedMs = 0
+        $completed = $false
 
         try {
-            # Use runspace for timeout operation (much faster than job)
-            $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1)
+            # Use a default session state so built-in cmdlets exist inside the
+            # timeout runspace (bare pools can omit them on some Windows hosts).
+            $initialSessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault2()
+            $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1, $initialSessionState, $Host)
             $runspacePool.Open()
-            
+
             $powershell = [PowerShell]::Create()
             $powershell.RunspacePool = $runspacePool
-            
+
             # Wrap the scriptblock to accept arguments
             $wrapperScript = {
                 param($ScriptBlock, $ArgumentList)
@@ -104,18 +111,13 @@ function Invoke-WithRetry {
                     & $ScriptBlock
                 }
             }
-            
+
             $null = $powershell.AddScript($wrapperScript)
             $null = $powershell.AddArgument($ScriptBlock)
             $null = $powershell.AddArgument($ArgumentList)
             $handle = $powershell.BeginInvoke()
 
             # Wait for completion or timeout using polling (STA-compatible)
-            $timeoutMs = $TimeoutSeconds * 1000
-            $pollIntervalMs = 50
-            $elapsedMs = 0
-            $completed = $false
-
             while ($elapsedMs -lt $timeoutMs) {
                 if ($handle.IsCompleted) {
                     $completed = $true
@@ -134,7 +136,7 @@ function Invoke-WithRetry {
                 throw "Operation timed out after $TimeoutSeconds seconds"
             }
 
-            # Get the result
+            # Get the result (EndInvoke returns Collection[PSObject]; unwrap single values)
             $result = $powershell.EndInvoke($handle)
             $powershell.Dispose()
             $runspacePool.Close()
@@ -142,6 +144,9 @@ function Invoke-WithRetry {
             $powershell = $null
             $runspacePool = $null
 
+            if ($null -ne $result -and $result -is [System.Collections.IList] -and $result.Count -eq 1) {
+                return $result[0]
+            }
             return $result
 
         }
@@ -169,9 +174,18 @@ function Invoke-WithRetry {
                 $runspacePool = $null
             }
 
-            # Check if this is a retryable error using Retry module if available
+            # Check if this is a retryable error using Retry module if available.
+            # Prefer command lookup that cannot itself throw CommandNotFoundException
+            # when the session is partially stubbed (seen on Windows CI).
             $isRetryable = $false
-            if (Get-Command Test-IsRetryableError -ErrorAction SilentlyContinue) {
+            $retryTester = $null
+            try {
+                $retryTester = Microsoft.PowerShell.Core\Get-Command -Name Test-IsRetryableError -ErrorAction SilentlyContinue
+            }
+            catch {
+                $retryTester = $null
+            }
+            if ($retryTester) {
                 $isRetryable = Test-IsRetryableError -Exception $_.Exception
             }
             else {

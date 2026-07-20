@@ -69,15 +69,17 @@ BeforeAll {
         )
 
         $captured = [System.Collections.Generic.List[string]]::new()
-                Invoke-RunPesterDryRun -Parameters $Parameters 2>&1 | ForEach-Object {
-            $null = $captured.Add("$($_)")
+        try {
+            Invoke-RunPesterDryRun -Parameters $Parameters 2>&1 | ForEach-Object {
+                $null = $captured.Add("$($_)")
+            }
+            $null = $captured.Add("EXIT:$LASTEXITCODE")
+            return $captured
         }
-        $null = $captured.Add("EXIT:$LASTEXITCODE")
-    }
-    catch {
-        $null = $captured.Add($_.Exception.Message)
-
-        return $captured
+        catch {
+            $null = $captured.Add($_.Exception.Message)
+            return $captured
+        }
     }
 }
 

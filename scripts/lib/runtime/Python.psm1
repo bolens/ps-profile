@@ -22,8 +22,25 @@ function Get-PythonPath {
         [string]$RepoRoot
     )
 
-    # Use Validation module if available
-    $useValidation = Get-Command Test-ValidPath -ErrorAction SilentlyContinue
+    # Use Validation module if available. Probe with the core-qualified Get-Command so unit
+    # tests that Mock Get-Command (-ModuleName Python) cannot flip this to a false positive,
+    # and invoke Test-ValidPath through a guarded helper that falls back to Test-Path when the
+    # Validation module was unloaded by an earlier test in the same shard (prevents
+    # "Test-ValidPath is not recognized").
+    $useValidation = $null -ne (Microsoft.PowerShell.Core\Get-Command -Name 'Test-ValidPath' -ErrorAction SilentlyContinue)
+    $testPathValidated = {
+        param([string]$Path, [string]$PathType = 'Any')
+        if (-not $Path -or [string]::IsNullOrWhiteSpace($Path)) { return $false }
+        if ($useValidation) {
+            try {
+                return [bool](Test-ValidPath -Path $Path -PathType $PathType)
+            }
+            catch {
+                # Validation helper vanished mid-shard; fall through to Test-Path.
+            }
+        }
+        return [bool](Test-Path -LiteralPath $Path)
+    }
 
     # First, check common Python-related environment variables (highest priority)
     $pythonEnvVars = @('PYTHON_HOME', 'PYTHON_ROOT', 'PYTHON', 'VIRTUAL_ENV', 'CONDA_PREFIX')
@@ -38,36 +55,31 @@ function Get-PythonPath {
         if ($envValue -and -not [string]::IsNullOrWhiteSpace($envValue)) {
             # For VIRTUAL_ENV and CONDA_PREFIX, these point to the environment root
             if ($envVar -eq 'VIRTUAL_ENV' -or $envVar -eq 'CONDA_PREFIX') {
-                # Check for Python executable in the environment
-                $pythonExe = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
-                    Join-Path $envValue 'Scripts' 'python.exe'
-                }
-                else {
-                    Join-Path $envValue 'bin' 'python'
-                }
-                $pythonExists = if ($useValidation) {
-                    Test-ValidPath -Path $pythonExe -PathType File
-                }
-                else {
-                    $pythonExe -and -not [string]::IsNullOrWhiteSpace($pythonExe) -and (Test-Path -LiteralPath $pythonExe)
-                }
-                if ($pythonExists) {
-                    $debugLevel = 0
-                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
-                        Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                # Check both Windows (Scripts/) and Unix (bin/) layouts — conda/venv
+                # on Windows may use either, and tests exercise the portable bin/ layout.
+                $pythonCandidates = @(
+                    (Join-Path $envValue 'Scripts' 'python.exe')
+                    (Join-Path $envValue 'Scripts' 'python')
+                    (Join-Path $envValue 'bin' 'python.exe')
+                    (Join-Path $envValue 'bin' 'python')
+                    (Join-Path $envValue 'python.exe')
+                    (Join-Path $envValue 'python')
+                )
+                foreach ($pythonExe in $pythonCandidates) {
+                    $pythonExists = & $testPathValidated -Path $pythonExe -PathType File
+                    if ($pythonExists) {
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                        }
+                        return $pythonExe
                     }
-                    return $pythonExe
                 }
             }
             # For PYTHON_HOME, PYTHON_ROOT, PYTHON - these might point directly to Python or its directory
             elseif ($envVar -eq 'PYTHON') {
                 # PYTHON might be a direct path to Python executable
-                $pythonExists = if ($useValidation) {
-                    Test-ValidPath -Path $envValue -PathType File
-                }
-                else {
-                    $envValue -and -not [string]::IsNullOrWhiteSpace($envValue) -and (Test-Path -LiteralPath $envValue)
-                }
+                $pythonExists = & $testPathValidated -Path $envValue -PathType File
                 if ($pythonExists) {
                     $debugLevel = 0
                     if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
@@ -78,40 +90,23 @@ function Get-PythonPath {
             }
             else {
                 # PYTHON_HOME or PYTHON_ROOT - check for python.exe or python in bin/Scripts
-                $pythonExe = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
-                    Join-Path $envValue 'python.exe'
-                }
-                else {
-                    Join-Path $envValue 'python'
-                }
-                $pythonExists = if ($useValidation) {
-                    Test-ValidPath -Path $pythonExe -PathType File
-                }
-                else {
-                    $pythonExe -and -not [string]::IsNullOrWhiteSpace($pythonExe) -and (Test-Path -LiteralPath $pythonExe)
-                }
-                if ($pythonExists) {
-                    return $pythonExe
-                }
-                # Try bin/python or Scripts/python.exe
-                $pythonExe = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) {
-                    Join-Path $envValue 'Scripts' 'python.exe'
-                }
-                else {
-                    Join-Path $envValue 'bin' 'python'
-                }
-                $pythonExists = if ($useValidation) {
-                    Test-ValidPath -Path $pythonExe -PathType File
-                }
-                else {
-                    $pythonExe -and -not [string]::IsNullOrWhiteSpace($pythonExe) -and (Test-Path -LiteralPath $pythonExe)
-                }
-                if ($pythonExists) {
-                    $debugLevel = 0
-                    if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
-                        Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                $pythonCandidates = @(
+                    (Join-Path $envValue 'python.exe')
+                    (Join-Path $envValue 'python')
+                    (Join-Path $envValue 'Scripts' 'python.exe')
+                    (Join-Path $envValue 'Scripts' 'python')
+                    (Join-Path $envValue 'bin' 'python.exe')
+                    (Join-Path $envValue 'bin' 'python')
+                )
+                foreach ($pythonExe in $pythonCandidates) {
+                    $pythonExists = & $testPathValidated -Path $pythonExe -PathType File
+                    if ($pythonExists) {
+                        $debugLevel = 0
+                        if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 3) {
+                            Write-Host "  [python.get-path] Found Python via $envVar env var: $pythonExe" -ForegroundColor DarkGray
+                        }
+                        return $pythonExe
                     }
-                    return $pythonExe
                 }
             }
         }
@@ -147,22 +142,12 @@ function Get-PythonPath {
     
     if ($RepoRoot) {
         $venvPath = Join-Path $RepoRoot '.venv'
-        $venvExists = if ($useValidation) {
-            Test-ValidPath -Path $venvPath -PathType Directory
-        }
-        else {
-            $venvPath -and -not [string]::IsNullOrWhiteSpace($venvPath) -and (Test-Path -LiteralPath $venvPath)
-        }
+        $venvExists = & $testPathValidated -Path $venvPath -PathType Directory
         
         if ($venvExists) {
             # Try Windows path first
             $venvPythonPath = Join-Path $venvPath 'Scripts' 'python.exe'
-            $pythonExists = if ($useValidation) {
-                Test-ValidPath -Path $venvPythonPath -PathType File
-            }
-            else {
-                $venvPythonPath -and -not [string]::IsNullOrWhiteSpace($venvPythonPath) -and (Test-Path -LiteralPath $venvPythonPath)
-            }
+            $pythonExists = & $testPathValidated -Path $venvPythonPath -PathType File
             if ($pythonExists) {
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
@@ -172,12 +157,7 @@ function Get-PythonPath {
             }
             # Try Unix-style path
             $venvPythonPath = Join-Path $venvPath 'bin' 'python'
-            $pythonExists = if ($useValidation) {
-                Test-ValidPath -Path $venvPythonPath -PathType File
-            }
-            else {
-                $venvPythonPath -and -not [string]::IsNullOrWhiteSpace($venvPythonPath) -and (Test-Path -LiteralPath $venvPythonPath)
-            }
+            $pythonExists = & $testPathValidated -Path $venvPythonPath -PathType File
             if ($pythonExists) {
                 $debugLevel = 0
                 if ($env:PS_PROFILE_DEBUG -and [int]::TryParse($env:PS_PROFILE_DEBUG, [ref]$debugLevel) -and $debugLevel -ge 2) {
@@ -295,18 +275,24 @@ function Invoke-PythonScript {
         [string]$RepoRoot
     )
 
-    # Validate script path exists
-    # Use Validation module if available
-    if (Get-Command Test-ValidPath -ErrorAction SilentlyContinue) {
-        if (-not (Test-ValidPath -Path $ScriptPath -PathType File)) {
-            throw "Python script not found: $ScriptPath"
+    # Validate script path exists. Probe with the core-qualified Get-Command so a mocked
+    # Get-Command cannot claim Test-ValidPath is present when the Validation module was
+    # unloaded by an earlier test in the shard, and guard the call so it never throws
+    # "Test-ValidPath is not recognized".
+    $scriptPathValid = $false
+    if ($null -ne (Microsoft.PowerShell.Core\Get-Command -Name 'Test-ValidPath' -ErrorAction SilentlyContinue)) {
+        try {
+            $scriptPathValid = [bool](Test-ValidPath -Path $ScriptPath -PathType File)
+        }
+        catch {
+            $scriptPathValid = ($ScriptPath -and -not [string]::IsNullOrWhiteSpace($ScriptPath) -and (Test-Path -LiteralPath $ScriptPath -ErrorAction SilentlyContinue))
         }
     }
     else {
-        # Fallback to manual validation
-        if (-not ($ScriptPath -and -not [string]::IsNullOrWhiteSpace($ScriptPath) -and (Test-Path -LiteralPath $ScriptPath -ErrorAction SilentlyContinue))) {
-            throw "Python script not found: $ScriptPath"
-        }
+        $scriptPathValid = ($ScriptPath -and -not [string]::IsNullOrWhiteSpace($ScriptPath) -and (Test-Path -LiteralPath $ScriptPath -ErrorAction SilentlyContinue))
+    }
+    if (-not $scriptPathValid) {
+        throw "Python script not found: $ScriptPath"
     }
     
     # Validate script is readable

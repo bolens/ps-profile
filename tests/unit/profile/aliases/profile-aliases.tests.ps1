@@ -15,14 +15,13 @@ BeforeAll {
     }
     $script:TestTempRoot = New-TestTempDirectory -Prefix 'ProfileAliases'
 
-    # Import common module directly
-    $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-    $commonModulePath = Join-Path $repoRoot 'scripts\lib\Common.psm1'
+    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $commonModulePath = Join-Path $script:RepoRoot 'scripts' 'lib' 'Common.psm1'
     if (Test-Path $commonModulePath) {
         Import-Module $commonModulePath -DisableNameChecking -ErrorAction Stop
     }
 
-    $script:ProfileDir = Join-Path $repoRoot 'profile.d'
+    $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
     if (-not (Test-Path $script:ProfileDir)) {
         throw "Profile directory not found: $script:ProfileDir"
     }
@@ -48,15 +47,17 @@ Describe 'Profile aliases' {
 
     Context 'Alias behaviors' {
         It 'Set-AgentModeAlias returns definition when requested and alias works' {
+            try {
             $name = "test_alias_{0}" -f (Get-Random)
                         $definition = Set-AgentModeAlias -Name $name -Target 'Write-Output' -ReturnDefinition
             $definition | Should -Not -Be $false
             $definition | Should -BeOfType [string]
             (& $name 'hello') | Should -Be 'hello'
-        }
-        finally {
-            if (Get-Alias -Name $name -ErrorAction SilentlyContinue) {
-                Remove-Item Alias:$name -Force
+            }
+            finally {
+                if (Get-Alias -Name $name -ErrorAction SilentlyContinue) {
+                    Remove-Item Alias:$name -Force
+                }
             }
         }
 

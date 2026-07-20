@@ -27,7 +27,7 @@ BeforeAll {
     Import-Module (Join-Path $modulePath 'TestRetry.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestEnvironment.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestPerformanceMonitoring.psm1') -Force
-    Import-Module (Join-Path $modulePath 'TestTimeoutHandling.psm1') -Force
+    Import-Module (Join-Path $modulePath 'TestTimeoutHandling.psm1') -Force -Global
     Import-Module (Join-Path $modulePath 'TestRecovery.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestSummaryGeneration.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestReporting.psm1') -Force
@@ -153,15 +153,17 @@ Describe 'TestExecution Module Tests' {
         }
 
         It 'Detects CI environment variables' {
+            try {
             # Mock CI environment
             $originalCI = $env:CI
             $env:CI = 'true'
 
                         $env = Get-TestEnvironment
             $env.IsCI | Should -Be $true
-        }
-        finally {
-            $env:CI = $originalCI
+            }
+            finally {
+                $env:CI = $originalCI
+            }
         }
 
         It 'Detects available tools' {

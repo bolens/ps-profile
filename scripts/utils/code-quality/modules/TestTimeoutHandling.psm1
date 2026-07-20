@@ -155,7 +155,14 @@ function Invoke-PesterWithTimeout {
                             }
                         }
 
-                        # Run Pester with Pester 5 syntax
+                        # Run Pester with Pester 5 syntax.
+                        # Test bodies must execute with the default non-terminating
+                        # error semantics (Continue) that they get under a direct
+                        # Invoke-Pester run and during real profile loading. Forcing
+                        # 'Stop' here turns benign diagnostic Write-Error calls in
+                        # resilient-loading code into terminating errors, which aborts
+                        # tests mid-flight (leaking env vars, TestDrive, and modules).
+                        $ErrorActionPreference = 'Continue'
                         $result = Invoke-Pester -Configuration $config
                         Write-Host "Pester execution completed successfully"
                         return @{
@@ -306,6 +313,10 @@ function Invoke-PesterWithTimeout {
             if ($TestPaths) {
                 $Config.Run.Path = $TestPaths
             }
+            # Run test bodies under Continue (see note on the runspace path above):
+            # forcing 'Stop' makes resilient-loading diagnostics terminate and aborts
+            # tests before cleanup, cascading into unrelated shard failures.
+            $ErrorActionPreference = 'Continue'
             $result = Invoke-Pester -Configuration $Config
         }
     }

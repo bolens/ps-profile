@@ -31,9 +31,9 @@
     pwsh -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1 -RelativePath data/encoding -Quiet
 #>
 param(
-    [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))),
-
     [string[]]$RelativePath = @(),
+
+    [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))),
 
     [switch]$Quiet,
 
@@ -42,6 +42,25 @@ param(
     [ValidateRange(0, 100)]
     [int]$Parallel = 0
 )
+
+$expectedRepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$conversionRootCheck = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
+if (-not (Test-Path -LiteralPath $conversionRootCheck)) {
+    # Remap only when RepoRoot looks like a RelativePath binding mistake (e.g. pwsh -File
+    # with a bare data/foo arg). Do not remap intentional alternate/fake roots.
+    $repoRootIsRelativePathMistake = $RepoRoot -match '^(data|document|media)(/|\\|$)'
+    if ($repoRootIsRelativePathMistake -and (Test-Path -LiteralPath (Join-Path $expectedRepoRoot 'tests' 'integration' 'conversion'))) {
+        if ($RelativePath.Count -eq 0) {
+            $RelativePath = @($RepoRoot)
+        }
+        $RepoRoot = $expectedRepoRoot
+        $conversionRootCheck = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
+    }
+    else {
+        Write-Error "Invalid -RepoRoot '$RepoRoot'. Pass one -RelativePath value per invocation when calling via pwsh -File."
+        exit 2
+    }
+}
 
 $conversionRoot = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
 $batchRunner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-conversion-integration-batch.ps1'
@@ -123,7 +142,12 @@ foreach ($rel in $paths) {
         $skipped = [int]$Matches[3]
     }
 
-    $batchFailed = $exitCode -ne 0 -or $failed -gt 0
+    $batchFailed = if ($failed -ge 0) {
+        $failed -gt 0
+    }
+    else {
+        $exitCode -ne 0
+    }
     $results += [pscustomobject]@{
         Path     = $rel
         Passed   = $passed
@@ -141,7 +165,14 @@ foreach ($rel in $paths) {
 Write-Host '--- Summary (conversion all) ---' -ForegroundColor Cyan
 $results | Format-Table -AutoSize
 
-$bad = @($results | Where-Object { $_.Failed -gt 0 -or $_.ExitCode -ne 0 })
+$bad = @($results | Where-Object {
+        if ($_.Failed -ge 0) {
+            $_.Failed -gt 0
+        }
+        else {
+            $_.ExitCode -ne 0
+        }
+    })
 if ($bad.Count -gt 0) {
     Write-Host "Sub-batches with failures: $($bad.Count)" -ForegroundColor Red
     exit 1

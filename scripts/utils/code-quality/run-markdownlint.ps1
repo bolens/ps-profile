@@ -78,12 +78,21 @@ if (-not $markdownlint -and -not $npx) {
 }
 
 Write-ScriptMessage -Message "Running markdownlint (version: $markdownlintVersion)..."
+# Keep ignores aligned with CI / local hooks (skip generated reports and test fixtures).
+$markdownArgs = @(
+    '**/*.md'
+    '--ignore', 'node_modules'
+    '--ignore', '**/Modules/**'
+    '--ignore', '**/tests/**'
+    '--ignore', '**/docs/test-verification-reports/**'
+    '--ignore', '**/docs/api/**'
+)
 try {
     if ($markdownlint) {
-        markdownlint '**/*.md' --ignore node_modules --ignore '**/Modules/**'
+        & markdownlint @markdownArgs
     }
     else {
-        npx --yes "markdownlint-cli@$markdownlintVersion" '**/*.md' --ignore node_modules --ignore '**/Modules/**'
+        & npx --yes "markdownlint-cli@$markdownlintVersion" @markdownArgs
     }
 
     if ($LASTEXITCODE -ne 0) {

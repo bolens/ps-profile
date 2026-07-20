@@ -61,53 +61,33 @@ function Import-TestModule {
 
         # Promote and invoke initialization function so module internals (e.g. _Compress-Zstd) are registered
         if ($InitFunctionName) {
-            $func = Get-Command $InitFunctionName -ErrorAction SilentlyContinue -All
+            $func = Get-Command $InitFunctionName -ErrorAction SilentlyContinue -All |
+                Where-Object { $_.CommandType -eq 'Function' } |
+                Select-Object -First 1
             if ($func) {
                 Set-Item -Path "Function:\global:$InitFunctionName" -Value $func.ScriptBlock -ErrorAction SilentlyContinue -Force
-                & "global:$InitFunctionName"
+                # Call by bare name — never & "global:Name" (triggers CommandNotFoundAction / fragment dispatcher).
+                & $InitFunctionName
             }
         }
 
-        # Promote user-facing functions to global scope
-        # Check both local and global scope for functions that match patterns
-        $allFuncs = @()
-        $allFuncs += Get-ChildItem Function: | Where-Object {
-            $funcName = $_.Name
-            $shouldPromote = $false
-
-            # Check if function matches any pattern
-            foreach ($pattern in $FunctionPatterns) {
-                if ($funcName -match $pattern) {
-                    # Exclude initialization functions
-                    if ($funcName -notmatch '^Initialize-') {
-                        $shouldPromote = $true
-                        break
-                    }
-                }
-            }
-
-            return $shouldPromote
-        }
-
-        # Also check if functions already exist in global scope (created with Function:Global:)
-        foreach ($pattern in $FunctionPatterns) {
-            $globalFuncs = Get-ChildItem Function: | Where-Object {
+        # Promote user-facing functions to global scope via the Function: drive only.
+        # Avoid Get-Command "global:Name" — that name form storms the fragment dispatcher and hangs CI.
+        $allFuncs = @(Get-ChildItem Function: | Where-Object {
                 $funcName = $_.Name
-                if ($funcName -match $pattern -and $funcName -notmatch '^Initialize-') {
-                    # Check if it's already in global scope
-                    $globalCmd = Get-Command "global:$funcName" -ErrorAction SilentlyContinue
-                    if ($globalCmd -and $globalCmd.CommandType -eq 'Function') {
-                        return $false  # Already in global, don't add to promotion list
+                if ($funcName -match '^Initialize-') {
+                    return $false
+                }
+                foreach ($pattern in $FunctionPatterns) {
+                    if ($funcName -match $pattern) {
+                        return $true
                     }
-                    return $true
                 }
                 return $false
-            }
-            # Functions created with Function:Global: are already accessible, so we just need to ensure they're found
-        }
+            })
 
         foreach ($f in $allFuncs) {
-            if (-not (Get-Command "global:$($f.Name)" -ErrorAction SilentlyContinue)) {
+            if (-not (Test-Path -LiteralPath "Function:\global:$($f.Name)")) {
                 Set-Item -Path "Function:\global:$($f.Name)" -Value $f.ScriptBlock -ErrorAction SilentlyContinue -Force
             }
         }
@@ -181,9 +161,10 @@ function Import-ModuleGroup {
         $ModuleConfig
     }
 
-    # Filter to selective modules if specified
+    # Filter to selective modules if specified (preserve caller order for dependencies)
     if ($SelectiveModules) {
-        $modules = @($modules | Where-Object { $SelectiveModules -contains $_ })
+        $selectiveOrder = @($SelectiveModules)
+        $modules = @($selectiveOrder | Where-Object { $modules -contains $_ })
         # Load shared common.ps1 helpers before format-specific modules
         $commonFirst = @($modules | Where-Object { $_ -eq 'common.ps1' })
         $rest = @($modules | Where-Object { $_ -ne 'common.ps1' })
@@ -949,7 +930,8 @@ function Ensure-ConversionModulesLoaded {
     $cacheKey = "ConversionModules_${ModuleType}_$selectiveKey"
     
     # Check if already loaded (use script scope for cross-file caching)
-    if ($null -eq $script:ModuleLoadCache) {
+    $moduleLoadCacheVar = Get-Variable -Name ModuleLoadCache -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $moduleLoadCacheVar -or $null -eq $moduleLoadCacheVar.Value) {
         $script:ModuleLoadCache = @{}
     }
     
@@ -1065,7 +1047,8 @@ function Initialize-TestProfile {
     $cacheKey = "Profile_$(if ($LoadBootstrap) { 'Bootstrap' })_$(if ($LoadConversionModules) { $LoadConversionModules })_${selectiveKey}_$(if ($LoadFilesFragment) { 'Files' })_$(if ($EnsureFileConversion) { 'EnsureData' })_$(if ($EnsureFileConversionMedia) { 'EnsureMedia' })_$(if ($EnsureFileConversionDocuments) { 'EnsureDocs' })"
     
     # Check if already loaded (use script scope for cross-file caching)
-    if ($null -eq $script:ProfileLoadCache) {
+    $profileLoadCacheVar = Get-Variable -Name ProfileLoadCache -Scope Script -ErrorAction SilentlyContinue
+    if ($null -eq $profileLoadCacheVar -or $null -eq $profileLoadCacheVar.Value) {
         $script:ProfileLoadCache = @{}
     }
     
@@ -1136,6 +1119,10 @@ function Initialize-SystemUtilityIntegration {
     )
 
     Initialize-TestProfile -ProfileDir $ProfileDir -LoadBootstrap -LoadFilesFragment
+
+    if (Get-Command Register-TestCommandAvailabilityStub -ErrorAction SilentlyContinue) {
+        Register-TestCommandAvailabilityStub
+    }
 
     $systemFragment = Join-Path $ProfileDir 'system.ps1'
     if (Test-Path -LiteralPath $systemFragment) {
@@ -1637,11 +1624,17 @@ function Initialize-ConversionIntegration {
         $env:PS_PROFILE_REPO_ROOT = Split-Path -Parent $ProfileDir
     }
 
-    Initialize-TestProfile `
-        -ProfileDir $ProfileDir `
-        -LoadBootstrap `
-        -LoadConversionModules $ModuleType `
-        -SelectiveModules $SelectiveModules
+    $profileInitParams = @{
+        ProfileDir            = $ProfileDir
+        LoadBootstrap         = $true
+        LoadConversionModules = $ModuleType
+        SelectiveModules      = $SelectiveModules
+    }
+    if ($EnsureMedia -or $EnsureDocuments) {
+        $profileInitParams['LoadFilesFragment'] = $true
+    }
+
+    Initialize-TestProfile @profileInitParams
 
     if ($EnsureData) {
         if (-not $SelectiveModules -or @($SelectiveModules).Count -eq 0) {
@@ -1665,11 +1658,12 @@ function Initialize-ConversionIntegration {
     }
 
     if ($EnsureMedia) {
-        if ($SelectiveModules -and @($SelectiveModules).Count -gt 0) {
-            $global:FileConversionMediaInitialized = $true
-        }
-        elseif (Get-Command Ensure-FileConversion-Media -ErrorAction SilentlyContinue) {
+        if (Get-Command Ensure-FileConversion-Media -ErrorAction SilentlyContinue) {
             Ensure-FileConversion-Media
+        }
+        elseif (Get-Command _Parse-Color -ErrorAction SilentlyContinue) {
+            # Selective media module loading registers parsers without files.ps1 Ensure helpers.
+            $global:FileConversionMediaInitialized = $true
         }
     }
 
@@ -1681,6 +1675,9 @@ function Initialize-ConversionIntegration {
             Ensure-FileConversion-Specialized
         }
     }
+
+    # yq availability is resolved lazily via Test-MikefarahYqAvailable when tests call
+    # Skip-IfMikefarahYqUnavailable; probing here broke unrelated conversion BeforeAll hooks on Linux CI.
 }
 
 
@@ -1717,21 +1714,20 @@ function Import-DevToolsModules {
 
     # QR code modules
     $qrcodeModules = Get-DevToolsQrCodeModulesConfig
-    $qrcodeDir = Join-Path $DevToolsModulesDir 'format' 'qrcode'
+    $qrcodeDir = Join-Path (Join-Path $DevToolsModulesDir 'format') 'qrcode'
     Import-ModuleGroup -BaseDir $qrcodeDir -ModuleConfig $qrcodeModules -DefaultFunctionPatterns $defaultPatterns
 
     # Data modules
     $dataModules = Get-DevToolsDataModulesConfig
     Import-ModuleGroup -BaseDir $DevToolsModulesDir -SubDir 'data' -ModuleConfig $dataModules -DefaultFunctionPatterns $defaultPatterns
 
-    # After loading all modules, promote any remaining functions that might have been created
-    # This ensures functions created by initialization functions are also promoted
-    $allFuncs = Get-ChildItem Function: | Where-Object { 
-        $_.Name -match '^(Get|Convert|Format|New|Test|Invoke|Set|Add|Remove|Clear|Decode|Encode|Compare)' -and
-        $_.Name -notmatch '^Initialize-'
-    }
+    # Promote remaining helpers without Get-Command "global:Name" (dispatcher storm / CI hang).
+    $allFuncs = @(Get-ChildItem Function: | Where-Object {
+            $_.Name -match '^(Get|Convert|Format|New|Test|Invoke|Set|Add|Remove|Clear|Decode|Encode|Compare)' -and
+            $_.Name -notmatch '^Initialize-'
+        })
     foreach ($f in $allFuncs) {
-        if (-not (Get-Command "global:$($f.Name)" -ErrorAction SilentlyContinue)) {
+        if (-not (Test-Path -LiteralPath "Function:\global:$($f.Name)")) {
             Set-Item -Path "Function:\global:$($f.Name)" -Value $f.ScriptBlock -ErrorAction SilentlyContinue -Force
         }
     }
@@ -1754,110 +1750,13 @@ function Ensure-DevToolsModulesLoaded {
         [Parameter(Mandatory)]
         [string]$ProfileDir
     )
-    
+
     $devToolsModulesDir = Join-Path $ProfileDir 'dev-tools-modules'
     if ($null -eq $devToolsModulesDir -or [string]::IsNullOrWhiteSpace($devToolsModulesDir) -or -not (Test-Path -LiteralPath $devToolsModulesDir)) {
         Write-Warning "Dev-tools modules directory not found: $devToolsModulesDir"
         return
     }
-    
-    Import-DevToolsModules -DevToolsModulesDir $devToolsModulesDir
-}
 
-#endregion
-
-#region Dev-Tools Modules Loading
-
-<#
-.SYNOPSIS
-    Loads dev-tools modules.
-.DESCRIPTION
-    Loads all dev-tools modules including encoding, crypto, format, QR code, and data modules.
-.PARAMETER DevToolsModulesDir
-    Base directory for dev-tools modules.
-#>
-function Import-DevToolsModules {
-    param(
-        [Parameter(Mandatory)]
-        [string]$DevToolsModulesDir
-    )
-
-    $defaultPatterns = @('^(Get|Convert|Format|New|Test|Invoke|Set|Add|Remove|Clear|Decode|Encode|Compare)')
-
-    # Encoding modules
-    $encodingModules = Get-DevToolsEncodingModulesConfig
-    Import-ModuleGroup -BaseDir $DevToolsModulesDir -SubDir 'encoding' -ModuleConfig $encodingModules -DefaultFunctionPatterns $defaultPatterns
-
-    # Crypto modules
-    $cryptoModules = Get-DevToolsCryptoModulesConfig
-    Import-ModuleGroup -BaseDir $DevToolsModulesDir -SubDir 'crypto' -ModuleConfig $cryptoModules -DefaultFunctionPatterns $defaultPatterns
-
-    # Format modules
-    $formatModules = Get-DevToolsFormatModulesConfig
-    Import-ModuleGroup -BaseDir $DevToolsModulesDir -SubDir 'format' -ModuleConfig $formatModules -DefaultFunctionPatterns $defaultPatterns
-
-    # QR code modules
-    $qrcodeModules = Get-DevToolsQrCodeModulesConfig
-    $qrcodeDir = Join-Path $DevToolsModulesDir 'format' 'qrcode'
-    Import-ModuleGroup -BaseDir $qrcodeDir -ModuleConfig $qrcodeModules -DefaultFunctionPatterns $defaultPatterns
-
-    # Data modules
-    $dataModules = Get-DevToolsDataModulesConfig
-    Import-ModuleGroup -BaseDir $DevToolsModulesDir -SubDir 'data' -ModuleConfig $dataModules -DefaultFunctionPatterns $defaultPatterns
-
-    # After loading all modules, promote any remaining functions that might have been created
-    # This ensures functions created by initialization functions are also promoted
-    $allFuncs = Get-ChildItem Function: | Where-Object { 
-        $_.Name -match '^(Get|Convert|Format|New|Test|Invoke|Set|Add|Remove|Clear|Decode|Encode|Compare)' -and
-        $_.Name -notmatch '^Initialize-'
-    }
-    foreach ($f in $allFuncs) {
-        if (-not (Get-Command "global:$($f.Name)" -ErrorAction SilentlyContinue)) {
-            Set-Item -Path "Function:\global:$($f.Name)" -Value $f.ScriptBlock -ErrorAction SilentlyContinue -Force
-        }
-    }
-}
-
-<#
-.SYNOPSIS
-    Ensures dev-tools modules are loaded before calling Ensure-DevTools.
-.DESCRIPTION
-    Manually loads dev-tools modules from profile.d/dev-tools-modules to ensure
-    initialization functions are available when tests call Ensure-DevTools.
-.PARAMETER ProfileDir
-    The profile.d directory path.
-.EXAMPLE
-    Ensure-DevToolsModulesLoaded -ProfileDir $script:ProfileDir
-    Loads all dev-tools modules.
-#>
-function Ensure-DevToolsModulesLoaded {
-    param(
-        [Parameter(Mandatory)]
-        [string]$ProfileDir
-    )
-    
-    $devToolsModulesDir = Join-Path $ProfileDir 'dev-tools-modules'
-    if ($null -eq $devToolsModulesDir -or [string]::IsNullOrWhiteSpace($devToolsModulesDir) -or -not (Test-Path -LiteralPath $devToolsModulesDir)) {
-        Write-Warning "Dev-tools modules directory not found: $devToolsModulesDir"
-        return
-    }
-    
-    Import-DevToolsModules -DevToolsModulesDir $devToolsModulesDir
-}
-
-#e
-function Ensure-DevToolsModulesLoaded {
-    param(
-        [Parameter(Mandatory)]
-        [string]$ProfileDir
-    )
-    
-    $devToolsModulesDir = Join-Path $ProfileDir 'dev-tools-modules'
-    if ($null -eq $devToolsModulesDir -or [string]::IsNullOrWhiteSpace($devToolsModulesDir) -or -not (Test-Path -LiteralPath $devToolsModulesDir)) {
-        Write-Warning "Dev-tools modules directory not found: $devToolsModulesDir"
-        return
-    }
-    
     Import-DevToolsModules -DevToolsModulesDir $devToolsModulesDir
 }
 

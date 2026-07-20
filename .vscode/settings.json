@@ -37,6 +37,27 @@
     "**/.git": true
   },
 
+  // Match .editorconfig / .gitattributes (LF, UTF-8, no BOM)
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false
+  },
+  "[yaml]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+  "[jsonc]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  },
+
   // Editor settings
   "editor.insertSpaces": true,
   "editor.tabSize": 4,

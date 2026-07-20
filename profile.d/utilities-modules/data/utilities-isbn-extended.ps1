@@ -965,18 +965,18 @@ function Show-IsbnCover {
     $coverPath = Join-Path $tempDir "$(Get-IsbnDigitsFromInput -Isbn $Isbn).img"
     Save-IsbnCover -Isbn $Isbn -OutputPath $coverPath -Refresh:$Refresh -PassThru | Out-Null
 
+    # Always emit the path so callers/tests can use it; opening is best-effort.
     if ($IsWindows) {
-        Start-Process $coverPath
+        try { Start-Process $coverPath -ErrorAction SilentlyContinue } catch { }
     }
     elseif (Test-CachedCommand 'xdg-open') {
-        & xdg-open $coverPath
+        try { & xdg-open $coverPath } catch { }
     }
     elseif ($IsMacOS) {
-        Start-Process 'open' -ArgumentList @($coverPath)
+        try { Start-Process 'open' -ArgumentList @($coverPath) -ErrorAction SilentlyContinue } catch { }
     }
-    else {
-        Write-Output $coverPath
-    }
+
+    Write-Output $coverPath
 }
 Set-AgentModeAlias -Name 'isbn-cover-show' -Target 'Show-IsbnCover'
 

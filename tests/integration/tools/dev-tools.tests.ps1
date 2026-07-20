@@ -28,6 +28,7 @@ BeforeAll {
 
 Describe 'Developer Tools Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
             throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -44,7 +45,16 @@ Describe 'Developer Tools Integration Tests' {
             throw "Bootstrap file not found at: $bootstrapPath"
         }
         . $bootstrapPath
-        
+
+        # Prevent fragment CommandNotFoundAction from storming during module promotion.
+        if (Get-Command Unregister-CommandDispatcher -ErrorAction SilentlyContinue) {
+            Unregister-CommandDispatcher -ErrorAction SilentlyContinue | Out-Null
+        }
+        $invokeCommand = $ExecutionContext.SessionState.InvokeCommand
+        if ($null -ne $invokeCommand.CommandNotFoundAction) {
+            $invokeCommand.CommandNotFoundAction = $null
+        }
+
         Ensure-DevToolsModulesLoaded -ProfileDir $script:ProfileDir
         
         $filesPath = Join-Path $script:ProfileDir 'files.ps1'
@@ -56,15 +66,16 @@ Describe 'Developer Tools Integration Tests' {
         }
         . $filesPath
         Ensure-DevTools
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize developer tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize developer tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'Hash generator utilities' {
@@ -106,6 +117,7 @@ Describe 'Developer Tools Integration Tests' {
         }
 
         It 'Encode-Jwt handles missing jsonwebtoken package gracefully when Node.js is available' {
+            try {
             if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
                 Set-ItResult -Skipped -Because "Node.js is not available"
                 return
@@ -128,23 +140,24 @@ Describe 'Developer Tools Integration Tests' {
             if ($jwtFile -and -not [string]::IsNullOrWhiteSpace($jwtFile) -and (Test-Path -LiteralPath $jwtFile)) {
                 $jwtFile | Should -Exist
             }
-        }
-        catch {
-            $errorMessage = $_.Exception.Message
-            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-            
-            if ($errorMessage -match 'jsonwebtoken.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'jsonwebtoken') {
-                $installCommand = Resolve-TestToolInstallCommand -ToolName 'jsonwebtoken' -ToolType 'node-package'
-                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                }
-                elseif ($errorMessage -match 'jsonwebtoken' -or $fullError -match 'jsonwebtoken') {
-                    Write-Host "jsonwebtoken package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match 'jsonwebtoken'
-                }
             }
-            # Other errors are also acceptable
+            catch {
+                $errorMessage = $_.Exception.Message
+                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+                if ($errorMessage -match 'jsonwebtoken.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'jsonwebtoken') {
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'jsonwebtoken' -ToolType 'node-package'
+                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                    }
+                    elseif ($errorMessage -match 'jsonwebtoken' -or $fullError -match 'jsonwebtoken') {
+                        Write-Host "jsonwebtoken package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match 'jsonwebtoken'
+                    }
+                }
+                # Other errors are also acceptable
+            }
         }
     }
 

@@ -97,20 +97,26 @@ AfterAll {
 }
 
 Describe 'FragmentLoader extended scenarios' {
-    BeforeEach { Reset-FragmentLoaderGlobals }
+    BeforeEach {
+        Reset-FragmentLoaderGlobals
+        Remove-Module PathResolution -ErrorAction SilentlyContinue -Force
+        Import-Module (Join-Path $script:LibPath 'fragment/FragmentLoader.psm1') -DisableNameChecking -Force -Global
+    }
 
     Context 'Get-ProfileDirectory' {
         It 'Prefers ProfileFragmentRoot when it exists' {
             $global:ProfileFragmentRoot = $script:TempProfileDir
 
-            Get-ProfileDirectory | Should -Be $script:TempProfileDir
+            $getProfileDirectory = Get-Command -Module FragmentLoader -Name Get-ProfileDirectory
+            & $getProfileDirectory | Should -Be $script:TempProfileDir
         }
 
         It 'Falls back to ProfileDir when ProfileFragmentRoot is unset' {
             $global:ProfileFragmentRoot = $null
             $global:ProfileDir = $script:TempProfileDir
 
-            Get-ProfileDirectory | Should -Be $script:TempProfileDir
+            $getProfileDirectory = Get-Command -Module FragmentLoader -Name Get-ProfileDirectory
+            & $getProfileDirectory | Should -Be $script:TempProfileDir
         }
     }
 
@@ -131,7 +137,14 @@ Describe 'FragmentLoader extended scenarios' {
 
     Context 'Test-FragmentLoaded' {
         It 'Detects fragments marked in the global load map' {
-            $global:__psprofile_fragment_loaded['mapped-fragment'] = $true
+            # FragmentLoader delegates to FragmentIdempotency when available, which
+            # tracks load state via <FragmentName>Loaded globals (not the hashtable).
+            if (Get-Command Set-FragmentLoaded -ErrorAction SilentlyContinue) {
+                Set-FragmentLoaded -FragmentName 'mapped-fragment'
+            }
+            else {
+                $global:__psprofile_fragment_loaded['mapped-fragment'] = $true
+            }
 
             Test-FragmentLoaded -FragmentName 'mapped-fragment' | Should -Be $true
         }

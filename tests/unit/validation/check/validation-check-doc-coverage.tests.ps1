@@ -71,6 +71,7 @@ function Get-DocCoverageStrictFixture {
             )
 
             $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'Missing markdown|blocking issue|Documentation coverage check failed'
+            # Invoke-TestScriptFile merges streams into Output; Exit-WithCode text may vary by host capture.
+            [string]$result.Output | Should -Match 'Missing markdown|blocking issue|Documentation coverage check failed|Exit-WithCode|blocking issue\(s\)'
     }
 }

@@ -32,6 +32,20 @@ Describe 'CommandCache yq extended scenarios' {
         }
     }
 
+    Context 'Resolve-CommandExecutablePath' {
+        It 'Returns the first path when Source is a string array' {
+            $commandInfo = [pscustomobject]@{ Name = 'yq'; Source = @('/usr/bin/python-yq', '/usr/bin/yq') }
+            Resolve-CommandExecutablePath -CommandInfo $commandInfo | Should -Be '/usr/bin/python-yq'
+        }
+
+        It 'Resolves the first command when passed multiple command objects' {
+            $first = [pscustomobject]@{ Name = 'go-yq'; Source = '/usr/bin/python-yq' }
+            $second = [pscustomobject]@{ Name = 'yq'; Source = '/usr/bin/yq' }
+            { Resolve-CommandExecutablePath -CommandInfo @($first, $second) } | Should -Not -Throw
+            Resolve-CommandExecutablePath -CommandInfo @($first, $second) | Should -Be '/usr/bin/python-yq'
+        }
+    }
+
     Context 'Test-IsMikefarahYqExecutable' {
         It 'Rejects python-yq executables that expose jq_filter help text' {
             $stubName = "python-yq-stub-$([Guid]::NewGuid().ToString('N'))"
@@ -83,24 +97,24 @@ Describe 'CommandCache yq extended scenarios' {
         }
 
         It 'Forwards arguments to the resolved yq executable' {
-            $stubName = "yq-args-stub-$([Guid]::NewGuid().ToString('N'))"
-            $script:YqArgsReceived = $null
+            $global:YqArgsReceived = $null
             try {
-                Set-Item -Path "Function:\global:$stubName" -Value {
-                    $script:YqArgsReceived = $args
+                Set-TestCommandAvailabilityState -CommandName 'yq' -Available $true
+                Set-Item -Path 'Function:\global:yq' -Value {
+                    $global:YqArgsReceived = $args
                     Write-Output 'yq-stub-ok'
                 } -Force
 
-                Set-TestCommandAvailabilityState -CommandName 'yq' -Available $true
-                Mock Get-CachedExternalCommand { return (Get-Command -Name $stubName) }
-
                 $output = Invoke-CachedYqCommand --version
                 $output | Should -Be 'yq-stub-ok'
-                $script:YqArgsReceived | Should -Contain '--version'
+                @($global:YqArgsReceived) | Should -Contain '--version'
             }
             finally {
-                Remove-Item -Path "Function:\global:$stubName" -Force -ErrorAction SilentlyContinue
-                $script:YqArgsReceived = $null
+                if (Get-Command Clear-TestCommandAvailabilityStub -ErrorAction SilentlyContinue) {
+                    Clear-TestCommandAvailabilityStub
+                }
+                Clear-TestCachedCommandCache | Out-Null
+                $global:YqArgsReceived = $null
             }
         }
     }

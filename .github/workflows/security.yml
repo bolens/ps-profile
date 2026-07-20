@@ -1,19 +1,40 @@
 name: Security - Scan
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/utils/security/**'
+      - 'scripts/lib/**'
+      - '.github/workflows/security.yml'
   push:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/utils/security/**'
+      - 'scripts/lib/**'
+      - '.github/workflows/security.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
 
 jobs:
   security-scan:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install PSScriptAnalyzer
         run: pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser"
       - name: Run Security Scan

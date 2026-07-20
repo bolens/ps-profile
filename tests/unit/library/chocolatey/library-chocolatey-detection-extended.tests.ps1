@@ -42,6 +42,58 @@ function script:Clear-ChocolateyTestEnvironment {
     }
 }
 
+function script:Disable-ChocolateyDefaultLocations {
+    <#
+    .SYNOPSIS
+        Isolate detection from a host Chocolatey install (ProgramData + hardcoded fallback).
+    #>
+    $emptyProgramData = Join-Path $script:TempDir 'empty-programdata'
+    if (-not (Test-Path -LiteralPath $emptyProgramData)) {
+        New-Item -ItemType Directory -Path $emptyProgramData -Force | Out-Null
+    }
+    Mock-EnvironmentVariable -Name 'ProgramData' -Value $emptyProgramData
+
+    Mock Get-Command {
+        $cmdName = $Name
+        if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
+            $cmdName = [string]$args[0]
+        }
+        # Hide Validation helpers and the real choco binary (Windows runners often have
+        # Chocolatey installed — CheckCommand tests must see it as unavailable).
+        if ($cmdName -in @('Test-ValidPath', 'choco')) {
+            return $null
+        }
+        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+    } -ModuleName ChocolateyDetection
+
+    Mock Test-Path {
+        $target = $null
+        $useLiteral = $false
+        if ($PSBoundParameters.ContainsKey('LiteralPath') -and $LiteralPath) {
+            $target = [string]$LiteralPath
+            $useLiteral = $true
+        }
+        elseif ($PSBoundParameters.ContainsKey('Path') -and $Path) {
+            $target = [string]$Path
+        }
+        elseif ($args.Count -gt 0) {
+            $target = [string]$args[0]
+        }
+        if ($target -eq 'C:\ProgramData\chocolatey') {
+            return $false
+        }
+        if ([string]::IsNullOrWhiteSpace($target)) {
+            return $false
+        }
+        # Rebuild the call from the resolved target so positional ($args) invocations
+        # never splat an empty $PSBoundParameters into the real Test-Path.
+        $forward = @{ ErrorAction = 'SilentlyContinue' }
+        if ($PSBoundParameters.ContainsKey('PathType')) { $forward['PathType'] = $PathType }
+        if ($useLiteral) { $forward['LiteralPath'] = $target } else { $forward['Path'] = $target }
+        return Microsoft.PowerShell.Management\Test-Path @forward
+    } -ModuleName ChocolateyDetection
+}
+
 AfterAll {
     Clear-ChocolateyTestEnvironment
     if ($script:TempDir -and (Test-Path -LiteralPath $script:TempDir)) {
@@ -49,11 +101,48 @@ AfterAll {
     }
 }
 
+function script:Mock-ChocolateyGetCommandWithoutChoco {
+    <#
+    .SYNOPSIS
+        Module-scoped Get-Command mock that hides choco without breaking other probes.
+    #>
+    # Pester 5.6+/6 require a default mock when -ModuleName is used with -ParameterFilter,
+    # otherwise unmatched calls (Test-ValidPath, Write-StructuredWarning) throw.
+    Mock Get-Command {
+        $cmdName = $Name
+        if ([string]::IsNullOrWhiteSpace($cmdName) -and $args.Count -gt 0) {
+            $cmdName = [string]$args[0]
+        }
+
+        if ($cmdName -eq 'choco') {
+            return $null
+        }
+
+        # Keep ChocolateyDetection on its Test-Path fallbacks; do not surface global-only helpers.
+        if ($cmdName -eq 'Test-ValidPath') {
+            return $null
+        }
+
+        # Prefer callable global stubs (Enable-TestStructuredLogging) over module-only exports.
+        if ($cmdName -in @('Write-StructuredWarning', 'Write-StructuredError')) {
+            $globalFn = Get-Item -Path "Function:\global:$cmdName" -ErrorAction SilentlyContinue
+            if ($globalFn) {
+                return Microsoft.PowerShell.Core\Get-Command -Name $cmdName -CommandType Function -ErrorAction SilentlyContinue
+            }
+            return $null
+        }
+
+        return Microsoft.PowerShell.Core\Get-Command @PSBoundParameters
+    } -ModuleName ChocolateyDetection
+}
+
 Describe 'ChocolateyDetection extended scenarios' {
     BeforeEach { Clear-ChocolateyTestEnvironment }
     AfterEach {
-        if (Get-Command Restore-AllMocks -ErrorAction SilentlyContinue) {
-            Restore-AllMocks
+        # Use module-qualified Get-Command so filtered Get-Command mocks cannot break cleanup.
+        $restoreMocks = Microsoft.PowerShell.Core\Get-Command -Name Restore-AllMocks -ErrorAction SilentlyContinue
+        if ($restoreMocks) {
+            & $restoreMocks
         }
     }
 
@@ -62,6 +151,7 @@ Describe 'ChocolateyDetection extended scenarios' {
             $filePath = Join-Path $script:TempDir 'missing-choco.txt'
             New-Item -ItemType File -Path $filePath -Force | Out-Null
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $filePath
+            Disable-ChocolateyDefaultLocations
 
             Get-ChocolateyRoot | Should -BeNullOrEmpty
         }
@@ -117,6 +207,7 @@ Describe 'ChocolateyDetection extended scenarios' {
 
         It 'Logs verbose output when no Chocolatey root is found at debug level 2' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $null
+            Disable-ChocolateyDefaultLocations
             $env:PS_PROFILE_DEBUG = '2'
 
             Get-ChocolateyRoot | Should -BeNullOrEmpty
@@ -203,7 +294,7 @@ Describe 'ChocolateyDetection extended scenarios' {
 
         It 'Requires choco command when CheckCommand is specified' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
-            Mock Get-Command { return $null } -ParameterFilter { $Name -eq 'choco' }
+            Mock-ChocolateyGetCommandWithoutChoco
 
             Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
@@ -219,7 +310,7 @@ Describe 'ChocolateyDetection extended scenarios' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
             $env:PS_PROFILE_DEBUG = '1'
             Enable-TestStructuredLogging
-            Mock Get-Command { return $null } -ParameterFilter { $Name -eq 'choco' }
+            Mock-ChocolateyGetCommandWithoutChoco
 
             Test-ChocolateyInstalled -CheckCommand | Should -Be $false
         }
@@ -235,7 +326,7 @@ Describe 'ChocolateyDetection extended scenarios' {
             Mock-EnvironmentVariable -Name 'ChocolateyInstall' -Value $script:FakeChocoRoot
             $env:PS_PROFILE_DEBUG = '1'
             Remove-TestFunction -Name 'Write-StructuredWarning'
-            Mock Get-Command { return $null } -ParameterFilter { $Name -eq 'choco' }
+            Mock-ChocolateyGetCommandWithoutChoco
 
             Test-ChocolateyInstalled -CheckCommand -WarningAction SilentlyContinue | Should -Be $false
         }

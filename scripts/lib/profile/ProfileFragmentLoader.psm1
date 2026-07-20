@@ -344,7 +344,7 @@ function Initialize-FragmentLoading {
                         }
                     }
                     else {
-                        Write-Error "[profile-fragment-loader.bootstrap] Failed to load bootstrap fragment '$($bf.Name)': $($_.Exception.Message)"
+                        Write-Error "[profile-fragment-loader.bootstrap] Failed to load bootstrap fragment '$($bf.Name)': $($_.Exception.Message)" -ErrorAction Continue
                     }
                 }
                 # Level 3: Log detailed error information
@@ -366,7 +366,7 @@ function Initialize-FragmentLoading {
                         }
                     }
                     else {
-                        Write-Error "[profile-fragment-loader.bootstrap] Failed to load bootstrap fragment '$($bf.Name)': $($_.Exception.Message)"
+                        Write-Error "[profile-fragment-loader.bootstrap] Failed to load bootstrap fragment '$($bf.Name)': $($_.Exception.Message)" -ErrorAction Continue
                     }
                 }
                 if ($bf.BaseName -and -not $failedNames.Contains($bf.BaseName)) {

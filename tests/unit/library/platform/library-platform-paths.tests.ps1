@@ -93,19 +93,36 @@ Describe 'PlatformPaths Module Functions' {
             $fakeHome = Join-Path $script:TempRoot 'user-home'
             New-Item -ItemType Directory -Path $fakeHome -Force | Out-Null
             $originalHome = $env:HOME
+            $originalUserProfile = $env:USERPROFILE
             $originalDesktop = $env:XDG_DESKTOP_DIR
+            $originalDownloads = $env:XDG_DOWNLOAD_DIR
+            $originalForcedHome = $env:PS_PROFILE_PLATFORM_PATHS_FORCE_USER_HOME
 
             try {
                 Remove-Item Env:XDG_DESKTOP_DIR -ErrorAction SilentlyContinue
+                Remove-Item Env:XDG_DOWNLOAD_DIR -ErrorAction SilentlyContinue
                 Remove-Item Env:XDG_CONFIG_HOME -ErrorAction SilentlyContinue
                 Remove-Item Env:APPDATA -ErrorAction SilentlyContinue
                 $env:HOME = $fakeHome
+                $env:USERPROFILE = $fakeHome
+                # Prefer ~/Name over Windows SpecialFolder when tests force a home.
+                $env:PS_PROFILE_PLATFORM_PATHS_FORCE_USER_HOME = $fakeHome
 
-                Get-UserDirectory -Name 'Desktop' | Should -Be (Join-Path $fakeHome 'Desktop')
+                # Downloads has no SpecialFolder mapping; Desktop would resolve to the
+                # real Windows desktop before the ~/Name fallback.
+                Get-UserDirectory -Name 'Downloads' | Should -Be (Join-Path $fakeHome 'Downloads')
             }
             finally {
                 $env:HOME = $originalHome
+                $env:USERPROFILE = $originalUserProfile
                 $env:XDG_DESKTOP_DIR = $originalDesktop
+                $env:XDG_DOWNLOAD_DIR = $originalDownloads
+                if ($null -eq $originalForcedHome) {
+                    Remove-Item Env:PS_PROFILE_PLATFORM_PATHS_FORCE_USER_HOME -ErrorAction SilentlyContinue
+                }
+                else {
+                    $env:PS_PROFILE_PLATFORM_PATHS_FORCE_USER_HOME = $originalForcedHome
+                }
             }
         }
     }

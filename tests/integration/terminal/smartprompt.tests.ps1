@@ -63,6 +63,7 @@ Describe "SmartPrompt Detection Tests" {
         }
 
         It "Does not show uv when PS_PROFILE_SHOW_UV is not set" {
+            try {
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptUV'
                         Push-Location $testDir
             New-Item -ItemType File -Path "pyproject.toml" -Force | Out-Null
@@ -75,13 +76,15 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'uv'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows uv when PS_PROFILE_SHOW_UV is enabled and pyproject.toml exists" {
+            try {
             $env:PS_PROFILE_SHOW_UV = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptUV'
                         Push-Location $testDir
@@ -104,14 +107,16 @@ Describe "SmartPrompt Detection Tests" {
             $outputString = Get-TestWriteHostOutputString
             # Should contain uv indicator (may be "uv" or "uv:py3.11.5" depending on version detection)
             $outputString | Should -Match 'uv'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_UV -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_UV -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows uv when .python-version exists" {
+            try {
             $env:PS_PROFILE_SHOW_UV = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptUV'
                         Push-Location $testDir
@@ -125,14 +130,16 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'uv'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_UV -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_UV -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows uv when .venv directory exists" {
+            try {
             $env:PS_PROFILE_SHOW_UV = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptUV'
                         Push-Location $testDir
@@ -146,14 +153,16 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'uv'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_UV -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_UV -ErrorAction SilentlyContinue
+            }
         }
 
         It "Does not show uv when uv command is not available" {
+            try {
             $env:PS_PROFILE_SHOW_UV = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptUV'
                         Push-Location $testDir
@@ -167,11 +176,12 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'uv'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_UV -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_UV -ErrorAction SilentlyContinue
+            }
         }
 
         It "Handles uv python list errors gracefully" {
@@ -215,6 +225,7 @@ Describe "SmartPrompt Detection Tests" {
         }
 
         It "Does not show npm when PS_PROFILE_SHOW_NPM is not set" {
+            try {
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptNPM'
                         Push-Location $testDir
             New-Item -ItemType File -Path "package.json" -Force | Out-Null
@@ -227,13 +238,15 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'npm'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows npm when PS_PROFILE_SHOW_NPM is enabled and package.json exists" {
+            try {
             $env:PS_PROFILE_SHOW_NPM = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptNPM'
                         Push-Location $testDir
@@ -257,14 +270,16 @@ Describe "SmartPrompt Detection Tests" {
             $outputString = Get-TestWriteHostOutputString
             # Should contain npm indicator (may be "npm" or "npm:node20.10.0" depending on version detection)
             $outputString | Should -Match 'npm'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_NPM -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_NPM -ErrorAction SilentlyContinue
+            }
         }
 
         It "Does not show npm when npm command is not available" {
+            try {
             $env:PS_PROFILE_SHOW_NPM = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptNPM'
                         Push-Location $testDir
@@ -278,11 +293,12 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'npm'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_NPM -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_NPM -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows npm without version when node command fails" {
@@ -318,6 +334,7 @@ Describe "SmartPrompt Detection Tests" {
         }
 
         It "Searches parent directories for package.json" {
+            try {
             $env:PS_PROFILE_SHOW_NPM = '1'
             $parentDir = New-TestTempDirectory -Prefix 'SmartPromptNPM'
             $testDir = Join-Path $parentDir "subdir"
@@ -334,11 +351,12 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'npm'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $parentDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_NPM -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $parentDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_NPM -ErrorAction SilentlyContinue
+            }
         }
     }
 
@@ -350,6 +368,7 @@ Describe "SmartPrompt Detection Tests" {
         }
 
         It "Does not show rust when PS_PROFILE_SHOW_RUST is not set" {
+            try {
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptRust'
                         Push-Location $testDir
             New-Item -ItemType File -Path "Cargo.toml" -Force | Out-Null
@@ -360,13 +379,15 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'rust'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows rust when PS_PROFILE_SHOW_RUST is enabled and Cargo.toml exists" {
+            try {
             $env:PS_PROFILE_SHOW_RUST = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptRust'
                         Push-Location $testDir
@@ -388,14 +409,16 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'rust'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_RUST -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_RUST -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows rust without version when rustc is not available" {
+            try {
             $env:PS_PROFILE_SHOW_RUST = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptRust'
                         Push-Location $testDir
@@ -409,11 +432,12 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'rust'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_RUST -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_RUST -ErrorAction SilentlyContinue
+            }
         }
     }
 
@@ -425,6 +449,7 @@ Describe "SmartPrompt Detection Tests" {
         }
 
         It "Does not show go when PS_PROFILE_SHOW_GO is not set" {
+            try {
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptGo'
                         Push-Location $testDir
             New-Item -ItemType File -Path "go.mod" -Force | Out-Null
@@ -435,13 +460,15 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'go'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows go when PS_PROFILE_SHOW_GO is enabled and go.mod exists" {
+            try {
             $env:PS_PROFILE_SHOW_GO = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptGo'
                         Push-Location $testDir
@@ -463,14 +490,16 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'go'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_GO -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_GO -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows go without version when go command is not available" {
+            try {
             $env:PS_PROFILE_SHOW_GO = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptGo'
                         Push-Location $testDir
@@ -484,11 +513,12 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'go'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_GO -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_GO -ErrorAction SilentlyContinue
+            }
         }
     }
 
@@ -500,6 +530,7 @@ Describe "SmartPrompt Detection Tests" {
         }
 
         It "Does not show docker when PS_PROFILE_SHOW_DOCKER is not set" {
+            try {
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptDocker'
                         Push-Location $testDir
             New-Item -ItemType File -Path "Dockerfile" -Force | Out-Null
@@ -510,13 +541,15 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'docker'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows docker when PS_PROFILE_SHOW_DOCKER is enabled and Dockerfile exists" {
+            try {
             $env:PS_PROFILE_SHOW_DOCKER = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptDocker'
                         Push-Location $testDir
@@ -528,14 +561,16 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'docker'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_DOCKER -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_DOCKER -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows docker when docker-compose.yml exists" {
+            try {
             $env:PS_PROFILE_SHOW_DOCKER = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptDocker'
                         Push-Location $testDir
@@ -547,11 +582,12 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'docker'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_DOCKER -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_DOCKER -ErrorAction SilentlyContinue
+            }
         }
     }
 
@@ -563,6 +599,7 @@ Describe "SmartPrompt Detection Tests" {
         }
 
         It "Does not show poetry when PS_PROFILE_SHOW_POETRY is not set" {
+            try {
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptPoetry'
                         Push-Location $testDir
             New-Item -ItemType File -Path "poetry.lock" -Force | Out-Null
@@ -575,13 +612,15 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'poetry'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows poetry when PS_PROFILE_SHOW_POETRY is enabled and poetry.lock exists" {
+            try {
             $env:PS_PROFILE_SHOW_POETRY = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptPoetry'
                         Push-Location $testDir
@@ -603,14 +642,16 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'poetry'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_POETRY -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_POETRY -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows poetry when pyproject.toml exists" {
+            try {
             $env:PS_PROFILE_SHOW_POETRY = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptPoetry'
                         Push-Location $testDir
@@ -624,14 +665,16 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'poetry'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_POETRY -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_POETRY -ErrorAction SilentlyContinue
+            }
         }
 
         It "Does not show poetry when poetry command is not available" {
+            try {
             $env:PS_PROFILE_SHOW_POETRY = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptPoetry'
                         Push-Location $testDir
@@ -645,11 +688,12 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'poetry'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_POETRY -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_POETRY -ErrorAction SilentlyContinue
+            }
         }
     }
 
@@ -661,6 +705,7 @@ Describe "SmartPrompt Detection Tests" {
         }
 
         It "Does not show pnpm when PS_PROFILE_SHOW_PNPM is not set" {
+            try {
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptPNPM'
                         Push-Location $testDir
             New-Item -ItemType File -Path "pnpm-lock.yaml" -Force | Out-Null
@@ -673,13 +718,15 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Not -Match 'pnpm'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows pnpm when PS_PROFILE_SHOW_PNPM is enabled and pnpm-lock.yaml exists" {
+            try {
             $env:PS_PROFILE_SHOW_PNPM = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptPNPM'
                         Push-Location $testDir
@@ -701,14 +748,16 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'pnpm'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_PNPM -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_PNPM -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows yarn when yarn.lock exists" {
+            try {
             $env:PS_PROFILE_SHOW_PNPM = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptPNPM'
                         Push-Location $testDir
@@ -730,14 +779,16 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'yarn'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_PNPM -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_PNPM -ErrorAction SilentlyContinue
+            }
         }
 
         It "Shows pnpm without version when pnpm command is not available" {
+            try {
             $env:PS_PROFILE_SHOW_PNPM = '1'
             $testDir = New-TestTempDirectory -Prefix 'SmartPromptPNPM'
                         Push-Location $testDir
@@ -751,11 +802,12 @@ Describe "SmartPrompt Detection Tests" {
             
             $outputString = Get-TestWriteHostOutputString
             $outputString | Should -Match 'pnpm'
-        }
-        finally {
-            Pop-Location
-            Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
-            Remove-Item Env:\PS_PROFILE_SHOW_PNPM -ErrorAction SilentlyContinue
+            }
+            finally {
+                Pop-Location
+                Remove-Item -Path $testDir -Recurse -Force -ErrorAction SilentlyContinue
+                Remove-Item Env:\PS_PROFILE_SHOW_PNPM -ErrorAction SilentlyContinue
+            }
         }
     }
 }

@@ -18,58 +18,72 @@ BeforeAll {
     }
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:SpellcheckScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'code-quality' 'spellcheck.ps1'
+    $script:PsExe = (Get-Command pwsh -ErrorAction Stop).Source
     $ConfirmPreference = 'None'
 }
 
 Describe 'spellcheck.ps1 execution' {
-    It 'Exits successfully and skips when cspell is not installed' {
-        if (Get-Command cspell -ErrorAction SilentlyContinue) {
-            Set-ItResult -Skipped -Because 'cspell is installed; skip-path test requires cspell to be absent'
+    It 'Uses repo-local cspell when available via node_modules' {
+        $cspellEntry = Join-Path $script:TestRepoRoot 'node_modules' 'cspell' 'bin.mjs'
+        if (-not (Test-Path -LiteralPath $cspellEntry)) {
+            Set-ItResult -Skipped -Because 'node_modules/cspell is not installed'
             return
         }
 
-        $docPath = Join-Path (New-TestTempDirectory -Prefix 'SpellcheckSkip') 'readme.md'
-        Set-Content -LiteralPath $docPath -Value '# Spellcheck skip fixture' -Encoding UTF8
+        # Use /tmp — New-TestTempDirectory lives under tests/ which cspell ignorePaths skips.
+        $docPath = Join-Path ([System.IO.Path]::GetTempPath()) ("spellcheck-local-{0}.md" -f [guid]::NewGuid())
+        Set-Content -LiteralPath $docPath -Value '# Spellcheck local fixture document' -Encoding utf8NoBOM
 
-            $result = Invoke-TestScriptFile -ScriptPath $script:SpellcheckScript -ArgumentList @(
-                '-Paths', $docPath
-            )
+        $result = Invoke-TestScriptFile -ScriptPath $script:SpellcheckScript -ArgumentList @(
+            '-Paths', $docPath
+        )
 
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'cspell not found|Skipping local spellcheck'
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match 'cspell passed|Running cspell'
+        Remove-Item -LiteralPath $docPath -Force -ErrorAction SilentlyContinue
     }
 
-    It 'Passes a clean document when cspell is available' {
-        if (-not (Get-Command cspell -ErrorAction SilentlyContinue)) {
-            Set-ItResult -Skipped -Because 'cspell is not installed'
-            return
-        }
+    It 'Skips when no cspell runner can be resolved in an empty repository' {
+        $orphanRoot = New-TestTempDirectory -Prefix 'SpellcheckOrphan'
+        $codeQualityDir = Join-Path $orphanRoot 'scripts' 'utils' 'code-quality'
+        New-Item -ItemType Directory -Path $codeQualityDir -Force | Out-Null
+        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $orphanRoot 'scripts' 'lib') -Recurse -Force
+        Copy-Item -LiteralPath $script:SpellcheckScript -Destination (Join-Path $codeQualityDir 'spellcheck.ps1') -Force
+        Push-Location $orphanRoot
+        try { & git init -q 2>$null } finally { Pop-Location }
 
-        $docPath = Join-Path (New-TestTempDirectory -Prefix 'SpellcheckClean') 'readme.md'
-        Set-Content -LiteralPath $docPath -Value '# Spellcheck clean fixture document' -Encoding UTF8
+        $isolatedPath = Join-Path $orphanRoot 'empty-path'
+        New-Item -ItemType Directory -Path $isolatedPath -Force | Out-Null
+        $orphanScript = Join-Path $codeQualityDir 'spellcheck.ps1'
+        $docPath = Join-Path $orphanRoot 'readme.md'
+        Set-Content -LiteralPath $docPath -Value '# Spellcheck skip fixture' -Encoding UTF8
 
-            $result = Invoke-TestScriptFile -ScriptPath $script:SpellcheckScript -ArgumentList @(
-                '-Paths', $docPath
-            )
+        $output = & $script:PsExe -NoProfile -NonInteractive -Command @"
+`$env:PATH = '$($isolatedPath -replace "'", "''")'
+Remove-Item Env:\PS_PROFILE_REQUIRE_CSPELL -ErrorAction SilentlyContinue
+& '$($orphanScript -replace "'", "''")' -Paths '$($docPath -replace "'", "''")'
+exit `$LASTEXITCODE
+"@ 2>&1 | Out-String
 
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'cspell passed'
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -Match 'cspell not found|Skipping local spellcheck'
     }
 
     It 'Fails validation when cspell finds a spelling error' {
-        if (-not (Get-Command cspell -ErrorAction SilentlyContinue)) {
-            Set-ItResult -Skipped -Because 'cspell is not installed'
+        $localCspell = Join-Path $script:TestRepoRoot 'node_modules' 'cspell' 'bin.mjs'
+        if (-not (Test-Path -LiteralPath $localCspell) -and -not (Get-Command cspell -ErrorAction SilentlyContinue)) {
+            Set-ItResult -Skipped -Because 'cspell is not available'
             return
         }
 
-        $docPath = Join-Path (New-TestTempDirectory -Prefix 'SpellcheckTypo') 'readme.md'
-        Set-Content -LiteralPath $docPath -Value 'zzqxwtypofixtureword' -Encoding UTF8
+        $docPath = Join-Path ([System.IO.Path]::GetTempPath()) ("spellcheck-typo-{0}.md" -f [guid]::NewGuid())
+        Set-Content -LiteralPath $docPath -Value 'zzqxwtypofixtureword' -Encoding utf8NoBOM
 
-            $result = Invoke-TestScriptFile -ScriptPath $script:SpellcheckScript -ArgumentList @(
-                '-Paths', $docPath
-            )
-
-            $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'cspell found spelling errors'
+        $raw = & $script:PsExe -NoProfile -NonInteractive -File $script:SpellcheckScript -Paths $docPath 2>&1
+        $exitCode = $LASTEXITCODE
+        $output = $raw | Out-String
+        Remove-Item -LiteralPath $docPath -Force -ErrorAction SilentlyContinue
+        $exitCode | Should -Be 1
+        $output | Should -Match 'cspell found spelling errors|zzqxwtypofixtureword'
     }
 }

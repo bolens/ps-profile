@@ -616,6 +616,66 @@ Batch scripts forward a subset of flags (`-Quiet`, `-Parallel` on conversion bat
 For full runner features (coverage, retries, baselines), call `run-pester.ps1` directly
 or use `task test -- <flags>`.
 
+### CI shards (GitHub Actions)
+
+The `Test - Pester` workflow runs the suite as **parallel matrix jobs** instead of one
+multi-hour job. Shared filter rules in
+`scripts/utils/code-quality/modules/PesterCiShardFilter.psm1` select shards from the PR
+diff (docs-only / npm-lock PRs run zero Pester jobs). `workflow_dispatch` and CI-contract
+path changes enable the full suite.
+
+Locally (same rules as CI):
+
+```powershell
+# Working tree + staged changes
+just test-changed-shards -- -Quiet
+# Or vs a branch
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 -ChangedSince origin/main -Quiet
+# List only
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 -ListOnly
+```
+
+Pre-push stays fast by default (no validate / no local shard run — pre-commit and CI
+already cover those). Opt into heavier local gates when you want them:
+
+```bash
+PS_PROFILE_PUSH_VALIDATE=1 git push   # re-run validate-profile before push
+PS_PROFILE_PUSH_TESTS=1 git push      # run changed CI Pester shards before push
+# optional: PS_PROFILE_PUSH_TESTS_SINCE=origin/main
+just pre-push-checks
+# or
+pwsh -NoProfile -File scripts/git/hooks/pre-push.ps1
+```
+
+Pre-commit stays format + validate only.
+
+Each enabled shard is a bounded path set executed via `run-pester-ci-shard.ps1`:
+
+```powershell
+# List shard names (matches .github/workflows/test-pester.yml)
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -ListShards
+
+# Run one shard locally (same as a single CI job)
+task test-ci-shard -- -Shard unit-library -Quiet
+pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard conversion-data-compression -Quiet
+```
+
+| Shard kind | Examples | Runner |
+|------------|----------|--------|
+| Unit | `unit-library`, `unit-profile-core`, `unit-profile-misc-a` | `run-pester.ps1 -Parallel` |
+| Integration (non-conversion) | `integration-core` | `run-pester.ps1 -Parallel` |
+| Tools integration | `integration-tools` | `run-tools-integration-batch.ps1` |
+| Conversion integration | `conversion-data-structured`, `conversion-media` | conversion batch scripts |
+| Performance | `performance` (Windows only) | `run-performance-batch.ps1` |
+| Coverage smoke | `coverage-smoke` (Ubuntu only) | `run-pester.ps1 -Coverage` on bootstrap + library |
+
+**OS matrix:** every enabled shard runs on Ubuntu (except `performance`). Windows also
+runs `unit-library`, `unit-profile-core`, `integration-tools`, `integration-core`, and
+`performance` when those shards are selected.
+
+Wall-clock time is dominated by the slowest shard; tune shards in `run-pester-ci-shard.ps1`
+and filter→shard maps in `.github/workflows/test-pester.yml` when buckets grow too large.
+
 ## Coverage Analysis
 
 During development, `analyze-coverage.ps1` is the recommended entry point. It maps

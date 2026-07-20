@@ -646,25 +646,30 @@ if (-not (Test-Path $scriptRoot)) {
 
 # Import shared utilities directly (similar to analyze-coverage.ps1)
 # Calculate lib path manually to avoid circular dependency with Get-RepoRoot
-$libPath = Join-Path $scriptRoot 'scripts' 'lib'
+$libPath = Join-Path (Join-Path $scriptRoot 'scripts') 'lib'
 try {
     Write-Host "Loading shared modules..." -ForegroundColor Yellow
     
     # Import core modules first (needed by others)
     $corePath = Join-Path $libPath 'core'
     Import-Module (Join-Path $corePath 'ExitCodes.psm1') -DisableNameChecking -ErrorAction Stop -Global
-    Import-Module (Join-Path $libPath 'path' 'PathResolution.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    # Snapshot exit codes so test cleanup (Remove-Module ExitCodes) cannot break runner shutdown.
+    $script:RunnerExitSuccess = $EXIT_SUCCESS
+    $script:RunnerExitTestFailure = $EXIT_TEST_FAILURE
+    $script:RunnerExitNoTestsFound = $EXIT_NO_TESTS_FOUND
+    $script:RunnerExitCoverageFailure = $EXIT_COVERAGE_FAILURE
+    Import-Module (Join-Path (Join-Path $libPath 'path') 'PathResolution.psm1') -DisableNameChecking -ErrorAction Stop -Global
     
     # Now we can use Get-RepoRoot if needed, but continue with direct imports for consistency
     Import-Module (Join-Path $corePath 'Logging.psm1') -DisableNameChecking -ErrorAction Stop -Global
     
     # Locale and Module may not exist - import only if available
-    $localePath = Join-Path $libPath 'utilities' 'Locale.psm1'
+    $localePath = Join-Path (Join-Path $libPath 'utilities') 'Locale.psm1'
     if (Test-Path $localePath) {
         Import-Module $localePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
     }
     
-    $modulePath = Join-Path $libPath 'runtime' 'Module.psm1'
+    $modulePath = Join-Path (Join-Path $libPath 'runtime') 'Module.psm1'
     if (Test-Path $modulePath) {
         Import-Module $modulePath -DisableNameChecking -ErrorAction SilentlyContinue -Global
     }
@@ -791,6 +796,9 @@ try {
     $testsDir = Join-Path $repoRoot 'tests'
     $profileDir = Join-Path $repoRoot 'profile.d'
     $testSupportPath = Join-Path $testsDir 'TestSupport.ps1'
+
+    $env:PS_PROFILE_TEST_SUPPORT_PATH = $testSupportPath
+    $env:PS_PROFILE_TESTS_DIR = $testsDir
     
     # Level 2: Repository paths resolved
     if ($debugLevel -ge 2) {
@@ -862,6 +870,15 @@ $PSScriptRoot = $testsDir
 $PSScriptRoot = $originalPSScriptRoot
 Write-Host "TestSupport.ps1 loaded" -ForegroundColor Green
 
+if (-not (Get-Command Get-TestPath -Scope Global -ErrorAction SilentlyContinue)) {
+    if (Get-Command Export-TestSupportGlobalFunctions -ErrorAction SilentlyContinue) {
+        Export-TestSupportGlobalFunctions
+    }
+    if (-not (Get-Command Get-TestPath -Scope Global -ErrorAction SilentlyContinue)) {
+        throw 'Get-TestPath was not exported to global scope after loading TestSupport.ps1'
+    }
+}
+
 # Re-apply confirmation suppression after TestSupport load (in case it was reset)
 $ConfirmPreference = 'None'
 $global:ConfirmPreference = 'None'
@@ -869,37 +886,39 @@ $global:ConfirmPreference = 'None'
 # Initialize output utilities
 Initialize-OutputUtils -RepoRoot $repoRoot
 
-# Ensure Pester 5+ is available and imported
+# Ensure Pester 5.7.x is available and imported.
+# - 5.9+ regresses Mock scoping ("Mock data are not setup for this scope") and TestDrive collisions
+# - 6+ breaks CodeCoverage tracer teardown when profile fragments install PostCommandLookupAction
+# Do NOT call Ensure-ModuleAvailable for Pester — Install-RequiredModule has no MaximumVersion.
 Write-Host "Checking Pester availability..." -ForegroundColor Yellow
-$requiredPesterVersion = [version]'5.0.0'
+$requiredPesterVersion = [version]'5.7.0'
+$maxPesterVersion = [version]'5.7.99'
 
-try {
-    Ensure-ModuleAvailable -ModuleName 'Pester'
-}
-catch {
-    Write-Host "Failed to ensure Pester is available: $_" -ForegroundColor Red
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
-}
-
-$installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
-if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersion) {
+$installedPester = Get-Module -ListAvailable -Name 'Pester' |
+    Where-Object { $_.Version -ge $requiredPesterVersion -and $_.Version -le $maxPesterVersion } |
+    Sort-Object Version -Descending |
+    Select-Object -First 1
+if (-not $installedPester) {
     try {
-        Write-ScriptMessage -Message "Installing Pester $requiredPesterVersion or newer"
-        Install-RequiredModule -ModuleName 'Pester' -Scope 'CurrentUser' -Force
-        $installedPester = Get-Module -ListAvailable -Name 'Pester' | Sort-Object Version -Descending | Select-Object -First 1
+        Write-ScriptMessage -Message "Installing Pester $requiredPesterVersion (maximum $maxPesterVersion)"
+        Install-Module -Name 'Pester' -MinimumVersion $requiredPesterVersion -MaximumVersion $maxPesterVersion -Scope 'CurrentUser' -Force -AllowClobber -ErrorAction Stop
+        $installedPester = Get-Module -ListAvailable -Name 'Pester' |
+            Where-Object { $_.Version -ge $requiredPesterVersion -and $_.Version -le $maxPesterVersion } |
+            Sort-Object Version -Descending |
+            Select-Object -First 1
     }
     catch {
         Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
     }
 }
 
-if (-not $installedPester -or $installedPester.Version -lt $requiredPesterVersion) {
-    $message = "Pester $requiredPesterVersion or newer is required but could not be installed."
+if (-not $installedPester) {
+    $message = "Pester $requiredPesterVersion–$maxPesterVersion is required but could not be installed."
     Exit-WithCleanup -ExitCode $EXIT_SETUP_ERROR -Message $message
 }
 
 try {
-    Import-Module -Name 'Pester' -MinimumVersion $requiredPesterVersion -Force -ErrorAction Stop
+    Import-Module -Name 'Pester' -RequiredVersion $installedPester.Version -Force -ErrorAction Stop
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
@@ -1010,6 +1029,8 @@ try {
         Verbose                  = $Verbose
         ProfileDir               = $profileDir
         RepoRoot                 = $repoRoot
+        TestSupportPath          = $testSupportPath
+        TestsDir                 = $testsDir
     }
 
     # Handle parallel execution
@@ -1210,7 +1231,7 @@ try {
     # Handle Interactive mode
     if ($Interactive) {
         $interactiveInputAvailable = $false
-        if ($env:PS_PROFILE_NONINTERACTIVE -ne '1' -and $env:CI -ne 'true' -and $env:GITHUB_ACTIONS -ne 'true') {
+        if ($env:PS_PROFILE_NONINTERACTIVE -ne '1' -and $env:PS_PROFILE_TEST_MODE -ne '1' -and $env:CI -ne 'true' -and $env:GITHUB_ACTIONS -ne 'true') {
             try {
                 $interactiveInputAvailable = -not [Console]::IsInputRedirected
             }
@@ -2000,20 +2021,20 @@ try {
         }
 
         # Determine exit code based on results
-        $exitCode = $EXIT_SUCCESS
+        $exitCode = $script:RunnerExitSuccess
     
         if ($result.FailedCount -gt 0) {
-            $exitCode = $EXIT_TEST_FAILURE
+            $exitCode = $script:RunnerExitTestFailure
         }
         elseif ($result.TotalCount -eq 0) {
-            $exitCode = $EXIT_NO_TESTS_FOUND
+            $exitCode = $script:RunnerExitNoTestsFound
         }
         elseif ($MinimumCoverage -and $enableCoverage) {
             # Check coverage threshold if specified
             if ($result.Coverage) {
                 $coveragePercent = [Math]::Round($result.Coverage.NumberOfCommandsExecuted / $result.Coverage.NumberOfCommandsAnalyzed * 100, 2)
                 if ($coveragePercent -lt $MinimumCoverage) {
-                    $exitCode = $EXIT_COVERAGE_FAILURE
+                    $exitCode = $script:RunnerExitCoverageFailure
                     $coveragePercentStr = if (Get-Command Format-LocaleNumber -ErrorAction SilentlyContinue) {
                         Format-LocaleNumber $coveragePercent -Format 'N2'
                     }
@@ -2033,10 +2054,10 @@ try {
     
         # Exit with appropriate code (unless in watch mode or interactive mode where we return result)
         if (-not $Watch -and -not $Interactive) {
-            if ($exitCode -ne $EXIT_SUCCESS) {
+            if ($exitCode -ne $script:RunnerExitSuccess) {
                 Exit-WithCleanup -ExitCode $exitCode -Message "Test execution completed with failures or issues"
             }
-            Exit-WithCleanup -ExitCode $EXIT_SUCCESS
+            Exit-WithCleanup -ExitCode $script:RunnerExitSuccess
         }
     }
     catch {

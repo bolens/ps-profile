@@ -181,6 +181,10 @@ Describe 'NodeJs Module Functions' {
         }
 
         It 'Restore scriptblock removes NODE_PATH when it was originally unset' {
+            # The restore only clears NODE_PATH when Set-NodePathForPnpm actually set it,
+            # i.e. when search paths exist. Ambient search paths vary per shard/runner, so
+            # force a deterministic non-empty result.
+            Mock Get-NodeModuleSearchPaths { @((Join-Path $script:TestDir 'fake-node-modules')) } -ModuleName NodeJs
             Remove-Item Env:\NODE_PATH -ErrorAction SilentlyContinue
             $restore = Set-NodePathForPnpm
             $env:NODE_PATH = '/simulated-change'

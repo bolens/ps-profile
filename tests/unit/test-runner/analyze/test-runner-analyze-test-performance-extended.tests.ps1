@@ -29,9 +29,9 @@ Describe 'analyze-test-performance.ps1 extended scenarios' {
             $content | Should -Match '\.PARAMETER OutputPath'
         }
 
-        It 'Uses the TestSuite enum for suite selection' {
+        It 'Uses ValidateSet for suite selection and loads CommonEnums' {
             $content = Get-Content -LiteralPath $script:PerfScript -Raw
-            $content | Should -Match '\[TestSuite\]'
+            $content | Should -Match "ValidateSet\('All',\s*'Unit',\s*'Integration',\s*'Performance'\)"
             $content | Should -Match 'CommonEnums\.psm1'
         }
     }

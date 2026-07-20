@@ -30,7 +30,7 @@ BeforeAll {
     Import-Module (Join-Path $modulePath 'TestRetry.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestEnvironment.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestPerformanceMonitoring.psm1') -Force
-    Import-Module (Join-Path $modulePath 'TestTimeoutHandling.psm1') -Force
+    Import-Module (Join-Path $modulePath 'TestTimeoutHandling.psm1') -Force -Global
     Import-Module (Join-Path $modulePath 'TestRecovery.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestSummaryGeneration.psm1') -Force
     Import-Module (Join-Path $modulePath 'TestReporting.psm1') -Force
@@ -87,12 +87,13 @@ Describe 'PesterConfig Module Tests' {
         It 'Configures parallel execution' {
             $config = New-PesterTestConfiguration -Parallel 4
 
-            if ($config.Run.PSObject.Properties.Name -contains 'Parallel') {
+            if ($config.Run.PSObject.Properties.Name -contains 'Parallel' -and
+                $config.Run.PSObject.Properties.Name -contains 'MaximumThreadCount') {
                 $config.Run.Parallel.Value | Should -Be $true
                 $config.Run.MaximumThreadCount.Value | Should -Be 4
             }
             else {
-                Set-ItResult -Skipped -Because 'Pester Run.Parallel is not available in this Pester version'
+                Set-ItResult -Skipped -Because 'Pester Run.Parallel/MaximumThreadCount is not available in this Pester version'
             }
         }
 
@@ -193,12 +194,13 @@ Describe 'PesterConfig Module Tests' {
 
             $config = Set-PesterExecutionOptions -Config $config -Parallel 8
 
-            if ($config.Run.PSObject.Properties.Name -contains 'Parallel') {
+            if ($config.Run.PSObject.Properties.Name -contains 'Parallel' -and
+                $config.Run.PSObject.Properties.Name -contains 'MaximumThreadCount') {
                 $config.Run.Parallel.Value | Should -Be $true
                 $config.Run.MaximumThreadCount.Value | Should -Be 8
             }
             else {
-                Set-ItResult -Skipped -Because 'Pester Run.Parallel is not available in this Pester version'
+                Set-ItResult -Skipped -Because 'Pester Run.Parallel/MaximumThreadCount is not available in this Pester version'
             }
         }
 

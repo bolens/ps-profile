@@ -61,16 +61,17 @@ Describe 'Network Utils Module' {
         }
 
         It 'retries on failure and succeeds' {
-            Set-Variable -Name NetworkRetryAttemptCount -Value 0 -Scope Global -Force
+            $state = [pscustomobject]@{ Attempt = 0 }
             $script = {
-                $global:NetworkRetryAttemptCount = 1 + [int]$global:NetworkRetryAttemptCount
-                if ($global:NetworkRetryAttemptCount -lt 2) {
+                param($state)
+                $state.Attempt = 1 + [int]$state.Attempt
+                if ($state.Attempt -lt 2) {
                     throw 'connection failed'
                 }
                 return 'success on attempt 2'
             }
 
-            $result = Invoke-WithRetry -ScriptBlock $script -MaxRetries 3 -RetryDelaySeconds 0 -TimeoutSeconds 5
+            $result = Invoke-WithRetry -ScriptBlock $script -ArgumentList $state -MaxRetries 3 -RetryDelaySeconds 0 -TimeoutSeconds 5
             $result | Should -Be 'success on attempt 2'
         }
 
@@ -97,8 +98,9 @@ Describe 'Network Utils Module' {
         }
 
         It 'returns false for failed connectivity test' {
-            # Test with invalid host that will fail
-            $result = Test-NetworkConnectivity -Target "invalid.host.invalid" -Port 80 -TimeoutSeconds 1 -ErrorAction SilentlyContinue
+            # Prefer a closed local port over a fake DNS name — some CI DNS
+            # resolvers hijack NXDOMAIN and can yield a false-positive connect.
+            $result = Test-NetworkConnectivity -Target '127.0.0.1' -Port 65535 -TimeoutSeconds 1 -ErrorAction SilentlyContinue
             $result | Should -Be $false
         }
 
@@ -112,19 +114,19 @@ Describe 'Network Utils Module' {
 
     Context 'Invoke-HttpRequestWithRetry' {
         It 'function exists and can be called' {
-            Get-Command Invoke-HttpRequestWithRetry -CommandType Function -ErrorAction SilentlyContinue | Should -Not -Be $null
-            # Function uses System.Net.WebRequest directly, so we test that it handles errors gracefully
-            # Test with invalid URL that will fail quickly
-            $result = Invoke-HttpRequestWithRetry -Uri "http://invalid.url.invalid" -Method "GET" -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue
-            # Result should be false (request failed) but function should not throw
-            { Invoke-HttpRequestWithRetry -Uri "http://invalid.url.invalid" -Method "GET" -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue } | Should -Not -Throw
+            Get-Command Invoke-HttpRequestWithRetry -CommandType Function -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
+            # Closed local port — avoid fake DNS names that CI resolvers may hijack.
+            { Invoke-HttpRequestWithRetry -Uri 'http://127.0.0.1:1/' -Method 'GET' -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue } | Should -Not -Throw
         }
 
         It 'handles HTTP request failure gracefully' {
-            # Test with invalid URL that will fail
-            $result = Invoke-HttpRequestWithRetry -Uri "http://invalid.url.invalid" -Method "GET" -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue
-            # Failure may surface as $false or $null depending on retry/timeout behavior
-            @($false, $null) | Should -Contain $result
+            $result = Invoke-HttpRequestWithRetry -Uri 'http://127.0.0.1:1/' -Method 'GET' -TimeoutSeconds 1 -MaxRetries 1 -ErrorAction SilentlyContinue
+            # Failure may surface as $false, $null, or an empty collection depending on
+            # EndInvoke wrapping / retry timeout behavior across platforms.
+            $failed = ($null -eq $result) -or ($result -eq $false) -or (
+                $result -is [System.Collections.ICollection] -and $result.Count -eq 0
+            )
+            $failed | Should -BeTrue -Because "HTTP to a closed local port should not report success (got: $(ConvertTo-Json -InputObject $result -Compress -Depth 3 -ErrorAction SilentlyContinue))"
         }
     }
 
@@ -147,7 +149,7 @@ Describe 'Network Utils Module' {
 
             $result = Resolve-HostWithRetry -HostName 'example.com'
             $result | Should -Not -BeNullOrEmpty
-            $result.HostName | Should -Be 'example.com'
+            @($result)[0].HostName | Should -Match '(?i)^example\.com\.?$'
         }
 
         It 'handles DNS resolution failure' {
@@ -157,6 +159,13 @@ Describe 'Network Utils Module' {
 
             $result = Resolve-HostWithRetry -HostName 'nonexistent.domain' -TimeoutSeconds 1
             $result | Should -Be $null
+        }
+    }
+
+    AfterEach {
+        # Resolve-HostWithRetry stubs Invoke-WithRetry; restore the real implementation.
+        if (Get-Command Restore-TestProfileFunctionStubs -ErrorAction SilentlyContinue) {
+            Restore-TestProfileFunctionStubs
         }
     }
 }

@@ -52,6 +52,8 @@ Describe 'ToolInstallRegistry preferences extended scenarios' {
         }
 
         It 'Returns macOS package manager metadata for explicit platform' {
+            Mock Test-CommandAvailable { param($CommandName) $CommandName -eq 'brew' }
+
             $result = Get-SystemPackageManagerFallbackChain -ToolName 'jq' -Platform 'macOS'
 
             $result.Platform | Should -Be 'macOS'

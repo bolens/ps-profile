@@ -39,6 +39,10 @@ test-performance *ARGS:
 test-coverage *ARGS:
     pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel {{ ARGS }}
 
+# Run CI shards for git changes (same filters as GitHub Actions)
+test-changed-shards *ARGS:
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 {{ ARGS }}
+
 # Run Performance Benchmark
 benchmark:
     pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1
@@ -193,6 +197,10 @@ quality-check format security-scan lint spellcheck markdownlint check-comment-he
 # Run Pre-commit Checks
 pre-commit-checks:
     pwsh -NoProfile -File scripts/git/pre-commit.ps1
+
+# Run Pre-push Checks (validate + changed CI Pester shards)
+pre-push-checks *ARGS:
+    pwsh -NoProfile -File scripts/git/hooks/pre-push.ps1 {{ ARGS }}
 
 # Check Idempotency
 check-idempotency:

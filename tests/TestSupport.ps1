@@ -8,7 +8,13 @@
 # Suppress all confirmation prompts for non-interactive test execution
 # Tests should never require user input - always run non-interactively
 # This must be set at the very top, before any operations that might prompt
-$ErrorActionPreference = 'Stop'
+#
+# Use Continue (not Stop): many library/profile helpers emit diagnostic Write-Error
+# while continuing (resilient fragment loading, Exit-WithCode before throw, etc.).
+# Stop turns those into terminating errors, aborts tests mid-flight, and leaks
+# TestDrive / env / module state across the shard. Pester 5.7 has no Run.Initialization
+# to reset this per worker, so TestSupport must not force Stop for test bodies.
+$ErrorActionPreference = 'Continue'
 $ConfirmPreference = 'None'
 $global:ConfirmPreference = 'None'
 
@@ -92,6 +98,10 @@ function Get-TestSupportPath {
         [string]$StartPath = $PSScriptRoot
     )
 
+    if ($env:PS_PROFILE_TEST_SUPPORT_PATH -and -not [string]::IsNullOrWhiteSpace($env:PS_PROFILE_TEST_SUPPORT_PATH) -and (Test-Path -LiteralPath $env:PS_PROFILE_TEST_SUPPORT_PATH)) {
+        return $env:PS_PROFILE_TEST_SUPPORT_PATH
+    }
+
     $current = Get-Item -LiteralPath $StartPath
     
     while ($null -ne $current) {
@@ -115,6 +125,13 @@ $testSupportDir = Join-Path $PSScriptRoot 'TestSupport'
 
 # Load test support modules in dependency order
 if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and (Test-Path -LiteralPath $testSupportDir)) {
+    # Load CoreFunctions early so Export-TestSupportGlobalFunctions / Restore helpers
+    # exist even if TestMocks load is skipped or reordered.
+    $testSupportCoreFunctionsPath = Join-Path $testSupportDir 'TestSupportCoreFunctions.ps1'
+    if ($testSupportCoreFunctionsPath -and (Test-Path -LiteralPath $testSupportCoreFunctionsPath)) {
+        . $testSupportCoreFunctionsPath
+    }
+
     # Load TestPaths first (used by other modules)
     $testPathsPath = Join-Path $testSupportDir 'TestPaths.ps1'
     if ($testPathsPath -and -not [string]::IsNullOrWhiteSpace($testPathsPath) -and (Test-Path -LiteralPath $testPathsPath)) {
@@ -145,12 +162,6 @@ if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and
         . $testNpmHelpersPath
     }
     
-    # Load TestPythonHelpers (standalone)
-    $testPythonHelpersPath = Join-Path $testSupportDir 'TestPythonHelpers.ps1'
-    if ($testPythonHelpersPath -and -not [string]::IsNullOrWhiteSpace($testPythonHelpersPath) -and (Test-Path -LiteralPath $testPythonHelpersPath)) {
-        . $testPythonHelpersPath
-    }
-    
     # Load TestScoopHelpers (standalone)
     $testScoopHelpersPath = Join-Path $testSupportDir 'TestScoopHelpers.ps1'
     if ($testScoopHelpersPath -and -not [string]::IsNullOrWhiteSpace($testScoopHelpersPath) -and (Test-Path -LiteralPath $testScoopHelpersPath)) {
@@ -169,10 +180,21 @@ if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and
         . $testMocksPath
     }
 
-    # Load TerminalTestStubs (Write-Host / Get-History / Read-Host stubs for terminal tests)
+    # Load TerminalTestStubs before isolation reset (Restore-TestTerminalStubs needs script-scoped state)
     $terminalStubsPath = Join-Path $testSupportDir 'TerminalTestStubs.ps1'
     if ($terminalStubsPath -and -not [string]::IsNullOrWhiteSpace($terminalStubsPath) -and (Test-Path -LiteralPath $terminalStubsPath)) {
         . $terminalStubsPath
+    }
+
+    # Clear cross-file pollution from prior test files before registering canonical helpers
+    if (Get-Command Reset-TestIsolationState -ErrorAction SilentlyContinue) {
+        Reset-TestIsolationState
+    }
+
+    # Load TestPythonHelpers after isolation reset (removed by Clear-CommandTestStubs)
+    $testPythonHelpersPath = Join-Path $testSupportDir 'TestPythonHelpers.ps1'
+    if ($testPythonHelpersPath -and -not [string]::IsNullOrWhiteSpace($testPythonHelpersPath) -and (Test-Path -LiteralPath $testPythonHelpersPath)) {
+        . $testPythonHelpersPath
     }
 
     # Load command availability stubs (depends on TestMocks for TestRegisteredMockCommands)
@@ -203,6 +225,10 @@ if ($testSupportDir -and -not [string]::IsNullOrWhiteSpace($testSupportDir) -and
     $toolDetectionPath = Join-Path $testSupportDir 'ToolDetection.ps1'
     if ($toolDetectionPath -and -not [string]::IsNullOrWhiteSpace($toolDetectionPath) -and (Test-Path -LiteralPath $toolDetectionPath)) {
         . $toolDetectionPath
+    }
+
+    if (Get-Command Export-TestSupportGlobalFunctions -ErrorAction SilentlyContinue) {
+        Export-TestSupportGlobalFunctions
     }
 }
 
@@ -235,11 +261,6 @@ if ($null -eq $script:TestSupportDefaultAssumedCommandsSet) {
     if ($combinedSuppressed) {
         $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS = [string]::Join(',', $combinedSuppressed)
     }
-}
-
-# Reset cross-file pollution before initializing mocks for each test file
-if (Get-Command Reset-TestIsolationState -ErrorAction SilentlyContinue) {
-    Reset-TestIsolationState
 }
 
 # Auto-initialize mocks whenever TestSupport loads (test mode is always enabled above)

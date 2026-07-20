@@ -82,6 +82,7 @@ Describe 'EDN Format Conversion Tests' {
         }
 
         It 'ConvertFrom-EdnToYaml converts EDN to YAML' {
+            if (Skip-IfMikefarahYqUnavailable) { return }
             $ednContent = '{:name "test" :value 123}'
             $ednFile = Join-Path $TestDrive 'test.edn'
             Set-Content -LiteralPath $ednFile -Value $ednContent -Encoding UTF8

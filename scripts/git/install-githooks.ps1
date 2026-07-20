@@ -10,7 +10,7 @@ scripts/git/install-githooks.ps1
     Creates wrapper scripts that ensure hooks are executed with pwsh.
 
 .PARAMETER GitDir
-    The git directory path. Defaults to '.git'.
+    The git hooks directory path relative to the repo root. Defaults to '.git/hooks'.
 
 .PARAMETER DryRun
     If specified, shows what hooks would be installed without actually installing them.
@@ -18,12 +18,12 @@ scripts/git/install-githooks.ps1
 .EXAMPLE
     pwsh -NoProfile -File scripts\git\install-githooks.ps1
 
-    Installs git hooks in the default .git directory.
+    Installs git hooks into .git/hooks.
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts\git\install-githooks.ps1 -GitDir '.git-custom'
+    pwsh -NoProfile -File scripts\git\install-githooks.ps1 -GitDir '.git/hooks'
 
-    Installs git hooks in a custom git directory.
+    Installs git hooks in the standard git hooks directory.
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\git\install-githooks.ps1 -DryRun
@@ -32,7 +32,7 @@ scripts/git/install-githooks.ps1
 #>
 
 param(
-    [string]$GitDir = '.git',
+    [string]$GitDir = '.git/hooks',
 
     [switch]$DryRun
 )
@@ -81,11 +81,23 @@ foreach ($hf in $hookFiles) {
     $name = [System.IO.Path]::GetFileNameWithoutExtension($hf.Name)
     $target = Join-Path $gitHooksDir $name
 
-    # Create a small wrapper script that executes PowerShell pointing at the repo script
-    # Use Get-PowerShellExecutable for cross-platform compatibility
+    # Create a small wrapper that invokes the canonical script under scripts/git/hooks/
+    # (pre-push resolves the repo via Get-RepoRoot from that path — do not copy .ps1 into .git/hooks).
     $psExe = Get-PowerShellExecutable
-    $hookScriptPath = Join-Path $repoRoot (Join-Path 'scripts' (Join-Path 'git' (Join-Path 'hooks' $hf.Name)))
-    $wrapperContent = "#!/usr/bin/env $psExe`n`$scriptDir = Split-Path -Parent `$MyInvocation.MyCommand.Definition`n& $psExe -NoProfile -File `"$hookScriptPath`" @args`nexit `$LASTEXITCODE`n"
+    $hookScriptPath = Join-Path $repoRoot 'scripts' 'git' 'hooks' $hf.Name
+    $psExeLiteral = $psExe -replace "'", "''"
+    $hookScriptLiteral = $hookScriptPath -replace "'", "''"
+    $wrapperContent = @"
+#!/bin/sh
+exec '$psExeLiteral' -NoProfile -File '$hookScriptLiteral' `"`$@`"
+"@
+    if (Test-IsWindows) {
+        $wrapperContent = @"
+#!/usr/bin/env pwsh
+& '$psExeLiteral' -NoProfile -File '$hookScriptLiteral' @args
+exit `$LASTEXITCODE
+"@
+    }
 
     if ($DryRun) {
         Write-ScriptMessage -Message "[DRY RUN] Would install hook: $name -> $target" -ForegroundColor Yellow

@@ -38,6 +38,60 @@ function script:Get-FragmentTierResult {
     return @((Get-FragmentTier -FragmentFile $FragmentFile))[-1]
 }
 
+function script:Simulate-UnreadableFragmentFile {
+    <#
+    .SYNOPSIS
+        Make a fragment unreadable for parse-failure tests (chmod on Unix; module Mock on Windows).
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path
+    )
+
+    if ($IsLinux -or $IsMacOS) {
+        chmod 000 $Path
+        return 'chmod'
+    }
+
+    # Windows cannot chmod away readability; force the module read path to fail.
+    # Ensure Read-FileContent is resolvable before Mock — FileContent may not be loaded
+    # in every shard ordering, and Pester 5 cannot mock a missing command.
+    if (-not (Get-Command Read-FileContent -ErrorAction SilentlyContinue)) {
+        function global:Read-FileContent {
+            param([Parameter(Mandatory)][string]$Path)
+            return Get-Content -LiteralPath $Path -Raw -ErrorAction Stop
+        }
+    }
+
+    Mock Read-FileContent {
+        throw [System.UnauthorizedAccessException]::new("Access to the path is denied.")
+    } -ModuleName FragmentLoading
+
+    Mock Get-Content {
+        throw [System.UnauthorizedAccessException]::new("Access to the path is denied.")
+    } -ModuleName FragmentLoading
+
+    return 'mock'
+}
+
+function script:Restore-UnreadableFragmentFile {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Path,
+
+        [string]$Mode
+    )
+
+    if ($Mode -eq 'chmod' -and ($IsLinux -or $IsMacOS)) {
+        if (Test-Path -LiteralPath $Path) {
+            chmod 644 $Path
+        }
+    }
+    elseif ($Mode -eq 'mock' -and (Get-Command Restore-AllMocks -ErrorAction SilentlyContinue)) {
+        Restore-AllMocks
+    }
+}
+
 function script:Set-ParallelParseTestEnvironment {
     param(
         [int]$TimeoutMs = 200,
@@ -350,7 +404,13 @@ AfterAll {
 Describe 'FragmentLoading extended scenarios' {
     BeforeEach {
         Remove-Module FragmentLoader -ErrorAction SilentlyContinue -Force
-        Import-Module $script:FragmentLoadingPath -DisableNameChecking -Force
+        # Drop leaked global stubs from prior Its so Get-Command resolves module helpers again.
+        Remove-TestFunction -Name @('Read-FileContent', 'Write-ScriptMessage', 'Write-Warning')
+        Import-Module $script:FragmentLoadingPath -DisableNameChecking -Force -Global
+        $depsCmd = Get-Command Get-FragmentDependencies -ErrorAction Stop
+        if ($depsCmd.ModuleName -ne 'FragmentLoading') {
+            throw "Get-FragmentDependencies resolved to '$($depsCmd.ModuleName)' instead of FragmentLoading"
+        }
     }
 
     Context 'Get-FragmentDependencies' {
@@ -723,20 +783,15 @@ Describe 'FragmentLoading extended scenarios' {
             $originalDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '3'
             Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            $unreadableMode = $null
 
             try {
-                if ($IsLinux -or $IsMacOS) {
-                    chmod 000 $fragmentPath
-                }
+                $unreadableMode = Simulate-UnreadableFragmentFile -Path $fragmentPath
 
                 Get-FragmentDependencies -FragmentFile $fragmentPath | Should -Be @()
             }
             finally {
-                if ($IsLinux -or $IsMacOS) {
-                    if (Test-Path -LiteralPath $fragmentPath) {
-                        chmod 644 $fragmentPath
-                    }
-                }
+                Restore-UnreadableFragmentFile -Path $fragmentPath -Mode $unreadableMode
 
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
@@ -763,7 +818,7 @@ Describe 'FragmentLoading extended scenarios' {
                         Get-FragmentDependencies -FragmentFile $fragmentPath | Should -Be @()
             }
             finally {
-            Remove-Item -Path Function:Read-FileContent -ErrorAction SilentlyContinue -Force
+            Remove-TestFunction -Name 'Read-FileContent'
             if ($null -eq $originalDebug) {
                 Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
             }
@@ -779,6 +834,7 @@ Describe 'FragmentLoading extended scenarios' {
             $originalDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '1'
             Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            $unreadableMode = $null
 
             function global:Write-ScriptMessage {
                 param(
@@ -788,19 +844,13 @@ Describe 'FragmentLoading extended scenarios' {
             }
 
             try {
-                if ($IsLinux -or $IsMacOS) {
-                    chmod 000 $fragmentPath
-                }
+                $unreadableMode = Simulate-UnreadableFragmentFile -Path $fragmentPath
 
                 Get-FragmentDependencies -FragmentFile $fragmentPath | Should -Be @()
             }
             finally {
-                Remove-Item -Path Function:Write-ScriptMessage -ErrorAction SilentlyContinue -Force
-                if ($IsLinux -or $IsMacOS) {
-                    if (Test-Path -LiteralPath $fragmentPath) {
-                        chmod 644 $fragmentPath
-                    }
-                }
+                Remove-TestFunction -Name 'Write-ScriptMessage'
+                Restore-UnreadableFragmentFile -Path $fragmentPath -Mode $unreadableMode
 
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
@@ -818,11 +868,10 @@ Describe 'FragmentLoading extended scenarios' {
             $global:TestFragmentPath = $fragmentPath
             $originalDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '1'
+            $unreadableMode = $null
 
             try {
-                if ($IsLinux -or $IsMacOS) {
-                    chmod 000 $fragmentPath
-                }
+                $unreadableMode = Simulate-UnreadableFragmentFile -Path $fragmentPath
 
                 InModuleScope -ModuleName FragmentLoading {
                     $output = @(Get-FragmentDependencies -FragmentFile $global:TestFragmentPath)
@@ -830,11 +879,7 @@ Describe 'FragmentLoading extended scenarios' {
                 }
             }
             finally {
-                if ($IsLinux -or $IsMacOS) {
-                    if (Test-Path -LiteralPath $fragmentPath) {
-                        chmod 644 $fragmentPath
-                    }
-                }
+                Restore-UnreadableFragmentFile -Path $fragmentPath -Mode $unreadableMode
 
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
@@ -851,20 +896,15 @@ Describe 'FragmentLoading extended scenarios' {
             $originalDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '1'
             Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
+            $unreadableMode = $null
 
             try {
-                if ($IsLinux -or $IsMacOS) {
-                    chmod 000 $fragmentPath
-                }
+                $unreadableMode = Simulate-UnreadableFragmentFile -Path $fragmentPath
 
                 Get-FragmentDependencies -FragmentFile $fragmentPath | Should -Be @()
             }
             finally {
-                if ($IsLinux -or $IsMacOS) {
-                    if (Test-Path -LiteralPath $fragmentPath) {
-                        chmod 644 $fragmentPath
-                    }
-                }
+                Restore-UnreadableFragmentFile -Path $fragmentPath -Mode $unreadableMode
 
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
@@ -892,24 +932,19 @@ Describe 'FragmentLoading extended scenarios' {
             Enable-TestStructuredLogging
             $originalDebug = $env:PS_PROFILE_DEBUG
             $env:PS_PROFILE_DEBUG = '1'
+            $unreadableMode = $null
 
             try {
                 $filePath = Join-Path $script:TempDir 'tier-parse-unreadable.ps1'
                 Set-Content -LiteralPath $filePath -Value '# Tier: core' -Encoding UTF8
 
-                if ($IsLinux -or $IsMacOS) {
-                    chmod 000 $filePath
-                }
+                $unreadableMode = Simulate-UnreadableFragmentFile -Path $filePath
 
                 Get-FragmentTierResult -FragmentFile $filePath | Should -Be 'optional'
             }
             finally {
-                if ($IsLinux -or $IsMacOS) {
-                    $filePath = Join-Path $script:TempDir 'tier-parse-unreadable.ps1'
-                    if (Test-Path -LiteralPath $filePath) {
-                        chmod 644 $filePath
-                    }
-                }
+                $filePath = Join-Path $script:TempDir 'tier-parse-unreadable.ps1'
+                Restore-UnreadableFragmentFile -Path $filePath -Mode $unreadableMode
 
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
@@ -947,21 +982,16 @@ Describe 'FragmentLoading extended scenarios' {
             $env:PS_PROFILE_DEBUG = '1'
             Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
             $filePath = Join-Path $script:TempDir 'tier-warning-fail.ps1'
+            $unreadableMode = $null
 
             try {
                 Set-Content -LiteralPath $filePath -Value '# Tier: core' -Encoding UTF8
-                if ($IsLinux -or $IsMacOS) {
-                    chmod 000 $filePath
-                }
+                $unreadableMode = Simulate-UnreadableFragmentFile -Path $filePath
 
                 Get-FragmentTierResult -FragmentFile $filePath | Should -Be 'optional'
             }
             finally {
-                if ($IsLinux -or $IsMacOS) {
-                    if (Test-Path -LiteralPath $filePath) {
-                        chmod 644 $filePath
-                    }
-                }
+                Restore-UnreadableFragmentFile -Path $filePath -Mode $unreadableMode
 
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
@@ -977,21 +1007,16 @@ Describe 'FragmentLoading extended scenarios' {
             $env:PS_PROFILE_DEBUG = '3'
             Remove-Item -Path Function:Write-StructuredWarning -ErrorAction SilentlyContinue -Force
             $filePath = Join-Path $script:TempDir 'tier-verbose-fail.ps1'
+            $unreadableMode = $null
 
             try {
                 Set-Content -LiteralPath $filePath -Value '# Tier: core' -Encoding UTF8
-                if ($IsLinux -or $IsMacOS) {
-                    chmod 000 $filePath
-                }
+                $unreadableMode = Simulate-UnreadableFragmentFile -Path $filePath
 
                 Get-FragmentTierResult -FragmentFile $filePath | Should -Be 'optional'
             }
             finally {
-                if ($IsLinux -or $IsMacOS) {
-                    if (Test-Path -LiteralPath $filePath) {
-                        chmod 644 $filePath
-                    }
-                }
+                Restore-UnreadableFragmentFile -Path $filePath -Mode $unreadableMode
 
                 if ($null -eq $originalDebug) {
                     Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue

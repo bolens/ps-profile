@@ -72,14 +72,16 @@ Describe 'OutputUtils Module Tests' {
         }
 
         It 'Interceptor can wrap Write-Warning calls without throwing' {
+            try {
             Start-TestOutputInterceptor
 
                         { Write-Warning 'Duplicate warning message' } | Should -Not -Throw
             { Write-Warning 'Duplicate warning message' } | Should -Not -Throw
             { Write-Warning 'Unique warning message' } | Should -Not -Throw
-        }
-        finally {
-            Stop-TestOutputInterceptor
+            }
+            finally {
+                Stop-TestOutputInterceptor
+            }
         }
     }
 }

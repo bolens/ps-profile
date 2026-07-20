@@ -140,29 +140,30 @@ Describe 'Utility Functions Integration Tests' {
             $result = ConvertFrom-Epoch -epoch $timestamp
             $result | Should -Not -Be $null
             $result.GetType().Name | Should -Be 'DateTimeOffset'
-            $result.Year | Should -Be 2020  # Local time year
-            $result.Month | Should -Be 12
-            $result.Day | Should -Be 31
+            $utc = $result.ToUniversalTime()
+            $utc.Year | Should -Be 2021
+            $utc.Month | Should -Be 1
+            $utc.Day | Should -Be 1
         }
 
         It 'ConvertFrom-Epoch handles null timestamp' {
             $result = ConvertFrom-Epoch -epoch 0
             $result | Should -Not -Be $null
             $result.GetType().Name | Should -Be 'DateTimeOffset'
-            # Unix epoch is 1970-01-01 UTC, but converted to local time
-            $result.Year | Should -Be 1969
-            $result.Month | Should -Be 12
-            $result.Day | Should -Be 31
+            $utc = $result.ToUniversalTime()
+            $utc.Year | Should -Be 1970
+            $utc.Month | Should -Be 1
+            $utc.Day | Should -Be 1
         }
 
         It 'ConvertFrom-Epoch handles zero timestamp' {
             $result = ConvertFrom-Epoch -epoch 0
             $result | Should -Not -Be $null
             $result.GetType().Name | Should -Be 'DateTimeOffset'
-            # Unix epoch is 1970-01-01 UTC, but converted to local time
-            $result.Year | Should -Be 1969
-            $result.Month | Should -Be 12
-            $result.Day | Should -Be 31
+            $utc = $result.ToUniversalTime()
+            $utc.Year | Should -Be 1970
+            $utc.Month | Should -Be 1
+            $utc.Day | Should -Be 1
         }
 
         It 'ConvertTo-Epoch handles valid DateTime' {

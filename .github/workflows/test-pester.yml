@@ -1,5 +1,9 @@
 name: Test - Pester
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     branches: [ main ]
@@ -8,32 +12,113 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            powershell: pwsh
-          - os: windows-latest
-            powershell: pwsh
-          - os: windows-latest
-            powershell: powershell
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+      any: ${{ steps.build.outputs.any }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Build matrix from shared shard filter
+        id: build
+        shell: pwsh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          $filterModule = Join-Path $env:GITHUB_WORKSPACE 'scripts/utils/code-quality/modules/PesterCiShardFilter.psm1'
+          Import-Module $filterModule -Force -DisableNameChecking
+
+          $isDispatch = $env:EVENT_NAME -eq 'workflow_dispatch'
+          if ($isDispatch) {
+            $shards = @(Resolve-PesterCiShards -All)
+          }
+          else {
+            $base = $env:BASE_SHA
+            $head = $env:HEAD_SHA
+            if ([string]::IsNullOrWhiteSpace($base) -or [string]::IsNullOrWhiteSpace($head)) {
+              $shards = @(Resolve-PesterCiShards -All)
+            }
+            else {
+              $changed = @(git diff --name-only --diff-filter=ACMRD "${base}...${head}")
+              Write-Host "Changed files: $($changed.Count)"
+              $shards = @(Resolve-PesterCiShards -ChangedFiles $changed)
+            }
+          }
+
+          $include = @(Get-PesterCiShardMatrix -Shards $shards)
+          $any = $include.Count -gt 0
+          $matrix = if ($any) {
+            @{ include = @($include) } | ConvertTo-Json -Compress -Depth 5
+          }
+          else {
+            @{ include = @(@{ os = 'ubuntu-latest'; shard = 'unit-library' }) } | ConvertTo-Json -Compress -Depth 5
+          }
+
+          $output = @(
+            'matrix<<EOF'
+            $matrix
+            'EOF'
+            "any=$($any.ToString().ToLowerInvariant())"
+          ) -join "`n"
+          Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value $output -Encoding utf8
+          Write-Host "Enabled shards: $($shards -join ', ')"
+          Write-Host "Matrix jobs: $($include.Count)"
+
+  test:
+    name: test (${{ matrix.os }}, ${{ matrix.shard }})
+    needs: changes
+    if: needs.changes.outputs.any == 'true'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.changes.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
       - name: Install Pester
-        run: ${{ matrix.powershell }} -NoProfile -Command "Install-Module -Name Pester -Force -Scope CurrentUser"
-      - name: Run Pester
-        run: ${{ matrix.powershell }} -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel
+        shell: pwsh
+        run: |
+          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+            Register-PSRepository -Default
+          }
+          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          # Pin to 5.7.x: Pester 5.9+ regresses Mock scoping ("Mock data are not setup for this scope")
+          # and TestDrive collisions across sequential containers; Pester 6+ breaks tracer teardown.
+          Install-Module -Name Pester -MinimumVersion 5.7.0 -MaximumVersion 5.7.99 -Force -Scope CurrentUser -AllowClobber
+          $pester5 = Get-Module -ListAvailable Pester |
+            Where-Object { $_.Version -ge [version]'5.7.0' -and $_.Version -lt [version]'5.8.0' } |
+            Sort-Object Version -Descending |
+            Select-Object -First 1
+          if (-not $pester5) { throw 'Pester 5.7.x is required but was not installed' }
+          Import-Module Pester -RequiredVersion $pester5.Version -Force
+          Write-Host "Installed Pester $($pester5.Version)"
+      - name: Run Pester shard
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard '${{ matrix.shard }}' -Quiet
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: test-results-${{ matrix.os }}-${{ matrix.powershell }}
-          path: pester-results.xml
-      - name: Upload coverage reports
+          name: pester-${{ matrix.os }}-${{ matrix.shard }}
+          path: tests/test-artifacts/ci-${{ matrix.shard }}/**
+          if-no-files-found: ignore
+      - name: Upload coverage report
+        if: matrix.shard == 'coverage-smoke'
         uses: actions/upload-artifact@v7
         with:
-          name: coverage-${{ matrix.os }}-${{ matrix.powershell }}
-          path: coverage.xml
+          name: coverage-ubuntu-smoke
+          path: |
+            coverage.xml
+            tests/test-artifacts/ci-coverage-smoke/**

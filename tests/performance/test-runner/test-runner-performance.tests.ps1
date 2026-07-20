@@ -11,10 +11,20 @@ tests/performance/test-runner-performance.tests.ps1
 
 BeforeAll {
     try {
-        # Import test support
-        $testSupportPath = Join-Path $PSScriptRoot '..\TestSupport.ps1'
-        if (-not (Test-Path $testSupportPath)) {
-            throw "TestSupport file not found at: $testSupportPath"
+        # Import test support (walk up from tests/performance/test-runner/)
+        $current = Get-Item $PSScriptRoot
+        $testSupportPath = $null
+        while ($null -ne $current) {
+            $candidate = Join-Path $current.FullName 'TestSupport.ps1'
+            if (Test-Path -LiteralPath $candidate) {
+                $testSupportPath = $candidate
+                break
+            }
+            if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
+            $current = $current.Parent
+        }
+        if (-not $testSupportPath) {
+            throw "TestSupport file not found walking up from: $PSScriptRoot"
         }
         . $testSupportPath
 

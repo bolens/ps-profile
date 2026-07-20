@@ -1,10 +1,32 @@
 name: Security - CodeQL Analysis
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
+    paths:
+      - '.github/workflows/**'
+      - '**/*.js'
+      - '**/*.ts'
+      - '**/*.mjs'
+      - '**/*.cjs'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/codeql.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - '.github/workflows/**'
+      - '**/*.js'
+      - '**/*.ts'
+      - '**/*.mjs'
+      - '**/*.cjs'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/codeql.yml'
   schedule:
     # Run weekly on Mondays at 2 AM UTC
     - cron: '0 2 * * 1'
@@ -16,6 +38,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      issues: write
       security-events: write
       pull-requests: write
 
@@ -26,7 +49,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v4

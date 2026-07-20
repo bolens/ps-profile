@@ -6,6 +6,7 @@ settings:
 
 overrides:
   parquetjs>thrift: 0.23.0
+  js-yaml: '>=4.2.0'
 
 importers:
 
@@ -48,8 +49,8 @@ importers:
         specifier: ^0.11.2
         version: 0.11.2
       protobufjs:
-        specifier: ^8.6.0
-        version: 8.6.0
+        specifier: ^8.6.4
+        version: 8.6.5
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
@@ -63,8 +64,8 @@ importers:
         specifier: ^0.0.8
         version: 0.0.8
       uuid:
-        specifier: ^14.0.0
-        version: 14.0.0
+        specifier: ^14.0.1
+        version: 14.0.1
     devDependencies:
       '@cspell/dict-aws':
         specifier: ^4.0.17
@@ -82,8 +83,8 @@ importers:
         specifier: ^1.1.22
         version: 1.1.22
       '@cspell/dict-en-ca':
-        specifier: ^1.0.58
-        version: 1.0.58
+        specifier: ^1.0.60
+        version: 1.0.60
       '@cspell/dict-en-gb-ise':
         specifier: ^1.0.29
         version: 1.0.29
@@ -197,8 +198,8 @@ packages:
   '@cspell/dict-en-au@1.1.22':
     resolution: {integrity: sha512-HrRSwGR4GMQgXWvjzcueIS7taU+Tlf3mQo2iuZoevHRh43gB5JYHnKlUaC7oaSMsjtSyZv9DBvv2eh04gjy5ag==}
 
-  '@cspell/dict-en-ca@1.0.58':
-    resolution: {integrity: sha512-zJUvYdc4ahOZCd/Too6oSy5FZzeVnIzoz5dFmaH1NjrTp1XmjQgVyBpYs9ARmJs0x0Vdv3uNh5hN6zegk3niIg==}
+  '@cspell/dict-en-ca@1.0.60':
+    resolution: {integrity: sha512-9U3a5xSRwlJYURPsCO0a9vCo5X3NFpjjHM1zbChbxCaopDXAzddBa5eyNQq3K1jdHMT+GTZG0enmlyooPQjCBg==}
 
   '@cspell/dict-en-common-misspellings@2.1.12':
     resolution: {integrity: sha512-14Eu6QGqyksqOd4fYPuRb58lK1Va7FQK9XxFsRKnZU8LhL3N+kj7YKDW+7aIaAN/0WGEqslGP6lGbQzNti8Akw==}
@@ -739,8 +740,8 @@ packages:
     peerDependencies:
       ws: '*'
 
-  js-yaml@4.1.1:
-    resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
+  js-yaml@4.2.0:
+    resolution: {integrity: sha512-ePWsvanv0DWuDRsW8dnt+R4jQ31SCRCQ7hhNcPXZPsoBZiemuZNYGf7adZdqX2D86j6rvKp3RpCxVTSb8WQlOw==}
     hasBin: true
 
   json-bignum@0.0.3:
@@ -972,8 +973,8 @@ packages:
     resolution: {integrity: sha512-40QW5YalBNfQo5yRYmiw7Yz6TKKVr3h6970B2YE+3fQpsWcrbj1PzJgxeJ19DRQjhMbKPIuMY8rFaXc8moolVw==}
     engines: {node: '>=10.13.0'}
 
-  protobufjs@8.6.0:
-    resolution: {integrity: sha512-PIOO89BMGMXGz2333TVv/OqPNVWm7w30ll/4FtLbtLBaonzJMYwTbAZSSlobjIy9MoUgIAxSVUpK7aP7EpTtkg==}
+  protobufjs@8.6.5:
+    resolution: {integrity: sha512-zeE5LPpencAGXvsxyOYmEgJhxzHY8IsmPAFzstZVhDSVT8QH03q6gMZwZRaQGApevZbAL6u28ugs4CC+YKB2jQ==}
     engines: {node: '>=12.0.0'}
 
   punycode.js@2.3.1:
@@ -1108,8 +1109,8 @@ packages:
     resolution: {integrity: sha512-vzi9uRZ926x4XV73S/4qQaTwPXM2JBj6/6lI/byHH1jOpCzb0zDbfytgA9LcN/hzb2l7WQSQnxITOVx5un/wGw==}
     hasBin: true
 
-  uuid@14.0.0:
-    resolution: {integrity: sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==}
+  uuid@14.0.1:
+    resolution: {integrity: sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==}
     hasBin: true
 
   varint@5.0.2:
@@ -1281,7 +1282,7 @@ snapshots:
 
   '@cspell/dict-en-au@1.1.22': {}
 
-  '@cspell/dict-en-ca@1.0.58': {}
+  '@cspell/dict-en-ca@1.0.60': {}
 
   '@cspell/dict-en-common-misspellings@2.1.12': {}
 
@@ -1742,7 +1743,7 @@ snapshots:
     dependencies:
       ws: 5.2.5
 
-  js-yaml@4.1.1:
+  js-yaml@4.2.0:
     dependencies:
       argparse: 2.0.1
 
@@ -1840,7 +1841,7 @@ snapshots:
       commander: 14.0.3
       deep-extend: 0.6.0
       ignore: 7.0.5
-      js-yaml: 4.1.1
+      js-yaml: 4.2.0
       jsonc-parser: 3.3.1
       jsonpointer: 5.0.1
       markdown-it: 14.1.1
@@ -2104,7 +2105,7 @@ snapshots:
 
   pngjs@5.0.0: {}
 
-  protobufjs@8.6.0:
+  protobufjs@8.6.5:
     dependencies:
       long: 5.3.2
 
@@ -2220,7 +2221,7 @@ snapshots:
 
   uuid@13.0.2: {}
 
-  uuid@14.0.0: {}
+  uuid@14.0.1: {}
 
   varint@5.0.2: {}
 

@@ -71,6 +71,9 @@ function Get-UntestedLibModuleFixture {
             $output | Should -Match 'UntestedLibModule'
             $output | Should -Match 'Missing tests for:'
         }
+        finally {
+            Remove-TestArtifacts
+        }
     }
 
     It 'Passes when an isolated repository has matching library unit tests for every lib module' {
@@ -109,6 +112,9 @@ Describe 'CoveredLibModule' {
 
             $exitCode | Should -Be 0
             $output | Should -Match 'Missing tests for:\s*\(none\)'
+        }
+        finally {
+            Remove-TestArtifacts
         }
     }
 }

@@ -32,7 +32,43 @@ function global:New-TestJavaInstallation {
 
     if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') {
         $javaPath = Join-Path $binDir 'java.exe'
-        Set-Content -Path $javaPath -Value "@echo openjdk version `"$Version.0.1`""
+        # A text file named .exe is not runnable on Windows; compile a tiny stub.
+        $code = @"
+using System;
+public static class JavaStub {
+    public static void Main(string[] args) {
+        Console.Error.WriteLine("openjdk version `"$Version.0.1`"");
+    }
+}
+"@
+        $compiled = $false
+        try {
+            Add-Type -TypeDefinition $code -OutputAssembly $javaPath -OutputType ConsoleApplication -ErrorAction Stop
+            $compiled = $true
+        }
+        catch {
+            # pwsh 7.4+ / CoreCLR often rejects OutputType ConsoleApplication.
+            # Prefer a real java.exe from the host (CI toolcache) when available.
+            $realJavaCandidates = @(
+                $(if ($env:JAVA_HOME) { Join-Path $env:JAVA_HOME 'bin' 'java.exe' } else { $null })
+                $(if ($env:JDK_HOME) { Join-Path $env:JDK_HOME 'bin' 'java.exe' } else { $null })
+                (Get-Command java.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue)
+            ) | Where-Object { $_ -and (Test-Path -LiteralPath $_) }
+
+            $realJava = $realJavaCandidates | Select-Object -First 1
+            if ($realJava) {
+                Copy-Item -LiteralPath $realJava -Destination $javaPath -Force
+                $compiled = $true
+            }
+            else {
+                Set-Content -Path (Join-Path $binDir 'java-stub-error.txt') -Value $_.Exception.Message
+                throw
+            }
+        }
+
+        if (-not $compiled -or -not (Test-Path -LiteralPath $javaPath)) {
+            throw "Failed to create test java.exe at $javaPath"
+        }
     }
     else {
         $javaPath = Join-Path $binDir 'java'

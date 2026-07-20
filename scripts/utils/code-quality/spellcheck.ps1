@@ -4,38 +4,41 @@
 
 
 .DESCRIPTION
-    Simple local spellcheck helper. If `cspell` (npm) is available on PATH, delegates
-    to it for the provided paths. Otherwise prints a short notice and exits 0 (non-blocking).
-    This avoids breaking environments without Node installed while providing an opt-in CI check.
+    Local spellcheck helper used by validate-profile and pre-commit. Resolves cspell from
+    (in order): PATH, repo node_modules/.bin, `pnpm exec cspell`, then `npx cspell`.
+    When no runner is available, exits 0 by default (non-blocking) unless -RequireAvailable
+    or PS_PROFILE_REQUIRE_CSPELL=1 is set (hooks should require it when deps are installed).
 
 
 .PARAMETER Paths
     Array of file paths or glob patterns to check. Defaults to '**/*' (all files).
 
+.PARAMETER RequireAvailable
+    Fail with EXIT_SETUP_ERROR when cspell cannot be resolved.
+
 
 .NOTES
     Exit Codes:
-    - 0 (EXIT_SUCCESS): Spellcheck passed or cspell not available
+    - 0 (EXIT_SUCCESS): Spellcheck passed or cspell not available (non-strict)
     - 1 (EXIT_VALIDATION_FAILURE): Spelling errors found
-    - 2 (EXIT_SETUP_ERROR): Error running cspell
-
-    This script is non-blocking - if cspell is not installed, it exits successfully
-    to avoid breaking workflows in environments without Node.js.
+    - 2 (EXIT_SETUP_ERROR): Error running cspell / required but missing
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts\utils\spellcheck.ps1
+    pwsh -NoProfile -File scripts\utils\code-quality\spellcheck.ps1
 
     Runs spellcheck on all files in the repository.
 
 
 .EXAMPLE
-    pwsh -NoProfile -File scripts\utils\spellcheck.ps1 -Paths '**/*.md', '**/*.ps1'
+    pwsh -NoProfile -File scripts\utils\code-quality\spellcheck.ps1 -Paths '**/*.md', '**/*.ps1'
 
     Runs spellcheck only on markdown and PowerShell files.
 #>
 
 param(
-  [string[]]$Paths = @('**/*')
+  [string[]]$Paths = @('**/*'),
+
+  [switch]$RequireAvailable
 )
 
 # Import PathResolution first (required for ModuleImport to work)
@@ -57,26 +60,130 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
-# Check if cspell is available
-$hasCSpell = Test-CommandAvailable -CommandName 'cspell'
-
-if ($hasCSpell) {
-  Write-ScriptMessage -Message "Running cspell on: $($Paths -join ', ')"
-  try {
-    & cspell @Paths --no-progress --no-summary
-    if ($LASTEXITCODE -ne 0) {
-      Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "cspell found spelling errors"
-    }
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "cspell passed"
-  }
-  catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
-  }
+try {
+  $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
-else {
-  Write-ScriptMessage -Message "cspell not found on PATH. Install with: npm install -g cspell@9" -IsWarning
-  Write-ScriptMessage -Message "Skipping local spellcheck (CI workflow will run cspell on push/PR)."
+catch {
+  Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+if ($env:PS_PROFILE_REQUIRE_CSPELL -eq '1') {
+  $RequireAvailable = $true
+}
+
+function Get-NodeExecutablePath {
+  $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+  if ($nodeCmd) {
+    return $nodeCmd.Source
+  }
+
+  return $null
+}
+
+function Get-CSpellInvocation {
+  param([string]$Root)
+
+  if (Test-CommandAvailable -CommandName 'cspell') {
+    return @{ Mode = 'command'; Executable = 'cspell'; PrefixArgs = @() }
+  }
+
+  # Prefer `node …/cspell/bin.mjs` so hooks still work when PATH is minimal
+  # (shell shims under node_modules/.bin need `node` on PATH).
+  $cspellEntry = Join-Path $Root 'node_modules' 'cspell' 'bin.mjs'
+  $nodeExe = Get-NodeExecutablePath
+  if ((Test-Path -LiteralPath $cspellEntry) -and $nodeExe) {
+    return @{ Mode = 'command'; Executable = $nodeExe; PrefixArgs = @($cspellEntry) }
+  }
+
+  $localCandidates = @(
+    (Join-Path $Root 'node_modules' '.bin' 'cspell')
+    (Join-Path $Root 'node_modules' '.bin' 'cspell.cmd')
+    (Join-Path $Root 'node_modules' '.bin' 'cspell.ps1')
+  )
+  foreach ($candidate in $localCandidates) {
+    if (Test-Path -LiteralPath $candidate) {
+      return @{ Mode = 'command'; Executable = $candidate; PrefixArgs = @() }
+    }
+  }
+
+  # Only use package managers when this repo already has Node deps installed.
+  # Bare `pnpm exec` / `npx` in an empty clone tries to install and fails loudly.
+  $hasPackageJson = Test-Path -LiteralPath (Join-Path $Root 'package.json')
+  $hasNodeModules = Test-Path -LiteralPath (Join-Path $Root 'node_modules')
+  if ($hasPackageJson -and $hasNodeModules) {
+    if (Test-CommandAvailable -CommandName 'pnpm') {
+      return @{ Mode = 'command'; Executable = 'pnpm'; PrefixArgs = @('exec', 'cspell') }
+    }
+
+    if (Test-CommandAvailable -CommandName 'npx') {
+      return @{ Mode = 'command'; Executable = 'npx'; PrefixArgs = @('--no-install', 'cspell') }
+    }
+  }
+
+  return $null
+}
+
+$invocation = Get-CSpellInvocation -Root $repoRoot
+
+if (-not $invocation) {
+  $message = 'cspell not found on PATH, in node_modules/.bin, or via pnpm/npx. Install with: pnpm install (or npm install -g cspell).'
+  if ($RequireAvailable) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message $message
+  }
+
+  Write-ScriptMessage -Message $message -IsWarning
+  Write-ScriptMessage -Message 'Skipping local spellcheck (CI workflow will run cspell on push/PR).'
   Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
+# Absolute paths (and ignored trees like tests/) need file:// so cspell still checks them.
+$normalizedPaths = @(foreach ($pathItem in $Paths) {
+    if ([string]::IsNullOrWhiteSpace($pathItem)) { continue }
+    if ($pathItem.StartsWith('file://', [System.StringComparison]::OrdinalIgnoreCase)) {
+      $pathItem
+      continue
+    }
+    if ([System.IO.Path]::IsPathRooted($pathItem) -and (Test-Path -LiteralPath $pathItem)) {
+      $fullPath = (Resolve-Path -LiteralPath $pathItem).Path
+      if ($IsWindows) {
+        'file:///' + ($fullPath -replace '\\', '/')
+      }
+      else {
+        'file://' + $fullPath
+      }
+      continue
+    }
+    $pathItem
+  })
+
+Write-ScriptMessage -Message "Running cspell on: $($normalizedPaths -join ', ')"
+$cspellExit = 0
+try {
+  Push-Location $repoRoot
+  try {
+    # cspell v8+ uses the `lint` subcommand (matches CI `pnpm exec cspell …`).
+    $cspellArgs = @($invocation.PrefixArgs) + @('lint') + @($normalizedPaths) + @(
+      '--no-progress'
+      '--no-summary'
+      '--no-must-find-files'
+    )
+    & $invocation.Executable @cspellArgs
+    if ($null -ne $LASTEXITCODE) {
+      $cspellExit = [int]$LASTEXITCODE
+    }
+  }
+  finally {
+    Pop-Location
+  }
+}
+catch {
+  Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+if ($cspellExit -ne 0) {
+  Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message 'cspell found spelling errors'
+}
+
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'cspell passed'

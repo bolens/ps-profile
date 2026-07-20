@@ -11,7 +11,9 @@ function global:Reset-TestEditorCommandAvailability {
         'lighttable', 'theia-ide', 'nano'
     )
 
-    Clear-TestCachedCommandCache | Out-Null
+    if (Get-Command Register-TestCommandAvailabilityStub -ErrorAction SilentlyContinue) {
+        Register-TestCommandAvailabilityStub
+    }
 
     foreach ($command in $managedEditorCommands) {
         if (Get-Command Set-TestCommandAvailabilityState -ErrorAction SilentlyContinue) {
@@ -22,12 +24,22 @@ function global:Reset-TestEditorCommandAvailability {
         Remove-Item -Path "Function:\$command" -Force -ErrorAction SilentlyContinue
         Remove-Item -Path "Function:\global:$command" -Force -ErrorAction SilentlyContinue
 
+        if (-not (Get-Variable -Name 'TestCommandAvailabilityOverrides' -Scope Global -ErrorAction SilentlyContinue)) {
+            $global:TestCommandAvailabilityOverrides = [System.Collections.Concurrent.ConcurrentDictionary[string, bool]]::new([System.StringComparer]::OrdinalIgnoreCase)
+        }
+        $cacheKey = $command.ToLowerInvariant()
+        $global:TestCommandAvailabilityOverrides[$command] = $false
+        $global:TestCommandAvailabilityOverrides[$cacheKey] = $false
+
         if ($global:AssumedAvailableCommands) {
             $removed = $null
             $null = $global:AssumedAvailableCommands.TryRemove($command, [ref]$removed)
+            $null = $global:AssumedAvailableCommands.TryRemove($cacheKey, [ref]$removed)
         }
 
-        $cacheKey = $command.ToLowerInvariant()
+        if (-not (Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue)) {
+            $global:TestCachedCommandCache = [System.Collections.Concurrent.ConcurrentDictionary[string, object]]::new([System.StringComparer]::OrdinalIgnoreCase)
+        }
         $global:TestCachedCommandCache[$cacheKey] = [pscustomobject]@{
             Result  = $false
             Expires = (Get-Date).AddHours(24)
@@ -49,6 +61,7 @@ BeforeAll {
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'editors.ps1')
+    Register-TestCommandAvailabilityStub
 
     $script:TestEditorPath = New-TestTempDirectory -Prefix 'EditorPath'
     $script:TestEditorFile = Join-Path $script:TestEditorPath 'script.ps1'
@@ -264,6 +277,8 @@ Describe 'editors.ps1 - Other Editor Functions' {
 
     Context 'Get-EditorInfo' {
         It 'Returns empty array when no editors are available' {
+            Reset-TestEditorCommandAvailability
+
             $result = Get-EditorInfo
 
             @($result).Count | Should -Be 0

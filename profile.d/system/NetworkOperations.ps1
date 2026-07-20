@@ -22,8 +22,9 @@ function Get-NetworkPorts {
     else {
         try {
             if (-not (Test-CachedCommand 'netstat')) {
-                Write-Error "netstat command not found. This command is typically available on Windows and Unix systems."
-                return
+                $missingNetstat = 'netstat command not found. This command is typically available on Windows and Unix systems.'
+                Write-Error $missingNetstat
+                throw $missingNetstat
             }
             & netstat -an
         }

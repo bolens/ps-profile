@@ -48,7 +48,7 @@ function Test-PathResolutionExitWithCodeAvailable {
 
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
-$safeImportModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'SafeImport.psm1'
+$safeImportModulePath = Join-Path (Join-Path (Split-Path -Parent $PSScriptRoot) 'core') 'SafeImport.psm1'
 if ($safeImportModulePath -and -not [string]::IsNullOrWhiteSpace($safeImportModulePath) -and (Test-Path -LiteralPath $safeImportModulePath)) {
     Import-Module $safeImportModulePath -DisableNameChecking -ErrorAction SilentlyContinue
 }
@@ -68,7 +68,7 @@ else {
 }
 
 # Import ErrorHandling module if available for consistent error action preference handling
-$errorHandlingModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'ErrorHandling.psm1'
+$errorHandlingModulePath = Join-Path (Join-Path (Split-Path -Parent $PSScriptRoot) 'core') 'ErrorHandling.psm1'
 if (-not $forceManualModuleImport -and (Get-Command Import-ModuleSafely -ErrorAction SilentlyContinue)) {
     # Import-ModuleSafely has ErrorAction as a parameter, don't pass it explicitly to avoid duplicate
     Import-ModuleSafely -ModulePath $errorHandlingModulePath -DisableNameChecking
@@ -376,6 +376,9 @@ function Get-RepoRootSafe {
                 else {
                     Exit-WithCode -ExitCode 2 -ErrorRecord $_
                 }
+                # Exit-WithCode should throw (test mode) or exit the process; if it
+                # returns, still surface a terminating error for callers.
+                throw $_
             }
             else {
                 # ExitCodes module not available yet; surface a terminating error
@@ -389,7 +392,7 @@ function Get-RepoRootSafe {
                             }
                         }
                         else {
-                            Write-Error $errorMessage -ErrorAction Stop
+                            Write-Error $errorMessage -ErrorAction Continue
                         }
                     }
                     # Level 3: Log detailed error information
@@ -406,9 +409,12 @@ function Get-RepoRootSafe {
                         }
                     }
                     else {
-                        Write-Error $errorMessage -ErrorAction Stop
+                        Write-Error $errorMessage -ErrorAction Continue
                     }
                 }
+
+                # Structured-logging test stubs are no-ops; ExitOnError must still terminate.
+                throw $_
             }
         }
         else {

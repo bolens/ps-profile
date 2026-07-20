@@ -92,6 +92,17 @@ Write-ScriptMessage -Message "Generating changelog..."
 $hasGitCliff = Test-CommandAvailable -CommandName 'git-cliff'
 
 if (-not $hasGitCliff) {
+    # Never auto-install in CI/unit tests — cargo/winget can prompt or run for minutes.
+    $nonInteractive = (
+        $env:PS_PROFILE_NONINTERACTIVE -eq '1' -or
+        $env:PS_PROFILE_TEST_MODE -eq '1' -or
+        $env:CI -eq 'true' -or
+        $env:GITHUB_ACTIONS -eq 'true'
+    )
+    if ($nonInteractive) {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'git-cliff is required but not installed (auto-install disabled in non-interactive mode)'
+    }
+
     Write-ScriptMessage -Message "git-cliff not found. Installing..."
 
     # Try to install git-cliff

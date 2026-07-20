@@ -65,7 +65,8 @@ Describe 'PathValidation extended scenarios' {
         It 'Throws when the provided path is missing even if the default exists' {
             $missingPath = Join-Path $script:TempDir 'missing.txt'
 
-            { Resolve-DefaultPath -Path $missingPath -DefaultPath $script:TempDir } | Should -Throw '*not found*'
+            $err = { Resolve-DefaultPath -Path $missingPath -DefaultPath $script:TempDir } | Should -Throw -PassThru
+            $err.Exception.Message | Should -Match 'not found|does not exist'
         }
 
         It 'Throws when a directory path is validated as a file' {

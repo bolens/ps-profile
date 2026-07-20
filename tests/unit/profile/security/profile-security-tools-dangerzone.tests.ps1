@@ -81,15 +81,17 @@ Describe 'security-tools.ps1 - Invoke-DangerzoneConvert' {
         }
 
         It 'Handles dangerzone execution errors gracefully' {
+            try {
             Set-TestCommandThrowingMock -CommandName 'dangerzone' -Message 'Execution failed'
 
             $result = $null
                         $result = Invoke-DangerzoneConvert -InputPath $script:TestFile -ErrorAction SilentlyContinue
-        }
-        catch {
-            $result = $null
+            }
+            catch {
+                $result = $null
 
-            $result | Should -BeNullOrEmpty
+                $result | Should -BeNullOrEmpty
+            }
         }
 
         It 'Tests dangerzone with custom output path' {

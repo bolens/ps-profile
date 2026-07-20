@@ -113,6 +113,12 @@ Describe 'bootstrap.ps1 - module failure handling' {
             Write-TestFileLiteralContent -Path $modulePath -Content 'throw "bootstrap loader failure"'
             $env:PS_PROFILE_DEBUG = '1'
 
+            # BeforeAll already loaded bootstrap (and Write-ProfileError). Force the
+            # early-module fallback path that only uses Write-Warning.
+            Remove-TestFunction -Name 'Write-ProfileError'
+            Remove-Item -Path Function:Write-ProfileError -ErrorAction SilentlyContinue -Force
+            Remove-Item -Path Function:global:Write-ProfileError -ErrorAction SilentlyContinue -Force
+
             $output = $(
                 . $script:BootstrapPath 3>&1 2>&1
             ) | Out-String

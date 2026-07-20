@@ -168,7 +168,7 @@ function Initialize-FileConversion-CoreTextGaps {
             
             if ($objects.Count -gt 0) {
                 try {
-                    $objects | Export-Csv -Path $OutputPath -NoTypeInformation -ErrorAction Stop
+                    $objects | Export-Csv -Path $OutputPath -ErrorAction Stop
                 }
                 catch {
                     throw "Failed to write CSV file '$OutputPath': $($_.Exception.Message)"

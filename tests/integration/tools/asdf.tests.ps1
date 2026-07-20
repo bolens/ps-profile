@@ -23,6 +23,7 @@ BeforeAll {
 
 Describe 'asdf Tools Integration Tests' {
     BeforeAll {
+        try {
                 $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         if ($null -eq $script:ProfileDir -or [string]::IsNullOrWhiteSpace($script:ProfileDir)) {
             throw "Get-TestPath returned null or empty value for ProfileDir"
@@ -39,15 +40,16 @@ Describe 'asdf Tools Integration Tests' {
             throw "Bootstrap file not found at: $bootstrapPath"
         }
         . $bootstrapPath
-    }
-    catch {
-        $errorDetails = @{
-            Message  = $_.Exception.Message
-            Type     = $_.Exception.GetType().FullName
-            Location = $_.InvocationInfo.ScriptLineNumber
         }
-        Write-Error "Failed to initialize asdf tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
-        throw
+        catch {
+            $errorDetails = @{
+                Message  = $_.Exception.Message
+                Type     = $_.Exception.GetType().FullName
+                Location = $_.InvocationInfo.ScriptLineNumber
+            }
+            Write-Error "Failed to initialize asdf tools tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
+            throw
+        }
     }
 
     Context 'asdf helpers (asdf.ps1)' {
@@ -176,6 +178,13 @@ Describe 'asdf Tools Integration Tests' {
         }
 
         It 'Emits missing-tool warning when asdf is unavailable' {
+            if (Get-Command Test-ToolAvailableOnPlatform -ErrorAction SilentlyContinue) {
+                if (-not (Test-ToolAvailableOnPlatform -Tool 'asdf')) {
+                    Set-ItResult -Inconclusive -Because 'asdf install hints are only emitted on Linux/macOS'
+                    return
+                }
+            }
+
             Assert-TestMissingToolWarning -Output $script:MissingAsdfOutput -Pattern 'asdf not found'
             Assert-TestOutputContainsInstallCommand -Output $script:MissingAsdfOutput -ToolName 'asdf'
         }

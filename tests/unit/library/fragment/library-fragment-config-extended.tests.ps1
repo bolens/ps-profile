@@ -435,7 +435,7 @@ Set-AgentModeFunction -Name 'Enable-DockerTools' -Body { }
                 $metadata.Tier | Should -Be 'optional'
             }
             finally {
-                Remove-Item -Path Function:Read-FileContent -ErrorAction SilentlyContinue -Force
+                Remove-TestFunction -Name 'Read-FileContent'
                 if ($null -eq $originalStructuredFlag) {
                     Remove-Item Env:PS_PROFILE_FRAGMENT_CONFIG_DISABLE_STRUCTURED_ERROR -ErrorAction SilentlyContinue
                 }
@@ -633,7 +633,7 @@ Set-AgentModeFunction -Name 'Enable-DockerTools' -Body { }
                 $metadata.Tier | Should -Be 'optional'
             }
             finally {
-                Remove-Item -Path Function:Read-FileContent -ErrorAction SilentlyContinue -Force
+                Remove-TestFunction -Name 'Read-FileContent'
                 if ($null -eq $originalStructuredFlag) {
                     Remove-Item Env:PS_PROFILE_FRAGMENT_CONFIG_DISABLE_STRUCTURED_ERROR -ErrorAction SilentlyContinue
                 }
@@ -670,7 +670,7 @@ Set-AgentModeFunction -Name 'Enable-DockerTools' -Body { }
                 $metadata.Tier | Should -Be 'optional'
             }
             finally {
-                Remove-Item -Path Function:Read-FileContent -ErrorAction SilentlyContinue -Force
+                Remove-TestFunction -Name 'Read-FileContent'
                 if ($null -eq $originalStructuredFlag) {
                     Remove-Item Env:PS_PROFILE_FRAGMENT_CONFIG_DISABLE_STRUCTURED_ERROR -ErrorAction SilentlyContinue
                 }

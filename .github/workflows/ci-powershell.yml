@@ -1,13 +1,36 @@
 name: CI - PowerShell (matrix)
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/checks/**'
+      - 'scripts/lib/**'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/ci-powershell.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/checks/**'
+      - 'scripts/lib/**'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/ci-powershell.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
 
 jobs:
   validate:
@@ -18,7 +41,7 @@ jobs:
         pwsh: [7.2, 7.4]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install PSScriptAnalyzer
         run: pwsh -NoProfile -Command "Install-Module -Name PSScriptAnalyzer -Scope CurrentUser -Force"
       - name: Validate profile (lint + idempotency)

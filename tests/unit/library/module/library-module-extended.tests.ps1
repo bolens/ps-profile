@@ -20,6 +20,20 @@ BeforeAll {
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:ProfileDir = Join-Path $script:RepoRoot 'profile.d'
     Import-Module (Join-Path $script:LibPath 'runtime' 'Module.psm1') -DisableNameChecking -Force
+
+    # Disposable probe module for import/ensure tests. NEVER unload Pester here — that
+    # destroys the running test runner's mock infrastructure and cascades
+    # "Mock data are not setup for this scope" into later files in the same shard.
+    $script:ProbeName = 'PsProfileModuleProbe'
+    $script:ProbeRoot = New-TestTempDirectory -Prefix 'ModuleProbeExt'
+    $probeDir = Join-Path $script:ProbeRoot $script:ProbeName
+    New-Item -ItemType Directory -Path $probeDir -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $probeDir "$($script:ProbeName).psm1") -Value @'
+function Get-PsProfileModuleProbe { 'ok' }
+Export-ModuleMember -Function Get-PsProfileModuleProbe
+'@
+    $script:OriginalPSModulePath = $env:PSModulePath
+    $env:PSModulePath = "$($script:ProbeRoot)$([System.IO.Path]::PathSeparator)$env:PSModulePath"
 }
 
 function script:Invoke-InModuleWithStubs {
@@ -52,18 +66,19 @@ function script:Invoke-InModuleWithStubs {
 
 AfterAll {
     Remove-Module Module -ErrorAction SilentlyContinue -Force
+    if ($script:ProbeName) {
+        Remove-Module -Name $script:ProbeName -Force -ErrorAction SilentlyContinue
+    }
+    if ($null -ne $script:OriginalPSModulePath) {
+        $env:PSModulePath = $script:OriginalPSModulePath
+    }
 }
 
 Describe 'Module extended scenarios' {
     Context 'Import-RequiredModule' {
         It 'Does not throw when importing an already loaded module' {
-            if (-not (Get-Module -ListAvailable -Name 'Pester' -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because 'Pester is not available for import tests'
-                return
-            }
-
-            Import-RequiredModule -ModuleName 'Pester' -ErrorAction SilentlyContinue
-            { Import-RequiredModule -ModuleName 'Pester' } | Should -Not -Throw
+            Import-RequiredModule -ModuleName $script:ProbeName -ErrorAction SilentlyContinue
+            { Import-RequiredModule -ModuleName $script:ProbeName } | Should -Not -Throw
         }
 
         It 'Requires ModuleName parameter' {
@@ -328,7 +343,7 @@ Describe 'Module extended scenarios' {
                 }
                 'Install-Module'   = { throw 'install failure probe' }
             } -Body {
-                { Install-RequiredModule -ModuleName 'InstallFailureProbe' } | Should -Throw 'install failure probe'
+                { Install-RequiredModule -ModuleName 'InstallFailureProbe' } | Should -Throw '*install failure probe*'
             }
         }
 
@@ -375,15 +390,11 @@ Describe 'Module extended scenarios' {
     }
 
     Context 'Ensure-ModuleAvailable' {
-        It 'Imports Pester without error when the module is already installed' {
-            if (-not (Get-Module -ListAvailable -Name 'Pester' -ErrorAction SilentlyContinue)) {
-                Set-ItResult -Skipped -Because 'Pester is not available'
-                return
-            }
-
-            Remove-Module Pester -ErrorAction SilentlyContinue -Force
-            { Ensure-ModuleAvailable -ModuleName 'Pester' } | Should -Not -Throw
-            Get-Module Pester | Should -Not -BeNullOrEmpty
+        It 'Imports probe module without error when the module is already installed' {
+            Remove-Module -Name $script:ProbeName -Force -ErrorAction SilentlyContinue
+            { Ensure-ModuleAvailable -ModuleName $script:ProbeName } | Should -Not -Throw
+            # Ensure-ModuleAvailable imports via Module.psm1 session — use -All to observe it.
+            Get-Module -Name $script:ProbeName -All | Should -Not -BeNullOrEmpty
         }
 
         It 'Installs and imports when both steps succeed' {

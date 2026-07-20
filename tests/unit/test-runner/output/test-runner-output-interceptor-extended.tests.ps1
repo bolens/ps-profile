@@ -50,10 +50,12 @@ Describe 'OutputInterceptor extended behavior' {
 
     Context 'Module override state' {
         It 'Activates override flags after Start-TestOutputInterceptor' {
-            InModuleScope OutputInterceptor {
-                Start-TestOutputInterceptor
-                                $script:WriteHostOverrideActive | Should -Be $true
-                $script:WriteWarningOverrideActive | Should -Be $true
+            try {
+                InModuleScope OutputInterceptor {
+                    Start-TestOutputInterceptor
+                    $script:WriteHostOverrideActive | Should -Be $true
+                    $script:WriteWarningOverrideActive | Should -Be $true
+                }
             }
             finally {
                 Stop-TestOutputInterceptor

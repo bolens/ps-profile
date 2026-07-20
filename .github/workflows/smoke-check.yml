@@ -1,19 +1,33 @@
 name: Smoke check - repro
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/checks/**'
+      - 'scripts/lib/**'
+      - '.github/workflows/smoke-check.yml'
   workflow_dispatch: {}
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
 
 jobs:
   smoke-windows:
     name: Smoke check (Windows)
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Run repro smoke script (verbose)
         shell: pwsh
         env:

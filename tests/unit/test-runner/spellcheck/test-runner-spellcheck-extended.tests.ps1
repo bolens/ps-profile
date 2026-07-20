@@ -38,22 +38,40 @@ Describe 'spellcheck.ps1 extended scenarios' {
     }
 
     Context 'Exit code handling' {
-        It 'Uses Test-CommandAvailable to detect cspell' {
+        It 'Resolves cspell from PATH, node_modules, pnpm, or npx' {
             $content = Get-Content -LiteralPath $script:SpellcheckScript -Raw
             $content | Should -Match 'Test-CommandAvailable'
-            $content | Should -Match "'cspell'"
+            $content | Should -Match 'node_modules'
+            $content | Should -Match 'pnpm'
+            $content | Should -Match 'Get-CSpellInvocation'
         }
 
-        It 'Exits successfully when cspell is not on PATH' {
+        It 'Exits successfully when no cspell runner can be resolved' {
             $isolatedPath = Join-Path $script:TempRoot 'empty-path'
             New-Item -ItemType Directory -Path $isolatedPath -Force | Out-Null
+            $orphanRoot = Join-Path $script:TempRoot 'orphan-repo'
+            New-Item -ItemType Directory -Path (Join-Path $orphanRoot 'scripts' 'utils' 'code-quality') -Force | Out-Null
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $orphanRoot 'scripts' 'lib') -Recurse -Force
+            Copy-Item -LiteralPath $script:SpellcheckScript -Destination (Join-Path $orphanRoot 'scripts' 'utils' 'code-quality' 'spellcheck.ps1') -Force
+            Push-Location $orphanRoot
+            try { & git init -q 2>$null } finally { Pop-Location }
+            $docPath = Join-Path $orphanRoot 'readme.md'
+            Set-Content -LiteralPath $docPath -Value '# fixture' -Encoding UTF8
+            $orphanScript = Join-Path $orphanRoot 'scripts' 'utils' 'code-quality' 'spellcheck.ps1'
 
             & $script:PsExe -NoProfile -NonInteractive -Command @"
-`$env:PATH = '$isolatedPath'
-& '$($script:SpellcheckScript -replace "'", "''")' -Paths '*.md'
+`$env:PATH = '$($isolatedPath -replace "'", "''")'
+Remove-Item Env:\PS_PROFILE_REQUIRE_CSPELL -ErrorAction SilentlyContinue
+& '$($orphanScript -replace "'", "''")' -Paths '$($docPath -replace "'", "''")'
 exit `$LASTEXITCODE
 "@ 2>&1 | Out-Null
             $LASTEXITCODE | Should -Be 0
+        }
+
+        It 'Fails when RequireAvailable is set and cspell is missing' {
+            $content = Get-Content -LiteralPath $script:SpellcheckScript -Raw
+            $content | Should -Match 'RequireAvailable'
+            $content | Should -Match 'PS_PROFILE_REQUIRE_CSPELL'
         }
 
         It 'Maps cspell failures to EXIT_VALIDATION_FAILURE' {

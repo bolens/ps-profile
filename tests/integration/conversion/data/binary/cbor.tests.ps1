@@ -86,6 +86,7 @@ Describe 'CBOR Format Conversion Tests' {
         }
 
         It 'ConvertTo-CborFromJson handles missing cbor package gracefully when Node.js is available' {
+            try {
             if (-not $script:NodeAvailable) {
                 Set-ItResult -Skipped -Because "Node.js is not available"
                 return
@@ -104,28 +105,30 @@ Describe 'CBOR Format Conversion Tests' {
             if ($cborFile -and -not [string]::IsNullOrWhiteSpace($cborFile) -and (Test-Path -LiteralPath $cborFile)) {
                 $cborFile | Should -Exist
             }
-        }
-        catch {
-            $errorMessage = $_.Exception.Message
-            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-            
-            if ($errorMessage -match 'cbor.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'cbor') {
-                $installCommand = Resolve-TestToolInstallCommand -ToolName 'cbor' -ToolType 'node-package'
-                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                }
-                elseif ($errorMessage -match 'cbor' -or $fullError -match 'cbor') {
-                    Write-Host "cbor package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match 'cbor'
-                }
             }
-            else {
-                throw
+            catch {
+                $errorMessage = $_.Exception.Message
+                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+                if ($errorMessage -match 'cbor.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'cbor') {
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'cbor' -ToolType 'node-package'
+                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                    }
+                    elseif ($errorMessage -match 'cbor' -or $fullError -match 'cbor') {
+                        Write-Host "cbor package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match 'cbor'
+                    }
+                }
+                else {
+                    throw
+                }
             }
         }
 
         It 'ConvertFrom-CborToJson handles missing cbor package gracefully when Node.js is available' {
+            try {
             if (-not $script:NodeAvailable) {
                 Set-ItResult -Skipped -Because "Node.js is not available"
                 return
@@ -143,23 +146,24 @@ Describe 'CBOR Format Conversion Tests' {
             if ($jsonFile -and -not [string]::IsNullOrWhiteSpace($jsonFile) -and (Test-Path -LiteralPath $jsonFile)) {
                 $jsonFile | Should -Exist
             }
-        }
-        catch {
-            $errorMessage = $_.Exception.Message
-            $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
-            
-            if ($errorMessage -match 'cbor.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'cbor') {
-                $installCommand = Resolve-TestToolInstallCommand -ToolName 'cbor' -ToolType 'node-package'
-                if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
-                    Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match ([regex]::Escape($installCommand))
-                }
-                elseif ($errorMessage -match 'cbor' -or $fullError -match 'cbor') {
-                    Write-Host "cbor package is not installed. Install with: $installCommand" -ForegroundColor Yellow
-                    $errorMessage | Should -Match 'cbor'
-                }
             }
-            # Other errors (like invalid file format) are also acceptable
+            catch {
+                $errorMessage = $_.Exception.Message
+                $fullError = ($_ | Out-String) + ($errorMessage | Out-String)
+            
+                if ($errorMessage -match 'cbor.*not.*installed' -or $errorMessage -match 'MODULE_NOT_FOUND' -or $fullError -match 'cbor') {
+                    $installCommand = Resolve-TestToolInstallCommand -ToolName 'cbor' -ToolType 'node-package'
+                    if ($errorMessage -match [regex]::Escape($installCommand) -or $fullError -match [regex]::Escape($installCommand)) {
+                        Write-Host "Installation command found in error: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match ([regex]::Escape($installCommand))
+                    }
+                    elseif ($errorMessage -match 'cbor' -or $fullError -match 'cbor') {
+                        Write-Host "cbor package is not installed. Install with: $installCommand" -ForegroundColor Yellow
+                        $errorMessage | Should -Match 'cbor'
+                    }
+                }
+                # Other errors (like invalid file format) are also acceptable
+            }
         }
     }
 }

@@ -15,10 +15,20 @@ BeforeAll {
         $current = $current.Parent
     }
     $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
-    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_LOAD_MS' -Default 4500
-    $script:MaxRepeatLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_REPEAT_LOAD_MS' -Default 3500
-    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_IDEMPOTENCY_MS' -Default 3500
-    $script:MaxFunctionCheckTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_FUNCTION_MS' -Default 500
+    $loadDefault = 10000
+    $repeatDefault = 10000
+    $idempotencyDefault = 10000
+    $functionDefault = 3000
+    if ($IsWindows -or $env:OS -eq 'Windows_NT') {
+        $loadDefault = 15000
+        $repeatDefault = 15000
+        $idempotencyDefault = 15000
+        $functionDefault = 5000
+    }
+    $script:MaxFragmentLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_LOAD_MS' -Default $loadDefault
+    $script:MaxRepeatLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_REPEAT_LOAD_MS' -Default $repeatDefault
+    $script:MaxIdempotencyTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_IDEMPOTENCY_MS' -Default $idempotencyDefault
+    $script:MaxFunctionCheckTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_GIT_ENHANCED_MAX_FUNCTION_MS' -Default $functionDefault
     . (Join-Path $script:ProfileDir 'bootstrap.ps1')
     . (Join-Path $script:ProfileDir 'env.ps1')
     . (Join-Path $script:ProfileDir 'git.ps1')

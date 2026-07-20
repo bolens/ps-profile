@@ -73,6 +73,16 @@ tasks:
     cmds:
       - pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 {{.CLI_ARGS}}
 
+  test-ci-shard:
+    desc: Run one CI Pester shard (use -- -Shard unit-library -ListShards)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 {{.CLI_ARGS}}
+
+  test-changed-shards:
+    desc: Run CI Pester shards for git changes (same filters as GitHub Actions)
+    cmds:
+      - pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 {{.CLI_ARGS}}
+
   test-coverage:
     desc: Run Pester Tests with Coverage
     cmds:
@@ -318,6 +328,11 @@ tasks:
     desc: Run Pre-commit Checks
     cmds:
       - pwsh -NoProfile -File scripts/git/pre-commit.ps1
+
+  pre-push-checks:
+    desc: Run Pre-push Checks (validate + changed CI Pester shards)
+    cmds:
+      - pwsh -NoProfile -File scripts/git/hooks/pre-push.ps1 {{.CLI_ARGS}}
 
   check-idempotency:
     desc: Check Idempotency

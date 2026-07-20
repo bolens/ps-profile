@@ -56,18 +56,20 @@ Describe 'System Information Integration Tests' {
         }
 
         It 'Get-SystemUptime returns TimeSpan object' {
+            try {
                         $result = Get-SystemUptime
             $result | Should -Not -BeNullOrEmpty -Because "Get-SystemUptime should return a result"
             $result.GetType().Name | Should -Be 'TimeSpan' -Because "Get-SystemUptime should return a TimeSpan object"
-        }
-        catch {
-            $errorDetails = @{
-                Message  = $_.Exception.Message
-                Function = 'Get-SystemUptime'
-                Category = $_.CategoryInfo.Category
             }
-            Write-Error "Get-SystemUptime test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
-            throw
+            catch {
+                $errorDetails = @{
+                    Message  = $_.Exception.Message
+                    Function = 'Get-SystemUptime'
+                    Category = $_.CategoryInfo.Category
+                }
+                Write-Error "Get-SystemUptime test failed: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Continue
+                throw
+            }
         }
 
         It 'Get-BatteryInfo (battery) function is available' {

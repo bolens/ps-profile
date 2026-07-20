@@ -424,11 +424,12 @@ function Get-CodeMetrics {
     $fileMetricsArray = ConvertTo-FileMetricsArray -InputList $fileMetrics
     
     # Ensure fileMetricsArray is always an array, never null (defensive checks)
+    # Prefer [object[]]::new(0) over @() — empty @() can unwrap to $null when assigned as a NoteProperty.
     if ($null -eq $fileMetricsArray) {
-        $fileMetricsArray = @()
+        $fileMetricsArray = [object[]]::new(0)
     }
     if (-not ($fileMetricsArray -is [System.Array])) {
-        $fileMetricsArray = @()
+        $fileMetricsArray = [object[]]::new(0)
     }
     
     # Create result object (without FileMetrics first)
@@ -451,8 +452,8 @@ function Get-CodeMetrics {
     # Final verification: ensure FileMetrics is never null (defensive check)
     # Double-check that the property was set correctly
     if ($null -eq $result.FileMetrics) {
-        # Last resort: remove and re-add the property
-        $emptyArray = @()
+        # Last resort: remove and re-add the property with a true empty array
+        $emptyArray = [object[]]::new(0)
         if ($result.PSObject.Properties['FileMetrics']) {
             $result.PSObject.Properties.Remove('FileMetrics')
         }
@@ -461,7 +462,7 @@ function Get-CodeMetrics {
     
     # One more safety check - verify the property exists and is not null
     if (-not $result.PSObject.Properties['FileMetrics'] -or $null -eq $result.PSObject.Properties['FileMetrics'].Value) {
-        $emptyArray = @()
+        $emptyArray = [object[]]::new(0)
         $result | Add-Member -MemberType NoteProperty -Name 'FileMetrics' -Value $emptyArray -Force
     }
     

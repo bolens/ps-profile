@@ -18,6 +18,15 @@ BeforeAll {
     }
     $localeModule = Get-TestPath -RelativePath 'scripts\lib\core\Locale.psm1' -StartPath $PSScriptRoot -EnsureExists
     Import-Module $localeModule -DisableNameChecking -ErrorAction Stop -Global
+
+    # CI runners often use the invariant culture (empty Name). Normalize for assertions.
+    try {
+        [System.Globalization.CultureInfo]::CurrentCulture = [System.Globalization.CultureInfo]::GetCultureInfo('en-US')
+        [System.Globalization.CultureInfo]::CurrentUICulture = [System.Globalization.CultureInfo]::GetCultureInfo('en-US')
+    }
+    catch {
+        # Best-effort; tests tolerate invariant LanguageCode when Name is empty.
+    }
 }
 
 Describe 'Locale extended scenarios' {
@@ -25,10 +34,13 @@ Describe 'Locale extended scenarios' {
         It 'Returns culture metadata with English variant flags' {
             $locale = Get-UserLocale
 
-            $locale.Name | Should -Not -BeNullOrEmpty
             $locale.LanguageCode | Should -Not -BeNullOrEmpty
             $locale.Culture | Should -Not -BeNullOrEmpty
             $locale.UICulture | Should -Not -BeNullOrEmpty
+            # Invariant culture uses an empty Name; otherwise Name should be populated.
+            if ($locale.LanguageCode -ne 'iv') {
+                $locale.Name | Should -Not -BeNullOrEmpty
+            }
             $locale.PSObject.Properties.Name | Should -Contain 'IsUKEnglish'
             $locale.PSObject.Properties.Name | Should -Contain 'IsUSEnglish'
             $locale.PSObject.Properties.Name | Should -Contain 'EnglishVariant'
@@ -213,7 +225,7 @@ Describe 'Locale extended scenarios' {
 
             try {
                 $locale = Get-UserLocale
-                $locale.Name | Should -Not -BeNullOrEmpty
+                $locale.LanguageCode | Should -Not -BeNullOrEmpty
                 Format-LocaleOutput -Date (Get-Date) -Number 1.5 -Currency 2.5 | Should -Not -BeNullOrEmpty
             }
             finally {

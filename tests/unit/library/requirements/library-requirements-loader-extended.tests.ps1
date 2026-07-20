@@ -18,11 +18,11 @@ BeforeAll {
     }
     $script:LibPath = Get-TestPath -RelativePath 'scripts\lib' -StartPath $PSScriptRoot -EnsureExists
     $script:ProfileDir = Join-Path (Get-TestRepoRoot -StartPath $PSScriptRoot) 'profile.d'
-    Import-Module (Join-Path $script:LibPath 'core' 'Validation.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
-    Import-Module (Join-Path $script:LibPath 'utilities' 'Cache.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
-    Import-Module (Join-Path $script:LibPath 'utilities' 'CacheKey.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
-    Import-Module (Join-Path $script:LibPath 'utilities' 'DataFile.psm1') -DisableNameChecking -Force -ErrorAction SilentlyContinue
-    Import-Module (Join-Path $script:LibPath 'utilities' 'RequirementsLoader.psm1') -DisableNameChecking -Force
+    Import-TestLibraryModule -ModulePath (Join-Path $script:LibPath 'core' 'Validation.psm1')
+    Import-TestLibraryModule -ModulePath (Join-Path $script:LibPath 'utilities' 'Cache.psm1')
+    Import-TestLibraryModule -ModulePath (Join-Path $script:LibPath 'utilities' 'CacheKey.psm1')
+    Import-TestLibraryModule -ModulePath (Join-Path $script:LibPath 'utilities' 'DataFile.psm1')
+    Import-TestLibraryModule -ModulePath (Join-Path $script:LibPath 'utilities' 'RequirementsLoader.psm1')
 
     $script:TempDir = New-TestTempDirectory -Prefix 'RequirementsLoaderExtended'
 }
@@ -201,7 +201,9 @@ Describe 'RequirementsLoader extended scenarios' {
         }
 
         It 'Returns cached requirements without reloading the loader script' {
-            $loaderFile = Join-Path $script:RepoRoot 'requirements' 'load-requirements.ps1'
+            $repoRoot = Join-Path $script:TempDir ("repo-cache-{0}" -f ([Guid]::NewGuid().ToString('N')))
+            New-Item -ItemType Directory -Path (Join-Path $repoRoot 'requirements') -Force | Out-Null
+            $loaderFile = Join-Path $repoRoot 'requirements' 'load-requirements.ps1'
             @'
 @{
     PowerShellVersion = '7.4'
@@ -211,11 +213,26 @@ Describe 'RequirementsLoader extended scenarios' {
 }
 '@ | Set-Content -LiteralPath $loaderFile -Encoding UTF8
 
-            $first = Import-Requirements -RepoRoot $script:RepoRoot -UseCache
+            # Ensure Cache helpers are globally visible inside RequirementsLoader.
+            Import-TestLibraryModule -ModulePath (Join-Path $script:LibPath 'utilities' 'Cache.psm1') -RemoveExisting
+            Import-TestLibraryModule -ModulePath (Join-Path $script:LibPath 'utilities' 'CacheKey.psm1') -RemoveExisting
+            Import-TestLibraryModule -ModulePath (Join-Path $script:LibPath 'utilities' 'RequirementsLoader.psm1') -RemoveExisting
+
+            if (Get-Command Clear-CachedValue -ErrorAction SilentlyContinue) {
+                $preKey = if (Get-Command New-CacheKey -ErrorAction SilentlyContinue) {
+                    New-CacheKey -Prefix 'Requirements' -Components @($repoRoot)
+                }
+                else {
+                    "Requirements_$repoRoot"
+                }
+                Clear-CachedValue -Key $preKey -ErrorAction SilentlyContinue
+            }
+
+            $first = Import-Requirements -RepoRoot $repoRoot -UseCache:$true
             '@{ PowerShellVersion = ''9.9''; Modules = @{}; ExternalTools = @{}; PlatformRequirements = @{} }' |
                 Set-Content -LiteralPath $loaderFile -Encoding UTF8
 
-            $second = Import-Requirements -RepoRoot $script:RepoRoot -UseCache
+            $second = Import-Requirements -RepoRoot $repoRoot -UseCache:$true
 
             $first.PowerShellVersion | Should -Be '7.4'
             $second.PowerShellVersion | Should -Be '7.4'

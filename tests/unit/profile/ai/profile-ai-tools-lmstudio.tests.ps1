@@ -36,6 +36,7 @@ Describe 'ai-tools.ps1 - Invoke-LMStudio' {
 
     Context 'Tool not available' {
         It 'Returns null when lms is not available' {
+            try {
             Set-TestCommandAvailabilityState -CommandName 'lms' -Available $false
 
             $originalHome = $env:HOME
@@ -43,13 +44,14 @@ Describe 'ai-tools.ps1 - Invoke-LMStudio' {
                         $env:HOME = $emptyHome
             $result = Invoke-LMStudio -Arguments @('list') -ErrorAction SilentlyContinue
             $result | Should -BeNullOrEmpty
-        }
-        finally {
-            if ($null -ne $originalHome) {
-                $env:HOME = $originalHome
             }
-            else {
-                Remove-Item Env:HOME -ErrorAction SilentlyContinue
+            finally {
+                if ($null -ne $originalHome) {
+                    $env:HOME = $originalHome
+                }
+                else {
+                    Remove-Item Env:HOME -ErrorAction SilentlyContinue
+                }
             }
         }
     }

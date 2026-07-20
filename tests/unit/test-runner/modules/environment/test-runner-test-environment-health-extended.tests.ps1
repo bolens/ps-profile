@@ -38,7 +38,14 @@ Describe 'TestEnvironment health extended scenarios' {
         }
 
         It 'Identifies GitLab CI as the CI provider' {
-            Mock-EnvironmentVariable -Name 'GITLAB_CI' -Value 'true'
+            Mock-EnvironmentVariables -Variables @{
+                CI             = $null
+                GITHUB_ACTIONS = $null
+                GITLAB_CI      = 'true'
+                JENKINS_HOME   = $null
+                TF_BUILD       = $null
+                CIRCLECI       = $null
+            }
 
             $info = Get-TestEnvironment
 

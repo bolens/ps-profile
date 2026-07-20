@@ -68,6 +68,7 @@ Describe 'security-tools.ps1 - Invoke-OSVScan' {
         }
 
         It 'Uses default path and format when not specified' {
+            try {
             Setup-CapturingCommandMock -CommandName 'osv-scanner' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
@@ -76,9 +77,10 @@ Describe 'security-tools.ps1 - Invoke-OSVScan' {
             $args = Get-TestCommandInvocationArgsFlat
             $args | Should -Contain '--format'
             $args | Should -Contain 'table'
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Supports different output formats' {
@@ -96,15 +98,17 @@ Describe 'security-tools.ps1 - Invoke-OSVScan' {
         }
 
         It 'Handles osv-scanner execution errors gracefully' {
+            try {
             Set-TestCommandThrowingMock -CommandName 'osv-scanner' -Message 'Execution failed'
 
             $result = $null
                         $result = Invoke-OSVScan -Path $script:TestRepoPath -ErrorAction SilentlyContinue
-        }
-        catch {
-            $result = $null
+            }
+            catch {
+                $result = $null
 
-            $result | Should -BeNullOrEmpty
+                $result | Should -BeNullOrEmpty
+            }
         }
 
         It 'Validates OutputFormat parameter' {
@@ -124,14 +128,16 @@ Describe 'security-tools.ps1 - Invoke-OSVScan' {
         }
 
         It 'Handles whitespace-only path' {
+            try {
             Setup-CapturingCommandMock -CommandName 'osv-scanner' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
                         $result = Invoke-OSVScan -Path '   ' -ErrorAction SilentlyContinue
             $result | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Handles osv-scanner path not found' {
@@ -143,14 +149,16 @@ Describe 'security-tools.ps1 - Invoke-OSVScan' {
         }
 
         It 'Uses default path when osv-scanner path is null' {
+            try {
             Setup-CapturingCommandMock -CommandName 'osv-scanner' -Output 'Scan results'
 
             Push-Location $script:TestRepoPath
                         $result = Invoke-OSVScan -Path $null -ErrorAction SilentlyContinue
             $result | Should -Not -BeNullOrEmpty
-        }
-        finally {
-            Pop-Location
+            }
+            finally {
+                Pop-Location
+            }
         }
 
         It 'Handles multiple pipeline inputs' {

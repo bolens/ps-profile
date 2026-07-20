@@ -1,21 +1,52 @@
 name: Spellcheck (cspell)
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
+    paths:
+      - '**/*.md'
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.json'
+      - 'cspell.json'
+      - 'cspell*.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/spellcheck.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - '**/*.md'
+      - '**/*.ps1'
+      - '**/*.psm1'
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '**/*.json'
+      - 'cspell.json'
+      - 'cspell*.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/spellcheck.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: read
 
 jobs:
   cspell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@b0f76dfb45f55f8421693e4803ac7bb65143bd34 # v6
         with:
           version: 11.5.3
       - name: Setup Node.js

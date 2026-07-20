@@ -10,6 +10,10 @@
 .PARAMETER Filter
     Optional glob-style name filter (e.g. lang-go-).
 
+.PARAMETER PathPattern
+    Optional case-insensitive regex matched against each file path relative to
+    tests/performance/ using forward slashes (e.g. '^profile/[0-9a-m]').
+
 .PARAMETER RepoRoot
     Repository root directory.
 
@@ -21,11 +25,16 @@
 
 .EXAMPLE
     pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 -Filter lang-
+
+.EXAMPLE
+    pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-performance-batch.ps1 -PathPattern '^profile/[n-z]'
 #>
 param(
     [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))),
 
     [string]$Filter = '',
+
+    [string]$PathPattern = '',
 
     [switch]$Quiet
 )
@@ -41,9 +50,22 @@ $files = @(Get-ChildItem -Path $perfRoot -Filter '*.tests.ps1' -File -Recurse | 
 if (-not [string]::IsNullOrWhiteSpace($Filter)) {
     $files = @($files | Where-Object { $_.Name -like "*$Filter*" })
 }
+if (-not [string]::IsNullOrWhiteSpace($PathPattern)) {
+    $files = @($files | Where-Object {
+            $rel = $_.FullName
+            if ($rel.StartsWith($perfRoot, [StringComparison]::OrdinalIgnoreCase)) {
+                $rel = $rel.Substring($perfRoot.Length).TrimStart('\', '/')
+            }
+            ($rel -replace '\\', '/') -match $PathPattern
+        })
+}
 
 if ($files.Count -eq 0) {
-    Write-Error "No performance test files matched under: $perfRoot (filter: '$Filter')"
+    $hint = @()
+    if (-not [string]::IsNullOrWhiteSpace($Filter)) { $hint += "Filter='$Filter'" }
+    if (-not [string]::IsNullOrWhiteSpace($PathPattern)) { $hint += "PathPattern='$PathPattern'" }
+    $suffix = if ($hint.Count -gt 0) { ' ({0})' -f ($hint -join ', ') } else { '' }
+    Write-Error "No performance test files matched under: $perfRoot$suffix"
     exit 2
 }
 
@@ -54,15 +76,16 @@ function Get-PesterRunStats {
     $failed = -1
     $skipped = 0
 
-    if ($Output -match 'Tests Passed:\s*(\d+)') {
-        $passed = [int]$Matches[1]
-        if ($Output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
-        if ($Output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
-    }
-    elseif ($Output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
+    # Prefer the runner summary line (present even under -Quiet).
+    if ($Output -match 'Tests completed:\s*Passed=(\d+),\s*Failed=(\d+),\s*Skipped=(\d+)') {
         $passed = [int]$Matches[1]
         $failed = [int]$Matches[2]
         $skipped = [int]$Matches[3]
+    }
+    elseif ($Output -match 'Tests Passed:\s*(\d+)') {
+        $passed = [int]$Matches[1]
+        if ($Output -match 'Failed:\s*(\d+)') { $failed = [int]$Matches[1] }
+        if ($Output -match 'Skipped:\s*(\d+)') { $skipped = [int]$Matches[1] }
     }
 
     return [pscustomobject]@{
@@ -90,7 +113,15 @@ function New-PerformanceRunnerArgs {
     return $args
 }
 
-$label = if ([string]::IsNullOrWhiteSpace($Filter)) { 'performance' } else { "performance ($Filter*)" }
+$label = if (-not [string]::IsNullOrWhiteSpace($PathPattern)) {
+    "performance (PathPattern=$PathPattern)"
+}
+elseif (-not [string]::IsNullOrWhiteSpace($Filter)) {
+    "performance ($Filter*)"
+}
+else {
+    'performance'
+}
 Write-Host "Batch: $label ($($files.Count) files)" -ForegroundColor Cyan
 Write-Host 'Mode: per-file' -ForegroundColor DarkGray
 Write-Host ''
@@ -120,6 +151,23 @@ foreach ($file in $files) {
     $suffix = if ($stats.Crash) { ' (crash/unparsed)' } else { '' }
     $color = if ($stats.Failed -gt 0 -or $stats.Crash) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
     Write-Host "  $($stats.Passed)P / $($stats.Failed)F / $($stats.Skipped)S$suffix" -ForegroundColor $color
+
+    # Under -Quiet, surface a short failure excerpt so CI logs remain actionable.
+    if ($Quiet -and ($stats.Failed -gt 0 -or $stats.Crash)) {
+        $failureLines = @(
+            $output -split "`n" |
+                Where-Object {
+                    $_ -match '^\s*\[-(FAIL|ERROR)\]|Expected:|But was:|Because:|ErrorMessage|CommandNotFoundException|RuntimeException|at\s+.+\.tests\.ps1:|BeLessThan|less than|greater than'
+                } |
+                Select-Object -First 40
+        )
+        if ($failureLines.Count -gt 0) {
+            Write-Host '  --- failure excerpt ---' -ForegroundColor DarkYellow
+            foreach ($line in $failureLines) {
+                Write-Host "  $line" -ForegroundColor DarkYellow
+            }
+        }
+    }
 }
 
 Write-Host ''

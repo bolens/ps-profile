@@ -32,6 +32,7 @@ BeforeAll {
 Describe 'Conversion image messages extended scenarios' {
     Context 'Get-ImageConversionToolMissingMessage' {
         It 'Returns the generic fallback when platform hints are unavailable' {
+            try {
             $originalPlatformHint = Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue
             Remove-Item Function:\Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
@@ -40,10 +41,11 @@ Describe 'Conversion image messages extended scenarios' {
             $message = Get-ImageConversionToolMissingMessage
             $message | Should -Match 'ImageMagick or GraphicsMagick'
             $message | Should -Match 'package manager'
-        }
-        finally {
-            if ($null -ne $originalPlatformHint) {
-                Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
+            }
+            finally {
+                if ($null -ne $originalPlatformHint) {
+                    Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
+                }
             }
         }
 
@@ -57,6 +59,7 @@ Describe 'Conversion image messages extended scenarios' {
 
     Context 'Get-ConversionToolMissingMessage fallback path' {
         It 'Uses Get-ToolInstallationCommand when platform hints are unavailable' {
+            try {
             $originalPlatformHint = Get-Command Get-PlatformInstallHint -ErrorAction SilentlyContinue
             Remove-Item Function:\Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
             Remove-Item Function:\global:Get-PlatformInstallHint -Force -ErrorAction SilentlyContinue
@@ -65,10 +68,11 @@ Describe 'Conversion image messages extended scenarios' {
             $message = Get-ConversionToolMissingMessage -ToolName 'ffmpeg'
             $message | Should -Match 'ffmpeg'
             $message | Should -Match 'Install with:'
-        }
-        finally {
-            if ($null -ne $originalPlatformHint) {
-                Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
+            }
+            finally {
+                if ($null -ne $originalPlatformHint) {
+                    Set-Item -Path Function:\global:Get-PlatformInstallHint -Value $originalPlatformHint.ScriptBlock -Force
+                }
             }
         }
     }

@@ -1,10 +1,34 @@
 name: Validate PowerShell Profile
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/checks/**'
+      - 'scripts/lib/**'
+      - 'scripts/utils/docs/**'
+      - 'docs/api/**'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/validate-profile.yml'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'Microsoft.PowerShell_profile.ps1'
+      - 'profile.d/**'
+      - 'Modules/**'
+      - 'scripts/checks/**'
+      - 'scripts/lib/**'
+      - 'scripts/utils/docs/**'
+      - 'docs/api/**'
+      - 'PSScriptAnalyzerSettings.psd1'
+      - '.github/workflows/validate-profile.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -12,9 +36,13 @@ env:
 jobs:
   api-docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Verify API documentation freshness
         run: pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1
@@ -130,6 +158,8 @@ jobs:
 
   validate:
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest]
@@ -139,7 +169,7 @@ jobs:
             powershell: powershell
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup PowerShell (Linux)
         if: matrix.os == 'ubuntu-latest'

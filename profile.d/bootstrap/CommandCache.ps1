@@ -50,18 +50,39 @@ function global:Test-CachedCommand {
     }
 
     $normalizedName = $Name.Trim()
+    $cacheKey = $normalizedName.ToLowerInvariant()
+
+    # Test harness overrides win over assumed commands / real lookups so
+    # Mark-TestCommandsUnavailable still works after bootstrap redefines this function.
+    # Honor whenever the override table is present (tests only); do not gate on
+    # PS_PROFILE_TEST_MODE — some shards clear or change that env mid-run.
+    $overrideTable = Get-Variable -Name 'TestCommandAvailabilityOverrides' -Scope Global -ErrorAction SilentlyContinue
+    if ($null -ne $overrideTable -and $null -ne $overrideTable.Value) {
+        $overrides = $overrideTable.Value
+        if ($overrides.ContainsKey($normalizedName)) {
+            return [bool]$overrides[$normalizedName]
+        }
+        if ($overrides.ContainsKey($cacheKey)) {
+            return [bool]$overrides[$cacheKey]
+        }
+    }
 
     # Check assumed commands first (bypasses actual command lookup for optional tools)
-    if ($global:AssumedAvailableCommands -and $global:AssumedAvailableCommands.ContainsKey($normalizedName)) {
+    $assumedTable = Get-Variable -Name 'AssumedAvailableCommands' -Scope Global -ErrorAction SilentlyContinue
+    if ($null -ne $assumedTable -and $null -ne $assumedTable.Value -and $assumedTable.Value.ContainsKey($normalizedName)) {
+        $assumed = $assumedTable.Value[$normalizedName]
+        if ($assumed -is [bool]) {
+            return $assumed
+        }
         return $true
     }
 
-    $cacheKey = $normalizedName.ToLowerInvariant()
     $now = Get-Date
 
     # Check cache for existing entry that hasn't expired (if caching enabled)
-    if ($CacheTTLMinutes -gt 0 -and $global:TestCachedCommandCache.ContainsKey($cacheKey)) {
-        $entry = [pscustomobject]$global:TestCachedCommandCache[$cacheKey]
+    $cacheTable = Get-Variable -Name 'TestCachedCommandCache' -Scope Global -ErrorAction SilentlyContinue
+    if ($CacheTTLMinutes -gt 0 -and $null -ne $cacheTable -and $null -ne $cacheTable.Value -and $cacheTable.Value.ContainsKey($cacheKey)) {
+        $entry = [pscustomobject]$cacheTable.Value[$cacheKey]
         if ($entry -and $entry.Expires -gt $now) {
             return [bool]$entry.Result
         }
@@ -322,6 +343,112 @@ function global:Get-ExternalCommandLookupNames {
 
 <#
 .SYNOPSIS
+    Resolves an executable path from command metadata or path-like input.
+
+.DESCRIPTION
+    Normalizes CommandInfo objects, nested command arrays, and multi-value Source
+    properties into a single executable path string for external command invocation.
+
+.PARAMETER CommandInfo
+    Command metadata, executable path, or enumerable command results.
+
+.OUTPUTS
+    System.String
+#>
+function global:Resolve-CommandExecutablePath {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [AllowNull()]
+        [object]$CommandInfo
+    )
+
+    if ($null -eq $CommandInfo) {
+        return $null
+    }
+
+    if ($CommandInfo -is [string]) {
+        $text = $CommandInfo.Trim()
+        if ([string]::IsNullOrWhiteSpace($text)) {
+            return $null
+        }
+
+        return $text
+    }
+
+    if ($CommandInfo -is [System.Management.Automation.CommandInfo]) {
+        $useSourcePath = $CommandInfo.CommandType -in @(
+            [System.Management.Automation.CommandTypes]::Application
+            [System.Management.Automation.CommandTypes]::ExternalScript
+        )
+
+        if ($useSourcePath -and $null -ne $CommandInfo.Source) {
+            $fromSource = Resolve-CommandExecutablePath -CommandInfo $CommandInfo.Source
+            if (-not [string]::IsNullOrWhiteSpace($fromSource)) {
+                return $fromSource
+            }
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($CommandInfo.Name)) {
+            return [string]$CommandInfo.Name
+        }
+
+        return $null
+    }
+
+    if ($null -ne $CommandInfo.PSObject.Properties['Source'] -or $null -ne $CommandInfo.PSObject.Properties['Name']) {
+        if ($null -ne $CommandInfo.Source) {
+            $fromSource = Resolve-CommandExecutablePath -CommandInfo $CommandInfo.Source
+            if (-not [string]::IsNullOrWhiteSpace($fromSource)) {
+                return $fromSource
+            }
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($CommandInfo.Name)) {
+            return [string]$CommandInfo.Name
+        }
+
+        return $null
+    }
+
+    if ($CommandInfo -is [System.Array]) {
+        foreach ($entry in $CommandInfo) {
+            $resolved = Resolve-CommandExecutablePath -CommandInfo $entry
+            if (-not [string]::IsNullOrWhiteSpace($resolved)) {
+                return $resolved
+            }
+        }
+
+        return $null
+    }
+
+    if ($CommandInfo -is [System.Collections.IEnumerable]) {
+        foreach ($entry in $CommandInfo) {
+            $resolved = Resolve-CommandExecutablePath -CommandInfo $entry
+            if (-not [string]::IsNullOrWhiteSpace($resolved)) {
+                return $resolved
+            }
+        }
+
+        return $null
+    }
+
+    try {
+        $text = ([string]$CommandInfo).Trim()
+        if ([string]::IsNullOrWhiteSpace($text)) {
+            return $null
+        }
+
+        return $text
+    }
+    catch {
+        return $null
+    }
+}
+
+<#
+.SYNOPSIS
     Returns whether an executable is mikefarah/yq v4+ (not python-yq).
 
 .DESCRIPTION
@@ -342,9 +469,10 @@ function global:Test-IsMikefarahYqExecutable {
     [OutputType([bool])]
     param(
         [Parameter(Mandatory)]
-        [string]$Executable
+        [object]$Executable
     )
 
+    $Executable = Resolve-CommandExecutablePath -CommandInfo $Executable
     if ([string]::IsNullOrWhiteSpace($Executable)) {
         return $false
     }
@@ -381,18 +509,17 @@ function global:Invoke-CachedYqCommand {
         throw 'yq command not found. Install mikefarah/yq (on Arch: sudo pacman -S go-yq).'
     }
 
-    $executable = if (-not [string]::IsNullOrWhiteSpace($yqCmd.Source)) { $yqCmd.Source } else { $yqCmd.Name }
     $yqArguments = @($args)
     $pipedInput = @($input)
 
     if ($pipedInput.Count -gt 0) {
-        $pipedInput | & $executable @yqArguments
+        $pipedInput | & $yqCmd @yqArguments
     }
     elseif ($yqArguments.Count -gt 0) {
-        & $executable @yqArguments
+        & $yqCmd @yqArguments
     }
     else {
-        & $executable
+        & $yqCmd
     }
 }
 
@@ -431,32 +558,54 @@ function global:Get-CachedExternalCommand {
 
         # Prefer explicit test mocks over host binaries with the same name.
         if ($global:TestRegisteredMockCommands -and $global:TestRegisteredMockCommands.Contains($candidate)) {
-            $mockFunction = Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue
-            if ($mockFunction -and $mockFunction.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
-                return $mockFunction
+            foreach ($mockFunction in @(Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue)) {
+                if ($mockFunction.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
+                    return $mockFunction
+                }
             }
         }
 
-        $application = Get-Command -Name $candidate -CommandType Application -ErrorAction SilentlyContinue
-        if ($application) {
-            if ($isYqLookup -and -not (Test-IsMikefarahYqExecutable -Executable $application.Source)) {
+        $applications = @(Get-Command -Name $candidate -CommandType Application -ErrorAction SilentlyContinue)
+        foreach ($application in $applications) {
+            $executablePath = Resolve-CommandExecutablePath -CommandInfo $application
+            if ([string]::IsNullOrWhiteSpace($executablePath)) {
                 continue
+            }
+
+            if ($isYqLookup) {
+                try {
+                    if (-not (Test-IsMikefarahYqExecutable -Executable $executablePath)) {
+                        continue
+                    }
+                }
+                catch {
+                    continue
+                }
             }
 
             return $application
         }
 
         # Profile aliases with the same name as a binary would otherwise recurse into wrapper functions.
-        $functionCmd = Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue
-        if ($functionCmd -and $functionCmd.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
-            return $functionCmd
+        foreach ($functionCmd in @(Get-Command -Name $candidate -CommandType Function -ErrorAction SilentlyContinue)) {
+            if ($functionCmd.Name.Equals($candidate, [StringComparison]::OrdinalIgnoreCase)) {
+                return $functionCmd
+            }
         }
 
-        $externalScript = Get-Command -Name $candidate -CommandType ExternalScript -ErrorAction SilentlyContinue
-        if ($externalScript) {
+        foreach ($externalScript in @(Get-Command -Name $candidate -CommandType ExternalScript -ErrorAction SilentlyContinue)) {
             if ($isYqLookup) {
-                $exe = if (-not [string]::IsNullOrWhiteSpace($externalScript.Source)) { $externalScript.Source } else { $externalScript.Name }
-                if (-not (Test-IsMikefarahYqExecutable -Executable $exe)) {
+                $exe = Resolve-CommandExecutablePath -CommandInfo $externalScript
+                if ([string]::IsNullOrWhiteSpace($exe)) {
+                    continue
+                }
+
+                try {
+                    if (-not (Test-IsMikefarahYqExecutable -Executable $exe)) {
+                        continue
+                    }
+                }
+                catch {
                     continue
                 }
             }
@@ -487,6 +636,9 @@ function global:Clear-TestCachedCommandCache {
     }
 
     $global:TestCachedCommandCache.Clear()
+    if (Get-Command Clear-TestMikefarahYqAvailabilityCache -ErrorAction SilentlyContinue) {
+        Clear-TestMikefarahYqAvailabilityCache
+    }
     return $true
 }
 

@@ -25,8 +25,8 @@ function Initialize-FileConversion-MediaColorsParse {
         
         # Check for named color
         $colorName = $colorString.ToLower()
-        if ($script:CssNamedColors.ContainsKey($colorName)) {
-            return $script:CssNamedColors[$colorName].Clone()
+        if ($null -ne $global:CssNamedColors -and $global:CssNamedColors.ContainsKey($colorName)) {
+            return $global:CssNamedColors[$colorName].Clone()
         }
         
         # Parse HEX (#rgb, #rrggbb, #rrggbbaa)

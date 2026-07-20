@@ -40,13 +40,15 @@ Describe 'OutputUtils extended scenarios' {
         }
 
         It 'Returns the original path when repository root is not initialized' {
+            try {
             Initialize-OutputUtils -RepoRoot $null
             $external = '/tmp/outside-repo/sample.txt'
 
                         ConvertTo-RepoRelativePath -PathString $external | Should -Be $external
-        }
-        finally {
-            Initialize-OutputUtils -RepoRoot $script:RepoRoot
+            }
+            finally {
+                Initialize-OutputUtils -RepoRoot $script:RepoRoot
+            }
         }
     }
 

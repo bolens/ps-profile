@@ -1,5 +1,14 @@
 
 
+# Load TestSupport.ps1 - ensure it's loaded before using its functions
+$testSupportPath = Join-Path $PSScriptRoot '..\..\..\TestSupport.ps1'
+if (Test-Path $testSupportPath) {
+    . $testSupportPath
+}
+else {
+    throw "TestSupport.ps1 not found at: $testSupportPath"
+}
+
 <#
 .SYNOPSIS
     Integration tests for note-app markdown migration tools.
@@ -7,23 +16,10 @@
 
 Describe 'Markdown Notes Migration Tests' {
     BeforeAll {
-                $current = Get-Item $PSScriptRoot
-        while ($null -ne $current) {
-            $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
-            if (Test-Path -LiteralPath $testSupportPath) {
-                . $testSupportPath
-                break
-            }
-            if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
-            $current = $current.Parent
-        }
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegration -ProfileDir $script:ProfileDir -ModuleType 'Documents' -SelectiveModules @(
             'document-markdown-notes.ps1'
         ) -EnsureDocuments
-    }
-    catch {
-        throw "Failed to initialize markdown notes tests: $($_.Exception.Message)"
     }
 
     Context 'Migration CLI wrappers' {

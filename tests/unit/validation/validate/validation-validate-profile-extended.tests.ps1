@@ -22,11 +22,12 @@ BeforeAll {
 
 Describe 'validate-profile.ps1 extended scenarios' {
     Context 'Validation pipeline' {
-        It 'Runs security lint spellcheck comment-help and idempotency checks' {
+        It 'Runs security lint spellcheck markdownlint comment-help and idempotency checks' {
             $content = Get-Content -LiteralPath $script:ValidateScript -Raw
             $content | Should -Match 'security scan'
             $content | Should -Match "'lint'"
             $content | Should -Match 'spellcheck'
+            $content | Should -Match 'markdownlint'
             $content | Should -Match 'comment-based help check'
             $content | Should -Match 'idempotency'
         }

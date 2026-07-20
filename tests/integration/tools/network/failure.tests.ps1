@@ -6,8 +6,20 @@ Tests for network failure scenarios and error handling.
 
 
 BeforeAll {
+    try {
+        $current = Get-Item $PSScriptRoot
+        while ($null -ne $current) {
+            $testSupportPath = Join-Path $current.FullName 'TestSupport.ps1'
+            if (Test-Path -LiteralPath $testSupportPath) {
+                . $testSupportPath
+                break
+            }
+            if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+            $current = $current.Parent
+        }
+
         # Get repository root
-    $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
+        $script:RepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ScriptsUtilsPath = Get-TestPath -RelativePath 'scripts\utils' -StartPath $PSScriptRoot -EnsureExists
     $script:ScriptsChecksPath = Get-TestPath -RelativePath 'scripts\checks' -StartPath $PSScriptRoot -EnsureExists
     if ($null -eq $script:ScriptsUtilsPath -or [string]::IsNullOrWhiteSpace($script:ScriptsUtilsPath)) {
@@ -22,8 +34,8 @@ BeforeAll {
     if (-not (Test-Path -LiteralPath $script:ScriptsChecksPath)) {
         throw "Scripts checks path not found at: $script:ScriptsChecksPath"
     }
-}
-catch {
+    }
+    catch {
     $errorDetails = @{
         Message  = $_.Exception.Message
         Type     = $_.Exception.GetType().FullName
@@ -31,6 +43,7 @@ catch {
     }
     Write-Error "Failed to initialize network failure tests in BeforeAll: $($errorDetails | ConvertTo-Json -Compress)" -ErrorAction Stop
     throw
+    }
 }
 
 Describe 'Network Failure Scenarios' {
@@ -149,8 +162,13 @@ Describe 'Network Failure Scenarios' {
 
 Describe 'External Dependency Mocking' {
     Context 'Mocking PowerShell Gallery Commands' {
-        It 'Find-Module command is available for dependency checks' {
-            Get-Command Find-Module -ErrorAction SilentlyContinue | Should -Not -Be $null
+        It 'Find-Module command is available for dependency checks when PowerShellGet is installed' {
+            if (-not (Get-Command Find-Module -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'Find-Module is not available on this runner'
+                return
+            }
+
+            Get-Command Find-Module | Should -Not -Be $null
         }
 
         It 'Get-Module command is available for dependency checks' {
@@ -159,12 +177,22 @@ Describe 'External Dependency Mocking' {
     }
 
     Context 'Mocking External Commands' {
-        It 'git command is available for repository checks' {
-            Get-Command git -ErrorAction SilentlyContinue | Should -Not -Be $null
+        It 'git command is available for repository checks when installed' {
+            if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'git is not available on this runner'
+                return
+            }
+
+            Get-Command git | Should -Not -Be $null
         }
 
-        It 'pwsh executable is available for script execution' {
-            Get-Command pwsh -ErrorAction SilentlyContinue | Should -Not -Be $null
+        It 'pwsh executable is available for script execution when installed' {
+            if (-not (Get-Command pwsh -ErrorAction SilentlyContinue)) {
+                Set-ItResult -Skipped -Because 'pwsh is not available on this runner'
+                return
+            }
+
+            Get-Command pwsh | Should -Not -Be $null
         }
     }
 

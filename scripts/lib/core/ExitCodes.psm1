@@ -104,12 +104,12 @@ function Exit-WithCode {
         Write-Output $Message
     }
 
-    if ($ErrorRecord) {
-        Write-Error $ErrorRecord
-    }
-
+    # In test mode, throw before Write-Error so a session ErrorActionPreference of
+    # Stop cannot turn the diagnostic Write-Error into the sole terminating path
+    # (or suppress the intended rethrow when callers assert on the exception).
     if ($env:PS_PROFILE_TEST_MODE -eq '1') {
         if ($ErrorRecord) {
+            Write-Error -ErrorRecord $ErrorRecord -ErrorAction Continue
             throw $ErrorRecord
         }
 
@@ -120,6 +120,10 @@ function Exit-WithCode {
 
         # Success exits are safe when invoked via `& script.ps1` and avoid false throws in callers.
         exit 0
+    }
+
+    if ($ErrorRecord) {
+        Write-Error $ErrorRecord
     }
 
     exit $exitCodeInt

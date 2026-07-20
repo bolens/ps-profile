@@ -4,6 +4,7 @@
 # ===============================================
 
 $script:OriginalTestCachedCommand = $null
+$script:StubbedTestCachedCommand = $null
 $script:TestCachedCommandStubInstalled = $false
 
 <#
@@ -11,13 +12,19 @@ $script:TestCachedCommandStubInstalled = $false
     Installs a function wrapper for Test-CachedCommand that honors availability overrides.
 #>
 function Register-TestCommandAvailabilityStub {
-    if ($script:TestCachedCommandStubInstalled) {
-        return
-    }
-
     $existing = Get-Command Test-CachedCommand -ErrorAction SilentlyContinue
     if (-not $existing -or $existing.CommandType -ne 'Function') {
         return
+    }
+
+    # Bootstrap/profile often redefines Test-CachedCommand; re-wrap when that happens.
+    if ($script:TestCachedCommandStubInstalled -and $script:StubbedTestCachedCommand) {
+        $currentBlock = $existing.ScriptBlock
+        if ($currentBlock -eq $script:StubbedTestCachedCommand) {
+            return
+        }
+        $script:OriginalTestCachedCommand = $currentBlock
+        $script:TestCachedCommandStubInstalled = $false
     }
 
     if (-not $script:OriginalTestCachedCommand) {
@@ -38,14 +45,18 @@ function Register-TestCommandAvailabilityStub {
             $actualName = $args[0]
         }
 
-        if (-not [string]::IsNullOrWhiteSpace($actualName) -and $global:TestCommandAvailabilityOverrides) {
-            $trimmed = $actualName.Trim()
-            $lower = $trimmed.ToLowerInvariant()
-            if ($global:TestCommandAvailabilityOverrides.ContainsKey($trimmed)) {
-                return [bool]$global:TestCommandAvailabilityOverrides[$trimmed]
-            }
-            if ($global:TestCommandAvailabilityOverrides.ContainsKey($lower)) {
-                return [bool]$global:TestCommandAvailabilityOverrides[$lower]
+        if (-not [string]::IsNullOrWhiteSpace($actualName)) {
+            $overrideTable = Get-Variable -Name 'TestCommandAvailabilityOverrides' -Scope Global -ErrorAction SilentlyContinue
+            if ($null -ne $overrideTable -and $null -ne $overrideTable.Value) {
+                $trimmed = $actualName.Trim()
+                $lower = $trimmed.ToLowerInvariant()
+                $overrides = $overrideTable.Value
+                if ($overrides.ContainsKey($trimmed)) {
+                    return [bool]$overrides[$trimmed]
+                }
+                if ($overrides.ContainsKey($lower)) {
+                    return [bool]$overrides[$lower]
+                }
             }
         }
 
@@ -57,6 +68,7 @@ function Register-TestCommandAvailabilityStub {
     }.GetNewClosure()
 
     Set-Item -Path 'Function:\global:Test-CachedCommand' -Value $wrapper -Force -ErrorAction SilentlyContinue
+    $script:StubbedTestCachedCommand = $wrapper
     $script:TestCachedCommandStubInstalled = $true
 }
 
@@ -76,6 +88,7 @@ function Clear-TestCommandAvailabilityStub {
         Set-Item -Path 'Function:\global:Test-CachedCommand' -Value $script:OriginalTestCachedCommand -Force -ErrorAction SilentlyContinue
     }
 
+    $script:StubbedTestCachedCommand = $null
     $script:TestCachedCommandStubInstalled = $false
 }
 
@@ -144,10 +157,6 @@ function Set-TestCommandAvailabilityState {
         Remove-Item -Path "Alias:\$normalized" -Force -ErrorAction SilentlyContinue
         Remove-Item -Path "Alias:\global:$normalized" -Force -ErrorAction SilentlyContinue
         [void]$global:TestRegisteredMockCommands.Remove($normalized)
-    }
-
-    if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-        Clear-TestCachedCommandCache | Out-Null
     }
 
     $null = $global:TestCachedCommandCache.TryRemove($cacheKey, [ref]$removed)

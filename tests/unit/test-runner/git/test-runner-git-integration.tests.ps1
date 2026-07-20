@@ -31,12 +31,14 @@ Describe 'TestGitIntegration Module' {
                 return
             }
 
-            $result = Get-GitChangedFiles -RepoRoot $script:TestRepoRoot
-            $result | Should -Not -BeNullOrEmpty
-            @($result).GetType().Name | Should -BeIn @('Object[]', 'String[]')
+            # Clean CI checkouts often have no porcelain changes; still return a typed array.
+            $result = @(Get-GitChangedFiles -RepoRoot $script:TestRepoRoot)
+            $null -eq $result | Should -BeFalse
+            $result.GetType().Name | Should -BeIn @('Object[]', 'String[]')
         }
 
         It 'Returns empty array outside a git repository' {
+            try {
             if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
                 Set-ItResult -Skipped -Because 'git is not available'
                 return
@@ -45,9 +47,10 @@ Describe 'TestGitIntegration Module' {
             $tempDir = New-TestTempDirectory -Prefix 'NoGitRepo'
                         $result = Get-GitChangedFiles -RepoRoot $tempDir
             $result | Should -Be @()
-        }
-        finally {
-            Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            finally {
+                Remove-Item -LiteralPath $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+            }
         }
 
         It 'Includes untracked files when requested' {
@@ -87,6 +90,18 @@ Describe 'TestGitIntegration Module' {
             if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
                 Set-ItResult -Skipped -Because 'git is not available'
                 return
+            }
+
+            Push-Location $script:TestRepoRoot
+            try {
+                $headParent = git rev-parse --verify HEAD~1 2>$null
+                if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($headParent)) {
+                    Set-ItResult -Skipped -Because 'Repository checkout has no HEAD~1 (shallow clone)'
+                    return
+                }
+            }
+            finally {
+                Pop-Location -ErrorAction SilentlyContinue
             }
 
             $result = Get-GitChangedFilesSince -Since 'HEAD~1' -RepoRoot $script:TestRepoRoot
