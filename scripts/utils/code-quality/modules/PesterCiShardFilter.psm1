@@ -380,8 +380,9 @@ function Resolve-PesterCiShards {
         })
 
     if ($files.Count -eq 0) {
-        # Unary comma preserves empty [string[]] (bare `return @()` unwraps to $null).
-        return , [string[]]@()
+        # Emit nothing so call-site `@()` is a true empty array (Count 0).
+        # Unary-comma / -NoEnumerate empty [string[]] still becomes @('') under `@()`.
+        return
     }
 
     foreach ($ruleName in $rules.Keys) {
@@ -406,7 +407,7 @@ function Resolve-PesterCiShards {
 
     $ordered = [string[]]@($shards | Sort-Object)
     if ($ordered.Count -eq 0) {
-        return , [string[]]@()
+        return
     }
     return $ordered
 }
@@ -421,6 +422,8 @@ function Get-PesterCiShardMatrix {
     param(
         [Parameter(Mandatory)]
         [AllowEmptyCollection()]
+        [AllowEmptyString()]
+        [AllowNull()]
         [string[]]$Shards
     )
 
@@ -428,7 +431,13 @@ function Get-PesterCiShardMatrix {
     $archShards = @(Get-PesterCiArchShards)
     $include = [System.Collections.Generic.List[object]]::new()
 
-    foreach ($shard in ($Shards | Sort-Object -Unique)) {
+    # Empty `@()` / `$null` / `''` can arrive from GHA when no shards match changed paths.
+    $shardNames = @(
+        $Shards |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+            Sort-Object -Unique
+    )
+    foreach ($shard in $shardNames) {
         # Performance shards are Windows-only (historically flaky / slow on Ubuntu).
         if ($shard -notlike 'performance*') {
             $include.Add([pscustomobject]@{
