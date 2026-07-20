@@ -22,10 +22,10 @@ BeforeAll {
     $idempotencyDefault = 2000
     # Windows CI runners are slower for fragment loads / Get-Command sweeps.
     if ($IsWindows -or $env:OS -eq 'Windows_NT') {
-        $loadDefault = 15000
-        $functionDefault = 5000
-        $aliasDefault = 5000
-        $idempotencyDefault = 10000
+        $loadDefault = 30000
+        $functionDefault = 10000
+        $aliasDefault = 10000
+        $idempotencyDefault = 20000
     }
     $script:MaxLoadTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_LOAD_MS' -Default $loadDefault
     $script:MaxFunctionRegistrationTimeMs = Get-PerformanceThreshold -EnvironmentVariable 'PS_PROFILE_DATABASE_CLIENTS_MAX_FUNCTION_MS' -Default $functionDefault

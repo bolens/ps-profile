@@ -178,6 +178,13 @@ Describe 'asdf Tools Integration Tests' {
         }
 
         It 'Emits missing-tool warning when asdf is unavailable' {
+            if (Get-Command Test-ToolAvailableOnPlatform -ErrorAction SilentlyContinue) {
+                if (-not (Test-ToolAvailableOnPlatform -Tool 'asdf')) {
+                    Set-ItResult -Inconclusive -Because 'asdf install hints are only emitted on Linux/macOS'
+                    return
+                }
+            }
+
             Assert-TestMissingToolWarning -Output $script:MissingAsdfOutput -Pattern 'asdf not found'
             Assert-TestOutputContainsInstallCommand -Output $script:MissingAsdfOutput -ToolName 'asdf'
         }

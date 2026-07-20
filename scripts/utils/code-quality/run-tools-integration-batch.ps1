@@ -24,6 +24,10 @@
     Optional case-insensitive regex matched against each test file basename
     (e.g. '^[0-9a-d]' for CI shard splits).
 
+.PARAMETER PerFileTimeoutSeconds
+    Abort each PerFile run-pester process after this many seconds (default: 600).
+    Prevents a single hung file from burning the full 90m CI job timeout.
+
 .EXAMPLE
     pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1
 
@@ -39,7 +43,10 @@ param(
 
     [switch]$Quiet,
 
-    [string]$NamePattern = ''
+    [string]$NamePattern = '',
+
+    [ValidateRange(0, 7200)]
+    [int]$PerFileTimeoutSeconds = 600
 )
 
 $toolsRoot = Join-Path $RepoRoot 'tests' 'integration' 'tools'
@@ -146,6 +153,10 @@ function New-BatchRunnerArgs {
         $args += '-TestResultPath'
         $args += $ResultPath
     }
+    if ($PerFileTimeoutSeconds -gt 0) {
+        $args += '-Timeout'
+        $args += $PerFileTimeoutSeconds
+    }
     return $args
 }
 
@@ -243,7 +254,17 @@ foreach ($file in $files) {
     if ($stats.Failed -lt 0) {
         $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $fileResultDir
     }
+    if ($run.ExitCode -ne 0 -and $stats.Failed -le 0) {
+        $stats = [pscustomobject]@{
+            Passed  = [Math]::Max(0, $stats.Passed)
+            Failed  = 1
+            Skipped = [Math]::Max(0, $stats.Skipped)
+        }
+    }
     $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $fileResultDir)
+    if ($run.ExitCode -ne 0 -and $failLines.Count -eq 0 -and $run.Output -match 'timed out') {
+        $failLines = @("Timed out after ${PerFileTimeoutSeconds}s")
+    }
 
     $results += [pscustomobject]@{
         File     = $relName
@@ -252,7 +273,7 @@ foreach ($file in $files) {
         Skipped  = $stats.Skipped
     }
 
-    $color = if ($stats.Failed -gt 0 -or ($stats.Failed -lt 0 -and $run.ExitCode -ne 0)) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
+    $color = if ($stats.Failed -gt 0) { 'Red' } elseif ($stats.Passed -ge 0) { 'Green' } else { 'Yellow' }
     Write-Host "  $($stats.Passed)P / $($stats.Failed)F / $($stats.Skipped)S" -ForegroundColor $color
     if ($failLines.Count -gt 0) {
         $failLines | Select-Object -First 5 | ForEach-Object {

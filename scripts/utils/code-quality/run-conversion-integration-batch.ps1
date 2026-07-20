@@ -29,6 +29,10 @@
     (e.g. '^[a-m]' for CI shard splits). When set, runs use -PerFile isolation
     (staging under test-artifacts is unsafe because Remove-TestArtifacts wipes it).
 
+.PARAMETER PerFileTimeoutSeconds
+    Abort each PerFile run-pester process after this many seconds (default: 600).
+    Prevents a single hung file from burning the full 90m CI job timeout.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1 -RelativePath data/structured
 
@@ -47,7 +51,10 @@ param(
     [ValidateRange(0, 100)]
     [int]$Parallel = 0,
 
-    [string]$NamePattern = ''
+    [string]$NamePattern = '',
+
+    [ValidateRange(0, 7200)]
+    [int]$PerFileTimeoutSeconds = 600
 )
 
 $conversionRoot = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
@@ -202,6 +209,10 @@ function New-BatchRunnerArgs {
         $args += '-TestResultPath'
         $args += $ResultPath
     }
+    if ($PerFileTimeoutSeconds -gt 0) {
+        $args += '-Timeout'
+        $args += $PerFileTimeoutSeconds
+    }
     return $args
 }
 
@@ -305,7 +316,18 @@ foreach ($file in $files) {
     if ($stats.Failed -lt 0) {
         $stats = Get-PesterRunStats -Output $run.Output -ResultXmlPath $fileResultDir
     }
+    # Timeout / crash: no Pester summary — treat non-zero exit as a failure so the batch fails.
+    if ($run.ExitCode -ne 0 -and $stats.Failed -le 0) {
+        $stats = [pscustomobject]@{
+            Passed  = [Math]::Max(0, $stats.Passed)
+            Failed  = 1
+            Skipped = [Math]::Max(0, $stats.Skipped)
+        }
+    }
     $failLines = @(Get-PesterFailureLines -Output $run.Output -ResultXmlPath $fileResultDir)
+    if ($run.ExitCode -ne 0 -and $failLines.Count -eq 0 -and $run.Output -match 'timed out') {
+        $failLines = @("Timed out after ${PerFileTimeoutSeconds}s")
+    }
 
     $results += [pscustomobject]@{
         File     = $relName

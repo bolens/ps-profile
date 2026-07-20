@@ -131,10 +131,48 @@ function Get-PesterCiShardDefinitions {
     'unit-profile-conversion'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/conversion') }
     'unit-profile-core-lang'     = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/lang'); MaxParallelThreads = 1 }
     'unit-profile-core-files'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/files'); MaxParallelThreads = 1 }
-    # bootstrap/main stay serial (shared globals) but are separate jobs so neither
-    # alone approaches the 90m job timeout (~20–40 files each).
+    # bootstrap stays serial; main loader-extended files take ~7–10 min each, so
+    # split into ~5-file shards (~40–50m) to stay under the 90m job timeout.
     'unit-profile-core-bootstrap' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/bootstrap'); MaxParallelThreads = 1 }
-    'unit-profile-core-main'     = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/main'); MaxParallelThreads = 1 }
+    'unit-profile-core-main-a'   = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
+        'tests/unit/profile/main/loader/profile-main-loader-common-enums-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-debug-setup-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-discovery-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-env-display-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-extended.tests.ps1'
+      )
+    }
+    'unit-profile-core-main-b'   = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
+        'tests/unit/profile/main/loader/profile-main-loader-fallback-loading-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-fragment-config-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-fragment-timing-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-fragments-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-host-check-extended.tests.ps1'
+      )
+    }
+    'unit-profile-core-main-c'   = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
+        'tests/unit/profile/main/loader/profile-main-loader-noprofile-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-prompt-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-psreadline-deferred-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-scoop-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-startup-logging-extended.tests.ps1'
+      )
+    }
+    'unit-profile-core-main-d'   = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
+        'tests/unit/profile/main/loader/profile-main-loader-startup-summary-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-test-env-bool-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-testpath-interception-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-version-extended.tests.ps1'
+      )
+    }
     'unit-profile-core-git-util-sys' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/git', 'tests/unit/profile/utilities', 'tests/unit/profile/system'); MaxParallelThreads = 1 }
     'unit-profile-infra'         = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $unitProfileInfra; MaxParallelThreads = 1 }
     'unit-profile-misc-a'        = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = $miscA; MaxParallelThreads = 1 }

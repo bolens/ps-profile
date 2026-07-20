@@ -19,7 +19,10 @@ function Get-PesterCiFilterRules {
         'unit-profile-core-lang'
         'unit-profile-core-files'
         'unit-profile-core-bootstrap'
-        'unit-profile-core-main'
+        'unit-profile-core-main-a'
+        'unit-profile-core-main-b'
+        'unit-profile-core-main-c'
+        'unit-profile-core-main-d'
         'unit-profile-core-git-util-sys'
     )
     $integrationToolsShards = @(
@@ -225,7 +228,8 @@ function Get-PesterCiAllShards {
         'unit-library', 'unit-utility', 'unit-test-runner', 'unit-support'
         'unit-profile-conversion'
         'unit-profile-core-lang', 'unit-profile-core-files'
-        'unit-profile-core-bootstrap', 'unit-profile-core-main', 'unit-profile-core-git-util-sys'
+        'unit-profile-core-bootstrap', 'unit-profile-core-main-a', 'unit-profile-core-main-b'
+        'unit-profile-core-main-c', 'unit-profile-core-main-d', 'unit-profile-core-git-util-sys'
         'unit-profile-infra'
         'unit-profile-misc-a', 'unit-profile-misc-b'
         'integration-tools-ab', 'integration-tools-c', 'integration-tools-d'
@@ -250,7 +254,8 @@ function Get-PesterCiWindowsShards {
     return @(
         'unit-library'
         'unit-profile-core-lang', 'unit-profile-core-files'
-        'unit-profile-core-bootstrap', 'unit-profile-core-main', 'unit-profile-core-git-util-sys'
+        'unit-profile-core-bootstrap', 'unit-profile-core-main-a', 'unit-profile-core-main-b'
+        'unit-profile-core-main-c', 'unit-profile-core-main-d', 'unit-profile-core-git-util-sys'
         'integration-tools-ab', 'integration-tools-c', 'integration-tools-d'
         'integration-tools-eh', 'integration-tools-il', 'integration-tools-m', 'integration-tools-s'
         'integration-core'

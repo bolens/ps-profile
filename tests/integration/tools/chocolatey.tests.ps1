@@ -460,21 +460,22 @@ Describe 'Chocolatey Tools Integration Tests' {
             Remove-Item Function:global:choco -ErrorAction SilentlyContinue
             Set-TestCommandAvailabilityState -CommandName 'choco' -Available $false
 
-            @(
+            # Remove session + global function drive entries left by the available Context
+            # (plain Remove-Item Function:$_ leaves Function:\global:Name on Windows).
+            Remove-TestFunction -Name @(
                 'Install-ChocoPackage', 'Remove-ChocoPackage', 'Update-ChocoPackages',
                 'Test-ChocoOutdated', 'Update-ChocoSelf', 'Clear-ChocoCache',
                 'Find-ChocoPackage', 'Get-ChocoPackage', 'Get-ChocoPackageInfo',
                 'Export-ChocoPackages', 'Import-ChocoPackages'
-            ) | ForEach-Object {
-                Remove-Item "Function:$_" -ErrorAction SilentlyContinue
-            }
+            )
 
             $output = & { . (Join-Path $script:ProfileDir 'chocolatey.ps1') } 2>&1 3>&1 | Out-String
             $script:MissingChocoOutput = $output
         }
 
         It 'Functions are not created when choco is unavailable' {
-            Get-Command Install-ChocoPackage -ErrorAction SilentlyContinue | Should -BeNullOrEmpty
+            Get-Command Install-ChocoPackage -CommandType Function -ErrorAction SilentlyContinue |
+                Should -BeNullOrEmpty
         }
 
         It 'Emits missing-tool warning when choco is unavailable' {

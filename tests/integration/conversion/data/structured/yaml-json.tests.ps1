@@ -10,19 +10,14 @@
 
 Describe 'YAML and JSON Conversion Integration Tests' {
     BeforeAll {
-        $testSupportPath = Get-TestSupportPath -StartPath $PSScriptRoot
-        if (-not (Test-Path -LiteralPath $testSupportPath)) {
-            throw "TestSupport file not found at: $testSupportPath"
-        }
-        . $testSupportPath
-
+        # TestSupport is loaded by the runner; do not re-dot-source here (resets
+        # FileConversionDataInitialized and can hang under CommandDispatcher).
         $script:ProfileDir = Get-TestPath -RelativePath 'profile.d' -StartPath $PSScriptRoot -EnsureExists
         Initialize-ConversionIntegration `
             -ProfileDir $script:ProfileDir `
             -ModuleType 'Data' `
             -SelectiveModules @('yaml.ps1', 'json.ps1') `
             -EnsureData
-
     }
 
     Context 'YAML conversion utilities' {

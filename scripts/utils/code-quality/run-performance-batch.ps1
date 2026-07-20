@@ -157,7 +157,7 @@ foreach ($file in $files) {
         $failureLines = @(
             $output -split "`n" |
                 Where-Object {
-                    $_ -match '^\s*\[-(FAIL|ERROR)\]|Expected:|But was:|Because:|ErrorMessage|CommandNotFoundException|RuntimeException|at\s+.+\.tests\.ps1:'
+                    $_ -match '^\s*\[-(FAIL|ERROR)\]|Expected:|But was:|Because:|ErrorMessage|CommandNotFoundException|RuntimeException|at\s+.+\.tests\.ps1:|BeLessThan|less than|greater than'
                 } |
                 Select-Object -First 40
         )

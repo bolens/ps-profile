@@ -699,6 +699,7 @@
     "noninteractive",
     "nonly",
     "nopass",
+    "noprofile",
     "nostrud",
     "notcontains",
     "notin",
