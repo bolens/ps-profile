@@ -1,3 +1,13 @@
+## [1.10.11] - 2026-07-20
+
+### 🐛 Bug Fixes
+
+- *(ci)* Align CodeQL with actions-only analysis (#41)
+
+### ⚙️ Miscellaneous Tasks
+
+- *(deps)* Bump actions/setup-node from 6 to 7 (#40)
+- Add Arch Linux coverage with shared Dev Containers (#35)
 ## [1.10.10] - 2026-07-20
 
 ### 🐛 Bug Fixes
@@ -15,6 +25,7 @@
 - *(deps)* Bump pnpm/action-setup from 4 to 6
 - *(deps)* Bump actions/checkout from 4 to 6
 - *(deps)* Bump actions/github-script from 8 to 9
+- *(release)* 1.10.10 [skip ci]
 ## [1.10.9] - 2026-06-14
 
 ### 🐛 Bug Fixes
