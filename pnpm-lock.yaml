@@ -58,8 +58,8 @@ importers:
         specifier: ^2.2.6
         version: 2.2.6
       thrift:
-        specifier: ^0.23.0
-        version: 0.23.0
+        specifier: ^0.24.0
+        version: 0.24.0
       ubjson:
         specifier: ^0.0.8
         version: 0.0.8
@@ -1084,6 +1084,10 @@ packages:
     resolution: {integrity: sha512-j7F1ls8JogClU88Ta/pwD/OzYuiFeD6Z5GoWw7ip+jcDhcNYFKgfXYEsyLXYpiNfJO94fbLnITGxyfZ19YzA6Q==}
     engines: {node: '>= 10.18.0'}
 
+  thrift@0.24.0:
+    resolution: {integrity: sha512-v9eU1uxWXQ8+4hESZaXlwUBB89TDBM1Q0/EBs1uTg639Zi5qONoiX6mW68NGRoVeEbe4XhmIweB3rR8UMxP1jA==}
+    engines: {node: '>= 10.18.0'}
+
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -1137,11 +1141,23 @@ packages:
     resolution: {integrity: sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==}
     engines: {node: '>=8'}
 
-  ws@5.2.5:
-    resolution: {integrity: sha512-G0gACQIjFmv7NqpaOAXEpe9nEtRYD6ZCy2Ip/B4EzR08qEwnf/wYJoQd3cjosPdnJsHkeh0j2tzOaIBZIOC1yA==}
+  ws@5.2.7:
+    resolution: {integrity: sha512-Yp1RXz/2h2qC/Gy7d5mqQcpuCWbXiO6FgYw/jTbSvytZF9wD7fh7od+6WzWR/y9EAnXcJjQZpPkYVmj3T2bj+Q==}
     peerDependencies:
       bufferutil: ^4.0.1
       utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
+  ws@8.21.1:
+    resolution: {integrity: sha512-+0NTnW77fFN/DjQi6k/Sq/Yvk4Sgajw7urW8V+asjXnRgDs9gyGkdb7EzgfhA4goXsRIZKE28fzIXBHEzhuiWw==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
     peerDependenciesMeta:
       bufferutil:
         optional: true
@@ -1745,9 +1761,13 @@ snapshots:
 
   is-what@5.5.0: {}
 
-  isomorphic-ws@4.0.1(ws@5.2.5):
+  isomorphic-ws@4.0.1(ws@5.2.7):
     dependencies:
-      ws: 5.2.5
+      ws: 5.2.7
+
+  isomorphic-ws@4.0.1(ws@8.21.1):
+    dependencies:
+      ws: 8.21.1
 
   js-yaml@5.2.2:
     dependencies:
@@ -2193,11 +2213,22 @@ snapshots:
   thrift@0.23.0:
     dependencies:
       browser-or-node: 1.3.0
-      isomorphic-ws: 4.0.1(ws@5.2.5)
+      isomorphic-ws: 4.0.1(ws@5.2.7)
       node-int64: 0.4.0
       q: 1.5.1
       uuid: 13.0.2
-      ws: 5.2.5
+      ws: 5.2.7
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  thrift@0.24.0:
+    dependencies:
+      browser-or-node: 1.3.0
+      isomorphic-ws: 4.0.1(ws@8.21.1)
+      node-int64: 0.4.0
+      uuid: 14.0.1
+      ws: 8.21.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -2242,9 +2273,11 @@ snapshots:
       string-width: 4.2.3
       strip-ansi: 6.0.1
 
-  ws@5.2.5:
+  ws@5.2.7:
     dependencies:
       async-limiter: 1.0.1
+
+  ws@8.21.1: {}
 
   xdg-basedir@5.1.0: {}
 
