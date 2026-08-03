@@ -83,8 +83,8 @@ importers:
         specifier: ^1.1.22
         version: 1.1.22
       '@cspell/dict-en-ca':
-        specifier: ^1.0.60
-        version: 1.0.60
+        specifier: ^1.0.61
+        version: 1.0.61
       '@cspell/dict-en-gb-ise':
         specifier: ^1.0.29
         version: 1.0.29
@@ -198,8 +198,8 @@ packages:
   '@cspell/dict-en-au@1.1.22':
     resolution: {integrity: sha512-HrRSwGR4GMQgXWvjzcueIS7taU+Tlf3mQo2iuZoevHRh43gB5JYHnKlUaC7oaSMsjtSyZv9DBvv2eh04gjy5ag==}
 
-  '@cspell/dict-en-ca@1.0.60':
-    resolution: {integrity: sha512-9U3a5xSRwlJYURPsCO0a9vCo5X3NFpjjHM1zbChbxCaopDXAzddBa5eyNQq3K1jdHMT+GTZG0enmlyooPQjCBg==}
+  '@cspell/dict-en-ca@1.0.61':
+    resolution: {integrity: sha512-/F5ubpNR085gBYKuH5AzIZZVrUhMcqsLXlm8H0K9PLbofQrp90pY/pXhLEz6LlupauKH6RqbHDs7CnJawYoDmA==}
 
   '@cspell/dict-en-common-misspellings@2.1.12':
     resolution: {integrity: sha512-14Eu6QGqyksqOd4fYPuRb58lK1Va7FQK9XxFsRKnZU8LhL3N+kj7YKDW+7aIaAN/0WGEqslGP6lGbQzNti8Akw==}
@@ -1286,7 +1286,7 @@ snapshots:
 
   '@cspell/dict-en-au@1.1.22': {}
 
-  '@cspell/dict-en-ca@1.0.60': {}
+  '@cspell/dict-en-ca@1.0.61': {}
 
   '@cspell/dict-en-common-misspellings@2.1.12': {}
 
