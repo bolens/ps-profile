@@ -65,8 +65,6 @@ $issues = New-ObjectList
 
 # Get compiled regex patterns from RegexUtilities module
 $patterns = Get-CommonRegexPatterns
-$exitPattern = $patterns['ExitCall']
-$exitVariablePattern = $patterns['ExitVariable']
 $commonImportPattern = $patterns['ImportModule']
 
 # Get all PowerShell scripts using helper function and filter with FileFiltering module
@@ -80,25 +78,36 @@ foreach ($script in $scripts) {
     # Use PathUtilities module for relative path calculation
     $relativePath = Get-RelativePath -From $Path -To $script.FullName
 
-    # Check 1: Direct exit calls (excluding exit 0/1 in generated hook scripts)
-    $exitMatches = $exitPattern.Matches($content)
-    foreach ($match in $exitMatches) {
-        $exitCode = $match.Groups[1].Value
-        # Allow exit 0/1 in git hook templates (they're generating shell scripts)
-        if ($script.FullName -match 'install.*hook' -and ($exitCode -eq '0' -or $exitCode -eq '1')) {
-            # Check if it's in a here-string (template generation)
-            $lineNum = ($content.Substring(0, $match.Index) -split "`n").Count
-            $context = ($content -split "`n")[$lineNum - 1]
-            if ($context -match '@"|@"|@''|@''') {
-                continue  # It's in a template string, which is OK
-            }
+    # Check 1: Direct exit statements. AST parsing avoids false positives from
+    # comments, documentation, regex patterns, and generated hook here-strings.
+    $parseTokens = $null
+    $parseErrors = $null
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+        $script.FullName,
+        [ref]$parseTokens,
+        [ref]$parseErrors
+    )
+    $exitStatements = @($ast.FindAll({
+                param($node)
+                $node.GetType().Name -eq 'ExitStatementAst'
+            }, $true))
+
+    foreach ($exitStatement in $exitStatements) {
+        # Exit-WithCode is the single abstraction allowed to terminate a process.
+        # Its implementation necessarily contains PowerShell's exit statement.
+        $owner = $exitStatement.Parent
+        while ($owner -and $owner.GetType().Name -ne 'FunctionDefinitionAst') {
+            $owner = $owner.Parent
         }
-        
+        if ($owner -and $owner.Name -like '*Exit-WithCode') {
+            continue
+        }
+
         $issues.Add([PSCustomObject]@{
                 File     = $relativePath
-                Line     = ($content.Substring(0, $match.Index) -split "`n").Count
+                Line     = $exitStatement.Extent.StartLineNumber
                 Issue    = 'Direct exit call'
-                Message  = "Found 'exit $exitCode' - use Exit-WithCode instead"
+                Message  = "Found '$($exitStatement.Extent.Text)' - use Exit-WithCode instead"
                 Severity = [SeverityLevel]::Warning
             })
     }
@@ -220,6 +229,4 @@ if ($issues.Count -gt 0) {
 else {
     Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All scripts comply with codebase standards"
 }
-
-
 

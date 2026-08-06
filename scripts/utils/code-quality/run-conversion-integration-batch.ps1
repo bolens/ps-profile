@@ -57,11 +57,15 @@ param(
     [int]$PerFileTimeoutSeconds = 600
 )
 
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
 $conversionRoot = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
 $testDir = Join-Path $conversionRoot $RelativePath
 if (-not (Test-Path -LiteralPath $testDir)) {
     Write-Error "Test directory not found: $testDir"
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
@@ -74,7 +78,7 @@ if (-not [string]::IsNullOrWhiteSpace($NamePattern)) {
 if ($files.Count -eq 0) {
     $hint = if ([string]::IsNullOrWhiteSpace($NamePattern)) { '' } else { " (NamePattern: $NamePattern)" }
     Write-Error "No *.tests.ps1 files under: $testDir$hint"
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 function Get-PesterRunStats {
@@ -338,11 +342,11 @@ if (-not $PerFile) {
     if ($batchFailed) {
         Write-Host "Batch failed: $label" -ForegroundColor Red
         Write-Host "Re-run with -PerFile to see which file failed." -ForegroundColor DarkGray
-        exit 1
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
     }
 
     Write-Host "All tests passed in batch: $label" -ForegroundColor Green
-    exit 0
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 Write-Host "Mode: per-file (slow)" -ForegroundColor DarkGray
@@ -400,8 +404,8 @@ $results | Format-Table -AutoSize
 $bad = @($results | Where-Object { $_.Failed -gt 0 })
 if ($bad.Count -gt 0) {
     Write-Host "Files with failures: $($bad.Count)" -ForegroundColor Red
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Write-Host "All tests passed in batch: $label" -ForegroundColor Green
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS

@@ -13,6 +13,10 @@
 
 $ErrorActionPreference = 'Stop'
 
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..')).Path
 $libPath = Join-Path $repoRoot 'scripts' 'lib'
 $testPath = Join-Path $repoRoot 'tests' 'unit'
@@ -111,7 +115,7 @@ else {
 }
 
 if ($missing.Count -gt 0) {
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS

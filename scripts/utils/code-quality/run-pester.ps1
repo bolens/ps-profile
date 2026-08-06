@@ -770,7 +770,7 @@ function Exit-WithCleanup {
         elseif ($Message) {
             Write-Host $Message -ForegroundColor Red
         }
-        exit $ExitCode
+        Exit-WithCode -ExitCode $ExitCode
     }
 }
 

@@ -31,6 +31,10 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..')).Path
 $docsApiRoot = Join-Path $repoRoot 'docs' 'api'
 $docsBase = Join-Path $repoRoot 'docs'
@@ -171,5 +175,5 @@ if ($failed.Count -gt 0) {
     Write-Host ''
     Write-Host 'Failures:'
     $failed | Select-Object -First 20 | ForEach-Object { Write-Host "  $_" }
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }

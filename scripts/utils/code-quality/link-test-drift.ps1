@@ -894,5 +894,5 @@ if ($failed.Count -gt 0) {
     Write-Host ''
     Write-Host 'Failures:'
     $failed | Select-Object -First 20 | ForEach-Object { Write-Host "  $_" }
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }

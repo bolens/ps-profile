@@ -42,6 +42,10 @@ param(
     [switch]$ListShards
 )
 
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ConfirmPreference = 'None'
@@ -216,7 +220,7 @@ function Invoke-PesterCiShardRunner {
   Write-Host ("Running: pwsh {0}" -f ($RunnerArgs -join ' ')) -ForegroundColor DarkGray
   & pwsh -NoProfile -NonInteractive @RunnerArgs
   if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
-    exit $LASTEXITCODE
+    Exit-WithCode -ExitCode $LASTEXITCODE
   }
 }
 
@@ -264,7 +268,7 @@ function Invoke-PesterShard {
   Write-Host ("Running: {0} -Suite {1} -Path ({2})" -f $runner, $Definition.Suite, ($paths -join ', ')) -ForegroundColor DarkGray
   & $runner @params
   if ($null -ne $LASTEXITCODE -and $LASTEXITCODE -ne 0) {
-    exit $LASTEXITCODE
+    Exit-WithCode -ExitCode $LASTEXITCODE
   }
 }
 
@@ -272,18 +276,18 @@ $definitions = Get-PesterCiShardDefinitions
 
 if ($ListShards) {
   $definitions.Keys | ForEach-Object { Write-Output $_ }
-  exit 0
+  Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 if ([string]::IsNullOrWhiteSpace($Shard)) {
   Write-Error 'Specify -Shard or use -ListShards.'
-  exit 2
+  Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 $normalizedShard = $Shard.Trim()
 if (-not $definitions.Contains($normalizedShard)) {
   Write-Error "Unknown CI shard '$normalizedShard'. Use -ListShards for valid names."
-  exit 2
+  Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 $definition = $definitions[$normalizedShard]
@@ -357,9 +361,9 @@ switch ($definition.Kind) {
   }
   default {
     Write-Error "Unsupported shard kind: $($definition.Kind)"
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
   }
 }
 
 Write-Host "CI shard passed: $normalizedShard" -ForegroundColor Green
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS

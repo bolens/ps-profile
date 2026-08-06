@@ -19,6 +19,10 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+$moduleImportPath = Join-Path $PSScriptRoot 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
 Write-Verbose 'repro_set_agentmode: starting'
 
 # Resolve repo root relative to this script
@@ -28,7 +32,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $bootstrapPath = Join-Path $repoRoot 'profile.d' 'bootstrap.ps1'
 if (-not (Test-Path -LiteralPath $bootstrapPath)) {
     Write-Error "Bootstrap file not found: $bootstrapPath"
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Write-Verbose "Sourcing bootstrap: $bootstrapPath"
@@ -37,11 +41,11 @@ Write-Verbose "Sourcing bootstrap: $bootstrapPath"
 # Verify the helpers are now available
 if (-not (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue)) {
     Write-Error 'Set-AgentModeFunction not available after sourcing bootstrap.ps1'
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 if (-not (Get-Command Set-AgentModeAlias -ErrorAction SilentlyContinue)) {
     Write-Error 'Set-AgentModeAlias not available after sourcing bootstrap.ps1'
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Write-Verbose 'Bootstrap helpers confirmed available'
@@ -52,7 +56,7 @@ Set-AgentModeFunction -Name 'Test-ReproFunc' -Body { param([string]$Val) $Val }
 
 if (-not (Get-Command Test-ReproFunc -ErrorAction SilentlyContinue)) {
     Write-Error 'Test-ReproFunc was not registered by Set-AgentModeFunction'
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 # Exercise alias registration idempotency
@@ -60,4 +64,4 @@ Set-AgentModeAlias -Name 'repro-test-alias' -Target 'Test-ReproFunc'
 Set-AgentModeAlias -Name 'repro-test-alias' -Target 'Test-ReproFunc'
 
 Write-Host 'repro_set_agentmode: PASSED' -ForegroundColor Green
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS

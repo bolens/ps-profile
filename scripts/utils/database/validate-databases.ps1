@@ -184,7 +184,7 @@ try {
         if ($OutputFormat -ieq 'Json') {
             $validationResults | ConvertTo-Json -Depth 10
         }
-        exit $EXIT_SUCCESS
+        Exit-WithCode -ExitCode $EXIT_SUCCESS
     }
     
     # Level 1: Database validation start
@@ -437,7 +437,7 @@ try {
         $EXIT_SETUP_ERROR
     }
     
-    exit $exitCode
+    Exit-WithCode -ExitCode $exitCode
 }
 catch {
     if (Get-Command Write-StructuredError -ErrorAction SilentlyContinue) {
@@ -449,5 +449,5 @@ catch {
         Write-Error "Validation failed: $($_.Exception.Message)"
         Write-Error $_.ScriptStackTrace
     }
-    exit $EXIT_RUNTIME_ERROR
+    Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR
 }

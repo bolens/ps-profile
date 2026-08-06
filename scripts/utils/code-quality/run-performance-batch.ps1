@@ -39,10 +39,14 @@ param(
     [switch]$Quiet
 )
 
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
 $perfRoot = Join-Path $RepoRoot 'tests' 'performance'
 if (-not (Test-Path -LiteralPath $perfRoot)) {
     Write-Error "Performance test directory not found: $perfRoot"
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
@@ -66,7 +70,7 @@ if ($files.Count -eq 0) {
     if (-not [string]::IsNullOrWhiteSpace($PathPattern)) { $hint += "PathPattern='$PathPattern'" }
     $suffix = if ($hint.Count -gt 0) { ' ({0})' -f ($hint -join ', ') } else { '' }
     Write-Error "No performance test files matched under: $perfRoot$suffix"
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 function Get-PesterRunStats {
@@ -180,8 +184,8 @@ if ($bad.Count -gt 0) {
     if ($skippedOnly.Count -gt 0) {
         Write-Host "Files skipped only: $($skippedOnly.Count)" -ForegroundColor DarkGray
     }
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Write-Host "All tests passed in batch: $label" -ForegroundColor Green
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS
