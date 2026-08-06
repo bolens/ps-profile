@@ -319,8 +319,24 @@ tasks:
       - pwsh -NoProfile -File scripts/utils/metrics/track-coverage-trends.ps1
 
   quality-check:
-    desc: Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests + function naming + drift)
-    deps: [format, security-scan, lint, spellcheck, markdownlint, check-comment-help, test, validate-function-naming, drift-check]
+    desc: Full repository quality gate
+    deps:
+      - format
+      - security-scan
+      - lint
+      - spellcheck
+      - markdownlint
+      - validate
+      - check-comment-help
+      - check-doc-coverage
+      - check-doc-freshness
+      - check-script-standards
+      - check-missing-tests
+      - validate-dependencies
+      - check-task-parity
+      - test
+      - validate-function-naming
+      - drift-check
     cmds:
       - echo "All quality checks passed"
 

@@ -17,6 +17,7 @@
 .PHONY: install-all install-all-global install-all-local install-js-global install-js-local install-python-global install-python-local install-scoop
 .PHONY: db-health db-statistics db-optimize db-backup db-repair db-validate db-validate-full db-init
 .PHONY: clear-fragment-cache build-fragment-cache validate-fragment-cache
+.PHONY: test-changed-shards test-ci-shard pre-push-checks
 
 lint: ## Lint profile.d
 	pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1
@@ -47,6 +48,15 @@ test-performance: ## Run performance test suite
 
 test-coverage: ## Run Pester tests with coverage
 	pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel $(ARGS)
+
+test-changed-shards: ## Run CI shards affected by current changes
+	pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 $(ARGS)
+
+test-ci-shard: ## Run one explicit CI shard
+	pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 $(ARGS)
+
+pre-push-checks: ## Run pre-push validation and changed CI shards
+	pwsh -NoProfile -File scripts/git/hooks/pre-push.ps1 $(ARGS)
 
 benchmark: ## Run startup performance benchmark
 	pwsh -NoProfile -File scripts/utils/metrics/benchmark-startup.ps1
@@ -162,7 +172,7 @@ save-metrics-snapshot: ## Save metrics snapshot
 track-coverage-trends: ## Track test coverage trends over time
 	pwsh -NoProfile -File scripts/utils/metrics/track-coverage-trends.ps1
 
-quality-check: format security-scan lint spellcheck markdownlint check-comment-help test validate-function-naming ## Full quality check (format + security + lint + spellcheck + markdownlint + help + tests + naming)
+quality-check: format security-scan lint spellcheck markdownlint validate check-comment-help check-doc-coverage check-doc-freshness check-script-standards check-missing-tests validate-dependencies check-task-parity test validate-function-naming drift-check ## Full repository quality gate
 	@echo "All quality checks passed"
 
 pre-commit-checks: ## Run pre-commit checks

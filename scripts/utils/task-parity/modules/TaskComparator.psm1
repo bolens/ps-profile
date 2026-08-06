@@ -133,10 +133,15 @@ function Normalize-Command {
     # Makefile: $(ARGS)
     # Justfile: *ARGS parameter with {{ ARGS }}
     # package.json: (no args)
-    $normalized = $normalized -replace '\{\{\.CLI_ARGS\}\}', '{{ARGS}}'
+    $normalized = $normalized -replace '\{\{\s*\.CLI_ARGS\s*\}\}', '{{ARGS}}'
     $normalized = $normalized -replace '\$\(ARGS\)', '{{ARGS}}'
     $normalized = $normalized -replace '\{\{arguments\(\)\}\}', '{{ARGS}}'
-    $normalized = $normalized -replace '\$\{workspaceFolder\}[\\/]', '${workspaceFolder}/'
+    $normalized = $normalized -replace '\{\{\s*ARGS\s*\}\}', '{{ARGS}}'
+    $normalized = $normalized -replace '\$\{workspaceFolder\}[\\/]', ''
+    # Package scripts cannot forward runner-specific optional arguments, so a
+    # trailing placeholder is not part of a task's semantic command.
+    $normalized = $normalized -replace '\s+\{\{ARGS\}\}$', ''
+    $normalized = $normalized -replace '\s*&&\s*', ' '
 
     if (Get-Command Normalize-TaskScriptPathInText -ErrorAction SilentlyContinue) {
         $normalized = Normalize-TaskScriptPathInText -Text $normalized

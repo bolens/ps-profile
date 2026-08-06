@@ -109,6 +109,7 @@ function Get-TasksFromTaskfile {
     $lines = Get-Content -Path $FilePath
     $currentTask = $null
     $currentDesc = $null
+    $pendingDesc = $null
     $inCmds = $false
     $inDeps = $false
     $inTasksSection = $false
@@ -441,11 +442,16 @@ function Get-TasksFromJustfile {
         }
         
         # Check for comment description (before task)
-        if ($trimmed.StartsWith('#') -and -not $trimmed.StartsWith('##')) {
-            $currentDesc = $trimmed.TrimStart('#').TrimStart()
+        if ($line -match '^#(?!#)\s*(.*)$') {
+            $pendingDesc = $matches[1].Trim()
         }
-        # Check for task definition (task-name: or task-name dependency1 dependency2:)
-        elseif ($trimmed -match '^([a-zA-Z0-9_-]+)(?:\s+[a-zA-Z0-9_-]+)*:\s*$') {
+        # Match recipes with dependencies, parameters, variadic parameters, defaults,
+        # and optional recipe attributes. Examples:
+        #   lint:
+        #   quality-check lint test:
+        #   test *ARGS:
+        #   [private] helper name='value':
+        elseif ($line -match '^(?:\[[^\]]+\]\s*)?([a-zA-Z0-9_-]+)(?:\s+(?:\*?[a-zA-Z_][a-zA-Z0-9_-]*(?:=(?:''[^'']*''|"[^"]*"|[^\s:]+))?|[a-zA-Z0-9_-]+))*:\s*$') {
             # Save previous task
             if ($currentTask) {
                 $cmd = Join-TaskCommandLines -Lines $cmdLines
@@ -459,15 +465,17 @@ function Get-TasksFromJustfile {
             
             # Start new task
             $currentTask = $matches[1]
+            $currentDesc = $pendingDesc
+            $pendingDesc = $null
             $cmdLines = @()
             $inTask = $true
         }
-        # Check for command lines (not starting with # and not empty)
-        elseif ($inTask -and -not $trimmed.StartsWith('#') -and -not [string]::IsNullOrWhiteSpace($trimmed)) {
-            $cmdLines += $trimmed
+        # Recipe bodies must be indented. Root-level settings and malformed recipe
+        # headers must never be appended to the preceding command.
+        elseif ($inTask -and $line -match '^\s+(\S.*)$' -and -not $matches[1].StartsWith('#')) {
+            $cmdLines += $matches[1]
         }
-        # If we hit a line that starts a new task or is a comment at root level, we've left the task
-        elseif ($inTask -and ($trimmed -match '^[a-zA-Z0-9_-]+:' -or ($trimmed.StartsWith('#') -and -not $trimmed.StartsWith('##')))) {
+        elseif ($inTask -and $line -match '^\S') {
             $inTask = $false
         }
     }

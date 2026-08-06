@@ -63,7 +63,7 @@
     "export-metrics": "pwsh -NoProfile -File scripts/utils/metrics/export-metrics.ps1",
     "save-metrics-snapshot": "pwsh -NoProfile -File scripts/utils/metrics/save-metrics-snapshot.ps1",
     "track-coverage-trends": "pwsh -NoProfile -File scripts/utils/metrics/track-coverage-trends.ps1",
-    "quality-check": "pnpm run format && pnpm run security-scan && pnpm run lint && pnpm run spellcheck && pnpm run markdownlint && pnpm run check-comment-help && pnpm run test && pnpm run validate-function-naming && pnpm run drift-check && echo All quality checks passed",
+    "quality-check": "pnpm run format && pnpm run security-scan && pnpm run lint && pnpm run spellcheck && pnpm run markdownlint && pnpm run validate && pnpm run check-comment-help && pnpm run check-doc-coverage && pnpm run check-doc-freshness && pnpm run check-script-standards && pnpm run check-missing-tests && pnpm run validate-dependencies && pnpm run check-task-parity && pnpm run test && pnpm run validate-function-naming && pnpm run drift-check && echo All quality checks passed",
     "pre-commit-checks": "pwsh -NoProfile -File scripts/git/pre-commit.ps1",
     "pre-push-checks": "pwsh -NoProfile -File scripts/git/hooks/pre-push.ps1",
     "check-idempotency": "pwsh -NoProfile -File scripts/checks/check-idempotency.ps1",
@@ -85,7 +85,9 @@
     "test-unit-batch": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-unit-batch.ps1",
     "test-conversion-batch": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-integration-batch.ps1",
     "test-conversion-all-batch": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-conversion-all-batch.ps1",
-    "test-tools": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1"
+    "test-tools": "pwsh -NonInteractive -NoProfile -File scripts/utils/code-quality/run-tools-integration-batch.ps1",
+    "test-changed-shards": "pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1",
+    "test-ci-shard": "pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.1.3",
@@ -108,7 +110,7 @@
     "uuid": "^14.0.1"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=22.18.0"
   },
   "devDependencies": {
     "@cspell/dict-aws": "^4.0.17",
