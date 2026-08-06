@@ -22,10 +22,11 @@ Describe 'check-module-updates.ps1 extended scenarios' {
         $c | Should -Match 'DryRun'
         $c | Should -Match 'ModuleFilter'
     }
-    It 'Checks PSScriptAnalyzer Pester and related modules' {
+    It 'loads module names from the canonical requirements manifest' {
         $c = Get-Content -LiteralPath $script:Script -Raw
-        $c | Should -Match 'PSScriptAnalyzer'
-        $c | Should -Match 'Pester'
+        $c | Should -Match 'requirements.+modules\.psd1'
+        $c | Should -Match 'Import-PowerShellDataFile'
+        $c | Should -Match 'Modules\.Keys'
     }
     It 'Supports scheduled update configuration' {
         $c = Get-Content -LiteralPath $script:Script -Raw

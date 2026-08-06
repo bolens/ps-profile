@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'Modules/**'
+      - 'requirements/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -18,7 +18,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'Modules/**'
+      - 'requirements/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -33,7 +33,6 @@ env:
 permissions:
   contents: read
   issues: write
-  pull-requests: write
 
 jobs:
   validate-dependencies:
@@ -41,7 +40,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
 
       - name: Validate Dependencies
@@ -52,7 +51,7 @@ jobs:
 
       - name: Comment PR with Dependency Status
         if: github.event_name == 'pull_request' && steps.validate-deps.outcome == 'success'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             github.rest.issues.createComment({
@@ -64,7 +63,7 @@ jobs:
 
       - name: Comment PR with Dependency Issues
         if: github.event_name == 'pull_request' && steps.validate-deps.outcome == 'failure'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             github.rest.issues.createComment({
@@ -73,4 +72,3 @@ jobs:
               repo: context.repo.repo,
               body: '❌ **Dependency Validation Failed**\n\nPlease check the workflow logs for details on missing or invalid dependencies.'
             })
-

@@ -38,11 +38,10 @@ jobs:
     permissions:
       contents: read
       issues: write
-      pull-requests: write
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
 
       - name: Collect Code Metrics
@@ -86,7 +85,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Metrics Artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: metrics-artifacts
@@ -101,7 +100,7 @@ jobs:
 
       - name: Comment PR with Metrics Summary
         if: github.event_name == 'pull_request' && steps.collect-code-metrics.outcome == 'success'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const fs = require('fs');
@@ -144,46 +143,45 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
 
       - name: Download Metrics Artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: metrics-artifacts
           path: scripts/data
 
       - name: Analyze Trends
         id: analyze-trends
+        shell: pwsh
         run: |
-          pwsh -NoProfile -Command "
-            Import-Module scripts/lib/metrics/MetricsHistory.psm1 -ErrorAction Stop
-            Import-Module scripts/lib/metrics/MetricsTrendAnalysis.psm1 -ErrorAction Stop
-            `$historical = Get-HistoricalMetrics -HistoryPath 'scripts/data/history'
-            if (`$historical.Count -ge 2) {
-              `$filesTrend = Get-MetricsTrend -HistoricalData `$historical -MetricName 'CodeMetrics.TotalFiles'
-              `$linesTrend = Get-MetricsTrend -HistoricalData `$historical -MetricName 'CodeMetrics.TotalLines'
-              `$functionsTrend = Get-MetricsTrend -HistoricalData `$historical -MetricName 'CodeMetrics.TotalFunctions'
-              
-              Write-Host '## Metrics Trends Analysis'
-              Write-Host ''
-              Write-Host '### Total Files'
-              Write-Host \"  Trend: `$(`$filesTrend.TrendDirection)\"
-              Write-Host \"  Growth Rate: `$(`$filesTrend.GrowthRate)%\"
-              Write-Host \"  Change: `$(`$filesTrend.TotalChange) files\"
-              Write-Host ''
-              Write-Host '### Total Lines'
-              Write-Host \"  Trend: `$(`$linesTrend.TrendDirection)\"
-              Write-Host \"  Growth Rate: `$(`$linesTrend.GrowthRate)%\"
-              Write-Host \"  Change: `$(`$linesTrend.TotalChange) lines\"
-              Write-Host ''
-              Write-Host '### Total Functions'
-              Write-Host \"  Trend: `$(`$functionsTrend.TrendDirection)\"
-              Write-Host \"  Growth Rate: `$(`$functionsTrend.GrowthRate)%\"
-              Write-Host \"  Change: `$(`$functionsTrend.TotalChange) functions\"
-            } else {
-              Write-Host 'Insufficient historical data for trend analysis (need at least 2 snapshots)'
-            }
-          "
-        continue-on-error: true
+          Import-Module scripts/lib/metrics/MetricsHistory.psm1 -ErrorAction Stop
+          Import-Module scripts/lib/metrics/MetricsTrendAnalysis.psm1 -ErrorAction Stop
+          $historical = Get-HistoricalMetrics -HistoryPath 'scripts/data/history'
+          if ($historical.Count -ge 2) {
+            $filesTrend = Get-MetricsTrend -HistoricalData $historical -MetricName 'CodeMetrics.TotalFiles'
+            $linesTrend = Get-MetricsTrend -HistoricalData $historical -MetricName 'CodeMetrics.TotalLines'
+            $functionsTrend = Get-MetricsTrend -HistoricalData $historical -MetricName 'CodeMetrics.TotalFunctions'
 
+            Write-Host '## Metrics Trends Analysis'
+            Write-Host ''
+            Write-Host '### Total Files'
+            Write-Host "  Trend: $($filesTrend.TrendDirection)"
+            Write-Host "  Growth Rate: $($filesTrend.GrowthRate)%"
+            Write-Host "  Change: $($filesTrend.TotalChange) files"
+            Write-Host ''
+            Write-Host '### Total Lines'
+            Write-Host "  Trend: $($linesTrend.TrendDirection)"
+            Write-Host "  Growth Rate: $($linesTrend.GrowthRate)%"
+            Write-Host "  Change: $($linesTrend.TotalChange) lines"
+            Write-Host ''
+            Write-Host '### Total Functions'
+            Write-Host "  Trend: $($functionsTrend.TrendDirection)"
+            Write-Host "  Growth Rate: $($functionsTrend.GrowthRate)%"
+            Write-Host "  Change: $($functionsTrend.TotalChange) functions"
+          }
+          else {
+            Write-Host 'Insufficient historical data for trend analysis (need at least 2 snapshots)'
+          }
+        continue-on-error: true

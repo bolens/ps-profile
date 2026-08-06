@@ -1,20 +1,5 @@
 version: 2
 updates:
-  # PowerShell modules in the Modules directory
-  - package-ecosystem: "nuget"
-    directory: "/Modules/"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
-    assignees:
-      - "bolens"
-    commit-message:
-      prefix: "deps"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "powershell"
-
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -44,7 +29,3 @@ updates:
     labels:
       - "dependencies"
       - "npm"
-    ignore:
-      # Ignore dev dependencies that are installed globally
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]

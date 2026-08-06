@@ -4,8 +4,8 @@
 
 
 .DESCRIPTION
-    Checks for available updates to PowerShell modules in the Modules directory and other
-    commonly used modules like PSScriptAnalyzer, Pester, and PowerShell-Beautifier. Compares
+    Checks for available updates to PowerShell modules declared in
+    requirements/modules.psd1 and any repository-local modules. Compares
     installed versions with latest versions available in the PowerShell Gallery.
 
     Supports scheduling automatic updates, email notifications, and update history tracking.
@@ -88,10 +88,8 @@
     - 2 (EXIT_SETUP_ERROR): Error accessing PowerShell Gallery or module installation failed
 
     Modules checked:
-    - Local modules in Modules/ directory
-    - PSScriptAnalyzer
-    - Pester
-    - PowerShell-Beautifier
+    - Modules declared in requirements/modules.psd1
+    - Repository-local modules, when present
 
     Requires access to PowerShell Gallery. Network connectivity may be required.
     Scheduling requires administrator privileges on Windows.
@@ -268,14 +266,29 @@ if ($debugLevel -ge 2) {
     Write-Verbose "[dependencies.check-updates] Found $($localModules.Count) local modules"
 }
 
+# Load the repository's canonical PowerShell module manifest. Keep dependency
+# discovery data-driven so this check cannot drift from requirements/modules.psd1.
+$moduleRequirementsPath = Join-Path $repoRoot 'requirements' 'modules.psd1'
+$declaredModuleNames = @()
+if (Test-Path -LiteralPath $moduleRequirementsPath) {
+    try {
+        $moduleRequirements = Import-PowerShellDataFile -LiteralPath $moduleRequirementsPath
+        $declaredModuleNames = @($moduleRequirements.Modules.Keys)
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    }
+}
+else {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "PowerShell module requirements not found: $moduleRequirementsPath"
+}
+
 # Check for updates from PowerShell Gallery
 $modulesToCheck = @(
     # Local modules
     $localModules | Select-Object -ExpandProperty Name
-    # Commonly used modules that might be installed
-    'PSScriptAnalyzer',
-    'Pester',
-    'PowerShell-Beautifier'
+    # Canonical declared dependencies
+    $declaredModuleNames
 ) | Select-Object -Unique
 
 # Apply module filter if specified
