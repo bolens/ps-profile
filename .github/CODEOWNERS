@@ -1,0 +1,10 @@
+# Default ownership
+* @bolens
+
+# High-impact automation and security configuration
+/.github/ @bolens
+/.hooks/ @bolens
+/scripts/git/ @bolens
+/scripts/lib/core/ExitCodes.psm1 @bolens
+/scripts/utils/security/ @bolens
+/SECURITY.md @bolens
