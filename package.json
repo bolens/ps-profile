@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Global npm packages required for PowerShell profile data format conversions",
   "private": true,
+  "license": "MIT",
   "packageManager": "pnpm@11.5.3",
   "scripts": {
     "prepare": "corepack enable",
