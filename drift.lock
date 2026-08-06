@@ -6930,7 +6930,7 @@ tests/unit/utility/performance/utility-performance.tests.ps1 -> scripts/lib/perf
 tests/unit/utility/performance/utility-performance.tests.ps1 -> scripts/lib/performance/PerformanceRegression.psm1 sig:d1c0f4584b9a2728
 tests/unit/utility/populate/utility-populate-performance-metrics-extended.tests.ps1 -> scripts/utils/database/populate-performance-metrics.ps1 sig:53ddccd7ee916267
 tests/unit/utility/populate/utility-populate-performance-metrics.tests.ps1 -> scripts/utils/database/populate-performance-metrics.ps1 sig:53ddccd7ee916267
-tests/unit/utility/pre/utility-pre-commit.tests.ps1 -> scripts/git/pre-commit.ps1 sig:46cefef183bb7cc6
+tests/unit/utility/pre/utility-pre-commit.tests.ps1 -> scripts/git/pre-commit.ps1 sig:2c4309919daded77
 tests/unit/utility/pre/utility-pre-push.tests.ps1 -> scripts/git/hooks/pre-push.ps1 sig:af39e36715ce3325
 tests/unit/utility/run/utility-run-conversion-all-batch.tests.ps1 -> scripts/utils/code-quality/run-conversion-all-batch.ps1 sig:7d0c06776966e51f
 tests/unit/utility/run/utility-run-conversion-integration-batch.tests.ps1 -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
