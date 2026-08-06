@@ -19,6 +19,22 @@ BeforeAll {
 }
 
 Describe 'Incremental documentation generation' {
+    It 'returns typed empty collections when a profile file has no documented commands' {
+        Remove-Module Doc* -ErrorAction SilentlyContinue
+        Import-Module (Join-Path $script:DocsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+        $profileDir = New-TestTempDirectory -Prefix 'IncrementalEmptyProfile'
+        $fixturePath = Join-Path $profileDir 'empty.ps1'
+        Set-Content -LiteralPath $fixturePath -Value '$value = 1' -Encoding UTF8
+
+        $parsed = Get-DocumentedCommands -ProfilePath $profileDir -Files @($fixturePath)
+
+        $parsed.Functions.GetType().FullName | Should -Match '^System\.Collections\.Generic\.List'
+        $parsed.Aliases.GetType().FullName | Should -Match '^System\.Collections\.Generic\.List'
+        $parsed.Functions.Count | Should -Be 0
+        $parsed.Aliases.Count | Should -Be 0
+    }
+
     It 'parses only requested profile files when -Files is supplied' {
         Remove-Module Doc* -ErrorAction SilentlyContinue
         Import-Module (Join-Path $script:DocsModulesPath 'DocParser.psm1') -DisableNameChecking -Force

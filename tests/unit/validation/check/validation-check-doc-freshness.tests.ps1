@@ -22,12 +22,7 @@ BeforeAll {
 }
 
 Describe 'check-doc-freshness.ps1 execution' {
-    It 'Regenerates docs incrementally and reports freshness status' {
-        if ($env:CI -or $env:GITHUB_ACTIONS) {
-            Set-ItResult -Skipped -Because 'incremental doc generation is too slow for CI'
-            return
-        }
-
+    It 'Regenerates docs incrementally and reports freshness status' -Tag 'Slow' {
         $result = Invoke-TestScriptFile -ScriptPath $script:CheckDocFreshnessScript
 
         $result.Output | Should -Match 'Regenerating API docs incrementally|generate-docs'
@@ -47,8 +42,10 @@ Describe 'check-doc-freshness.ps1 execution' {
             Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
             Copy-Item -LiteralPath $script:CheckDocFreshnessScript -Destination (Join-Path $checksDir 'check-doc-freshness.ps1') -Force
 
-            $noopGenerate = @'
+$noopGenerate = @'
 param([switch]$Incremental, [string]$OutputPath, [string]$ProfilePath)
+$null = New-Item -ItemType Directory -Path $OutputPath -Force
+Set-Content -LiteralPath (Join-Path $OutputPath 'README.md') -Value '# api docs fixture' -Encoding UTF8
 exit 0
 '@
             Set-Content -LiteralPath (Join-Path $generateDir 'generate-docs.ps1') -Value $noopGenerate -Encoding UTF8
@@ -85,9 +82,7 @@ exit 0
 
             $staleGenerate = @'
 param([switch]$Incremental, [string]$OutputPath, [string]$ProfilePath)
-$repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-$relative = if ($OutputPath) { $OutputPath } else { 'docs/api' }
-$outDir = Join-Path $repoRoot $relative
+$outDir = $OutputPath
 $target = Join-Path $outDir 'stale-output.md'
 Set-Content -LiteralPath $target -Value 'generated stale doc' -Encoding UTF8
 exit 0
@@ -109,6 +104,8 @@ exit 0
 
             $result.ExitCode | Should -Be 1
             $result.Output | Should -Match 'out of date|freshness check failed'
+            Test-Path -LiteralPath (Join-Path $docsDir 'stale-output.md') | Should -Be $false
+            (Get-Content -LiteralPath (Join-Path $docsDir 'README.md') -Raw).Trim() | Should -Be '# api docs fixture'
         }
     }
 }
