@@ -116,19 +116,28 @@ jobs:
       - name: Install Pester
         shell: pwsh
         run: |
-          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
-            Register-PSRepository `
-              -Name PSGallery `
-              -SourceLocation 'https://www.powershellgallery.com/api/v2' `
-              -PublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
-              -ScriptSourceLocation 'https://www.powershellgallery.com/api/v2/items/psscript' `
-              -ScriptPublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
-              -InstallationPolicy Trusted
+          $galleryName = 'PSGallery'
+          if (-not (Get-PSRepository -Name $galleryName -ErrorAction SilentlyContinue)) {
+            try {
+              Register-PSRepository -Default -ErrorAction Stop
+            }
+            catch {
+              # Some Windows images cannot restore the reserved PSGallery name.
+              # A differently named repository can use the same official endpoint.
+              $galleryName = 'PSGalleryFallback'
+              Register-PSRepository `
+                -Name $galleryName `
+                -SourceLocation 'https://www.powershellgallery.com/api/v2' `
+                -PublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
+                -ScriptSourceLocation 'https://www.powershellgallery.com/api/v2/items/psscript' `
+                -ScriptPublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
+                -InstallationPolicy Trusted
+            }
           }
-          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Set-PSRepository -Name $galleryName -InstallationPolicy Trusted
           # Pin to 5.7.x: Pester 5.9+ regresses Mock scoping ("Mock data are not setup for this scope")
           # and TestDrive collisions across sequential containers; Pester 6+ breaks tracer teardown.
-          Install-Module -Name Pester -MinimumVersion 5.7.0 -MaximumVersion 5.7.99 -Force -Scope CurrentUser -AllowClobber
+          Install-Module -Name Pester -Repository $galleryName -MinimumVersion 5.7.0 -MaximumVersion 5.7.99 -Force -Scope CurrentUser -AllowClobber
           $pester5 = Get-Module -ListAvailable Pester |
             Where-Object { $_.Version -ge [version]'5.7.0' -and $_.Version -lt [version]'5.8.0' } |
             Sort-Object Version -Descending |
