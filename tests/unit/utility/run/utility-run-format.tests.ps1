@@ -22,6 +22,79 @@ BeforeAll {
 }
 
 Describe 'run-format.ps1 execution' {
+    It 'DryRun executes in-process without modifying isolated files' {
+        $formatDir = New-TestTempDirectory -Prefix 'RunFormatInProcessDryRun'
+        $sampleFile = Join-Path $formatDir 'sample.ps1'
+        $originalContent = "function Get-InProcessDryRunFixture{`r`n'ok'`r`n}"
+        [System.IO.File]::WriteAllText($sampleFile, $originalContent)
+
+        $previousDebug = $env:PS_PROFILE_DEBUG
+        $env:PS_PROFILE_DEBUG = '3'
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:RunFormatScript -Path $formatDir -DryRun -Verbose 4>&1
+            $outputText = $output | Out-String
+
+            $outputText | Should -Match 'Would format 1 file'
+            [System.IO.File]::ReadAllText($sampleFile) | Should -BeExactly $originalContent
+        }
+        finally {
+            if ($null -eq $previousDebug) {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_DEBUG = $previousDebug
+            }
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'formats files and skips empty files in-process' {
+        $formatDir = New-TestTempDirectory -Prefix 'RunFormatInProcessApply'
+        $sampleFile = Join-Path $formatDir 'sample.ps1'
+        $emptyFile = Join-Path $formatDir 'empty.ps1'
+        Set-Content -LiteralPath $sampleFile -Value "function Get-InProcessApplyFixture{ 'ok' }" -Encoding UTF8
+        [System.IO.File]::WriteAllText($emptyFile, '')
+
+        $previousDebug = $env:PS_PROFILE_DEBUG
+        $env:PS_PROFILE_DEBUG = '2'
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:RunFormatScript -Path $formatDir 2>&1
+            $outputText = $output | Out-String
+
+            $outputText | Should -Match 'Skipping empty file'
+            $outputText | Should -Match 'Formatted 1 file'
+            [System.IO.File]::ReadAllText($emptyFile) | Should -BeExactly ''
+            (Get-Content -LiteralPath $sampleFile -Raw) | Should -Match 'function Get-InProcessApplyFixture'
+        }
+        finally {
+            if ($null -eq $previousDebug) {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_DEBUG = $previousDebug
+            }
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'reports in-process formatter failures as validation failures' {
+        $formatDir = New-TestTempDirectory -Prefix 'RunFormatInProcessFailure'
+        Set-Content -LiteralPath (Join-Path $formatDir 'sample.ps1') -Value "'fixture'" -Encoding UTF8
+        Mock Invoke-Formatter { throw 'formatter failure probe' }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            {
+                & $script:RunFormatScript -Path $formatDir 2>&1
+            } | Should -Throw -ExpectedMessage '*Failed to format 1 file*formatter failure probe*'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
     It 'DryRun previews formatting for an isolated scripts directory' {
         $formatDir = New-TestTempDirectory -Prefix 'RunFormatDryRun'
         Set-Content -LiteralPath (Join-Path $formatDir 'sample.ps1') -Value "function Get-RunFormatFixture { 'ok' }" -Encoding UTF8

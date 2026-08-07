@@ -104,7 +104,7 @@ $filesFormatted = 0
 $errors = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 # Get PowerShell scripts using helper function
-$scripts = Get-PowerShellScripts -Path $Path
+$scripts = @(Get-PowerShellScripts -Path $Path)
 
 # Level 2: File list details
 if ($debugLevel -ge 2) {
@@ -215,8 +215,15 @@ if ($errors.Count -gt 0) {
 }
 
 if ($DryRun) {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would format $filesFormatted file(s). Run without -DryRun to apply changes."
+    $successMessage = "DRY RUN: Would format $filesFormatted file(s). Run without -DryRun to apply changes."
 }
 else {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: all files formatted successfully"
+    $successMessage = "PSScriptAnalyzer: all files formatted successfully"
+}
+
+if ($Path -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+}
+else {
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
 }
