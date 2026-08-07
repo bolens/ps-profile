@@ -367,7 +367,7 @@ function Write-JsonFile {
             throw [System.IO.IOException]::new('json write failure probe')
         }
 
-        $jsonContent = $InputObject | ConvertTo-Json -Depth $Depth -ErrorAction Stop
+        $jsonContent = ConvertTo-Json -InputObject $InputObject -Depth $Depth -ErrorAction Stop
         
         # Use Set-Content with encoding
         $encodingParam = @{}

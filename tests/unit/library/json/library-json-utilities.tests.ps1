@@ -62,6 +62,16 @@ Describe 'JsonUtilities Module Functions' {
     }
 
     Context 'Write-JsonFile' {
+        It 'Writes an empty collection as a valid JSON array' {
+            $testFile = Join-Path $script:TestTempDir 'empty-array.json'
+            $emptyCollection = [System.Collections.Generic.List[object]]::new()
+
+            Write-JsonFile -Path $testFile -InputObject $emptyCollection
+
+            (Get-Content -LiteralPath $testFile -Raw).Trim() | Should -Be '[]'
+            @(Read-JsonFile -Path $testFile) | Should -HaveCount 0
+        }
+
         It 'Writes JSON file successfully' {
             $testData = @{
                 Name  = 'Test'
@@ -223,4 +233,3 @@ Describe 'JsonUtilities Module Functions' {
         }
     }
 }
-
