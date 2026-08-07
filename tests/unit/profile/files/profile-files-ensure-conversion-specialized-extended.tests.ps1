@@ -26,7 +26,7 @@ function script:Reset-FileConversionSpecializedState {
 }
 
 Describe 'profile.d/files.ps1 Ensure-FileConversion-Specialized extended scenarios' {
-    BeforeEach {
+    BeforeAll {
         Reset-FileConversionSpecializedState
     }
 

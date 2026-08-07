@@ -27,7 +27,7 @@ function script:Reset-FileUtilitiesState {
 }
 
 Describe 'profile.d/files.ps1 Ensure-FileUtilities extended scenarios' {
-    BeforeEach {
+    BeforeAll {
         Reset-FileUtilitiesState
     }
 

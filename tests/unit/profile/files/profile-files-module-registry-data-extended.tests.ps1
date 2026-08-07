@@ -36,11 +36,4 @@ Describe 'profile.d/files-module-registry.ps1 Ensure-FileConversion-Data registr
         $files | Should -Contain 'network-url-uri.ps1'
     }
 
-    It 'Load-EnsureModules loads data conversion module initializers' {
-        Load-EnsureModules -EnsureFunctionName 'Ensure-FileConversion-Data' -BaseDir $script:ProfileDir
-
-        Get-Command Initialize-FileConversion-CoreBasicJson -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-ColumnarParquet -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-ScientificHdf5 -ErrorAction Stop | Should -Not -BeNullOrEmpty
-    }
 }

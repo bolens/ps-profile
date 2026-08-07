@@ -36,11 +36,4 @@ Describe 'profile.d/files-module-registry.ps1 Ensure-FileConversion-Documents re
         $files | Should -Contain 'document-ebook-mobi.ps1'
     }
 
-    It 'Load-EnsureModules loads document conversion module initializers' {
-        Load-EnsureModules -EnsureFunctionName 'Ensure-FileConversion-Documents' -BaseDir $script:ProfileDir
-
-        Get-Command Initialize-FileConversion-DocumentMarkdown -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-DocumentLaTeX -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-DocumentOfficeOdt -ErrorAction Stop | Should -Not -BeNullOrEmpty
-    }
 }

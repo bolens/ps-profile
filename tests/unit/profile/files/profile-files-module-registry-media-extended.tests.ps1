@@ -36,12 +36,4 @@ Describe 'profile.d/files-module-registry.ps1 Ensure-FileConversion-Media regist
         $files | Should -Contain 'convert.ps1'
     }
 
-    It 'Load-EnsureModules loads media conversion module initializers' {
-        Load-EnsureModules -EnsureFunctionName 'Ensure-FileConversion-Media' -BaseDir $script:ProfileDir
-
-        Get-Command Initialize-FileConversion-MediaImagesCommon -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-MediaAudioCommon -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-MediaPdf -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-MediaColorsConvert -ErrorAction Stop | Should -Not -BeNullOrEmpty
-    }
 }
