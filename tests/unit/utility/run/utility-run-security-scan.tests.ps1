@@ -46,6 +46,92 @@ function Invoke-InsecureFixtureExample {
 }
 
 Describe 'run-security-scan.ps1 execution' {
+    It 'scans an empty directory in-process with portable debug timing' {
+        $emptyDir = New-TestTempDirectory -Prefix 'SecurityScanInProcessEmpty'
+        $previousDebug = $env:PS_PROFILE_DEBUG
+        $env:PS_PROFILE_DEBUG = '3'
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:SecurityScanScript -Path $emptyDir -Verbose 4>&1
+            $outputText = $output | Out-String
+
+            $outputText | Should -Match 'Scanning 0 file'
+            $outputText | Should -Match 'no issues found'
+        }
+        finally {
+            if ($null -eq $previousDebug) {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_DEBUG = $previousDebug
+            }
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'reports warning findings from an isolated fixture in-process' {
+        $scanDir = New-TestTempDirectory -Prefix 'SecurityScanInProcessWarning'
+        Set-Content -LiteralPath (Join-Path $scanDir 'warning.ps1') -Value @'
+function Invoke-SecurityWarningFixture {
+    Invoke-Expression 'Write-Output warning-fixture'
+}
+'@ -Encoding UTF8
+
+        $previousDebug = $env:PS_PROFILE_DEBUG
+        $env:PS_PROFILE_DEBUG = '2'
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:SecurityScanScript -Path $scanDir -Verbose 4>&1
+            $outputText = $output | Out-String
+
+            $outputText | Should -Match 'completed with 1 warning'
+        }
+        finally {
+            if ($null -eq $previousDebug) {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_DEBUG = $previousDebug
+            }
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'loads a custom allowlist during an in-process scan' {
+        $workDir = New-TestTempDirectory -Prefix 'SecurityScanInProcessAllowlist'
+        $scanDir = Join-Path $workDir 'scan'
+        $allowlistPath = Join-Path $workDir 'allowlist.json'
+        New-Item -ItemType Directory -Path $scanDir -Force | Out-Null
+        @{ FilePatterns = @('fixture\.ps1$') } |
+            ConvertTo-Json |
+            Set-Content -LiteralPath $allowlistPath -Encoding UTF8
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:SecurityScanScript -Path $scanDir -AllowlistFile $allowlistPath 2>&1 | Out-String
+
+            $output | Should -Match 'no issues found'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'fails when an isolated file cannot be scanned in-process' {
+        $scanDir = New-TestTempDirectory -Prefix 'SecurityScanInProcessFailure'
+        Set-Content -LiteralPath (Join-Path $scanDir 'failure.ps1') -Value "'fixture'" -Encoding UTF8
+        Mock Invoke-SecurityScan { throw 'security scan failure probe' }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            { & $script:SecurityScanScript -Path $scanDir 2>&1 } |
+                Should -Throw -ExpectedMessage '*1 file(s) failed during security scan*'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
     It 'Completes successfully when the scan directory has no PowerShell files' {
         $emptyDir = New-TestTempDirectory -Prefix 'SecurityScanEmpty'
             $result = Invoke-SecurityScanScript -ArgumentList @('-Path', $emptyDir)

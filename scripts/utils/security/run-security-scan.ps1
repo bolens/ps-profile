@@ -119,7 +119,7 @@ $secretPatterns = Get-SecretPatterns
 $falsePositivePatterns = Get-FalsePositivePatterns
 
 # Get PowerShell scripts using helper function
-$scripts = Get-PowerShellScripts -Path $Path
+$scripts = @(Get-PowerShellScripts -Path $Path)
 
 # Level 2: File list details
 if ($debugLevel -ge 2) {
@@ -228,7 +228,19 @@ if ($results.BlockingIssues.Count -gt 0) {
 }
 
 if ($results.WarningIssues.Count -gt 0) {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Security scan completed with $($results.WarningIssues.Count) warning(s)"
+    $successMessage = "Security scan completed with $($results.WarningIssues.Count) warning(s)"
+    if ($Path -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        Write-ScriptMessage -Message $successMessage
+        return
+    }
+
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Security scan completed: no issues found"
+$successMessage = "Security scan completed: no issues found"
+if ($Path -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+}
+else {
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
+}
