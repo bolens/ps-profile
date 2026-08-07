@@ -14,11 +14,25 @@ cspell:ignore ACMR
     be absorbed into the commit. cspell is required when node tooling is available
     (same gate as CI).
 
+.PARAMETER RepositoryRoot
+    Optional repository root override for isolated hook validation.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\git\pre-commit.ps1
 
     Runs formatting and validation checks as part of the git pre-commit hook.
 #>
+
+[CmdletBinding()]
+param(
+    [ValidateScript({
+            if ($_ -and -not [string]::IsNullOrWhiteSpace($_) -and -not (Test-Path -LiteralPath $_ -PathType Container)) {
+                throw "Repository root does not exist: $_"
+            }
+            $true
+        })]
+    [string]$RepositoryRoot
+)
 
 # Import PathResolution first (required for ModuleImport to work)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
@@ -42,7 +56,12 @@ Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -Di
 
 # Get repository root
 try {
-    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    $repoRoot = if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+        Get-RepoRoot -ScriptPath $PSScriptRoot
+    }
+    else {
+        [System.IO.Path]::GetFullPath($RepositoryRoot)
+    }
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
@@ -120,4 +139,10 @@ if ($LASTEXITCODE -ne 0) {
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Validation checks failed"
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Pre-commit checks passed"
+$successMessage = "Pre-commit checks passed"
+if ($RepositoryRoot -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+}
+else {
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
+}
