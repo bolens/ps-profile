@@ -4743,7 +4743,7 @@ tests/integration/utilities/isbn.tests.ps1 -> profile.d/utilities.ps1 sig:de643d
 tests/integration/utilities/utility-functions.tests.ps1 -> profile.d/utilities.ps1 sig:de643daee7a52d7c
 tests/integration/validation/pipeline.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/integration/validation/pipeline.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:6374366b1e3aa5f2
-tests/integration/validation/pipeline.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:49a6af5ae6081608
+tests/integration/validation/pipeline.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:16c28ee8c0b00a12
 tests/performance/core/performance.tests.ps1 -> Microsoft.PowerShell_profile.ps1 sig:e1a5656c1f0efc86
 tests/performance/lang/lang-go-performance.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/performance/lang/lang-go-performance.tests.ps1 -> profile.d/lang-go.ps1 sig:ccba8c44468f9a01
@@ -6967,7 +6967,7 @@ tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> .vsc
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> Makefile sig:218db1f93c76d9b4
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> Taskfile.yml sig:c269031ad63901dd
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> justfile sig:30bc4c1a0c7f0858
-tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> package.json sig:dc0976d807470213
+tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> package.json sig:7de8c3335b5c625a
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskParser.psm1 sig:70df6e65f25b8e16
 tests/unit/utility/track/utility-track-coverage-trends-extended.tests.ps1 -> scripts/utils/metrics/track-coverage-trends.ps1 sig:2340a411fb7efb2f
 tests/unit/utility/track/utility-track-coverage-trends.tests.ps1 -> scripts/utils/metrics/track-coverage-trends.ps1 sig:2340a411fb7efb2f
@@ -6995,10 +6995,10 @@ tests/unit/validation/idempotency/validation-idempotency-fixtures.tests.ps1 -> s
 tests/unit/validation/idempotency/validation-idempotency.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:6374366b1e3aa5f2
 tests/unit/validation/script/validation-script-standards-extended.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
 tests/unit/validation/script/validation-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
-tests/unit/validation/validate/validation-validate-profile-extended.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:49a6af5ae6081608
-tests/unit/validation/validate/validation-validate-profile.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:49a6af5ae6081608
+tests/unit/validation/validate/validation-validate-profile-extended.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:16c28ee8c0b00a12
+tests/unit/validation/validate/validation-validate-profile.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:16c28ee8c0b00a12
 tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/commit-message-check.yml sig:b1b5720dd8edd78d
 tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-validation.yml sig:5fab74ac2b75c21b
-tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-vulnerability-scan.yml sig:946cce30d8c362e7
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-vulnerability-scan.yml sig:9c88e297f43e12ed
 tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/metrics-collection.yml sig:08f8f356311c21b3
 tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/validate-profile.yml sig:e44472787b4bebb4
