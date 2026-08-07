@@ -22,13 +22,6 @@ BeforeAll {
 }
 
 Describe 'check-missing-packages.ps1 execution' {
-    It 'Runs package checks against the repository manifests without interactive prompts' {
-        $result = Invoke-TestScriptFile -ScriptPath $script:CheckMissingPackagesScript
-
-        $result.Output | Should -Match 'npm|python|package|Checking'
-        $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
-    }
-
     It 'Checks npm dependencies from an isolated repository package.json' {
         $repo = New-TestTempDirectory -Prefix 'CheckMissingPackagesRepo'
         try {

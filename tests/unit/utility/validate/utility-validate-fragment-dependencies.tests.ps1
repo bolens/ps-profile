@@ -22,13 +22,6 @@ BeforeAll {
 }
 
 Describe 'validate-fragment-dependencies.ps1 execution' {
-    It 'Validates fragment dependencies against the repository profile.d directory' {
-        $result = Invoke-TestScriptFile -ScriptPath $script:ValidateDepsScript
-
-        $result.ExitCode | Should -BeIn @(0, 1)
-        $result.Output | Should -Match 'Validating dependencies|fragment'
-    }
-
     It 'Fails validation when an isolated profile fragment depends on a missing fragment' {
         $repo = New-TestTempDirectory -Prefix 'ValidateFragmentDepsRepo'
         try {

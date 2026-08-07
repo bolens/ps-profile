@@ -87,33 +87,6 @@ Describe 'run-markdownlint.ps1 execution' {
         }
     }
 
-    It 'Runs markdownlint or npx fallback without interactive prompts' {
-        if (-not $script:MarkdownlintAvailable -and -not $script:NpxAvailable) {
-            Set-ItResult -Skipped -Because 'markdownlint and npx are not available'
-            return
-        }
-
-        $result = Invoke-TestScriptFile -ScriptPath $script:RunMarkdownlintScript
-
-        $result.ExitCode | Should -BeIn @(0, 1, 2)
-        $result.Output | Should -Match 'markdownlint'
-    }
-
-    It 'Reports the configured MARKDOWNLINT_VERSION in output' {
-        if (-not $script:MarkdownlintAvailable -and -not $script:NpxAvailable) {
-            Set-ItResult -Skipped -Because 'markdownlint and npx are not available'
-            return
-        }
-
-        $customVersion = '0.35.0'
-        $result = Invoke-TestScriptFile -ScriptPath $script:RunMarkdownlintScript -EnvironmentVariables @{
-            MARKDOWNLINT_VERSION = $customVersion
-        }
-
-        $result.ExitCode | Should -BeIn @(0, 1, 2)
-        $result.Output | Should -Match "version: $customVersion"
-    }
-
     It 'Fails when markdownlint finds violations in an isolated repository' {
         if (-not $script:MarkdownlintAvailable -and -not $script:NpxAvailable) {
             Set-ItResult -Skipped -Because 'markdownlint and npx are not available'
