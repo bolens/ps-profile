@@ -6880,8 +6880,8 @@ tests/unit/utility/docs/utility-docs-generation.tests.ps1 -> profile.d/git-modul
 tests/unit/utility/docs/utility-docs-generation.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 tests/unit/utility/export/utility-export-metrics-extended.tests.ps1 -> scripts/utils/metrics/export-metrics.ps1 sig:48f7dc377bf61f5e
 tests/unit/utility/export/utility-export-metrics.tests.ps1 -> scripts/utils/metrics/export-metrics.ps1 sig:48f7dc377bf61f5e
-tests/unit/utility/find/utility-find-duplicate-functions-extended.tests.ps1 -> scripts/utils/metrics/find-duplicate-functions.ps1 sig:736f3562c156568e
-tests/unit/utility/find/utility-find-duplicate-functions.tests.ps1 -> scripts/utils/metrics/find-duplicate-functions.ps1 sig:736f3562c156568e
+tests/unit/utility/find/utility-find-duplicate-functions-extended.tests.ps1 -> scripts/utils/metrics/find-duplicate-functions.ps1 sig:e78258a7e36ebd87
+tests/unit/utility/find/utility-find-duplicate-functions.tests.ps1 -> scripts/utils/metrics/find-duplicate-functions.ps1 sig:e78258a7e36ebd87
 tests/unit/utility/fragment/utility-fragment-index-generator-structure-extended.tests.ps1 -> scripts/utils/docs/modules/FragmentIndexGenerator.psm1 sig:3eb95b0123988a9c
 tests/unit/utility/fragment/utility-fragment-readme-generator-structure-extended.tests.ps1 -> scripts/utils/docs/modules/FragmentReadmeGenerator.psm1 sig:57ff520a8d59ab0a
 tests/unit/utility/fragment/utility-fragment-readme-parser-structure-extended.tests.ps1 -> scripts/utils/docs/modules/FragmentReadmeParser.psm1 sig:6b461dbb1597ce96
