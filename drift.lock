@@ -4679,7 +4679,7 @@ tests/integration/tools/network/failure.tests.ps1 -> scripts/utils/dependencies/
 tests/integration/tools/network/failure.tests.ps1 -> scripts/utils/dependencies/validate-dependencies.ps1 sig:4e0747c3d1eaf5f2
 tests/integration/tools/network/utils.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/integration/tools/network/utils.tests.ps1 -> profile.d/network-utils.ps1 sig:870de214411fb302
-tests/integration/tools/network/utils.tests.ps1 -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:e78ee7d0a8858917
+tests/integration/tools/network/utils.tests.ps1 -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:7690e85e92e9c91d
 tests/integration/tools/nimble.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/integration/tools/nimble.tests.ps1 -> profile.d/nimble.ps1 sig:033924e2ad8a5b45
 tests/integration/tools/npm.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
