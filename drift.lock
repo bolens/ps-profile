@@ -4741,7 +4741,7 @@ tests/integration/tools/yarn.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3
 tests/integration/tools/yarn.tests.ps1 -> profile.d/yarn.ps1 sig:20e8cad8e44afd5b
 tests/integration/utilities/isbn.tests.ps1 -> profile.d/utilities.ps1 sig:de643daee7a52d7c
 tests/integration/utilities/utility-functions.tests.ps1 -> profile.d/utilities.ps1 sig:de643daee7a52d7c
-tests/integration/validation/pipeline.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:3144ff33fe8ea363
+tests/integration/validation/pipeline.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/integration/validation/pipeline.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:6374366b1e3aa5f2
 tests/integration/validation/pipeline.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:49a6af5ae6081608
 tests/performance/core/performance.tests.ps1 -> Microsoft.PowerShell_profile.ps1 sig:e1a5656c1f0efc86
@@ -6979,11 +6979,12 @@ tests/unit/utility/validate/utility-validate-fragment-dependencies-extended.test
 tests/unit/utility/validate/utility-validate-fragment-dependencies.tests.ps1 -> scripts/utils/fragment/validate-fragment-dependencies.ps1 sig:62023876f6a256d2
 tests/unit/utility/verify/utility-verify-cache-cleared-extended.tests.ps1 -> scripts/utils/verify-cache-cleared.ps1 sig:9fe86d9c19e3704b
 tests/unit/utility/verify/utility-verify-cache-cleared.tests.ps1 -> scripts/utils/verify-cache-cleared.ps1 sig:9fe86d9c19e3704b
+tests/unit/validation/check/validation-check-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/check/validation-check-commit-messages.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:5cbcfd4092469c30
 tests/unit/validation/check/validation-check-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
-tests/unit/validation/comment/validation-comment-help-extended.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:3144ff33fe8ea363
-tests/unit/validation/comment/validation-comment-help-fixtures.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:3144ff33fe8ea363
-tests/unit/validation/comment/validation-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:3144ff33fe8ea363
+tests/unit/validation/comment/validation-comment-help-extended.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
+tests/unit/validation/comment/validation-comment-help-fixtures.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
+tests/unit/validation/comment/validation-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/commit/validation-commit-messages-extended.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:5cbcfd4092469c30
 tests/unit/validation/commit/validation-commit-messages.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:5cbcfd4092469c30
 tests/unit/validation/doc/validation-doc-coverage-extended.tests.ps1 -> scripts/checks/check-doc-coverage.ps1 sig:51375505dd2dbdfc
