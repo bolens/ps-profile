@@ -210,31 +210,8 @@ else {
 if ($errors.Count -gt 0) {
     $errorDetails = $errors | ForEach-Object { "  $($_.File): $($_.Error)" }
     $errorMessage = "Failed to format $($errors.Count) file(s):`n$($errorDetails -join "`n")"
-    
-    # Allow partial success - if we formatted at least some files, report warning but don't fail
-    if ($filesFormatted -gt 0) {
-        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-            Write-StructuredWarning -Message "Some files failed to format" -OperationName 'format.batch' -Context @{
-                formatted_count = $filesFormatted
-                failed_count = $errors.Count
-                total_files = $scripts.Count
-            } -Code 'FormatPartialFailure'
-        }
-        else {
-            Write-ScriptMessage -Message "Warning: $errorMessage" -IsWarning
-        }
-        # Continue with success if we formatted at least some files
-        if ($DryRun) {
-            Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would format $filesFormatted file(s) (with $($errors.Count) failures). Run without -DryRun to apply changes."
-        }
-        else {
-            Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: formatted $filesFormatted file(s) (with $($errors.Count) failures)"
-        }
-    }
-    else {
-        # All files failed - this is a real failure
-        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message $errorMessage
-    }
+
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message $errorMessage
 }
 
 if ($DryRun) {
@@ -243,4 +220,3 @@ if ($DryRun) {
 else {
     Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: all files formatted successfully"
 }
-

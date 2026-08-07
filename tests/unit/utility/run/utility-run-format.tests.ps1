@@ -58,4 +58,22 @@ Describe 'run-format.ps1 execution' {
             $result.Output | Should -Match 'Formatted|Formatting'
             (Get-Content -LiteralPath $sampleFile -Raw) | Should -Match 'function Get-RunFormatApplyFixture'
     }
+
+    It 'Makes every formatting error a validation failure' {
+        $tokens = $null
+        $parseErrors = $null
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile(
+            $script:RunFormatScript,
+            [ref]$tokens,
+            [ref]$parseErrors
+        )
+        $errorBranch = @($ast.FindAll({
+                    param($node)
+                    $node -is [System.Management.Automation.Language.IfStatementAst] -and
+                    $node.Extent.Text -match '\$errors\.Count -gt 0'
+                }, $true))[0].Extent.Text
+
+        $errorBranch | Should -Match 'EXIT_VALIDATION_FAILURE'
+        $errorBranch | Should -Not -Match 'EXIT_SUCCESS'
+    }
 }
