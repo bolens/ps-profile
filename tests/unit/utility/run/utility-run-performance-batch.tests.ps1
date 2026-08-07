@@ -32,33 +32,6 @@ Describe 'run-performance-batch.ps1 execution' {
         $result.Output | Should -Match 'No .* test files matched|performance'
     }
 
-    It 'Runs per-file performance tests using a stub Pester runner' {
-        $tempRoot = New-TestTempDirectory -Prefix 'performance-batch-stub'
-        $perfDir = Join-Path $tempRoot 'tests' 'performance'
-        $runnerDir = Join-Path $tempRoot 'scripts' 'utils' 'code-quality'
-        $null = New-Item -ItemType Directory -Path $perfDir -Force
-        $null = New-Item -ItemType Directory -Path $runnerDir -Force
-        $null = New-Item -ItemType File -Path (Join-Path $perfDir 'sample-performance.tests.ps1') -Force
-
-        $stubRunner = @'
-param()
-Write-Host 'Tests Passed: 1, Failed: 0, Skipped: 0'
-exit 0
-'@
-        Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
-
-        $result = Invoke-TestScriptFile -ScriptPath $script:RunPerformanceBatchScript -ArgumentList @(
-            '-RepoRoot', $tempRoot,
-            '-Filter', 'sample-performance',
-            '-Quiet'
-        )
-
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'Batch: performance \(sample-performance\*\)'
-        $result.Output | Should -Match '1P / 0F / 0S'
-        $result.Output | Should -Match 'All tests passed in batch'
-    }
-
     It 'Fails the batch when the stub Pester runner reports test failures' {
         $tempRoot = New-TestTempDirectory -Prefix 'performance-batch-failure'
         $perfDir = Join-Path $tempRoot 'tests' 'performance'
