@@ -3858,7 +3858,7 @@ docs/api/functions/venv.md -> profile.d/dev.ps1 sig:3077918b09bfd18c
 docs/api/functions/~.md -> profile.d/files-modules/navigation/files-navigation.ps1 sig:eeedced76d2c23f5
 docs/guides/DEVELOPMENT.md -> requirements/linux.txt sig:50a0ea54af26d113
 docs/guides/DEVELOPMENT.md -> requirements/scoop.txt sig:d7f36587afdb9b8b
-docs/guides/DEVELOPMENT.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:17a5a2ad25321f29
+docs/guides/DEVELOPMENT.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:35b1e022fda06c0e
 docs/guides/DEVELOPMENT.md -> scripts/utils/code-quality/run-pester.ps1 sig:1d139c40dd640928
 docs/guides/DEVELOPMENT.md -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 docs/guides/DEVELOPMENT.md -> tests/unit/library/common/library-common.tests.ps1 sig:883c040538d61094
@@ -3934,7 +3934,7 @@ docs/guides/TESTING.md -> profile.d/files.ps1 sig:2a63ce5e7ebcad5b
 docs/guides/TESTING.md -> profile.d/git.ps1 sig:a7f9055956a7be64
 docs/guides/TESTING.md -> scripts/git/hooks/pre-push.ps1 sig:af39e36715ce3325
 docs/guides/TESTING.md -> scripts/lib/path/PathResolution.psm1 sig:77cd28d0062bfc09
-docs/guides/TESTING.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:17a5a2ad25321f29
+docs/guides/TESTING.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:35b1e022fda06c0e
 docs/guides/TESTING.md -> scripts/utils/code-quality/modules/PesterCiShardFilter.psm1 sig:9381cdd1408fcc0f
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-pester-changed-shards.ps1 sig:d170c2ce054afaf1
@@ -3963,7 +3963,7 @@ docs/guides/TYPE_SAFETY.md -> scripts/lib/fragment/FragmentCommandRegistry.psm1 
 docs/guides/TYPE_SAFETY.md -> scripts/lib/fragment/FragmentLoading.psm1 sig:6d871cd4b17ae9ac
 docs/guides/TYPE_SAFETY.md -> tests/TestSupport.ps1 sig:60c2d3807b910a2b
 docs/guides/VERIFY_COVERAGE.md -> scripts/lib/utilities/Command.psm1 sig:4d68807fd241b457
-docs/guides/VERIFY_COVERAGE.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:17a5a2ad25321f29
+docs/guides/VERIFY_COVERAGE.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:35b1e022fda06c0e
 tests/integration/bootstrap/fragment-command-access.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/integration/bootstrap/fragment-command-access.tests.ps1 -> scripts/lib/fragment/CommandDispatcher.psm1 sig:7b944355a2f3a0f5
 tests/integration/bootstrap/fragment-command-access.tests.ps1 -> scripts/lib/fragment/FragmentCommandRegistry.psm1 sig:02f839f07291471d
@@ -4523,7 +4523,7 @@ tests/integration/terminal/oh-my-posh.tests.ps1 -> profile.d/oh-my-posh.ps1 sig:
 tests/integration/terminal/scoop-completion.tests.ps1 -> profile.d/scoop-completion.ps1 sig:e324286c762abdb0
 tests/integration/terminal/smartprompt.tests.ps1 -> profile.d/starship/SmartPrompt.ps1 sig:ae8388f7fb4496cb
 tests/integration/terminal/starship.tests.ps1 -> profile.d/starship.ps1 sig:683005c16f6ac66d
-tests/integration/test-runner/analyze-coverage.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:17a5a2ad25321f29
+tests/integration/test-runner/analyze-coverage.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:35b1e022fda06c0e
 tests/integration/test-runner/baseline-comparison.tests.ps1 -> scripts/utils/code-quality/modules/BaselineComparison.psm1 sig:7145f5a9c53afc9d
 tests/integration/test-runner/baseline-comparison.tests.ps1 -> scripts/utils/code-quality/modules/BaselineGeneration.psm1 sig:adc4d349bee3aae2
 tests/integration/test-runner/baseline-comparison.tests.ps1 -> scripts/utils/code-quality/run-pester.ps1 sig:1d139c40dd640928
@@ -6489,7 +6489,7 @@ tests/unit/test-runner/analysis/test-runner-analysis-edge-cases-extended.tests.p
 tests/unit/test-runner/analysis/test-runner-analysis-edge-cases.tests.ps1 -> scripts/utils/code-quality/modules/TestCategorization.psm1 sig:8b01502115892f7f
 tests/unit/test-runner/analysis/test-runner-analysis-edge-cases.tests.ps1 -> scripts/utils/code-quality/modules/TestFailureAnalysis.psm1 sig:e0259daca1c5c77e
 tests/unit/test-runner/analysis/test-runner-analysis-edge-cases.tests.ps1 -> scripts/utils/code-quality/modules/TestPerformanceAnalysis.psm1 sig:228d724a3de28791
-tests/unit/test-runner/analyze/test-runner-analyze-coverage-extended.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:17a5a2ad25321f29
+tests/unit/test-runner/analyze/test-runner-analyze-coverage-extended.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:35b1e022fda06c0e
 tests/unit/test-runner/analyze/test-runner-analyze-test-performance-extended.tests.ps1 -> scripts/utils/code-quality/analyze-test-performance.ps1 sig:0f57fc070d1919fe
 tests/unit/test-runner/analyze/test-runner-analyze-test-performance.tests.ps1 -> scripts/utils/code-quality/analyze-test-performance.ps1 sig:0f57fc070d1919fe
 tests/unit/test-runner/baseline/test-runner-baseline-comparison-extended.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
@@ -6842,7 +6842,7 @@ tests/unit/test-support/tool/test-support-tool-detection-extended.tests.ps1 -> t
 tests/unit/utility/add/utility-add-comment-help.tests.ps1 -> scripts/utils/code-quality/add-comment-help.ps1 sig:a0507e6b0c76e92c
 tests/unit/utility/add/utility-add-fragment-metadata-extended.tests.ps1 -> scripts/utils/fragment/add-fragment-metadata.ps1 sig:7fb66c043b4e4fed
 tests/unit/utility/add/utility-add-fragment-metadata.tests.ps1 -> scripts/utils/fragment/add-fragment-metadata.ps1 sig:7fb66c043b4e4fed
-tests/unit/utility/analyze/utility-analyze-coverage.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:17a5a2ad25321f29
+tests/unit/utility/analyze/utility-analyze-coverage.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:35b1e022fda06c0e
 tests/unit/utility/backup/utility-backup-workflow.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:e3418b5e3159e675
 tests/unit/utility/benchmark/utility-benchmark-startup-extended.tests.ps1 -> scripts/utils/metrics/benchmark-startup.ps1 sig:dee41149421251de
 tests/unit/utility/benchmark/utility-benchmark-startup.tests.ps1 -> scripts/utils/metrics/benchmark-startup.ps1 sig:dee41149421251de
@@ -6873,7 +6873,7 @@ tests/unit/utility/doc/utility-doc-agent-mode-function-parser-structure-extended
 tests/unit/utility/doc/utility-doc-alias-parser-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocAliasParser.psm1 sig:97fe0718582dce05
 tests/unit/utility/doc/utility-doc-cleanup-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocCleanup.psm1 sig:1d2a1a083fafd7f0
 tests/unit/utility/doc/utility-doc-function-parser-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocFunctionParser.psm1 sig:7c731bcee58229a0
-tests/unit/utility/doc/utility-doc-generator-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocGenerator.psm1 sig:158699bad918b416
+tests/unit/utility/doc/utility-doc-generator-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocGenerator.psm1 sig:68bcffd7f0c533f9
 tests/unit/utility/doc/utility-doc-index-generator-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocIndexGenerator.psm1 sig:b3b1e49a3167fb50
 tests/unit/utility/doc/utility-doc-parser-regex-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocParserRegex.psm1 sig:c5a38c5f211103fa
 tests/unit/utility/doc/utility-doc-parser-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocParser.psm1 sig:724d4bca5ce5397e
@@ -6895,6 +6895,7 @@ tests/unit/utility/generate/utility-generate-dashboard-extended.tests.ps1 -> scr
 tests/unit/utility/generate/utility-generate-dashboard.tests.ps1 -> scripts/utils/metrics/generate-dashboard.ps1 sig:53a885c69e6d9b2c
 tests/unit/utility/generate/utility-generate-docs-extended.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 tests/unit/utility/generate/utility-generate-docs-incremental.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
+tests/unit/utility/generate/utility-generate-docs-incremental.tests.ps1 -> scripts/utils/docs/modules/DocGenerator.psm1 sig:68bcffd7f0c533f9
 tests/unit/utility/generate/utility-generate-docs.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 tests/unit/utility/generate/utility-generate-fragment-readmes-extended.tests.ps1 -> scripts/utils/docs/generate-fragment-readmes.ps1 sig:d6440720ea01c42a
 tests/unit/utility/generate/utility-generate-fragment-readmes.tests.ps1 -> scripts/utils/docs/generate-fragment-readmes.ps1 sig:d6440720ea01c42a
