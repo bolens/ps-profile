@@ -6930,7 +6930,7 @@ tests/unit/utility/performance/utility-performance.tests.ps1 -> scripts/lib/perf
 tests/unit/utility/performance/utility-performance.tests.ps1 -> scripts/lib/performance/PerformanceRegression.psm1 sig:d1c0f4584b9a2728
 tests/unit/utility/populate/utility-populate-performance-metrics-extended.tests.ps1 -> scripts/utils/database/populate-performance-metrics.ps1 sig:53ddccd7ee916267
 tests/unit/utility/populate/utility-populate-performance-metrics.tests.ps1 -> scripts/utils/database/populate-performance-metrics.ps1 sig:53ddccd7ee916267
-tests/unit/utility/pre/utility-pre-commit.tests.ps1 -> scripts/git/pre-commit.ps1 sig:2c4309919daded77
+tests/unit/utility/pre/utility-pre-commit.tests.ps1 -> scripts/git/pre-commit.ps1 sig:04f455ae2dc9850e
 tests/unit/utility/pre/utility-pre-push.tests.ps1 -> scripts/git/hooks/pre-push.ps1 sig:af39e36715ce3325
 tests/unit/utility/run/utility-run-conversion-all-batch.tests.ps1 -> scripts/utils/code-quality/run-conversion-all-batch.ps1 sig:7d0c06776966e51f
 tests/unit/utility/run/utility-run-conversion-integration-batch.tests.ps1 -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
@@ -6988,3 +6988,8 @@ tests/unit/validation/script/validation-script-standards-extended.tests.ps1 -> s
 tests/unit/validation/script/validation-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:ee98a5ea61fd2917
 tests/unit/validation/validate/validation-validate-profile-extended.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:49a6af5ae6081608
 tests/unit/validation/validate/validation-validate-profile.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:49a6af5ae6081608
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/commit-message-check.yml sig:b1b5720dd8edd78d
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-validation.yml sig:5fab74ac2b75c21b
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-vulnerability-scan.yml sig:946cce30d8c362e7
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/metrics-collection.yml sig:08f8f356311c21b3
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/validate-profile.yml sig:e44472787b4bebb4
