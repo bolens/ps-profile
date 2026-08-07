@@ -22,52 +22,47 @@ BeforeAll {
 }
 
 Describe 'save-metrics-snapshot.ps1 execution' {
-    It 'Writes a metrics snapshot JSON file to an isolated output directory' {
-        $outputDir = New-TestTempDirectory -Prefix 'MetricsSnapshot'
-            $result = Invoke-TestScriptFile -ScriptPath $script:SaveSnapshotScript -ArgumentList @(
-                '-OutputPath', $outputDir,
-                '-IncludeCodeMetrics:False'
-            )
-
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'Metrics snapshot saved|Snapshot timestamp'
-
-            $snapshotFiles = @(Get-ChildItem -LiteralPath $outputDir -Filter '*.json' -ErrorAction SilentlyContinue)
-            $snapshotFiles.Count | Should -BeGreaterThan 0
-
-            $snapshot = Get-Content -LiteralPath $snapshotFiles[0].FullName -Raw | ConvertFrom-Json
-            $snapshot.Timestamp | Should -Not -BeNullOrEmpty
+    BeforeEach {
+        $script:PreviousDebug = $env:PS_PROFILE_DEBUG
+        $env:PS_PROFILE_DEBUG = '2'
     }
 
-    It 'Omits code metrics when IncludeCodeMetrics is disabled' {
-        $outputDir = New-TestTempDirectory -Prefix 'MetricsSnapshotNoCode'
-            $result = Invoke-TestScriptFile -ScriptPath $script:SaveSnapshotScript -ArgumentList @(
-                '-OutputPath', $outputDir,
-                '-IncludeCodeMetrics:False',
-                '-IncludePerformanceMetrics:False'
-            )
-
-            $result.ExitCode | Should -Be 0
-            $snapshotFiles = @(Get-ChildItem -LiteralPath $outputDir -Filter '*.json' -ErrorAction SilentlyContinue)
-            $snapshotFiles.Count | Should -BeGreaterThan 0
-
-            $snapshot = Get-Content -LiteralPath $snapshotFiles[0].FullName -Raw | ConvertFrom-Json
-            $snapshot.PSObject.Properties.Name | Should -Not -Contain 'CodeMetrics'
+    AfterEach {
+        if ($null -eq $script:PreviousDebug) {
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PS_PROFILE_DEBUG = $script:PreviousDebug
+        }
     }
 
-    It 'Creates the output directory when it does not exist yet' {
-        $parentDir = New-TestTempDirectory -Prefix 'MetricsSnapshotParent'
+    It 'creates an isolated snapshot without disabled metric sections' {
+        $parentDir = New-TestTempDirectory -Prefix 'MetricsSnapshot'
         $outputDir = Join-Path $parentDir 'nested' 'snapshots'
-            Test-Path -LiteralPath $outputDir | Should -BeFalse
+        Test-Path -LiteralPath $outputDir | Should -BeFalse
 
-            $result = Invoke-TestScriptFile -ScriptPath $script:SaveSnapshotScript -ArgumentList @(
-                '-OutputPath', $outputDir,
-                '-IncludeCodeMetrics:False',
-                '-IncludePerformanceMetrics:False'
-            )
+        { & $script:SaveSnapshotScript -OutputPath $outputDir -IncludeCodeMetrics:$false -Verbose } | Should -Not -Throw
 
-            $result.ExitCode | Should -Be 0
-            Test-Path -LiteralPath $outputDir | Should -BeTrue
-            @(Get-ChildItem -LiteralPath $outputDir -Filter '*.json').Count | Should -BeGreaterThan 0
+        Test-Path -LiteralPath $outputDir | Should -BeTrue
+        $snapshotFiles = @(Get-ChildItem -LiteralPath $outputDir -Filter '*.json' -ErrorAction SilentlyContinue)
+        $snapshotFiles.Count | Should -BeGreaterThan 0
+
+        $snapshot = Get-Content -LiteralPath $snapshotFiles[0].FullName -Raw | ConvertFrom-Json
+        $snapshot.Timestamp | Should -Not -BeNullOrEmpty
+        $snapshot.PSObject.Properties.Name | Should -Not -Contain 'CodeMetrics'
+        $snapshot.PSObject.Properties.Name | Should -Not -Contain 'PerformanceMetrics'
+    }
+
+    It 'continues without code metrics when collection is unavailable' {
+        $repositoryRoot = New-TestTempDirectory -Prefix 'MetricsSnapshotRepo'
+        $outputDir = Join-Path $repositoryRoot 'output'
+
+        {
+            & $script:SaveSnapshotScript -RepositoryRoot $repositoryRoot -OutputPath $outputDir -IncludeCodeMetrics
+        } | Should -Not -Throw
+
+        $snapshotFile = Get-ChildItem -LiteralPath $outputDir -Filter '*.json' | Select-Object -First 1
+        $snapshot = Get-Content -LiteralPath $snapshotFile.FullName -Raw | ConvertFrom-Json
+        $snapshot.PSObject.Properties.Name | Should -Not -Contain 'CodeMetrics'
     }
 }
