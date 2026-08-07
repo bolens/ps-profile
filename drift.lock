@@ -6960,6 +6960,11 @@ tests/unit/utility/sync/utility-sync-profile-fragments.tests.ps1 -> scripts/util
 tests/unit/utility/task/utility-task-comparator-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskComparator.psm1 sig:fae902a57b00e69f
 tests/unit/utility/task/utility-task-generator-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskGenerator.psm1 sig:4653ffdadb3de355
 tests/unit/utility/task/utility-task-parity-utilities-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskParityUtilities.psm1 sig:b6e4767930248714
+tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> .vscode/tasks.json sig:c1cd7f7195e3d108
+tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> Makefile sig:218db1f93c76d9b4
+tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> Taskfile.yml sig:c269031ad63901dd
+tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> justfile sig:30bc4c1a0c7f0858
+tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> package.json sig:dc0976d807470213
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskParser.psm1 sig:70df6e65f25b8e16
 tests/unit/utility/track/utility-track-coverage-trends-extended.tests.ps1 -> scripts/utils/metrics/track-coverage-trends.ps1 sig:2340a411fb7efb2f
 tests/unit/utility/track/utility-track-coverage-trends.tests.ps1 -> scripts/utils/metrics/track-coverage-trends.ps1 sig:2340a411fb7efb2f
