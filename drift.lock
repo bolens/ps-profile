@@ -6987,7 +6987,7 @@ tests/unit/validation/comment/validation-comment-help.tests.ps1 -> scripts/check
 tests/unit/validation/commit/validation-commit-messages-extended.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:5cbcfd4092469c30
 tests/unit/validation/commit/validation-commit-messages.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:5cbcfd4092469c30
 tests/unit/validation/doc/validation-doc-coverage-extended.tests.ps1 -> scripts/checks/check-doc-coverage.ps1 sig:51375505dd2dbdfc
-tests/unit/validation/doc/validation-doc-coverage-extended.tests.ps1 -> scripts/checks/check-doc-freshness.ps1 sig:1732f5c23247b676
+tests/unit/validation/doc/validation-doc-coverage-extended.tests.ps1 -> scripts/checks/check-doc-freshness.ps1 sig:2dec098c36933089
 tests/unit/validation/doc/validation-doc-coverage-extended.tests.ps1 -> scripts/utils/docs/modules/DocCoverage.psm1 sig:e043b75826312f70
 tests/unit/validation/idempotency/validation-idempotency-extended.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:6374366b1e3aa5f2
 tests/unit/validation/idempotency/validation-idempotency-fixtures.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:6374366b1e3aa5f2
