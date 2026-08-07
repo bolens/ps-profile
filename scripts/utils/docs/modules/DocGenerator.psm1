@@ -194,6 +194,7 @@ function Write-FunctionDocumentation {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [System.Collections.Generic.List[PSCustomObject]]$Functions,
 
         [Parameter(Mandatory)]
@@ -380,11 +381,11 @@ function Write-FunctionDocumentation {
                 Write-ScriptMessage -Message "Generated documentation: $mdFile"
             }
             else {
-                Write-Warning "File was not created: $mdFile"
+                throw "Documentation file was not created: $mdFile"
             }
         }
         catch {
-            Write-Warning "Failed to write documentation file $mdFile : $_"
+            throw "Failed to write documentation file '$mdFile': $($_.Exception.Message)"
         }
     }
     
@@ -508,4 +509,3 @@ function Write-AliasDocumentation {
 }
 
 Export-ModuleMember -Function Write-FunctionDocumentation, Write-AliasDocumentation, Get-RelativePath
-
