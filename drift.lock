@@ -5015,8 +5015,8 @@ tests/unit/library/json/library-json-utilities-extended.tests.ps1 -> profile.d/b
 tests/unit/library/json/library-json-utilities-extended.tests.ps1 -> profile.d/bootstrap/GlobalState.ps1 sig:d738e66d74659040
 tests/unit/library/json/library-json-utilities-extended.tests.ps1 -> scripts/lib/core/ErrorHandling.psm1 sig:a843a6278a9c9e35
 tests/unit/library/json/library-json-utilities-extended.tests.ps1 -> scripts/lib/file/FileSystem.psm1 sig:5d00a04e2377ef90
-tests/unit/library/json/library-json-utilities-extended.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:e791b4a02d14853d
-tests/unit/library/json/library-json-utilities.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:e791b4a02d14853d
+tests/unit/library/json/library-json-utilities-extended.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:39d48f132897639a
+tests/unit/library/json/library-json-utilities.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:39d48f132897639a
 tests/unit/library/locale/library-locale-extended.tests.ps1 -> scripts/lib/core/Locale.psm1 sig:335a84151e058d42
 tests/unit/library/logging/library-logging-extended.tests.ps1 -> profile.d/bootstrap/ErrorHandlingStandard.ps1 sig:0605b2f44f12dcf5
 tests/unit/library/logging/library-logging-extended.tests.ps1 -> profile.d/bootstrap/FunctionRegistration.ps1 sig:2f0da5a7c212345c
@@ -5033,11 +5033,11 @@ tests/unit/library/metrics/library-metrics-snapshot-extended.tests.ps1 -> profil
 tests/unit/library/metrics/library-metrics-snapshot-extended.tests.ps1 -> scripts/lib/file/FileSystem.psm1 sig:5d00a04e2377ef90
 tests/unit/library/metrics/library-metrics-snapshot-extended.tests.ps1 -> scripts/lib/metrics/MetricsSnapshot.psm1 sig:10952645551e9f47
 tests/unit/library/metrics/library-metrics-snapshot-extended.tests.ps1 -> scripts/lib/path/PathResolution.psm1 sig:77cd28d0062bfc09
-tests/unit/library/metrics/library-metrics-snapshot-extended.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:e791b4a02d14853d
+tests/unit/library/metrics/library-metrics-snapshot-extended.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:39d48f132897639a
 tests/unit/library/metrics/library-metrics-snapshot.tests.ps1 -> scripts/lib/file/FileSystem.psm1 sig:5d00a04e2377ef90
 tests/unit/library/metrics/library-metrics-snapshot.tests.ps1 -> scripts/lib/metrics/MetricsSnapshot.psm1 sig:10952645551e9f47
 tests/unit/library/metrics/library-metrics-snapshot.tests.ps1 -> scripts/lib/path/PathResolution.psm1 sig:77cd28d0062bfc09
-tests/unit/library/metrics/library-metrics-snapshot.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:e791b4a02d14853d
+tests/unit/library/metrics/library-metrics-snapshot.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:39d48f132897639a
 tests/unit/library/metrics/library-metrics-trend-analysis-extended.tests.ps1 -> scripts/lib/metrics/MetricsTrendAnalysis.psm1 sig:972b2984f885894b
 tests/unit/library/metrics/library-metrics-trend-analysis.tests.ps1 -> scripts/lib/metrics/MetricsTrendAnalysis.psm1 sig:972b2984f885894b
 tests/unit/library/metrics/library-metrics.tests.ps1 -> scripts/lib/metrics/MetricsHistory.psm1 sig:698151fa91ff6fe0
@@ -5105,9 +5105,9 @@ tests/unit/library/performance/library-performance-measurement-extended.tests.ps
 tests/unit/library/performance/library-performance-measurement.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
 tests/unit/library/performance/library-performance-measurement.tests.ps1 -> scripts/lib/performance/PerformanceMeasurement.psm1 sig:4d1f40fecf24bdb4
 tests/unit/library/performance/library-performance-regression-extended.tests.ps1 -> scripts/lib/performance/PerformanceRegression.psm1 sig:d1c0f4584b9a2728
-tests/unit/library/performance/library-performance-regression-extended.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:e791b4a02d14853d
+tests/unit/library/performance/library-performance-regression-extended.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:39d48f132897639a
 tests/unit/library/performance/library-performance-regression.tests.ps1 -> scripts/lib/performance/PerformanceRegression.psm1 sig:d1c0f4584b9a2728
-tests/unit/library/performance/library-performance-regression.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:e791b4a02d14853d
+tests/unit/library/performance/library-performance-regression.tests.ps1 -> scripts/lib/utilities/JsonUtilities.psm1 sig:39d48f132897639a
 tests/unit/library/performance/library-performance.tests.ps1 -> scripts/lib/performance/PerformanceAggregation.psm1 sig:ebb7076d700e5427
 tests/unit/library/platform/library-platform-extended.tests.ps1 -> scripts/lib/core/Platform.psm1 sig:96d2913f6b590072
 tests/unit/library/platform/library-platform-paths-extended.tests.ps1 -> scripts/lib/core/PlatformPaths.psm1 sig:f0f4bad472b381e2
@@ -6774,7 +6774,7 @@ tests/unit/test-runner/result/test-runner-result-reader.tests.ps1 -> scripts/uti
 tests/unit/test-runner/result/test-runner-result-validation-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestResultValidation.psm1 sig:a889bdf13d942bb1
 tests/unit/test-runner/result/test-runner-result-validation.tests.ps1 -> scripts/utils/code-quality/modules/TestResultValidation.psm1 sig:a889bdf13d942bb1
 tests/unit/test-runner/run/test-runner-run-format-extended.tests.ps1 -> scripts/utils/code-quality/run-format.ps1 sig:31997fbb63847fe9
-tests/unit/test-runner/run/test-runner-run-lint-extended.tests.ps1 -> scripts/utils/code-quality/run-lint.ps1 sig:081072eddcc00a92
+tests/unit/test-runner/run/test-runner-run-lint-extended.tests.ps1 -> scripts/utils/code-quality/run-lint.ps1 sig:defbba736969a474
 tests/unit/test-runner/run/test-runner-run-markdownlint-extended.tests.ps1 -> scripts/utils/code-quality/run-markdownlint.ps1 sig:927b49baebc863ca
 tests/unit/test-runner/run/test-runner-run-pester-extended.tests.ps1 -> scripts/utils/code-quality/modules/PesterConfig.psm1 sig:43a7e54f37cf1fb3
 tests/unit/test-runner/run/test-runner-run-pester-extended.tests.ps1 -> scripts/utils/code-quality/run-pester.ps1 sig:1d139c40dd640928
@@ -6937,7 +6937,7 @@ tests/unit/utility/pre/utility-pre-push.tests.ps1 -> scripts/git/hooks/pre-push.
 tests/unit/utility/run/utility-run-conversion-all-batch.tests.ps1 -> scripts/utils/code-quality/run-conversion-all-batch.ps1 sig:7d0c06776966e51f
 tests/unit/utility/run/utility-run-conversion-integration-batch.tests.ps1 -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
 tests/unit/utility/run/utility-run-format.tests.ps1 -> scripts/utils/code-quality/run-format.ps1 sig:31997fbb63847fe9
-tests/unit/utility/run/utility-run-lint.tests.ps1 -> scripts/utils/code-quality/run-lint.ps1 sig:081072eddcc00a92
+tests/unit/utility/run/utility-run-lint.tests.ps1 -> scripts/utils/code-quality/run-lint.ps1 sig:defbba736969a474
 tests/unit/utility/run/utility-run-markdownlint.tests.ps1 -> scripts/utils/code-quality/run-markdownlint.ps1 sig:927b49baebc863ca
 tests/unit/utility/run/utility-run-performance-batch.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:2b6a591a650f98c7
 tests/unit/utility/run/utility-run-security-scan-extended.tests.ps1 -> scripts/utils/security/run-security-scan.ps1 sig:ad1f9daf3ada5d37
