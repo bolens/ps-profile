@@ -315,6 +315,7 @@ if ($sourceFiles.Count -gt 0 -and $testFiles.Count -eq 0) {
             'EnvFile'              = @('library-envfile*.tests.ps1')
             'RequirementsLoader'   = @('library-requirements-loader*.tests.ps1')
             'DocGenerator'         = @('utility-doc-generator*.tests.ps1', 'utility-docs-generation*.tests.ps1', 'utility-generate-docs*.tests.ps1')
+            'pre-commit'           = @('utility-pre-commit.tests.ps1')
         }
         
         $patterns = @()
