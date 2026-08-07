@@ -15,6 +15,33 @@ function global:New-GenerateChangelogTestRepository {
     return $repo
 }
 
+function global:Invoke-GenerateChangelogInProcess {
+    param(
+        [Parameter(Mandatory)]
+        [scriptblock]$CommandTestAction,
+
+        [scriptblock]$CargoInstallAction = { 0 },
+
+        [scriptblock]$GitCliffAction = { param($Arguments) 0 },
+
+        [bool]$NonInteractive = $true,
+
+        [switch]$Unreleased
+    )
+
+    $records = @(& $script:GenerateChangelogScript -OutputFile 'tests/test-artifacts/CHANGELOG-test.md' `
+            -CommandTestAction $CommandTestAction -CargoInstallAction $CargoInstallAction `
+            -GitCliffAction $GitCliffAction -NonInteractive $NonInteractive -Unreleased:$Unreleased -PassThru *>&1)
+    $exitResult = $records | Where-Object { $_.PSObject.Properties.Name -contains 'ExitCode' } | Select-Object -Last 1
+    $output = @($records | Where-Object { $_ -ne $exitResult }) | Out-String -Width 4096
+    if ($exitResult.Message) { $output = "$output$($exitResult.Message)" }
+
+    [PSCustomObject]@{
+        ExitCode = $exitResult.ExitCode
+        Output   = $output
+    }
+}
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -33,6 +60,49 @@ BeforeAll {
 }
 
 Describe 'generate-changelog.ps1 execution' {
+    It 'Returns setup failure when git-cliff is unavailable non-interactively' {
+        $result = Invoke-GenerateChangelogInProcess -CommandTestAction { param($CommandName) $false }
+
+        $result.ExitCode | Should -Be 2
+        $result.Output | Should -Match 'auto-install disabled|not installed'
+    }
+
+    It 'Returns setup failure when neither git-cliff nor cargo is available' {
+        $result = Invoke-GenerateChangelogInProcess -NonInteractive:$false `
+            -CommandTestAction { param($CommandName) $false }
+
+        $result.ExitCode | Should -Be 2
+        $result.Output | Should -Match 'install git-cliff manually|required but not installed'
+    }
+
+    It 'Reports a failed injected cargo installation' {
+        $commandTest = { param($CommandName) $CommandName -eq 'cargo' }
+        $result = Invoke-GenerateChangelogInProcess -NonInteractive:$false -CommandTestAction $commandTest `
+            -CargoInstallAction { 17 }
+
+        $result.ExitCode | Should -Be 2
+        $result.Output | Should -Match 'Failed to install git-cliff via cargo'
+    }
+
+    It 'Runs unreleased changelog generation through the injected command' {
+        $result = Invoke-GenerateChangelogInProcess -Unreleased `
+            -CommandTestAction { param($CommandName) $CommandName -eq 'git-cliff' } `
+            -GitCliffAction { param($Arguments) 0 }
+
+        $result.ExitCode | Should -Be 0
+        $result.Output | Should -Match '\-\-unreleased'
+        $result.Output | Should -Match 'Changelog generated successfully'
+    }
+
+    It 'Reports a nonzero injected git-cliff exit code' {
+        $result = Invoke-GenerateChangelogInProcess `
+            -CommandTestAction { param($CommandName) $CommandName -eq 'git-cliff' } `
+            -GitCliffAction { param($Arguments) 9 }
+
+        $result.ExitCode | Should -Be 2
+        $result.Output | Should -Match 'exit code: 9'
+    }
+
     It 'Exits with setup error when git-cliff is not installed' {
         if ($script:GitCliffAvailable) {
             Set-ItResult -Skipped -Because 'git-cliff is installed on this host'

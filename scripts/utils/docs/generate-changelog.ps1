@@ -23,6 +23,9 @@
     If specified, generates only the unreleased changes section without
     including version tags. Useful for previewing changes before a release.
 
+.PARAMETER PassThru
+    Returns an exit result instead of terminating the current process.
+
 
 .OUTPUTS
     Creates or updates the changelog file at the specified path.
@@ -62,7 +65,27 @@
 param(
     [ValidateNotNullOrEmpty()]
     [string]$OutputFile = "CHANGELOG.md",
-    [switch]$Unreleased
+    [switch]$Unreleased,
+
+    [scriptblock]$CommandTestAction = {
+        param($CommandName)
+        Test-CommandAvailable -CommandName $CommandName
+    },
+
+    [scriptblock]$CargoInstallAction = {
+        & cargo install git-cliff
+        $LASTEXITCODE
+    },
+
+    [scriptblock]$GitCliffAction = {
+        param($Arguments)
+        & git-cliff @Arguments
+        $LASTEXITCODE
+    },
+
+    [Nullable[bool]]$NonInteractive,
+
+    [switch]$PassThru
 )
 
 # Import shared utilities directly (no barrel files)
@@ -76,6 +99,28 @@ Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -Disable
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
+function Complete-ChangelogGeneration {
+    param(
+        [Parameter(Mandatory)]
+        [int]$ExitCode,
+
+        [string]$Message,
+
+        [System.Management.Automation.ErrorRecord]$ErrorRecord
+    )
+
+    if ($PassThru) {
+        [PSCustomObject]@{
+            ExitCode    = $ExitCode
+            Message     = $Message
+            ErrorRecord = $ErrorRecord
+        }
+        return
+    }
+
+    Exit-WithCode -ExitCode $ExitCode -Message $Message -ErrorRecord $ErrorRecord
+}
+
 # Get repository root using shared function
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
@@ -83,24 +128,26 @@ try {
     $changelogPath = Join-Path $repoRoot $OutputFile
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Complete-ChangelogGeneration -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    return
 }
 
 Write-ScriptMessage -Message "Generating changelog..."
 
 # Check if git-cliff is available
-$hasGitCliff = Test-CommandAvailable -CommandName 'git-cliff'
+$hasGitCliff = & $CommandTestAction -CommandName 'git-cliff'
 
 if (-not $hasGitCliff) {
     # Never auto-install in CI/unit tests — cargo/winget can prompt or run for minutes.
-    $nonInteractive = (
+    $nonInteractive = if ($null -ne $NonInteractive) { [bool]$NonInteractive } else {
         $env:PS_PROFILE_NONINTERACTIVE -eq '1' -or
         $env:PS_PROFILE_TEST_MODE -eq '1' -or
         $env:CI -eq 'true' -or
         $env:GITHUB_ACTIONS -eq 'true'
-    )
+    }
     if ($nonInteractive) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'git-cliff is required but not installed (auto-install disabled in non-interactive mode)'
+        Complete-ChangelogGeneration -ExitCode $EXIT_SETUP_ERROR -Message 'git-cliff is required but not installed (auto-install disabled in non-interactive mode)'
+        return
     }
 
     Write-ScriptMessage -Message "git-cliff not found. Installing..."
@@ -108,13 +155,13 @@ if (-not $hasGitCliff) {
     # Try to install git-cliff
     try {
         # Check if cargo is available (Rust toolchain)
-        $hasCargo = Test-CommandAvailable -CommandName 'cargo'
+        $hasCargo = & $CommandTestAction -CommandName 'cargo'
         if ($hasCargo) {
-            $cargo = Get-Command cargo -ErrorAction SilentlyContinue
             Write-ScriptMessage -Message "Installing git-cliff via cargo..."
-            & cargo install git-cliff
-            if ($LASTEXITCODE -ne 0) {
-                Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to install git-cliff via cargo"
+            $cargoExitCode = & $CargoInstallAction
+            if ($cargoExitCode -ne 0) {
+                Complete-ChangelogGeneration -ExitCode $EXIT_SETUP_ERROR -Message "Failed to install git-cliff via cargo"
+                return
             }
         }
         else {
@@ -124,11 +171,13 @@ if (-not $hasGitCliff) {
             Write-ScriptMessage -Message "  Via scoop: scoop install git-cliff"
             Write-ScriptMessage -Message "  Via winget: winget install git-cliff"
             Write-ScriptMessage -Message "  Download from: https://github.com/orhun/git-cliff/releases"
-            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "git-cliff is required but not installed"
+            Complete-ChangelogGeneration -ExitCode $EXIT_SETUP_ERROR -Message "git-cliff is required but not installed"
+            return
         }
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Complete-ChangelogGeneration -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        return
     }
 }
 
@@ -144,15 +193,18 @@ if ($Unreleased) {
 
 Write-ScriptMessage -Message "Running: git-cliff $($args -join ' ')"
 try {
-    & git-cliff @args
+    $gitCliffExitCode = & $GitCliffAction -Arguments $args
 
-    if ($LASTEXITCODE -eq 0) {
-        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Changelog generated successfully: $changelogPath"
+    if ($gitCliffExitCode -eq 0) {
+        Complete-ChangelogGeneration -ExitCode $EXIT_SUCCESS -Message "Changelog generated successfully: $changelogPath"
+        return
     }
     else {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to generate changelog (exit code: $LASTEXITCODE)"
+        Complete-ChangelogGeneration -ExitCode $EXIT_SETUP_ERROR -Message "Failed to generate changelog (exit code: $gitCliffExitCode)"
+        return
     }
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Complete-ChangelogGeneration -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    return
 }
