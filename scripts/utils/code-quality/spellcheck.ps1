@@ -16,6 +16,9 @@
 .PARAMETER RequireAvailable
     Fail with EXIT_SETUP_ERROR when cspell cannot be resolved.
 
+.PARAMETER RepositoryRoot
+    Optional repository root override for isolated spellcheck validation.
+
 
 .NOTES
     Exit Codes:
@@ -38,7 +41,15 @@
 param(
   [string[]]$Paths = @('**/*'),
 
-  [switch]$RequireAvailable
+  [switch]$RequireAvailable,
+
+  [ValidateScript({
+      if ($_ -and -not [string]::IsNullOrWhiteSpace($_) -and -not (Test-Path -LiteralPath $_ -PathType Container)) {
+        throw "Repository root does not exist: $_"
+      }
+      $true
+    })]
+  [string]$RepositoryRoot
 )
 
 # Import PathResolution first (required for ModuleImport to work)
@@ -63,7 +74,12 @@ Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChe
 Import-LibModule -ModuleName 'PathResolution' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 try {
-  $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+  $repoRoot = if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+    Get-RepoRoot -ScriptPath $PSScriptRoot
+  }
+  else {
+    [System.IO.Path]::GetFullPath($RepositoryRoot)
+  }
 }
 catch {
   Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
@@ -135,6 +151,10 @@ if (-not $invocation) {
 
   Write-ScriptMessage -Message $message -IsWarning
   Write-ScriptMessage -Message 'Skipping local spellcheck (CI workflow will run cspell on push/PR).'
+  if ($RepositoryRoot -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    return
+  }
+
   Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
@@ -186,4 +206,10 @@ if ($cspellExit -ne 0) {
   Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message 'cspell found spelling errors'
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'cspell passed'
+$successMessage = 'cspell passed'
+if ($RepositoryRoot -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+  Write-ScriptMessage -Message $successMessage
+}
+else {
+  Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
+}

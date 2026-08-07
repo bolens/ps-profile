@@ -23,6 +23,127 @@ BeforeAll {
 }
 
 Describe 'spellcheck.ps1 execution' {
+    It 'runs an available cspell command in-process with portable path normalization' {
+        $repo = New-TestTempDirectory -Prefix 'SpellcheckInProcess'
+        $docPath = Join-Path $repo 'fixture.md'
+        Set-Content -LiteralPath $docPath -Value '# Portable spellcheck fixture' -Encoding UTF8
+        function global:cspell {
+            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+            $global:LASTEXITCODE = 0
+        }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:SpellcheckScript -RepositoryRoot $repo -Paths @('', $docPath, 'file://fixture.md') 2>&1 |
+                Out-String
+
+            $output | Should -Match 'Running cspell'
+            $output | Should -Match 'file://'
+            $output | Should -Match 'cspell passed'
+        }
+        finally {
+            Remove-Item Function:\cspell -ErrorAction SilentlyContinue
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'skips in-process when no cspell runner is available' {
+        $repo = New-TestTempDirectory -Prefix 'SpellcheckInProcessMissing'
+        Mock Test-CommandAvailable { $false }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:SpellcheckScript -RepositoryRoot $repo 2>&1 | Out-String
+
+            $output | Should -Match 'Skipping local spellcheck'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'fails in-process when cspell reports spelling errors' {
+        $repo = New-TestTempDirectory -Prefix 'SpellcheckInProcessFailure'
+        function global:cspell {
+            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+            $global:LASTEXITCODE = 1
+        }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            { & $script:SpellcheckScript -RepositoryRoot $repo 2>&1 } |
+                Should -Throw -ExpectedMessage '*cspell found spelling errors*'
+        }
+        finally {
+            Remove-Item Function:\cspell -ErrorAction SilentlyContinue
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'fails in-process when cspell is required but unavailable' {
+        $repo = New-TestTempDirectory -Prefix 'SpellcheckInProcessRequired'
+        Mock Test-CommandAvailable { $false }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            { & $script:SpellcheckScript -RepositoryRoot $repo -RequireAvailable 2>&1 } |
+                Should -Throw -ExpectedMessage '*cspell not found*'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'uses pnpm for installed repository dependencies in-process' {
+        $repo = New-TestTempDirectory -Prefix 'SpellcheckInProcessPnpm'
+        New-Item -ItemType Directory -Path (Join-Path $repo 'node_modules') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $repo 'package.json') -Value '{}' -Encoding UTF8
+        function global:pnpm {
+            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+            $global:LASTEXITCODE = 0
+        }
+        Mock Test-CommandAvailable {
+            param([string]$CommandName)
+            return $CommandName -eq 'pnpm'
+        }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:SpellcheckScript -RepositoryRoot $repo 2>&1 | Out-String
+
+            $output | Should -Match 'cspell passed'
+        }
+        finally {
+            Remove-Item Function:\pnpm -ErrorAction SilentlyContinue
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'uses npx when pnpm is unavailable in-process' {
+        $repo = New-TestTempDirectory -Prefix 'SpellcheckInProcessNpx'
+        New-Item -ItemType Directory -Path (Join-Path $repo 'node_modules') -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $repo 'package.json') -Value '{}' -Encoding UTF8
+        function global:npx {
+            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+            $global:LASTEXITCODE = 0
+        }
+        Mock Test-CommandAvailable {
+            param([string]$CommandName)
+            return $CommandName -eq 'npx'
+        }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:SpellcheckScript -RepositoryRoot $repo 2>&1 | Out-String
+
+            $output | Should -Match 'cspell passed'
+        }
+        finally {
+            Remove-Item Function:\npx -ErrorAction SilentlyContinue
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
     It 'Uses repo-local cspell when available via node_modules' {
         $cspellEntry = Join-Path $script:TestRepoRoot 'node_modules' 'cspell' 'bin.mjs'
         if (-not (Test-Path -LiteralPath $cspellEntry)) {
