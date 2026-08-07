@@ -1,30 +1,9 @@
 <#
-tests/unit/utility-create-release.tests.ps1
+tests/unit/utility/create/utility-create-release.tests.ps1
 
 .SYNOPSIS
-    Behavioral unit tests for create-release.ps1 DryRun in an isolated git repository.
+    Behavioral tests for create-release.ps1 with isolated command fixtures.
 #>
-
-function global:New-CreateReleaseTestRepository {
-    $repo = New-TestTempDirectory -Prefix 'CreateReleaseRepo'
-    $releaseDir = Join-Path $repo 'scripts' 'utils' 'release'
-    New-Item -ItemType Directory -Path $releaseDir -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-    Copy-Item -LiteralPath $script:CreateReleaseScript -Destination (Join-Path $releaseDir 'create-release.ps1') -Force
-
-    Push-Location $repo
-    try {
-    & git init -q 2>$null
-    & git config user.email 'test@example.com' 2>$null
-    & git config user.name 'Test User' 2>$null
-    & git commit --allow-empty -m 'feat(init): seed repository' -q 2>$null
-    }
-    finally {
-        Pop-Location
-    }
-
-    return $repo
-}
 
 BeforeAll {
     $current = Get-Item $PSScriptRoot
@@ -34,87 +13,65 @@ BeforeAll {
             . $testSupportPath
             break
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:CreateReleaseScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'release' 'create-release.ps1'
-    $script:GitAvailable = [bool](Get-Command git -ErrorAction SilentlyContinue)
-    $ConfirmPreference = 'None'
+
+    function global:Invoke-ReleaseGitFixture {
+        $arguments = @($args)
+        $global:ReleaseGitCalls.Add(($arguments -join ' '))
+        $global:LASTEXITCODE = 0
+        if ($arguments[0] -eq 'describe') {
+            return 'v1.2.3'
+        }
+        if ($arguments[0] -eq 'log') {
+            return @($global:ReleaseCommitSubjects)
+        }
+    }
+
+    function global:Invoke-ReleaseChangelogFixture {
+        param([switch]$Unreleased)
+        $global:ReleaseChangelogCalled = $Unreleased.IsPresent
+        $global:LASTEXITCODE = 0
+    }
 }
 
 Describe 'create-release.ps1 execution' {
-    It 'DryRun analyzes commits without creating tags in an isolated repository' {
-        if (-not $script:GitAvailable) {
-            Set-ItResult -Skipped -Because 'git is not installed'
-            return
-        }
-
-        $repo = New-CreateReleaseTestRepository
-        $scriptPath = Join-Path $repo 'scripts' 'utils' 'release' 'create-release.ps1'
-        Push-Location $repo
-        try {
-            $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @('-DryRun')
-        }
-        finally {
-            Pop-Location
-        }
-                $result.ExitCode | Should -BeIn @(0, 1, 2)
-        $result.Output | Should -Match 'Analyzing commits|Breaking changes|features|fixes|DryRun|release'
+    BeforeEach {
+        $global:ReleaseCommitSubjects = @('docs: update release notes')
+        $global:ReleaseGitCalls = [System.Collections.Generic.List[string]]::new()
+        $global:ReleaseChangelogCalled = $false
     }
 
-    It 'DryRun recommends a minor version bump when feature commits are present' {
-        if (-not $script:GitAvailable) {
-            Set-ItResult -Skipped -Because 'git is not installed'
-            return
-        }
-
-        $repo = New-CreateReleaseTestRepository
-        Push-Location $repo
-        try {
-            & git commit --allow-empty -m 'feat(release): add release fixture feature' -q 2>$null
-        }
-        finally {
-            Pop-Location
-        }
-                $scriptPath = Join-Path $repo 'scripts' 'utils' 'release' 'create-release.ps1'
-        Push-Location $repo
-        try {
-            $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @('-DryRun')
-        }
-        finally {
-            Pop-Location
-        }
-                $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'Features: [1-9]'
-        $result.Output | Should -Match 'Recommended version bump: minor'
-        $result.Output | Should -Match 'DRY RUN'
+    It 'selects a patch release for non-feature commits' {
+        { & $script:CreateReleaseScript -DryRun -GitExecutable 'Invoke-ReleaseGitFixture' } | Should -Not -Throw
+        $global:ReleaseGitCalls | Should -Contain 'describe --tags --abbrev=0'
     }
 
-    It 'DryRun recommends a major version bump when breaking commits are present' {
-        if (-not $script:GitAvailable) {
-            Set-ItResult -Skipped -Because 'git is not installed'
-            return
-        }
+    It 'selects a minor release when feature commits are present' {
+        $global:ReleaseCommitSubjects = @('feat(release): add release automation', 'fix: correct notes')
+        { & $script:CreateReleaseScript -DryRun -GitExecutable 'Invoke-ReleaseGitFixture' } | Should -Not -Throw
+    }
 
-        $repo = New-CreateReleaseTestRepository
-        Push-Location $repo
-        try {
-            & git commit --allow-empty -m 'feat!: remove deprecated profile hook' -q 2>$null
-        }
-        finally {
-            Pop-Location
-        }
-                $scriptPath = Join-Path $repo 'scripts' 'utils' 'release' 'create-release.ps1'
-        Push-Location $repo
-        try {
-            $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @('-DryRun')
-        }
-        finally {
-            Pop-Location
-        }
-                $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'Breaking changes: [1-9]'
-        $result.Output | Should -Match 'Recommended version bump: major'
+    It 'selects a major release when breaking commits are present' {
+        $global:ReleaseCommitSubjects = @('feat!: remove deprecated hook')
+        { & $script:CreateReleaseScript -DryRun -GitExecutable 'Invoke-ReleaseGitFixture' } | Should -Not -Throw
+    }
+
+    It 'generates a changelog, tags, and pushes a release' {
+        $global:ReleaseCommitSubjects = @('fix(release): correct published archive')
+
+        {
+            & $script:CreateReleaseScript `
+                -GitExecutable 'Invoke-ReleaseGitFixture' `
+                -ChangelogScript 'Invoke-ReleaseChangelogFixture'
+        } | Should -Not -Throw
+
+        $global:ReleaseChangelogCalled | Should -BeTrue
+        $global:ReleaseGitCalls | Should -Contain 'tag -a v1.2.4 -m Release v1.2.4'
+        $global:ReleaseGitCalls | Should -Contain 'push origin v1.2.4'
     }
 }
