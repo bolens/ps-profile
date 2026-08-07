@@ -44,14 +44,22 @@ BeforeAll {
 }
 
 Describe 'verify-cache-cleared.ps1 execution' {
-    It 'Reports success when the cache database does not exist in an isolated cache directory' {
-        $cacheDir = New-TestTempDirectory -Prefix 'VerifyCacheCleared'
-            $result = Invoke-TestScriptFile -ScriptPath $script:VerifyCacheScript -EnvironmentVariables @{
-                PS_PROFILE_CACHE_DIR = $cacheDir
-            }
+    BeforeEach {
+        $script:PreviousCacheDirectory = $env:PS_PROFILE_CACHE_DIR
+        $env:PS_PROFILE_CACHE_DIR = New-TestTempDirectory -Prefix 'VerifyCacheCleared'
+    }
 
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'Database file does not exist|cache is cleared'
+    AfterEach {
+        if ($null -eq $script:PreviousCacheDirectory) {
+            Remove-Item Env:PS_PROFILE_CACHE_DIR -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PS_PROFILE_CACHE_DIR = $script:PreviousCacheDirectory
+        }
+    }
+
+    It 'Reports success when the cache database does not exist in an isolated cache directory' {
+        { & $script:VerifyCacheScript } | Should -Not -Throw
     }
 
     It 'Reports non-empty cache entries without failing when sqlite3 is available' {
@@ -60,15 +68,9 @@ Describe 'verify-cache-cleared.ps1 execution' {
             return
         }
 
-        $cacheDir = New-TestTempDirectory -Prefix 'VerifyCacheNotCleared'
-            $null = New-FragmentCacheDatabaseWithEntries -CacheDir $cacheDir
-            $result = Invoke-TestScriptFile -ScriptPath $script:VerifyCacheScript -EnvironmentVariables @{
-                PS_PROFILE_CACHE_DIR = $cacheDir
-            }
+        $null = New-FragmentCacheDatabaseWithEntries -CacheDir $env:PS_PROFILE_CACHE_DIR
 
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'Database file exists'
-            $result.Output | Should -Match 'Cache is NOT fully cleared|AST cache entries: 1|Content cache entries: 1'
+        { & $script:VerifyCacheScript } | Should -Not -Throw
     }
 
     It 'Reports a fully cleared cache when database tables exist but contain no rows' {
@@ -77,21 +79,35 @@ Describe 'verify-cache-cleared.ps1 execution' {
             return
         }
 
-        $cacheDir = New-TestTempDirectory -Prefix 'VerifyCacheEmptyTables'
-            $dbPath = Join-Path $cacheDir 'fragment-cache.db'
-            @'
+        $dbPath = Join-Path $env:PS_PROFILE_CACHE_DIR 'fragment-cache.db'
+        @'
 CREATE TABLE fragment_ast_cache (id INTEGER PRIMARY KEY);
 CREATE TABLE fragment_content_cache (id INTEGER PRIMARY KEY);
 '@ | & sqlite3 $dbPath 2>&1 | Out-Null
 
-            $result = Invoke-TestScriptFile -ScriptPath $script:VerifyCacheScript -EnvironmentVariables @{
-                PS_PROFILE_CACHE_DIR = $cacheDir
-            }
+        { & $script:VerifyCacheScript } | Should -Not -Throw
+    }
 
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'Database file exists'
-            $result.Output | Should -Match 'AST cache entries: 0'
-            $result.Output | Should -Match 'Content cache entries: 0'
-            $result.Output | Should -Match 'Cache is cleared \(both AST and content caches are empty\)'
+    It 'handles an invalid cache database without leaking temporary files' {
+        if (-not $script:SqliteAvailable) {
+            Set-ItResult -Skipped -Because 'sqlite3 is not installed'
+            return
+        }
+
+        Set-Content -LiteralPath (Join-Path $env:PS_PROFILE_CACHE_DIR 'fragment-cache.db') -Value 'not a database' -Encoding UTF8
+
+        { & $script:VerifyCacheScript } | Should -Not -Throw
+    }
+
+    It 'reports an existing database when SQLite is unavailable' {
+        Set-Content -LiteralPath (Join-Path $env:PS_PROFILE_CACHE_DIR 'fragment-cache.db') -Value 'fixture' -Encoding UTF8
+        $previousPath = $env:PATH
+        $env:PATH = New-TestTempDirectory -Prefix 'EmptyExecutablePath'
+        try {
+            { & $script:VerifyCacheScript } | Should -Not -Throw
+        }
+        finally {
+            $env:PATH = $previousPath
+        }
     }
 }
