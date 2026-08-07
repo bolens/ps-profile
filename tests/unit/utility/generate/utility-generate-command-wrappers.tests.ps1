@@ -41,20 +41,23 @@ Describe 'generate-command-wrappers.ps1 execution' {
 
     It 'Fails validation when the registry has no commands' {
         $outputDir = New-TestTempDirectory -Prefix 'WrapperEmpty'
-                & pwsh -NoProfile -File $script:GenerateScript -OutputPath $outputDir 2>&1 | Out-Null
+        & pwsh -NoProfile -File $script:GenerateScript -OutputPath $outputDir 2>&1 | Out-Null
         $LASTEXITCODE | Should -Be 1
     }
 
-    It 'DryRun reports a wrapper plan for a registered function command' {
+    It 'DryRun reports wrapper plans for registered function and alias commands' {
         $null = Register-FragmentCommand -CommandName 'Invoke-WrapperTest' -FragmentName 'bootstrap' -CommandType 'Function'
+        $null = Register-FragmentCommand -CommandName 'gs' -FragmentName 'git' -CommandType 'Alias'
         $outputDir = New-TestTempDirectory -Prefix 'WrapperDryRun'
 
-                $output = & $script:GenerateScript -DryRun -CommandName 'Invoke-WrapperTest' -OutputPath $outputDir *>&1 | Out-String
+        $output = & $script:GenerateScript -DryRun -OutputPath $outputDir *>&1 | Out-String
         $LASTEXITCODE | Should -Be 0
         $output | Should -Match '\[GENERATE\] Invoke-WrapperTest'
+        $output | Should -Match '\[SKIP\] gs \(alias\)'
         $expectedPath = [regex]::Escape((Join-Path $outputDir 'Invoke-WrapperTest.ps1'))
         $output | Should -Match $expectedPath
         Test-Path -LiteralPath (Join-Path $outputDir 'Invoke-WrapperTest.ps1') | Should -Be $false
+        Test-Path -LiteralPath (Join-Path $outputDir 'gs.ps1') | Should -Be $false
     }
 
     It 'Writes a wrapper script for a registered function command' {
@@ -75,18 +78,8 @@ Describe 'generate-command-wrappers.ps1 execution' {
 
     It 'Fails validation when a specific command name is not registered' {
         $outputDir = New-TestTempDirectory -Prefix 'WrapperUnknownCommand'
-                $output = & pwsh -NoProfile -File $script:GenerateScript -CommandName 'Definitely-Not-Registered-Command' -OutputPath $outputDir 2>&1 | Out-String
+        $output = & pwsh -NoProfile -File $script:GenerateScript -CommandName 'Definitely-Not-Registered-Command' -OutputPath $outputDir 2>&1 | Out-String
         $LASTEXITCODE | Should -Be 1
         $output | Should -Match 'No commands to generate wrappers for|No commands found in registry'
-    }
-
-    It 'DryRun reports a wrapper plan for a registered alias command' {
-        $null = Register-FragmentCommand -CommandName 'gs' -FragmentName 'git' -CommandType 'Alias'
-        $outputDir = New-TestTempDirectory -Prefix 'WrapperAliasDryRun'
-
-                $output = & $script:GenerateScript -DryRun -CommandName 'gs' -OutputPath $outputDir *>&1 | Out-String
-        $LASTEXITCODE | Should -Be 0
-        $output | Should -Match '\[GENERATE\] gs|Found 1 command'
-        Test-Path -LiteralPath (Join-Path $outputDir 'gs.ps1') | Should -Be $false
     }
 }
