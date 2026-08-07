@@ -32,7 +32,17 @@ function Get-NamingExceptions {
     )
 
     $exceptions = @{}
-    $exceptionVerbs = @('Ensure', 'Reload', 'Continue', 'Jump', 'Time', 'am', 'Simple', 'Visit')
+    $exceptionVerbs = @(
+        # Infrastructure and convenience patterns.
+        'Ensure', 'Reload', 'Continue', 'Jump', 'Time', 'am', 'Simple', 'Visit',
+        # Domain-specific commands whose established terminology is clearer than
+        # an approved-verb substitution.
+        'Analyze', 'Apply', 'Archive', 'Audit', 'Clean', 'Compile', 'Decode',
+        'Decompile', 'Describe', 'Download', 'Dump', 'Encode', 'Exec', 'Explain',
+        'Extract', 'Flash', 'Grep', 'Health', 'Launch', 'Lint', 'Load', 'Mirror',
+        'Navigate', 'Normalize', 'Parse', 'Pin', 'PortForward', 'Process', 'Query',
+        'Release', 'Render', 'Rip', 'Sanitize', 'Tag', 'Tail', 'View'
+    )
 
     if ($ExceptionsFile -and -not [string]::IsNullOrWhiteSpace($ExceptionsFile) -and (Test-Path -LiteralPath $ExceptionsFile)) {
         $exceptionContent = Get-Content -Path $ExceptionsFile -Raw

@@ -47,6 +47,9 @@ Describe 'ExceptionHandler extended scenarios' {
             $result.Exceptions.ContainsKey('Ensure-FileConversion') | Should -Be $true
             $result.Exceptions.ContainsKey('Ensure-PlainName') | Should -Be $true
             @($result.ExceptionVerbs).Count | Should -BeGreaterThan 0
+            $result.ExceptionVerbs | Should -Contain 'Launch'
+            $result.ExceptionVerbs | Should -Contain 'Parse'
+            $result.ExceptionVerbs | Should -Contain 'PortForward'
         }
 
         It 'Returns empty exception maps for missing files' {
