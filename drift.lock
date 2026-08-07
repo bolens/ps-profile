@@ -6851,7 +6851,7 @@ tests/unit/utility/fragment/utility-fragment-index-generator-structure-extended.
 tests/unit/utility/fragment/utility-fragment-readme-generator-structure-extended.tests.ps1 -> scripts/utils/docs/modules/FragmentReadmeGenerator.psm1 sig:57ff520a8d59ab0a
 tests/unit/utility/fragment/utility-fragment-readme-parser-structure-extended.tests.ps1 -> scripts/utils/docs/modules/FragmentReadmeParser.psm1 sig:6b461dbb1597ce96
 tests/unit/utility/fragment/utility-fragment-readme-regex-structure-extended.tests.ps1 -> scripts/utils/docs/modules/FragmentReadmeRegex.psm1 sig:231ae68a6460acad
-tests/unit/utility/generate/utility-generate-changelog-extended.tests.ps1 -> scripts/utils/docs/generate-changelog.ps1 sig:0df0b385600b2678
+tests/unit/utility/generate/utility-generate-changelog-extended.tests.ps1 -> scripts/utils/docs/generate-changelog.ps1 sig:20a3a3a48d4bd8d2
 tests/unit/utility/generate/utility-generate-changelog.tests.ps1 -> scripts/utils/docs/generate-changelog.ps1 sig:20a3a3a48d4bd8d2
 tests/unit/utility/generate/utility-generate-command-wrappers-extended.tests.ps1 -> scripts/utils/fragment/generate-command-wrappers.ps1 sig:f0e087747b1e9041
 tests/unit/utility/generate/utility-generate-command-wrappers.tests.ps1 -> scripts/utils/fragment/generate-command-wrappers.ps1 sig:f0e087747b1e9041
