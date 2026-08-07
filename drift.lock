@@ -4933,8 +4933,8 @@ tests/unit/library/file/library-file-content-extended.tests.ps1 -> scripts/lib/f
 tests/unit/library/file/library-file-content.tests.ps1 -> scripts/lib/file/FileContent.psm1 sig:12d39ade7bcb0039
 tests/unit/library/file/library-file-filtering-extended.tests.ps1 -> scripts/lib/file/FileFiltering.psm1 sig:5e6679024b7583e4
 tests/unit/library/file/library-file-filtering.tests.ps1 -> scripts/lib/file/FileFiltering.psm1 sig:5e6679024b7583e4
-tests/unit/library/filebackup/library-filebackup-extended.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:e3418b5e3159e675
-tests/unit/library/filebackup/library-filebackup.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:e3418b5e3159e675
+tests/unit/library/filebackup/library-filebackup-extended.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
+tests/unit/library/filebackup/library-filebackup.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
 tests/unit/library/filesystem/library-filesystem-extended.tests.ps1 -> profile.d/bootstrap/ErrorHandlingStandard.ps1 sig:0605b2f44f12dcf5
 tests/unit/library/filesystem/library-filesystem-extended.tests.ps1 -> profile.d/bootstrap/FunctionRegistration.ps1 sig:2f0da5a7c212345c
 tests/unit/library/filesystem/library-filesystem-extended.tests.ps1 -> profile.d/bootstrap/GlobalState.ps1 sig:d738e66d74659040
@@ -6870,8 +6870,8 @@ tests/unit/utility/initialize/utility-initialize-databases.tests.ps1 -> scripts/
 tests/unit/utility/install/utility-install-githooks.tests.ps1 -> scripts/git/install-githooks.ps1 sig:dd1eac9fdc5eefb4
 tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:925dde2c54f274af
 tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:e3418b5e3159e675
-tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:925dde2c54f274af
-tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:e3418b5e3159e675
+tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:d163ae4b6191fc9a
+tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
 tests/unit/utility/logging/utility-logging.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
 tests/unit/utility/migrate/utility-migrate-metrics-to-sqlite-extended.tests.ps1 -> scripts/utils/database/migrate-metrics-to-sqlite.ps1 sig:5ace14879dee3357
 tests/unit/utility/migrate/utility-migrate-metrics-to-sqlite.tests.ps1 -> scripts/utils/database/migrate-metrics-to-sqlite.ps1 sig:5ace14879dee3357
