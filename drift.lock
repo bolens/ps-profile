@@ -2693,7 +2693,7 @@ docs/api/functions/Invoke-GumSpin.md -> profile.d/gum.ps1 sig:1afa7a9b278a166d
 docs/api/functions/Invoke-GumStyle.md -> profile.d/gum.ps1 sig:1afa7a9b278a166d
 docs/api/functions/Invoke-Hasura.md -> profile.d/database-clients.ps1 sig:2c6571c7cfdb8b64
 docs/api/functions/Invoke-Helm.md -> profile.d/helm.ps1 sig:97533af22d6847be
-docs/api/functions/Invoke-HttpRequestWithRetry.md -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:e78ee7d0a8858917
+docs/api/functions/Invoke-HttpRequestWithRetry.md -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:7690e85e92e9c91d
 docs/api/functions/Invoke-HttpServer.md -> profile.d/dev-tools-modules/build/build-tools.ps1 sig:c858be169695077c
 docs/api/functions/Invoke-Httpie.md -> profile.d/api-tools.ps1 sig:9da5de6cb6a2fc4d
 docs/api/functions/Invoke-Hurl.md -> profile.d/api-tools.ps1 sig:9da5de6cb6a2fc4d
@@ -2755,7 +2755,7 @@ docs/api/functions/Invoke-Vite.md -> profile.d/vite.ps1 sig:254b45d42ba43682
 docs/api/functions/Invoke-Vitest.md -> profile.d/dev-tools-modules/build/testing-frameworks.ps1 sig:e72161480509a96e
 docs/api/functions/Invoke-Vue.md -> profile.d/vue.ps1 sig:52a862808b499706
 docs/api/functions/Invoke-WebRequestCustom.md -> profile.d/system/NetworkOperations.ps1 sig:1d157a210046acff
-docs/api/functions/Invoke-WithRetry.md -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:e78ee7d0a8858917
+docs/api/functions/Invoke-WithRetry.md -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:7690e85e92e9c91d
 docs/api/functions/Invoke-WithWideEvent.md -> profile.d/bootstrap/ErrorHandlingStandard.ps1 sig:0605b2f44f12dcf5
 docs/api/functions/Invoke-YaraScan.md -> profile.d/security-tools.ps1 sig:c8bc3cd027a93b69
 docs/api/functions/Invoke-Yarn.md -> profile.d/yarn.ps1 sig:20e8cad8e44afd5b
@@ -2896,7 +2896,7 @@ docs/api/functions/Repair-ScoopBuckets.md -> profile.d/scoop.ps1 sig:415a277d321
 docs/api/functions/Resize-Image.md -> profile.d/conversion-modules/media/images/legacy-image.ps1 sig:9e33e5efc1beb5d3
 docs/api/functions/Resolve-CloudInstallHint.md -> profile.d/bootstrap/CloudProviderBase.ps1 sig:e31f77da1cd51e9d
 docs/api/functions/Resolve-DnsNameCustom.md -> profile.d/system/NetworkOperations.ps1 sig:1d157a210046acff
-docs/api/functions/Resolve-HostWithRetry.md -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:e78ee7d0a8858917
+docs/api/functions/Resolve-HostWithRetry.md -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:7690e85e92e9c91d
 docs/api/functions/Resolve-SwiftPackages.md -> profile.d/swift.ps1 sig:354c54a88539b8a6
 docs/api/functions/Restore-ContainerVolumes.md -> profile.d/containers-enhanced.ps1 sig:f37332399d1a59be
 docs/api/functions/Restore-Database.md -> profile.d/database.ps1 sig:1279be2b67e977ca
@@ -3037,7 +3037,7 @@ docs/api/functions/Test-MavenOutdated.md -> profile.d/maven.ps1 sig:b1b25281b662
 docs/api/functions/Test-MiseOutdated.md -> profile.d/mise.ps1 sig:c7fb8c53d23508bf
 docs/api/functions/Test-MixOutdated.md -> profile.d/mix.ps1 sig:df205e570752a0c3
 docs/api/functions/Test-NetworkConnection.md -> profile.d/system/NetworkOperations.ps1 sig:1d157a210046acff
-docs/api/functions/Test-NetworkConnectivity.md -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:e78ee7d0a8858917
+docs/api/functions/Test-NetworkConnectivity.md -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:7690e85e92e9c91d
 docs/api/functions/Test-NimbleOutdated.md -> profile.d/nimble.ps1 sig:033924e2ad8a5b45
 docs/api/functions/Test-NpmOutdated.md -> profile.d/npm.ps1 sig:59f307326671bc7f
 docs/api/functions/Test-PerformanceHealth.md -> profile.d/diagnostics-modules/monitoring/diagnostics-performance.ps1 sig:8c26a59dc5053e79
@@ -6414,7 +6414,7 @@ tests/unit/profile/utilities/profile-utilities-isbn.tests.ps1 -> profile.d/utili
 tests/unit/profile/utilities/profile-utilities-network-advanced-extended.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/unit/profile/utilities/profile-utilities-network-advanced-extended.tests.ps1 -> profile.d/files-module-registry.ps1 sig:80a766bfd3b187b1
 tests/unit/profile/utilities/profile-utilities-network-advanced-extended.tests.ps1 -> profile.d/network-utils.ps1 sig:870de214411fb302
-tests/unit/profile/utilities/profile-utilities-network-advanced-extended.tests.ps1 -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:e78ee7d0a8858917
+tests/unit/profile/utilities/profile-utilities-network-advanced-extended.tests.ps1 -> profile.d/utilities-modules/network/utilities-network-advanced.ps1 sig:7690e85e92e9c91d
 tests/unit/profile/utilities/profile-utilities-network-extended.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/unit/profile/utilities/profile-utilities-network-extended.tests.ps1 -> profile.d/files-module-registry.ps1 sig:80a766bfd3b187b1
 tests/unit/profile/utilities/profile-utilities-network-extended.tests.ps1 -> profile.d/utilities-modules/network/utilities-network.ps1 sig:899ac89697436997
