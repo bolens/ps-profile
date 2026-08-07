@@ -139,9 +139,9 @@ foreach ($script in $scripts) {
                     Severity = [SeverityLevel]::Information
                 })
         }
-        elseif ($isInGit -and $content -notmatch "Join-Path\s+`\$scriptsDir\s+['\`"]lib['\`"]\s+['\`"]Common\.psm1['\`"]") {
+        elseif ($isInGit -and $content -notmatch 'Join-Path\s+\$scriptsDir\s+[''"]lib[''"]\s+[''"]Common\.psm1[''"]') {
             # Git scripts use a different pattern, check for it
-            if ($content -notmatch '`\$scriptsDir\s*=\s*Split-Path\s+-Parent\s+`\$PSScriptRoot') {
+            if ($content -notmatch '\$scriptsDir\s*=\s*Split-Path\s+-Parent\s+\$PSScriptRoot') {
                 $issues.Add([PSCustomObject]@{
                         File     = $relativePath
                         Line     = 0
@@ -199,9 +199,9 @@ if ($issues.Count -gt 0) {
     Write-ScriptMessage -Message "`nFound $($issues.Count) issue(s):"
     
     # Group by severity
-    $errors = $issues | Where-Object { $_.Severity -eq [SeverityLevel]::Error }
-    $warnings = $issues | Where-Object { $_.Severity -eq [SeverityLevel]::Warning }
-    $info = $issues | Where-Object { $_.Severity -eq [SeverityLevel]::Information }
+    $errors = @($issues | Where-Object { $_.Severity -eq [SeverityLevel]::Error })
+    $warnings = @($issues | Where-Object { $_.Severity -eq [SeverityLevel]::Warning })
+    $info = @($issues | Where-Object { $_.Severity -eq [SeverityLevel]::Information })
     
     if ($errors.Count -gt 0) {
         Write-ScriptMessage -Message "`nErrors:" -ForegroundColor Red
@@ -223,10 +223,19 @@ if ($issues.Count -gt 0) {
         Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $($errors.Count + $warnings.Count) issue(s) that need attention"
     }
     else {
-        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Found $($info.Count) informational issue(s) - no action required"
+        $successMessage = "Found $($info.Count) informational issue(s) - no action required"
+        if ($Path -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+            Write-ScriptMessage -Message $successMessage
+            return
+        }
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
     }
 }
 else {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All scripts comply with codebase standards"
+    $successMessage = 'All scripts comply with codebase standards'
+    if ($Path -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        Write-ScriptMessage -Message $successMessage
+        return
+    }
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
 }
-
