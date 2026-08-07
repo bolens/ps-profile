@@ -6807,7 +6807,7 @@ tests/unit/utility/add/utility-add-comment-help.tests.ps1 -> scripts/utils/code-
 tests/unit/utility/add/utility-add-fragment-metadata-extended.tests.ps1 -> scripts/utils/fragment/add-fragment-metadata.ps1 sig:7fb66c043b4e4fed
 tests/unit/utility/add/utility-add-fragment-metadata.tests.ps1 -> scripts/utils/fragment/add-fragment-metadata.ps1 sig:7fb66c043b4e4fed
 tests/unit/utility/analyze/utility-analyze-coverage.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:682de92c5a08d2b3
-tests/unit/utility/backup/utility-backup-workflow.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:e3418b5e3159e675
+tests/unit/utility/backup/utility-backup-workflow.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
 tests/unit/utility/benchmark/utility-benchmark-startup-extended.tests.ps1 -> scripts/utils/metrics/benchmark-startup.ps1 sig:dee41149421251de
 tests/unit/utility/benchmark/utility-benchmark-startup.tests.ps1 -> scripts/utils/metrics/benchmark-startup.ps1 sig:dee41149421251de
 tests/unit/utility/build/utility-build-fragment-cache-extended.tests.ps1 -> scripts/utils/build-fragment-cache.ps1 sig:8e4543e55c50f268
@@ -6817,7 +6817,7 @@ tests/unit/utility/check/utility-check-missing-packages-extended.tests.ps1 -> sc
 tests/unit/utility/check/utility-check-missing-packages.tests.ps1 -> scripts/utils/dependencies/check-missing-packages.ps1 sig:ea6d11c8e4d84be9
 tests/unit/utility/check/utility-check-module-updates-extended.tests.ps1 -> scripts/utils/dependencies/check-module-updates.ps1 sig:3bc9e3e218faeb62
 tests/unit/utility/check/utility-check-module-updates.tests.ps1 -> scripts/utils/dependencies/check-module-updates.ps1 sig:3bc9e3e218faeb62
-tests/unit/utility/check/utility-check-task-parity-extended.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:e3418b5e3159e675
+tests/unit/utility/check/utility-check-task-parity-extended.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
 tests/unit/utility/check/utility-check-task-parity-extended.tests.ps1 -> scripts/utils/task-parity/check-task-parity.ps1 sig:07031d8d0687adc6
 tests/unit/utility/check/utility-check-task-parity.tests.ps1 -> scripts/utils/task-parity/check-task-parity.ps1 sig:07031d8d0687adc6
 tests/unit/utility/clear/utility-clear-fragment-cache-extended.tests.ps1 -> scripts/utils/clear-fragment-cache.ps1 sig:0be965fcb9c15d51
@@ -6868,8 +6868,8 @@ tests/unit/utility/init/utility-init-wrangler-config.tests.ps1 -> scripts/utils/
 tests/unit/utility/initialize/utility-initialize-databases-extended.tests.ps1 -> scripts/utils/database/initialize-databases.ps1 sig:99ee189ace8f874b
 tests/unit/utility/initialize/utility-initialize-databases.tests.ps1 -> scripts/utils/database/initialize-databases.ps1 sig:99ee189ace8f874b
 tests/unit/utility/install/utility-install-githooks.tests.ps1 -> scripts/git/install-githooks.ps1 sig:dd1eac9fdc5eefb4
-tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:925dde2c54f274af
-tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:e3418b5e3159e675
+tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:d163ae4b6191fc9a
+tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
 tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:d163ae4b6191fc9a
 tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
 tests/unit/utility/logging/utility-logging.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
