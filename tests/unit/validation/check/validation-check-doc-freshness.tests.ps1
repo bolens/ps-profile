@@ -70,6 +70,23 @@ switch ($ProfilePath) {
         $output | Should -Match 'API documentation is up to date'
     }
 
+    It 'resolves relative documentation and generator paths from the repository root' {
+        @(
+            '# API'
+            '**Generated:** 2000-01-01'
+            'Defined in: ../../../repo/profile.d/example.ps1'
+        ) | Set-Content -LiteralPath (Join-Path $script:TrackedDocs 'README.md') -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:TrackedDocs '.doc-generation-cache.json') -Value '{}' -Encoding UTF8
+        $relativeDocsPath = [System.IO.Path]::GetRelativePath($script:TestRepoRoot, $script:TrackedDocs)
+        $relativeGeneratorPath = [System.IO.Path]::GetRelativePath($script:TestRepoRoot, $script:Generator)
+
+        $output = & $script:CheckDocFreshnessScript `
+            -DocsPath $relativeDocsPath `
+            -GeneratorPath $relativeGeneratorPath 2>&1 | Out-String
+
+        $output | Should -Match 'API documentation is up to date'
+    }
+
     It 'reports added, removed, and changed generated documentation' {
         Set-Content -LiteralPath (Join-Path $script:TrackedDocs 'README.md') -Value 'tracked content' -Encoding UTF8
         Set-Content -LiteralPath (Join-Path $script:TrackedDocs 'removed.md') -Value 'removed content' -Encoding UTF8
