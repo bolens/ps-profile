@@ -75,6 +75,8 @@ All documentation is automatically generated from source code:
 - **Fragment Documentation**: Run `task generate-fragment-readmes` or `pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1`
 - **All Documentation**: Run `task all-docs` to generate both
 
+API documentation generation returns a validation failure if any function, alias, index, or cleanup step fails; partial output is never reported as a successful run.
+
 After editing guides, tests, or the source files they describe—or after `generate-docs`—refresh drift bindings:
 
 ```powershell

@@ -396,6 +396,8 @@ task check-doc-coverage          # informational coverage report for dynamic reg
 task check-doc-freshness         # CI-style check: regen + fail when docs/api differs from git
 ```
 
+The API generator returns a validation failure when any generation or cleanup step fails, even if other documentation files were produced successfully.
+
 CI runs `check-doc-freshness` in the `api-docs` job (`.github/workflows/validate-profile.yml`) with a cached `.doc-generation-cache.json` for faster incremental runs.
 
 Generate fragment READMEs:
