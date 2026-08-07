@@ -1,4 +1,4 @@
-docs/README.md -> scripts/utils/docs/generate-docs.ps1 sig:386e2d85f8a2c370
+docs/README.md -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 docs/api/aliases/Git-CurrentBranch.md -> profile.d/git.ps1 sig:a7f9055956a7be64
 docs/api/aliases/Git-StatusShort.md -> profile.d/git.ps1 sig:a7f9055956a7be64
 docs/api/aliases/Prompt-GitSegment.md -> profile.d/git.ps1 sig:a7f9055956a7be64
@@ -3860,7 +3860,7 @@ docs/guides/DEVELOPMENT.md -> requirements/linux.txt sig:50a0ea54af26d113
 docs/guides/DEVELOPMENT.md -> requirements/scoop.txt sig:d7f36587afdb9b8b
 docs/guides/DEVELOPMENT.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:17a5a2ad25321f29
 docs/guides/DEVELOPMENT.md -> scripts/utils/code-quality/run-pester.ps1 sig:1d139c40dd640928
-docs/guides/DEVELOPMENT.md -> scripts/utils/docs/generate-docs.ps1 sig:386e2d85f8a2c370
+docs/guides/DEVELOPMENT.md -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 docs/guides/DEVELOPMENT.md -> tests/unit/library/common/library-common.tests.ps1 sig:883c040538d61094
 docs/guides/DEVELOPMENT_PERFORMANCE.md -> Microsoft.PowerShell_profile.ps1 sig:e1a5656c1f0efc86
 docs/guides/DEVELOPMENT_PERFORMANCE.md -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
@@ -3889,7 +3889,7 @@ docs/guides/MODULE_DOCUMENTATION_TEMPLATE.md -> profile.d/bootstrap/CloudProvide
 docs/guides/MODULE_DOCUMENTATION_TEMPLATE.md -> profile.d/bootstrap/LanguageBase.ps1 sig:2426590e8bfd08f0
 docs/guides/MODULE_DOCUMENTATION_TEMPLATE.md -> profile.d/bootstrap/PromptBase.ps1 sig:0edf2f785aae7e1b
 docs/guides/MODULE_DOCUMENTATION_TEMPLATE.md -> profile.d/git-enhanced.ps1 sig:4ea0db23a3eaaa5e
-docs/guides/MODULE_DOCUMENTATION_TEMPLATE.md -> scripts/utils/docs/generate-docs.ps1 sig:386e2d85f8a2c370
+docs/guides/MODULE_DOCUMENTATION_TEMPLATE.md -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 docs/guides/MODULE_LOADING_STANDARD.md -> profile.d/bootstrap/ModuleLoading.ps1 sig:1b67189120e4efa1
 docs/guides/MODULE_LOADING_STANDARD.md -> tests/integration/bootstrap/module-loading-standard.tests.ps1 sig:cf5e87a6327687a4
 docs/guides/PARALLEL_LOADING_STATE_MERGE_ANALYSIS.md -> scripts/lib/fragment/FragmentParallelLoading.psm1 sig:d17222f1eb44bd47
@@ -6878,7 +6878,7 @@ tests/unit/utility/doc/utility-doc-index-generator-structure-extended.tests.ps1 
 tests/unit/utility/doc/utility-doc-parser-regex-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocParserRegex.psm1 sig:c5a38c5f211103fa
 tests/unit/utility/doc/utility-doc-parser-structure-extended.tests.ps1 -> scripts/utils/docs/modules/DocParser.psm1 sig:724d4bca5ce5397e
 tests/unit/utility/docs/utility-docs-generation.tests.ps1 -> profile.d/git-modules/core/git-advanced.ps1 sig:d192790a29fb5ce2
-tests/unit/utility/docs/utility-docs-generation.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:386e2d85f8a2c370
+tests/unit/utility/docs/utility-docs-generation.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 tests/unit/utility/export/utility-export-metrics-extended.tests.ps1 -> scripts/utils/metrics/export-metrics.ps1 sig:48f7dc377bf61f5e
 tests/unit/utility/export/utility-export-metrics.tests.ps1 -> scripts/utils/metrics/export-metrics.ps1 sig:48f7dc377bf61f5e
 tests/unit/utility/find/utility-find-duplicate-functions-extended.tests.ps1 -> scripts/utils/metrics/find-duplicate-functions.ps1 sig:736f3562c156568e
@@ -6893,8 +6893,9 @@ tests/unit/utility/generate/utility-generate-command-wrappers-extended.tests.ps1
 tests/unit/utility/generate/utility-generate-command-wrappers.tests.ps1 -> scripts/utils/fragment/generate-command-wrappers.ps1 sig:f0e087747b1e9041
 tests/unit/utility/generate/utility-generate-dashboard-extended.tests.ps1 -> scripts/utils/metrics/generate-dashboard.ps1 sig:53a885c69e6d9b2c
 tests/unit/utility/generate/utility-generate-dashboard.tests.ps1 -> scripts/utils/metrics/generate-dashboard.ps1 sig:53a885c69e6d9b2c
-tests/unit/utility/generate/utility-generate-docs-extended.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:386e2d85f8a2c370
-tests/unit/utility/generate/utility-generate-docs.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:386e2d85f8a2c370
+tests/unit/utility/generate/utility-generate-docs-extended.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
+tests/unit/utility/generate/utility-generate-docs-incremental.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
+tests/unit/utility/generate/utility-generate-docs.tests.ps1 -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 tests/unit/utility/generate/utility-generate-fragment-readmes-extended.tests.ps1 -> scripts/utils/docs/generate-fragment-readmes.ps1 sig:d6440720ea01c42a
 tests/unit/utility/generate/utility-generate-fragment-readmes.tests.ps1 -> scripts/utils/docs/generate-fragment-readmes.ps1 sig:d6440720ea01c42a
 tests/unit/utility/init/utility-init-wrangler-config-extended.tests.ps1 -> scripts/utils/setup/init-wrangler-config.ps1 sig:ef19531082cab152
