@@ -79,6 +79,9 @@ function Get-NamingExceptions {
 .PARAMETER ExceptionVerbs
     Array of exception verbs.
 
+.PARAMETER IncludeTests
+    When specified, test-path functions are not treated as automatic exceptions.
+
 .OUTPUTS
     System.Boolean. True if the function is an exception, false otherwise.
 .EXAMPLE
@@ -101,7 +104,9 @@ function Test-IsException {
         [hashtable]$Exceptions,
 
         [Parameter(Mandatory)]
-        [string[]]$ExceptionVerbs
+        [string[]]$ExceptionVerbs,
+
+        [switch]$IncludeTests
     )
 
     # Import validation functions
@@ -124,7 +129,7 @@ function Test-IsException {
     }
 
     # Check if it's a test file
-    if ($FilePath -like '*\tests\*' -or $FilePath -like '*/tests/*') {
+    if (-not $IncludeTests -and ($FilePath -like '*\tests\*' -or $FilePath -like '*/tests/*')) {
         return $true
     }
 
@@ -132,4 +137,3 @@ function Test-IsException {
 }
 
 Export-ModuleMember -Function Get-NamingExceptions, Test-IsException
-

@@ -24,6 +24,10 @@ scripts/utils/code-quality/modules/ValidationReporter.psm1
 .PARAMETER ExceptionVerbs
     Array of exception verbs.
 
+.PARAMETER IncludeTests
+    Includes test-path functions in issue detection instead of treating them as
+    automatic exceptions.
+
 .OUTPUTS
     PSCustomObject with validation results including statistics and issues.
 .EXAMPLE
@@ -34,13 +38,16 @@ function Get-ValidationResults {
     [OutputType([PSCustomObject])]
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [PSCustomObject[]]$Functions,
 
         [Parameter(Mandatory)]
         [hashtable]$Exceptions,
 
         [Parameter(Mandatory)]
-        [string[]]$ExceptionVerbs
+        [string[]]$ExceptionVerbs,
+
+        [switch]$IncludeTests
     )
 
     # Import exception handler
@@ -51,7 +58,7 @@ function Get-ValidationResults {
         TotalFunctions                     = $Functions.Count
         FunctionsWithApprovedVerbs         = ($Functions | Where-Object { $_.HasApprovedVerb }).Count
         FunctionsWithUnapprovedVerbs       = ($Functions | Where-Object {
-                $_.IsValidFormat -and -not $_.HasApprovedVerb -and -not (Test-IsException -FunctionName $_.Name -Verb $_.Verb -FilePath $_.FilePath -Exceptions $Exceptions -ExceptionVerbs $ExceptionVerbs)
+                $_.IsValidFormat -and -not $_.HasApprovedVerb -and -not (Test-IsException -FunctionName $_.Name -Verb $_.Verb -FilePath $_.FilePath -Exceptions $Exceptions -ExceptionVerbs $ExceptionVerbs -IncludeTests:$IncludeTests)
             }).Count
         FunctionsWithInvalidFormat         = ($Functions | Where-Object { -not $_.IsValidFormat }).Count
         ProfileDFunctionsNotUsingAgentMode = 0  # Removed requirement - Set-AgentModeFunction is optional
@@ -63,7 +70,7 @@ function Get-ValidationResults {
     # Identify issues
     foreach ($func in $Functions) {
         # Skip exceptions
-        if (Test-IsException -FunctionName $func.Name -Verb $func.Verb -FilePath $func.FilePath -Exceptions $Exceptions -ExceptionVerbs $ExceptionVerbs) {
+        if (Test-IsException -FunctionName $func.Name -Verb $func.Verb -FilePath $func.FilePath -Exceptions $Exceptions -ExceptionVerbs $ExceptionVerbs -IncludeTests:$IncludeTests) {
             continue
         }
 
@@ -209,4 +216,3 @@ function Save-ValidationReport {
 }
 
 Export-ModuleMember -Function Get-ValidationResults, Write-ValidationReport, Save-ValidationReport
-
