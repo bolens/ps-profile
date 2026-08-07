@@ -35,35 +35,6 @@ Describe 'track-coverage-trends.ps1 execution' {
             $result.Output | Should -Match 'Coverage file not found|coverage'
     }
 
-    It 'Saves a coverage snapshot when a minimal coverage XML file is provided' {
-        $fixtureDir = New-TestTempDirectory -Prefix 'CoverageTrendSnapshot'
-        $coverageXml = Join-Path $fixtureDir 'coverage.xml'
-        $historyDir = Join-Path $fixtureDir 'history'
-        @'
-<?xml version="1.0" encoding="utf-8"?>
-<Coverage>
-    <Module ModulePath="C:\test\Sample.psm1">
-        <Function FunctionName="Test-Sample">
-            <Line Number="1" Covered="true" />
-            <Line Number="2" Covered="false" />
-        </Function>
-    </Module>
-</Coverage>
-'@ | Set-Content -LiteralPath $coverageXml -Encoding UTF8
-
-            $result = Invoke-TestScriptFile -ScriptPath $script:TrackCoverageScript -ArgumentList @(
-                '-CoverageXmlPath', $coverageXml,
-                '-HistoryPath', $historyDir,
-                '-SaveSnapshot',
-                '-Days', '1'
-            )
-
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'Current Coverage|Coverage snapshot saved'
-            @(Get-ChildItem -LiteralPath $historyDir -Filter 'coverage-*.json' -ErrorAction SilentlyContinue).Count |
-                Should -BeGreaterThan 0
-    }
-
     It 'Reports when no historical coverage snapshots exist in the history directory' {
         $historyDir = New-TestTempDirectory -Prefix 'CoverageTrendEmptyHistory'
         $coverageXml = Join-Path (New-TestTempDirectory -Prefix 'CoverageTrendCurrent') 'coverage.xml'
@@ -132,10 +103,14 @@ Describe 'track-coverage-trends.ps1 execution' {
             $result = Invoke-TestScriptFile -ScriptPath $script:TrackCoverageScript -ArgumentList @(
                 '-CoverageXmlPath', $coverageXml,
                 '-HistoryPath', $historyDir,
+                '-SaveSnapshot',
                 '-Days', '30'
             )
 
             $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'Analyzing 2 historical snapshots|Coverage Trends|historical snapshots'
+            $result.Output | Should -Match 'Coverage snapshot saved'
+            $result.Output | Should -Match 'Analyzing 3 historical snapshots|Coverage Trends|historical snapshots'
+            @(Get-ChildItem -LiteralPath $historyDir -Filter 'coverage-*.json' -ErrorAction SilentlyContinue).Count |
+                Should -Be 3
     }
 }
