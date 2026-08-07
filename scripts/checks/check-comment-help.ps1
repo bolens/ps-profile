@@ -13,6 +13,10 @@ scripts/checks/check-comment-help.ps1
 .PARAMETER Verbose
     If specified, outputs detailed information about each function checked.
 
+.PARAMETER Path
+    Optional profile fragment directory to scan. Defaults to profile.d in the
+    repository root.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\checks\check-comment-help.ps1
 
@@ -25,7 +29,8 @@ scripts/checks/check-comment-help.ps1
 #>
 
 param(
-    [switch]$Verbose
+    [switch]$Verbose,
+    [string]$Path
 )
 
 # Import PathResolution first (required for ModuleImport to work)
@@ -53,10 +58,24 @@ Import-LibModule -ModuleName 'FileContent' -ScriptPath $PSScriptRoot -DisableNam
 # Get repository root using shared function
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
-    $fragDir = Join-Path $repoRoot 'profile.d'
+    $fragDir = if ($Path) {
+        if ([System.IO.Path]::IsPathRooted($Path)) {
+            $Path
+        }
+        else {
+            Join-Path $repoRoot $Path
+        }
+    }
+    else {
+        Join-Path $repoRoot 'profile.d'
+    }
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+if (-not (Test-Path -LiteralPath $fragDir -PathType Container)) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Profile fragment directory not found at: $fragDir"
 }
 
 $psFiles = Get-ChildItem -Path $fragDir -Filter '*.ps1' -File | Sort-Object Name
@@ -122,7 +141,7 @@ function Get-FunctionsWithoutCommentHelp {
 Write-ScriptMessage -Message "Checking that all functions have comment-based help in $fragDir"
 
 foreach ($ps in $psFiles) {
-    $undocumentedFuncs = Get-FunctionsWithoutCommentHelp -Path $ps.FullName
+    $undocumentedFuncs = @(Get-FunctionsWithoutCommentHelp -Path $ps.FullName)
 
     if ($undocumentedFuncs.Count -gt 0) {
         $issueCount++
@@ -138,6 +157,10 @@ if ($issueCount -gt 0) {
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Found $issueCount fragments with functions missing comment-based help."
 }
 else {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All functions have comment-based help."
+    $successMessage = 'All functions have comment-based help.'
+    if ($Path -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        Write-ScriptMessage -Message $successMessage
+        return
+    }
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
 }
-
