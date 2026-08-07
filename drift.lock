@@ -6530,9 +6530,9 @@ tests/unit/test-runner/error/test-runner-error-recovery-extended.tests.ps1 -> sc
 tests/unit/test-runner/error/test-runner-error-recovery-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestErrorRecovery.psm1 sig:55dfa59b0096a3d6
 tests/unit/test-runner/error/test-runner-error-recovery.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
 tests/unit/test-runner/error/test-runner-error-recovery.tests.ps1 -> scripts/utils/code-quality/modules/TestErrorRecovery.psm1 sig:55dfa59b0096a3d6
-tests/unit/test-runner/exception/test-runner-exception-handler-extended.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:ab46343784d4cde8
+tests/unit/test-runner/exception/test-runner-exception-handler-extended.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:4974b7666d0afa05
 tests/unit/test-runner/exception/test-runner-exception-handler-extended.tests.ps1 -> scripts/utils/code-quality/modules/FunctionNamingValidator.psm1 sig:b6a9a9bc39a29f4b
-tests/unit/test-runner/exception/test-runner-exception-handler-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:ab46343784d4cde8
+tests/unit/test-runner/exception/test-runner-exception-handler-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:4974b7666d0afa05
 tests/unit/test-runner/failure/test-runner-failure-analysis-grouping-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestCategorization.psm1 sig:8b01502115892f7f
 tests/unit/test-runner/failure/test-runner-failure-analysis-grouping-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestFailureAnalysis.psm1 sig:e0259daca1c5c77e
 tests/unit/test-runner/function/test-runner-function-discovery-extended.tests.ps1 -> scripts/utils/code-quality/modules/FunctionDiscovery.psm1 sig:2c5f929a16ee59a5
@@ -6546,11 +6546,11 @@ tests/unit/test-runner/git/test-runner-git-integration-extended.tests.ps1 -> scr
 tests/unit/test-runner/git/test-runner-git-integration.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
 tests/unit/test-runner/git/test-runner-git-integration.tests.ps1 -> scripts/utils/code-quality/modules/TestGitIntegration.psm1 sig:f40b79c489de8bba
 tests/unit/test-runner/helpers/test-runner-helpers-extended.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
-tests/unit/test-runner/helpers/test-runner-helpers-extended.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:ab46343784d4cde8
+tests/unit/test-runner/helpers/test-runner-helpers-extended.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:4974b7666d0afa05
 tests/unit/test-runner/helpers/test-runner-helpers-extended.tests.ps1 -> scripts/utils/code-quality/modules/OutputPathUtils.psm1 sig:5eafe8e74190511c
 tests/unit/test-runner/helpers/test-runner-helpers-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestRunnerHelpers.psm1 sig:1d62b3310082997f
 tests/unit/test-runner/helpers/test-runner-helpers.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
-tests/unit/test-runner/helpers/test-runner-helpers.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:ab46343784d4cde8
+tests/unit/test-runner/helpers/test-runner-helpers.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:4974b7666d0afa05
 tests/unit/test-runner/helpers/test-runner-helpers.tests.ps1 -> scripts/utils/code-quality/modules/OutputPathUtils.psm1 sig:5eafe8e74190511c
 tests/unit/test-runner/helpers/test-runner-helpers.tests.ps1 -> scripts/utils/code-quality/modules/TestRunnerHelpers.psm1 sig:1d62b3310082997f
 tests/unit/test-runner/link/test-runner-link-api-drift-extended.tests.ps1 -> scripts/utils/code-quality/link-api-drift.ps1 sig:69a05c28e44aa475
@@ -6792,7 +6792,7 @@ tests/unit/test-runner/timeout/test-runner-timeout-handling.tests.ps1 -> scripts
 tests/unit/test-runner/tools/test-runner-tools-integration-batch-extended.tests.ps1 -> scripts/utils/code-quality/run-tools-integration-batch.ps1 sig:02a6b3157f500079
 tests/unit/test-runner/unit/test-runner-unit-batch-extended.tests.ps1 -> scripts/utils/code-quality/run-unit-batch.ps1 sig:cbed57563e9a8dad
 tests/unit/test-runner/validate/test-runner-validate-function-naming-extended.tests.ps1 -> scripts/utils/code-quality/validate-function-naming.ps1 sig:ed98ec71a6eb3e89
-tests/unit/test-runner/validation/test-runner-validation-reporter-extended.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:ab46343784d4cde8
+tests/unit/test-runner/validation/test-runner-validation-reporter-extended.tests.ps1 -> scripts/utils/code-quality/modules/ExceptionHandler.psm1 sig:4974b7666d0afa05
 tests/unit/test-runner/validation/test-runner-validation-reporter-extended.tests.ps1 -> scripts/utils/code-quality/modules/ValidationReporter.psm1 sig:842016364d1a35c6
 tests/unit/test-runner/validation/test-runner-validation-reporter-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/ValidationReporter.psm1 sig:842016364d1a35c6
 tests/unit/test-runner/validation/test-runner-validation-reporter.tests.ps1 -> scripts/utils/code-quality/modules/FunctionDiscovery.psm1 sig:2c5f929a16ee59a5
