@@ -69,4 +69,18 @@ quality-check lint test:
         $tasks.'drift-status'.Command | Should -Be 'drift status'
         $tasks.'test-unit-batch'.Command | Should -Not -Match 'test-conversion'
     }
+
+    It 'keeps documentation coverage strict in every task runner' {
+        $taskSets = @(
+            Get-TasksFromTaskfile -FilePath (Join-Path $script:TestRepoRoot 'Taskfile.yml')
+            Get-TasksFromMakefile -FilePath (Join-Path $script:TestRepoRoot 'Makefile')
+            Get-TasksFromPackageJson -FilePath (Join-Path $script:TestRepoRoot 'package.json')
+            Get-TasksFromJustfile -FilePath (Join-Path $script:TestRepoRoot 'justfile')
+            Get-TasksFromTasksJson -FilePath (Join-Path $script:TestRepoRoot '.vscode/tasks.json')
+        )
+
+        foreach ($tasks in $taskSets) {
+            $tasks.'check-doc-coverage'.Command | Should -Match '(?:^|\s)-Strict(?:\s|$)'
+        }
+    }
 }

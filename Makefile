@@ -28,8 +28,8 @@ validate: ## Validate profile (lint + idempotency)
 check-comment-help: ## Check comment-based help
 	pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
 
-check-doc-coverage: ## Report API documentation coverage gaps
-	pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 $(ARGS)
+check-doc-coverage: ## Validate API documentation coverage
+	pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 -Strict $(ARGS)
 
 check-doc-freshness: ## Verify docs/api matches incremental generator output
 	pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 $(ARGS)

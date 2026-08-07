@@ -19,7 +19,7 @@
     "lint": "pwsh -NoProfile -File scripts/utils/code-quality/run-lint.ps1",
     "validate": "pwsh -NoProfile -File scripts/checks/validate-profile.ps1",
     "check-comment-help": "pwsh -NoProfile -File scripts/checks/check-comment-help.ps1",
-    "check-doc-coverage": "pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1",
+    "check-doc-coverage": "pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 -Strict",
     "check-doc-freshness": "pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1",
     "test": "pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Coverage -Parallel",
     "test-unit": "pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Suite Unit -Parallel",

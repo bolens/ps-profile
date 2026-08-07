@@ -19,9 +19,9 @@ tasks:
       - pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
 
   check-doc-coverage:
-    desc: Report API documentation coverage gaps (informational)
+    desc: Validate API documentation coverage
     cmds:
-      - pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 {{.CLI_ARGS}}
+      - pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 -Strict {{.CLI_ARGS}}
 
   check-doc-freshness:
     desc: Verify docs/api matches incremental generator output

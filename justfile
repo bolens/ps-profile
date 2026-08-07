@@ -14,7 +14,7 @@ check-comment-help:
     pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
 
 check-doc-coverage *ARGS:
-    pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 {{ ARGS }}
+    pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 -Strict {{ ARGS }}
 
 check-doc-freshness *ARGS:
     pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 {{ ARGS }}

@@ -1734,7 +1734,7 @@
       "label": "check-doc-coverage",
       "type": "shell",
       "command": "pwsh",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/checks/check-doc-coverage.ps1"],
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/checks/check-doc-coverage.ps1", "-Strict"],
       "problemMatcher": []
     },
     {
