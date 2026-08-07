@@ -33,6 +33,7 @@ env:
 permissions:
   contents: read
   issues: write
+  pull-requests: write
 
 jobs:
   validate-dependencies:
@@ -51,6 +52,7 @@ jobs:
 
       - name: Comment PR with Dependency Status
         if: github.event_name == 'pull_request' && steps.validate-deps.outcome == 'success'
+        continue-on-error: true
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
@@ -63,6 +65,7 @@ jobs:
 
       - name: Comment PR with Dependency Issues
         if: failure() && github.event_name == 'pull_request' && steps.validate-deps.outcome == 'failure'
+        continue-on-error: true
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |

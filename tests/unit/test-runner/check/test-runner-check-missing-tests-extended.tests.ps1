@@ -45,8 +45,8 @@ Describe 'check-missing-tests.ps1 extended scenarios' {
     Context 'Exit behavior' {
         It 'Exits non-zero when modules are missing dedicated tests' {
             $content = Get-Content -LiteralPath $script:CheckScript -Raw
-            $content | Should -Match 'exit 1'
-            $content | Should -Match 'exit 0'
+            $content | Should -Match 'Exit-WithCode -ExitCode \$EXIT_VALIDATION_FAILURE'
+            $content | Should -Match 'Exit-WithCode -ExitCode \$EXIT_SUCCESS'
         }
     }
 }

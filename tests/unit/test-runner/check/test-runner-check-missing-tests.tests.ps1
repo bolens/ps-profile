@@ -45,8 +45,22 @@ Describe 'check-missing-tests.ps1 execution' {
             $libDir = Join-Path $repo 'scripts' 'lib' 'fixture'
             $unitDir = Join-Path $repo 'tests' 'unit'
             $null = New-Item -ItemType Directory -Path $checkDir -Force
-            $null = New-Item -ItemType Directory -Path $libDir -Force
             $null = New-Item -ItemType Directory -Path $unitDir -Force
+            $fixtureLibRoot = Join-Path $repo 'scripts' 'lib'
+            $fixtureCoreRoot = Join-Path $fixtureLibRoot 'core'
+            $null = New-Item -ItemType Directory -Path $fixtureCoreRoot -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'ModuleImport.psm1') `
+                -Destination $fixtureLibRoot -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'core' 'CommonEnums.psm1') `
+                -Destination $fixtureCoreRoot -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'core' 'ExitCodes.psm1') `
+                -Destination $fixtureCoreRoot -Force
+            $null = New-Item -ItemType Directory -Path $libDir -Force
+            foreach ($supportModule in @('moduleimport', 'commonenums', 'exitcodes')) {
+                Set-Content -LiteralPath (Join-Path $unitDir "library-$supportModule.tests.ps1") `
+                    -Value "Describe '$supportModule fixture' { It 'is fixture infrastructure' { `$true | Should -BeTrue } }" `
+                    -Encoding UTF8
+            }
             Copy-Item -LiteralPath $script:CheckScript -Destination (Join-Path $checkDir 'check-missing-tests.ps1') -Force
             Set-Content -LiteralPath (Join-Path $libDir 'UntestedLibModule.psm1') -Value @'
 function Get-UntestedLibModuleFixture {
@@ -83,8 +97,22 @@ function Get-UntestedLibModuleFixture {
             $libDir = Join-Path $repo 'scripts' 'lib' 'fixture'
             $unitDir = Join-Path $repo 'tests' 'unit'
             $null = New-Item -ItemType Directory -Path $checkDir -Force
-            $null = New-Item -ItemType Directory -Path $libDir -Force
             $null = New-Item -ItemType Directory -Path $unitDir -Force
+            $fixtureLibRoot = Join-Path $repo 'scripts' 'lib'
+            $fixtureCoreRoot = Join-Path $fixtureLibRoot 'core'
+            $null = New-Item -ItemType Directory -Path $fixtureCoreRoot -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'ModuleImport.psm1') `
+                -Destination $fixtureLibRoot -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'core' 'CommonEnums.psm1') `
+                -Destination $fixtureCoreRoot -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'core' 'ExitCodes.psm1') `
+                -Destination $fixtureCoreRoot -Force
+            $null = New-Item -ItemType Directory -Path $libDir -Force
+            foreach ($supportModule in @('moduleimport', 'commonenums', 'exitcodes')) {
+                Set-Content -LiteralPath (Join-Path $unitDir "library-$supportModule.tests.ps1") `
+                    -Value "Describe '$supportModule fixture' { It 'is fixture infrastructure' { `$true | Should -BeTrue } }" `
+                    -Encoding UTF8
+            }
             Copy-Item -LiteralPath $script:CheckScript -Destination (Join-Path $checkDir 'check-missing-tests.ps1') -Force
             Set-Content -LiteralPath (Join-Path $libDir 'CoveredLibModule.psm1') -Value @'
 function Get-CoveredLibModuleFixture {

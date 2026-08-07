@@ -68,6 +68,18 @@ Exit-WithCode -ExitCode 0
             ($output | Out-String) | Should -Match 'completed'
         }
 
+        It 'Preserves requested exit codes in child processes that inherit test mode' {
+            $testScript = Join-Path $script:TempDir 'exit-test-mode-child-code.ps1'
+            @"
+`$env:PS_PROFILE_TEST_MODE = '1'
+Import-Module '$($script:ExitCodesPath)' -DisableNameChecking -Force
+Exit-WithCode -ExitCode 2
+"@ | Set-Content -LiteralPath $testScript -Encoding UTF8
+
+            & pwsh -NoProfile -File $testScript 2>&1 | Out-Null
+            $LASTEXITCODE | Should -Be 2
+        }
+
         It 'Rethrows ErrorRecord in test mode instead of exiting' {
             $testScript = Join-Path $script:TempDir 'exit-test-mode-errorrecord.ps1'
             @"

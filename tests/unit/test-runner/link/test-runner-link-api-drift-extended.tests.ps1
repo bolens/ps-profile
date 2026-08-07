@@ -48,7 +48,7 @@ Describe 'scripts/utils/code-quality/link-api-drift.ps1 extended scenarios' {
     }
     It 'Exits non-zero when drift link failures remain' {
         $c = Get-Content -LiteralPath $script:Fragment -Raw
-        $c | Should -Match 'exit 1'
+        $c | Should -Match 'Exit-WithCode -ExitCode \$EXIT_VALIDATION_FAILURE'
         $c | Should -Match '\$failed\.Count -gt 0'
     }
 }
