@@ -40,6 +40,42 @@ function Test-MetricsSnapshotStructuredErrorAvailable {
     return $null -ne (Get-Command Write-StructuredError -ErrorAction SilentlyContinue)
 }
 
+<#
+.SYNOPSIS
+    Finds the nearest repository root from a starting directory.
+.DESCRIPTION
+    Walks parent DirectoryInfo objects until a .git marker is found. This avoids
+    platform-specific root comparisons and works with Unix roots, Windows drive
+    roots, and UNC paths.
+.PARAMETER StartPath
+    Directory from which to begin the parent walk.
+.OUTPUTS
+    System.String
+#>
+function Resolve-MetricsSnapshotRepoRoot {
+    [CmdletBinding()]
+    [OutputType([string])]
+    param(
+        [Parameter(Mandatory)]
+        [string]$StartPath
+    )
+
+    $currentDirectory = Get-Item -LiteralPath $StartPath -ErrorAction Stop
+    if (-not $currentDirectory.PSIsContainer) {
+        $currentDirectory = $currentDirectory.Directory
+    }
+
+    while ($null -ne $currentDirectory) {
+        if (Test-Path -LiteralPath (Join-Path $currentDirectory.FullName '.git')) {
+            return $currentDirectory.FullName
+        }
+
+        $currentDirectory = $currentDirectory.Parent
+    }
+
+    throw "Could not determine repository root"
+}
+
 # Import SafeImport module if available for safer imports
 # Note: We need to use manual check here since SafeImport itself uses Validation
 $safeImportModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'core' 'SafeImport.psm1'
@@ -116,37 +152,16 @@ function Save-MetricsSnapshot {
         if (Get-Command Get-RepoRoot -ErrorAction SilentlyContinue) {
             try {
                 $RepoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+                if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
+                    throw "Repository root resolver returned no path"
+                }
             }
             catch {
-                # Fallback: try to detect from current location
-                $currentPath = $PWD.Path
-                while ($currentPath -and -not (Test-Path -Path (Join-Path $currentPath '.git'))) {
-                    $parent = Split-Path -Parent $currentPath
-                    if ($parent -eq $currentPath) { break }
-                    $currentPath = $parent
-                }
-                if ($currentPath) {
-                    $RepoRoot = $currentPath
-                }
-                else {
-                    throw "Could not determine repository root"
-                }
+                $RepoRoot = Resolve-MetricsSnapshotRepoRoot -StartPath $PWD.Path
             }
         }
         else {
-            # Fallback: try to detect from current location
-            $currentPath = $PWD.Path
-            while ($currentPath -and -not (Test-Path -Path (Join-Path $currentPath '.git'))) {
-                $parent = Split-Path -Parent $currentPath
-                if ($parent -eq $currentPath) { break }
-                $currentPath = $parent
-            }
-            if ($currentPath) {
-                $RepoRoot = $currentPath
-            }
-            else {
-                throw "Could not determine repository root"
-            }
+            $RepoRoot = Resolve-MetricsSnapshotRepoRoot -StartPath $PWD.Path
         }
     }
 
@@ -335,4 +350,3 @@ function Save-MetricsSnapshot {
 }
 
 Export-ModuleMember -Function Save-MetricsSnapshot
-
