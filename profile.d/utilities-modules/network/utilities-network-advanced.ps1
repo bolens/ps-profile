@@ -218,7 +218,9 @@ function Invoke-WithRetry {
                 Write-Host "Retrying in $RetryDelaySeconds seconds..." -ForegroundColor Yellow
             }
 
-            Start-Sleep -Seconds $RetryDelaySeconds
+            if ($RetryDelaySeconds -gt 0) {
+                Start-Sleep -Seconds $RetryDelaySeconds
+            }
         }
     }
 
@@ -396,4 +398,3 @@ function Resolve-HostWithRetry {
 }
 
 Set-Variable -Name 'NetworkUtilsLoaded' -Value $true -Scope Global -Force
-
