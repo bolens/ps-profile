@@ -84,6 +84,23 @@ Describe 'validate-profile.ps1 execution' {
         $output | Should -Match 'security \+ lint \+ spellcheck \+ comment help'
     }
 
+    It 'uses detected repository and PowerShell defaults' {
+        $global:ValidateProfileFixtureRoot = $script:FixtureRoot
+        try {
+            Mock Get-RepoRoot { $global:ValidateProfileFixtureRoot }
+            Mock Get-PowerShellExecutable { 'Invoke-ValidationFixture' }
+
+            $output = & $script:ValidateProfileScript 2>&1 | Out-String
+
+            $output | Should -Match 'security \+ lint \+ spellcheck \+ markdownlint'
+            Should -Invoke Get-RepoRoot -Times 1 -Exactly
+            Should -Invoke Get-PowerShellExecutable -Times 1 -Exactly
+        }
+        finally {
+            Remove-Variable -Name ValidateProfileFixtureRoot -Scope Global -ErrorAction SilentlyContinue
+        }
+    }
+
     It 'stops and identifies a failed required check' {
         $env:PS_PROFILE_FAIL_CHECK = 'lint'
 
