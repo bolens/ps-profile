@@ -144,6 +144,52 @@ function Get-DocCoverageStrictInProcessFixture {
         }
     }
 
+    It 'summarizes multiple truncated documentation gap lists in-process' {
+        $fixtureRoot = New-TestTempDirectory -Prefix 'DocCoverageManyGaps'
+        $profilePath = Join-Path $fixtureRoot 'profile.d'
+        $docsPath = Join-Path $fixtureRoot 'docs' 'api'
+        New-Item -ItemType Directory -Path $profilePath, $docsPath -Force | Out-Null
+
+        $fixtureContent = [System.Collections.Generic.List[string]]::new()
+        foreach ($index in 1..21) {
+            $fixtureContent.Add(@"
+<#
+.SYNOPSIS
+    Documented fixture function $index.
+.DESCRIPTION
+    Exercises missing markdown list truncation.
+#>
+function Get-MissingMarkdownFixture$index {
+    'ok'
+}
+
+Set-AgentModeFunction -Name 'Get-ParserGapFixture$index' -Body {
+    <#
+    .SYNOPSIS
+        Dynamic fixture function $index.
+    .DESCRIPTION
+        Exercises parser gap list truncation.
+    #>
+    'dynamic'
+}
+"@)
+        }
+        Set-Content -LiteralPath (Join-Path $profilePath 'many-gaps.ps1') -Value $fixtureContent -Encoding UTF8
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:CheckDocCoverageScript -ProfilePath $profilePath -DocsPath $docsPath 2>&1 |
+                Out-String -Width 4096
+
+            $output | Should -Match 'Dynamic registrations without resolvable help'
+            $output | Should -Match 'Missing markdown files:'
+            ([regex]::Matches($output, '\.\.\. and 1 more')).Count | Should -Be 2
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
     It 'Emits a JSON coverage report without strict validation failures' {
         $fixtureRoot = New-TestTempDirectory -Prefix 'DocCoverageJsonChild'
         $profilePath = Join-Path $fixtureRoot 'profile.d'
