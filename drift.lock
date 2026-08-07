@@ -3921,7 +3921,7 @@ docs/guides/README.md -> scripts/utils/code-quality/link-api-drift.ps1 sig:69a05
 docs/guides/README.md -> scripts/utils/code-quality/link-guide-drift.ps1 sig:d3385084a689a235
 docs/guides/README.md -> scripts/utils/code-quality/link-test-drift.ps1 sig:5d3894dcf7aade46
 docs/guides/SECURITY_ALLOWLIST.md -> PSScriptAnalyzerSettings.psd1 sig:9ac4c7d7762df7fc
-docs/guides/SECURITY_ALLOWLIST.md -> scripts/utils/security/run-security-scan.ps1 sig:ad1f9daf3ada5d37
+docs/guides/SECURITY_ALLOWLIST.md -> scripts/utils/security/run-security-scan.ps1 sig:9183bb6b55a22b91
 docs/guides/SQLITE_DATABASES.md -> profile.d/diagnostics-modules/monitoring/diagnostics-performance.ps1 sig:8c26a59dc5053e79
 docs/guides/SQLITE_DATABASES.md -> scripts/lib/metrics/MetricsHistory.psm1 sig:698151fa91ff6fe0
 docs/guides/SQLITE_DATABASES.md -> scripts/lib/performance/PerformanceMeasurement.psm1 sig:4d1f40fecf24bdb4
@@ -6940,8 +6940,9 @@ tests/unit/utility/run/utility-run-format.tests.ps1 -> scripts/utils/code-qualit
 tests/unit/utility/run/utility-run-lint.tests.ps1 -> scripts/utils/code-quality/run-lint.ps1 sig:defbba736969a474
 tests/unit/utility/run/utility-run-markdownlint.tests.ps1 -> scripts/utils/code-quality/run-markdownlint.ps1 sig:7ac3156ffcf78cbf
 tests/unit/utility/run/utility-run-performance-batch.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:2b6a591a650f98c7
-tests/unit/utility/run/utility-run-security-scan-extended.tests.ps1 -> scripts/utils/security/run-security-scan.ps1 sig:ad1f9daf3ada5d37
-tests/unit/utility/run/utility-run-security-scan.tests.ps1 -> scripts/utils/security/run-security-scan.ps1 sig:ad1f9daf3ada5d37
+tests/unit/utility/run/utility-run-security-scan-extended.tests.ps1 -> scripts/utils/security/run-security-scan.ps1 sig:9183bb6b55a22b91
+tests/unit/utility/run/utility-run-security-scan.tests.ps1 -> scripts/utils/security/modules/SecurityReporter.psm1 sig:def268e80f2badc2
+tests/unit/utility/run/utility-run-security-scan.tests.ps1 -> scripts/utils/security/run-security-scan.ps1 sig:9183bb6b55a22b91
 tests/unit/utility/run/utility-run-systematic-tests-extended.tests.ps1 -> scripts/utils/test-verification/run-systematic-tests.ps1 sig:f2e7fa0f2573d1b7
 tests/unit/utility/run/utility-run-systematic-tests.tests.ps1 -> scripts/utils/test-verification/run-systematic-tests.ps1 sig:f2e7fa0f2573d1b7
 tests/unit/utility/run/utility-run-tools-integration-batch.tests.ps1 -> scripts/utils/code-quality/run-tools-integration-batch.ps1 sig:02a6b3157f500079
@@ -6953,7 +6954,7 @@ tests/unit/utility/script/utility-script-errors.tests.ps1 -> scripts/lib/core/Ex
 tests/unit/utility/scripts/utility-scripts.tests.ps1 -> scripts/lib/ModuleImport.psm1 sig:e334f0766c976bc1
 tests/unit/utility/security/utility-security-allowlist-structure-extended.tests.ps1 -> scripts/utils/security/modules/SecurityAllowlist.psm1 sig:c55946db33897f4c
 tests/unit/utility/security/utility-security-patterns-structure-extended.tests.ps1 -> scripts/utils/security/modules/SecurityPatterns.psm1 sig:010e4fc74e904445
-tests/unit/utility/security/utility-security-reporter-structure-extended.tests.ps1 -> scripts/utils/security/modules/SecurityReporter.psm1 sig:a9af6c81c1c00285
+tests/unit/utility/security/utility-security-reporter-structure-extended.tests.ps1 -> scripts/utils/security/modules/SecurityReporter.psm1 sig:def268e80f2badc2
 tests/unit/utility/security/utility-security-rules-structure-extended.tests.ps1 -> scripts/utils/security/modules/SecurityRules.psm1 sig:93f639859cefa537
 tests/unit/utility/security/utility-security-scanner-structure-extended.tests.ps1 -> scripts/utils/security/modules/SecurityScanner.psm1 sig:4905c3cd35f4fa07
 tests/unit/utility/spellcheck/utility-spellcheck.tests.ps1 -> scripts/utils/code-quality/spellcheck.ps1 sig:e72fca73c471aedd
