@@ -51,10 +51,11 @@ Describe 'run-lint.ps1 extended scenarios' {
             $content | Should -Match 'No paths found to analyze'
         }
 
-        It 'Exits with setup error when all configured paths fail analysis' {
+        It 'Exits with setup error when any configured path fails analysis' {
             $content = Get-Content -LiteralPath $script:LintScript -Raw
             $content | Should -Match 'EXIT_SETUP_ERROR'
-            $content | Should -Match 'All paths failed during linting'
+            $content | Should -Match 'path\(s\) failed during linting'
+            $content | Should -Not -Match '\$failedPaths\.Count -eq \$paths\.Count'
         }
 
         It 'Exits with validation failure when Error-severity findings exist' {

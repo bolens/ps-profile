@@ -188,11 +188,8 @@ if ($failedFiles.Count -gt 0) {
     else {
         Write-ScriptMessage -Message "Warning: Failed to scan $($failedFiles.Count) file(s): $($failedFiles -join ', ')" -IsWarning
     }
-    
-    # If all files failed, exit with error
-    if ($failedFiles.Count -eq $scripts.Count) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "All files failed during security scan"
-    }
+
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "$($failedFiles.Count) file(s) failed during security scan"
 }
 
 $scanDuration = ((Get-Date) - $scanStartTime).TotalMilliseconds

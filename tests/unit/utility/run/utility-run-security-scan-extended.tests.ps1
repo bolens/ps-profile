@@ -47,5 +47,12 @@ Describe 'run-security-scan.ps1 extended scenarios' {
             $content = Get-Content -LiteralPath $script:SecurityScript -Raw
             $content | Should -Match 'Get-ProfileDirectory'
         }
+
+        It 'Exits with setup error when any file cannot be scanned' {
+            $content = Get-Content -LiteralPath $script:SecurityScript -Raw
+            $content | Should -Match 'file\(s\) failed during security scan'
+            $content | Should -Match 'EXIT_SETUP_ERROR'
+            $content | Should -Not -Match '\$failedFiles\.Count -eq \$scripts\.Count'
+        }
     }
 }

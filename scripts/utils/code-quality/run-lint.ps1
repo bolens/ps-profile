@@ -171,11 +171,8 @@ if ($failedPaths.Count -gt 0) {
     else {
         Write-ScriptMessage -Message "Warning: Failed to analyze $($failedPaths.Count) path(s): $($failedPaths -join ', ')" -IsWarning
     }
-    
-    # If all paths failed, exit with error
-    if ($failedPaths.Count -eq $paths.Count) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "All paths failed during linting"
-    }
+
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "$($failedPaths.Count) path(s) failed during linting"
 }
 
 # Save report to JSON (matching CI behavior)
@@ -203,5 +200,4 @@ if ($errorFindings) {
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: no issues found"
-
 
