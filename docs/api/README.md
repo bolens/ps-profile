@@ -4315,7 +4315,7 @@ This documentation is automatically generated from comment-based help in the pro
 - [lg](aliases/lg.md) - Lists directory contents with git status using eza. (alias for `Get-ChildItemEzaGit`)
 - [lla](aliases/lla.md) - Lists all directory contents in long format using eza. (alias for `Get-ChildItemEzaAllLong`)
 - [llg](aliases/llg.md) - Lists directory contents in long format with git status using eza. (alias for `Get-ChildItemEzaLongGit`)
-- [ls](aliases/ls.md) - Lists directory contents using eza. (alias for `Get-ChildItemEza`)
+- [lS](aliases/lS.md) - Lists directory contents sorted by size using eza. (alias for `Get-ChildItemEzaBySize`)
 - [lt](aliases/lt.md) - Lists directory contents in tree format using eza. (alias for `Get-ChildItemEzaTree`)
 - [lta](aliases/lta.md) - Lists all directory contents in tree format using eza. (alias for `Get-ChildItemEzaTreeAll`)
 - [ltime](aliases/ltime.md) - Lists directory contents sorted by modification time using eza. (alias for `Get-ChildItemEzaByTime`)

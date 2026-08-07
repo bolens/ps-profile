@@ -67,7 +67,7 @@ function Get-DeduplicatedDocumentedCommands {
         }
 
         $existing = $commandByName[$name]
-        if (-not $existing -or ($command.File -and $existing.File -and $command.File -gt $existing.File)) {
+        if (-not $existing -or ($command.File -and $existing.File -and $command.File -ge $existing.File)) {
             $commandByName[$name] = $command
         }
     }

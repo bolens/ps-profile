@@ -155,7 +155,7 @@ function Parse-AliasesFromFile {
 
     $ast = $Ast
 
-    $aliasCommands = $ast.FindAll({
+    $aliasCommands = @($ast.FindAll({
             param($node)
             if ($node -isnot [System.Management.Automation.Language.CommandAst]) { return $false }
             $cmdName = $node.GetCommandName()
@@ -164,13 +164,11 @@ function Parse-AliasesFromFile {
                 $cmdName -ieq 'Set-AgentModeAlias' -or
                 $cmdName -ieq 'Register-LazyFunction'
             )
-        }, $true)
+        }, $true) | Sort-Object { $_.Extent.StartOffset })
 
     if ($env:PS_PROFILE_DEBUG -eq '1') {
         Write-Host "[AliasParser] $File -> $($aliasCommands.Count) alias command(s)" -ForegroundColor DarkCyan
     }
-
-    $seenAliasNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 
     foreach ($commandAst in $aliasCommands) {
         $commandName = $commandAst.GetCommandName()
@@ -196,10 +194,6 @@ function Parse-AliasesFromFile {
             if ($env:PS_PROFILE_DEBUG -eq '1') {
                 Write-Host "[AliasParser] Skipping alias - Name: '$aliasName', Target: '$targetCommand'" -ForegroundColor DarkYellow
             }
-            continue
-        }
-
-        if (-not $seenAliasNames.Add($aliasName)) {
             continue
         }
 
@@ -330,4 +324,3 @@ function Parse-AliasesFromFile {
 }
 
 Export-ModuleMember -Function Parse-AliasesFromFile, Get-CommandParameterValue
-

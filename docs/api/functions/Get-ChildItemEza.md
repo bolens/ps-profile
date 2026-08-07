@@ -22,13 +22,6 @@ No parameters.
 
 No examples provided.
 
-## Aliases
-
-This function has the following aliases:
-
-- `ls` - Lists directory contents using eza.
-
-
 ## Source
 
 Defined in: ../profile.d/eza.ps1
