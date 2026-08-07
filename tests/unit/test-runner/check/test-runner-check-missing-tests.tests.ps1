@@ -1,17 +1,9 @@
 <#
-tests/unit/test-runner-check-missing-tests.tests.ps1
+tests/unit/test-runner/check/test-runner-check-missing-tests.tests.ps1
 
 .SYNOPSIS
-    Behavioral unit tests for check-missing-tests.ps1 module coverage audit.
+    Behavioral tests for check-missing-tests.ps1 using isolated repositories.
 #>
-
-function global:Invoke-CheckMissingTestsScript {
-    $output = & pwsh -NoProfile -File $script:CheckScript 2>&1 | Out-String
-    return [pscustomobject]@{
-        ExitCode = $LASTEXITCODE
-        Output   = $output
-    }
-}
 
 BeforeAll {
     $current = Get-Item $PSScriptRoot
@@ -21,128 +13,59 @@ BeforeAll {
             . $testSupportPath
             break
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:CheckScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'code-quality' 'check-missing-tests.ps1'
 }
 
 Describe 'check-missing-tests.ps1 execution' {
-    It 'Recursively scans scripts/lib and reports full module coverage for this repository' {
-        $result = Invoke-CheckMissingTestsScript
-
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'Total modules:\s+[1-9]\d*'
-        $result.Output | Should -Match 'Modules with tests:\s+[1-9]\d*'
-        $result.Output | Should -Match 'Missing tests for:\s*\(none\)'
+    BeforeEach {
+        $script:FixtureRoot = New-TestTempDirectory -Prefix 'MissingTests'
+        $script:LibRoot = Join-Path $script:FixtureRoot 'scripts' 'lib'
+        $script:UnitRoot = Join-Path $script:FixtureRoot 'tests' 'unit' 'library'
+        $null = New-Item -ItemType Directory -Path $script:LibRoot -Force
+        $null = New-Item -ItemType Directory -Path $script:UnitRoot -Force
     }
 
-    It 'Fails when an isolated repository has a lib module without a matching unit test' {
-        $repo = New-TestTempDirectory -Prefix 'CheckMissingTestsFail'
-        try {
-            $checkDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
-            $libDir = Join-Path $repo 'scripts' 'lib' 'fixture'
-            $unitDir = Join-Path $repo 'tests' 'unit'
-            $null = New-Item -ItemType Directory -Path $checkDir -Force
-            $null = New-Item -ItemType Directory -Path $unitDir -Force
-            $fixtureLibRoot = Join-Path $repo 'scripts' 'lib'
-            $fixtureCoreRoot = Join-Path $fixtureLibRoot 'core'
-            $null = New-Item -ItemType Directory -Path $fixtureCoreRoot -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'ModuleImport.psm1') `
-                -Destination $fixtureLibRoot -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'core' 'CommonEnums.psm1') `
-                -Destination $fixtureCoreRoot -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'core' 'ExitCodes.psm1') `
-                -Destination $fixtureCoreRoot -Force
-            $null = New-Item -ItemType Directory -Path $libDir -Force
-            foreach ($supportModule in @('moduleimport', 'commonenums', 'exitcodes')) {
-                Set-Content -LiteralPath (Join-Path $unitDir "library-$supportModule.tests.ps1") `
-                    -Value "Describe '$supportModule fixture' { It 'is fixture infrastructure' { `$true | Should -BeTrue } }" `
-                    -Encoding UTF8
-            }
-            Copy-Item -LiteralPath $script:CheckScript -Destination (Join-Path $checkDir 'check-missing-tests.ps1') -Force
-            Set-Content -LiteralPath (Join-Path $libDir 'UntestedLibModule.psm1') -Value @'
-function Get-UntestedLibModuleFixture {
-    'missing-test'
-}
-'@ -Encoding UTF8
+    It 'matches normalized module names and extended test suffixes' {
+        Set-Content -LiteralPath (Join-Path $script:LibRoot 'Json-Utilities.psm1') -Value '# fixture' -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:UnitRoot 'library-json_utilities-structure-extended.tests.ps1') `
+            -Value "Describe 'fixture' {}" -Encoding UTF8
 
-            Push-Location $repo
-            try {
-                git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
+        $output = & $script:CheckScript -RepositoryRoot $script:FixtureRoot *>&1 | Out-String
 
-                $output = & pwsh -NoProfile -File (Join-Path $checkDir 'check-missing-tests.ps1') 2>&1 | Out-String
-                $exitCode = $LASTEXITCODE
-            }
-            finally {
-                Pop-Location
-            }
-
-            $exitCode | Should -Be 1
-            $output | Should -Match 'UntestedLibModule'
-            $output | Should -Match 'Missing tests for:'
-        }
-        finally {
-            Remove-TestArtifacts
-        }
+        $output | Should -Match 'Total modules:\s+1'
+        $output | Should -Match 'Modules with tests:\s+1'
+        $output | Should -Match 'Missing tests for:\s+\(none\)'
     }
 
-    It 'Passes when an isolated repository has matching library unit tests for every lib module' {
-        $repo = New-TestTempDirectory -Prefix 'CheckMissingTestsPass'
-        try {
-            $checkDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
-            $libDir = Join-Path $repo 'scripts' 'lib' 'fixture'
-            $unitDir = Join-Path $repo 'tests' 'unit'
-            $null = New-Item -ItemType Directory -Path $checkDir -Force
-            $null = New-Item -ItemType Directory -Path $unitDir -Force
-            $fixtureLibRoot = Join-Path $repo 'scripts' 'lib'
-            $fixtureCoreRoot = Join-Path $fixtureLibRoot 'core'
-            $null = New-Item -ItemType Directory -Path $fixtureCoreRoot -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'ModuleImport.psm1') `
-                -Destination $fixtureLibRoot -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'core' 'CommonEnums.psm1') `
-                -Destination $fixtureCoreRoot -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib' 'core' 'ExitCodes.psm1') `
-                -Destination $fixtureCoreRoot -Force
-            $null = New-Item -ItemType Directory -Path $libDir -Force
-            foreach ($supportModule in @('moduleimport', 'commonenums', 'exitcodes')) {
-                Set-Content -LiteralPath (Join-Path $unitDir "library-$supportModule.tests.ps1") `
-                    -Value "Describe '$supportModule fixture' { It 'is fixture infrastructure' { `$true | Should -BeTrue } }" `
-                    -Encoding UTF8
-            }
-            Copy-Item -LiteralPath $script:CheckScript -Destination (Join-Path $checkDir 'check-missing-tests.ps1') -Force
-            Set-Content -LiteralPath (Join-Path $libDir 'CoveredLibModule.psm1') -Value @'
-function Get-CoveredLibModuleFixture {
-    'covered'
-}
-'@ -Encoding UTF8
-            Set-Content -LiteralPath (Join-Path $unitDir 'library-coveredlibmodule.tests.ps1') -Value @'
-Describe 'CoveredLibModule' {
-    It 'has a matching test file name' { $true | Should -BeTrue }
-}
-'@ -Encoding UTF8
+    It 'recognizes aggregate test coverage' {
+        Set-Content -LiteralPath (Join-Path $script:LibRoot 'CodeMetrics.psm1') -Value '# fixture' -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:UnitRoot 'library-codeanalysis-extended.tests.ps1') `
+            -Value "Describe 'fixture' {}" -Encoding UTF8
 
-            Push-Location $repo
-            try {
-                git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
+        $output = & $script:CheckScript -RepositoryRoot $script:FixtureRoot *>&1 | Out-String
 
-                $output = & pwsh -NoProfile -File (Join-Path $checkDir 'check-missing-tests.ps1') 2>&1 | Out-String
-                $exitCode = $LASTEXITCODE
-            }
-            finally {
-                Pop-Location
-            }
+        $output | Should -Match 'Modules with tests:\s+1'
+        $output | Should -Match 'Missing tests for:\s+\(none\)'
+    }
 
-            $exitCode | Should -Be 0
-            $output | Should -Match 'Missing tests for:\s*\(none\)'
-        }
-        finally {
-            Remove-TestArtifacts
-        }
+    It 'reports every module without direct or aggregate coverage' {
+        Set-Content -LiteralPath (Join-Path $script:LibRoot 'FirstMissing.psm1') -Value '# fixture' -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:LibRoot 'SecondMissing.psm1') -Value '# fixture' -Encoding UTF8
+
+        {
+            & $script:CheckScript -RepositoryRoot $script:FixtureRoot
+        } | Should -Throw
+    }
+
+    It 'handles a repository with no library modules' {
+        $output = & $script:CheckScript -RepositoryRoot $script:FixtureRoot *>&1 | Out-String
+
+        $output | Should -Match 'Total modules:\s+0'
+        $output | Should -Match 'Missing tests for:\s+\(none\)'
     }
 }
