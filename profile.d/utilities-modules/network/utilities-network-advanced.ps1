@@ -122,11 +122,10 @@ function Invoke-WithRetry {
 
             # Wait for completion or timeout using polling (STA-compatible)
             while ($elapsedMs -lt $timeoutMs) {
-                if ($handle.IsCompleted) {
+                if ($handle.AsyncWaitHandle.WaitOne($pollIntervalMs)) {
                     $completed = $true
                     break
                 }
-                Start-Sleep -Milliseconds $pollIntervalMs
                 $elapsedMs += $pollIntervalMs
             }
 
