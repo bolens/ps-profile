@@ -85,6 +85,17 @@ Describe 'check-idempotency.ps1 execution' {
         $global:IdempotencyRunnerContent | Should -Match "profile''s"
     }
 
+    It 'resolves relative profile paths with the detected PowerShell executable' {
+        Set-Content -LiteralPath (Join-Path $script:FixtureRoot 'alpha.ps1') -Value "'alpha'" -Encoding UTF8
+        $relativeProfilePath = [System.IO.Path]::GetRelativePath($script:TestRepoRoot, $script:FixtureRoot)
+        Mock Get-PowerShellExecutable { 'Invoke-IdempotencyFixture' }
+
+        $output = & $script:CheckIdempotencyScript -ProfilePath $relativeProfilePath 2>&1 | Out-String
+
+        $output | Should -Match 'all profile.d fragments loaded twice'
+        Should -Invoke Get-PowerShellExecutable -Times 1 -Exactly
+    }
+
     It 'reports runner output and a nonzero exit code' {
         Set-Content -LiteralPath (Join-Path $script:FixtureRoot 'alpha.ps1') -Value "'alpha'" -Encoding UTF8
         $env:PS_PROFILE_FAIL_IDEMPOTENCY = 'output'
