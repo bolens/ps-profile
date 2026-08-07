@@ -23,6 +23,12 @@ BeforeAll {
 
 Describe 'run-lint.ps1 extended scenarios' {
     Context 'Script structure' {
+        It 'Documents the isolated repository override' {
+            $content = Get-Content -LiteralPath $script:LintScript -Raw
+            $content | Should -Match '\.PARAMETER RepositoryRoot'
+            $content | Should -Match '\[string\]\$RepositoryRoot'
+        }
+
         It 'Analyzes profile.d and scripts directories' {
             $content = Get-Content -LiteralPath $script:LintScript -Raw
             $content | Should -Match "'profile\.d'"

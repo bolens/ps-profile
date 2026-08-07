@@ -22,6 +22,80 @@ BeforeAll {
 }
 
 Describe 'run-lint.ps1 execution' {
+    It 'analyzes an isolated repository in-process and writes an empty report' {
+        $repo = New-TestTempDirectory -Prefix 'RunLintInProcess'
+        New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d'), (Join-Path $repo 'scripts') -Force | Out-Null
+        Mock Invoke-ScriptAnalyzer { @() }
+
+        $previousDebug = $env:PS_PROFILE_DEBUG
+        $env:PS_PROFILE_DEBUG = '3'
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:RunLintScript -RepositoryRoot $repo -Verbose 4>&1
+            $outputText = $output | Out-String
+            $reportPath = Join-Path $repo 'scripts' 'data' 'psscriptanalyzer-report.json'
+
+            $outputText | Should -Match 'Saved report'
+            $outputText | Should -Match 'no issues found'
+            Test-Path -LiteralPath $reportPath | Should -BeTrue
+            @(Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json).Count | Should -Be 0
+            Should -Invoke Invoke-ScriptAnalyzer -Times 2 -Exactly
+        }
+        finally {
+            if ($null -eq $previousDebug) {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_DEBUG = $previousDebug
+            }
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'reports analyzer findings from an isolated repository in-process' {
+        $repo = New-TestTempDirectory -Prefix 'RunLintFinding'
+        New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d'), (Join-Path $repo 'scripts') -Force | Out-Null
+        Mock Invoke-ScriptAnalyzer {
+            [pscustomobject]@{
+                ScriptName = 'fixture.ps1'
+                RuleName   = 'FixtureRule'
+                Severity   = 'Error'
+                Message    = 'fixture finding'
+                Line       = 3
+                Column     = 5
+            }
+        }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            { & $script:RunLintScript -RepositoryRoot $repo 2>&1 } |
+                Should -Throw -ExpectedMessage '*Errors found by PSScriptAnalyzer*'
+
+            $reportPath = Join-Path $repo 'scripts' 'data' 'psscriptanalyzer-report.json'
+            $report = @(Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json)
+            $report | Should -HaveCount 2
+            $report[0].RuleName | Should -Be 'FixtureRule'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'fails when an analyzer path cannot be processed in-process' {
+        $repo = New-TestTempDirectory -Prefix 'RunLintFailure'
+        New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d'), (Join-Path $repo 'scripts') -Force | Out-Null
+        Mock Invoke-ScriptAnalyzer { throw 'analyzer failure probe' }
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            { & $script:RunLintScript -RepositoryRoot $repo 2>&1 } |
+                Should -Throw -ExpectedMessage '*2 path(s) failed during linting*'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
     It 'Runs PSScriptAnalyzer and writes the JSON report' {
         if ($env:CI -or $env:GITHUB_ACTIONS) {
             Set-ItResult -Skipped -Because 'full-repo lint is too slow for CI'
