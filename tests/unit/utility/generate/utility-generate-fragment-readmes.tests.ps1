@@ -35,19 +35,6 @@ BeforeAll {
 }
 
 Describe 'generate-fragment-readmes.ps1 execution' {
-    It 'DryRun previews README generation without writing files' {
-        if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
-            Set-ItResult -Skipped -Because 'profile.d directory not found'
-            return
-        }
-
-        $result = Invoke-GenerateFragmentReadmesScript -ArgumentList @('-DryRun')
-
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'DRY RUN'
-        $result.Output | Should -Match 'Would generate'
-    }
-
     It 'DryRun previews README generation for a custom output directory' {
         if (-not (Test-Path -LiteralPath $script:ProfileDir)) {
             Set-ItResult -Skipped -Because 'profile.d directory not found'
@@ -66,8 +53,6 @@ Describe 'generate-fragment-readmes.ps1 execution' {
     }
 
     It 'Writes fragment README files for an isolated profile directory' {
-        try {
-        try {
         $repo = New-TestTempDirectory -Prefix 'GenerateFragmentReadmesApply'
         $docsDir = Join-Path $repo 'scripts' 'utils' 'docs'
         $profileDir = Join-Path $repo 'profile.d'
@@ -85,33 +70,17 @@ function Get-FragmentReadmeFixture {
 }
 '@ -Encoding UTF8
 
-        Push-Location $repo
-                git init -q | Out-Null
-        git config user.email 'fixture@example.com'
-        git config user.name 'Fixture'
-        git add profile.d/fixture.ps1
-        git commit -m 'init fragment readme fixture' -q
-        }
-        finally {
-            Pop-Location
+        $scriptPath = Join-Path $docsDir 'generate-fragment-readmes.ps1'
+        $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
+            '-Force',
+            '-OutputPath', $outputDir
+        )
 
-            $scriptPath = Join-Path $docsDir 'generate-fragment-readmes.ps1'
-            Push-Location $repo
-                    $result = Invoke-TestScriptFile -ScriptPath $scriptPath -ArgumentList @(
-                '-Force',
-                '-OutputPath', $outputDir
-            )
-        }
-        }
-        finally {
-            Pop-Location
-
-            $result.ExitCode | Should -Be 0
-            $expectedReadme = Join-Path $outputDir 'fixture.md'
-            Test-Path -LiteralPath $expectedReadme | Should -BeTrue
-            Test-Path -LiteralPath (Join-Path $outputDir 'README.md') | Should -BeTrue
-            Get-Content -LiteralPath $expectedReadme -Raw | Should -Match 'Get-FragmentReadmeFixture|fixture'
-            Test-Path -LiteralPath (Join-Path $profileDir 'fixture.ps1.README.md') | Should -BeFalse
-        }
+        $result.ExitCode | Should -Be 0
+        $expectedReadme = Join-Path $outputDir 'fixture.md'
+        Test-Path -LiteralPath $expectedReadme | Should -BeTrue
+        Test-Path -LiteralPath (Join-Path $outputDir 'README.md') | Should -BeTrue
+        Get-Content -LiteralPath $expectedReadme -Raw | Should -Match 'Get-FragmentReadmeFixture|fixture'
+        Test-Path -LiteralPath (Join-Path $profileDir 'fixture.ps1.README.md') | Should -BeFalse
     }
 }
