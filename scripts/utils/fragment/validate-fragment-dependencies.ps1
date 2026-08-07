@@ -11,10 +11,18 @@
     Checks that all fragments have correct dependencies declared and that there are no
     missing or circular dependencies.
 
+.PARAMETER ProfilePath
+    Optional profile fragment directory to validate. Defaults to profile.d in the
+    repository root.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/fragment/validate-fragment-dependencies.ps1
 
 #>
+
+param(
+    [string]$ProfilePath
+)
 
 # Import ExitCodes for standardized exit handling
 $_ewcScriptsDir = Split-Path -Parent $PSScriptRoot
@@ -54,12 +62,17 @@ if (-not (Test-Path $fragmentLoadingPath)) {
 Import-Module $fragmentLoadingPath -DisableNameChecking -ErrorAction Stop
 
 # Get all fragments (exclude numbered fragments and module registry)
-$profileDDir = Join-Path $repoRoot 'profile.d'
-$fragments = Get-ChildItem -Path $profileDDir -Filter '*.ps1' | 
-Where-Object { 
+$profileDDir = if ($ProfilePath) {
+    [System.IO.Path]::GetFullPath($ProfilePath)
+}
+else {
+    Join-Path $repoRoot 'profile.d'
+}
+$fragments = @(Get-ChildItem -Path $profileDDir -Filter '*.ps1' |
+Where-Object {
     $_.Name -notmatch '^[0-9]+-' -and 
     $_.Name -ne 'files-module-registry.ps1' 
-}
+})
 
 # Level 1: Basic operation start
 if ($debugLevel -ge 1) {
@@ -128,6 +141,9 @@ if ($result.Valid) {
         Write-Host "  ... and $($sorted.Count - 20) more" -ForegroundColor Gray
     }
     
+    if ($ProfilePath -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        return
+    }
     Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 else {
@@ -152,4 +168,3 @@ else {
     
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
-
