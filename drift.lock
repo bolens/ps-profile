@@ -4940,7 +4940,7 @@ tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/lib/path/
 tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/lib/runtime/PowerShellDetection.psm1 sig:4e7b96eb1e750fb4
 tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/lib/utilities/Command.psm1 sig:4d68807fd241b457
 tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/utils/code-quality/run-pester.ps1 sig:1d139c40dd640928
-tests/unit/library/common/library-common.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:ee98a5ea61fd2917
+tests/unit/library/common/library-common.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
 tests/unit/library/common/library-common.tests.ps1 -> scripts/lib/core/ExitCodes.psm1 sig:ab2b11f05d8ef1f2
 tests/unit/library/common/library-common.tests.ps1 -> scripts/lib/core/PlatformPaths.psm1 sig:f0f4bad472b381e2
 tests/unit/library/common/library-common.tests.ps1 -> scripts/lib/file/FileSystem.psm1 sig:5d00a04e2377ef90
@@ -6980,7 +6980,7 @@ tests/unit/utility/validate/utility-validate-fragment-dependencies.tests.ps1 -> 
 tests/unit/utility/verify/utility-verify-cache-cleared-extended.tests.ps1 -> scripts/utils/verify-cache-cleared.ps1 sig:9fe86d9c19e3704b
 tests/unit/utility/verify/utility-verify-cache-cleared.tests.ps1 -> scripts/utils/verify-cache-cleared.ps1 sig:9fe86d9c19e3704b
 tests/unit/validation/check/validation-check-commit-messages.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:5cbcfd4092469c30
-tests/unit/validation/check/validation-check-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:ee98a5ea61fd2917
+tests/unit/validation/check/validation-check-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
 tests/unit/validation/comment/validation-comment-help-extended.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:3144ff33fe8ea363
 tests/unit/validation/comment/validation-comment-help-fixtures.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:3144ff33fe8ea363
 tests/unit/validation/comment/validation-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:3144ff33fe8ea363
@@ -6992,8 +6992,8 @@ tests/unit/validation/doc/validation-doc-coverage-extended.tests.ps1 -> scripts/
 tests/unit/validation/idempotency/validation-idempotency-extended.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:6374366b1e3aa5f2
 tests/unit/validation/idempotency/validation-idempotency-fixtures.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:6374366b1e3aa5f2
 tests/unit/validation/idempotency/validation-idempotency.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:6374366b1e3aa5f2
-tests/unit/validation/script/validation-script-standards-extended.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:ee98a5ea61fd2917
-tests/unit/validation/script/validation-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:ee98a5ea61fd2917
+tests/unit/validation/script/validation-script-standards-extended.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
+tests/unit/validation/script/validation-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
 tests/unit/validation/validate/validation-validate-profile-extended.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:49a6af5ae6081608
 tests/unit/validation/validate/validation-validate-profile.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:49a6af5ae6081608
 tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/commit-message-check.yml sig:b1b5720dd8edd78d
