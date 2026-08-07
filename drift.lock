@@ -6512,8 +6512,8 @@ tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/util
 tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:2b6a591a650f98c7
 tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-tools-integration-batch.ps1 sig:02a6b3157f500079
 tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-unit-batch.ps1 sig:cbed57563e9a8dad
-tests/unit/test-runner/check/test-runner-check-missing-tests-extended.tests.ps1 -> scripts/utils/code-quality/check-missing-tests.ps1 sig:7f46c400871bc642
-tests/unit/test-runner/check/test-runner-check-missing-tests.tests.ps1 -> scripts/utils/code-quality/check-missing-tests.ps1 sig:7f46c400871bc642
+tests/unit/test-runner/check/test-runner-check-missing-tests-extended.tests.ps1 -> scripts/utils/code-quality/check-missing-tests.ps1 sig:4754eeede4f5f829
+tests/unit/test-runner/check/test-runner-check-missing-tests.tests.ps1 -> scripts/utils/code-quality/check-missing-tests.ps1 sig:4754eeede4f5f829
 tests/unit/test-runner/ci/test-runner-pester-ci-shard-filter.tests.ps1 -> profile.d/conversion-modules/data/core/csv.ps1 sig:a684f3cb48f6e0ff
 tests/unit/test-runner/ci/test-runner-pester-ci-shard-filter.tests.ps1 -> scripts/utils/code-quality/modules/PesterCiShardFilter.psm1 sig:9381cdd1408fcc0f
 tests/unit/test-runner/comprehensive/test-runner-comprehensive-reporting-extended.tests.ps1 -> scripts/lib/core/CommonEnums.psm1 sig:52f25a2636735296
