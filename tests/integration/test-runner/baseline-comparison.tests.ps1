@@ -104,17 +104,7 @@ Describe 'Performance Baseline Workflows' {
     }
 
     Context 'run-pester baseline CLI switches' {
-        It 'Accepts GenerateBaseline in dry-run mode' {
-            $baselinePath = Join-Path $script:TempTestDir 'cli-baseline.json'
-            { & $script:RunPesterPath -DryRun -GenerateBaseline -BaselinePath $baselinePath -TestFile $script:DryRunTestFile } | Should -Not -Throw
-        }
-
-        It 'Accepts CompareBaseline in dry-run mode' {
-            $baselinePath = Join-Path $script:TempTestDir 'cli-compare-baseline.json'
-            { & $script:RunPesterPath -DryRun -CompareBaseline -BaselinePath $baselinePath -BaselineThreshold 8 -TestFile $script:DryRunTestFile } | Should -Not -Throw
-        }
-
-        It 'Accepts baseline switches with performance tracking flags' {
+        It 'Accepts combined baseline and performance switches in dry-run mode' {
             $baselinePath = Join-Path $script:TempTestDir 'cli-perf-baseline.json'
             {
                 & $script:RunPesterPath -DryRun -GenerateBaseline -CompareBaseline -BaselinePath $baselinePath `

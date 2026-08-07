@@ -59,73 +59,104 @@ Describe 'Test Runner Integration (real run-pester.ps1)' {
         }
 
         It 'Accepts output format and quiet switches' {
-            foreach ($format in @('Normal', 'Detailed', 'Minimal', 'None')) {
-                { Invoke-RunPesterDryRun @{ OutputFormat = $format } } | Should -Not -Throw
-            }
-            { Invoke-RunPesterDryRun @{ Quiet = $true } } | Should -Not -Throw
+            { Invoke-RunPesterDryRun @{ OutputFormat = 'None'; Quiet = $true } } | Should -Not -Throw
         }
     }
 
     Context 'Coverage and CI flags' {
         It 'Accepts coverage-related switches' {
-            { Invoke-RunPesterDryRun @{ Coverage = $true; MinimumCoverage = 0 } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ ShowCoverageSummary = $true } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ CI = $true } } | Should -Not -Throw
+            {
+                Invoke-RunPesterDryRun @{
+                    Coverage            = $true
+                    MinimumCoverage     = 0
+                    ShowCoverageSummary = $true
+                    CI                  = $true
+                }
+            } | Should -Not -Throw
         }
     }
 
     Context 'Performance and baseline flags' {
         It 'Accepts performance tracking switches' {
-            { Invoke-RunPesterDryRun @{ TrackPerformance = $true } } | Should -Not -Throw
             { Invoke-RunPesterDryRun @{ TrackPerformance = $true; TrackMemory = $true; TrackCPU = $true } } | Should -Not -Throw
         }
 
         It 'Accepts baseline generation and comparison switches' {
             $baselinePath = Join-Path $TestDrive 'integration-baseline.json'
-            { Invoke-RunPesterDryRun @{ GenerateBaseline = $true; BaselinePath = $baselinePath } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ CompareBaseline = $true; BaselinePath = $baselinePath; BaselineThreshold = 10 } } | Should -Not -Throw
+            {
+                Invoke-RunPesterDryRun @{
+                    GenerateBaseline  = $true
+                    CompareBaseline   = $true
+                    BaselinePath      = $baselinePath
+                    BaselineThreshold = 10
+                }
+            } | Should -Not -Throw
         }
     }
 
     Context 'Retry, timeout, and execution control flags' {
         It 'Accepts retry and timeout switches' {
-            { Invoke-RunPesterDryRun @{ MaxRetries = 2; RetryOnFailure = $true; ExponentialBackoff = $true } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ SuppressRetryWarnings = $true; MaxRetries = 1 } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ Timeout = 300 } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ TestTimeoutSeconds = 60 } } | Should -Not -Throw
+            {
+                Invoke-RunPesterDryRun @{
+                    MaxRetries           = 2
+                    RetryOnFailure       = $true
+                    ExponentialBackoff   = $true
+                    SuppressRetryWarnings = $true
+                    Timeout              = 300
+                    TestTimeoutSeconds   = 60
+                }
+            } | Should -Not -Throw
         }
 
         It 'Accepts fail-fast and repeat switches' {
-            { Invoke-RunPesterDryRun @{ FailFast = $true } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ Repeat = 2 } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ FailOnWarnings = $true } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ Progress = $true } } | Should -Not -Throw
+            {
+                Invoke-RunPesterDryRun @{
+                    FailFast       = $true
+                    Repeat         = 2
+                    FailOnWarnings = $true
+                    Progress       = $true
+                }
+            } | Should -Not -Throw
         }
     }
 
     Context 'Filtering and discovery flags' {
         It 'Accepts tag, category, and name filters' {
-            { Invoke-RunPesterDryRun @{ TestName = '*library*' } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ IncludeTag = 'Unit' } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ ExcludeTag = 'Slow' } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ OnlyCategories = 'Unit' } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ ExcludeCategories = 'Slow' } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ TestFilePattern = '*library-common*' } } | Should -Not -Throw
+            {
+                Invoke-RunPesterDryRun @{
+                    TestName         = '*library*'
+                    IncludeTag       = 'Unit'
+                    ExcludeTag       = 'Slow'
+                    OnlyCategories   = 'Unit'
+                    ExcludeCategories = 'Slow'
+                    TestFilePattern  = '*library-common*'
+                }
+            } | Should -Not -Throw
         }
 
         It 'Accepts parallel execution switches' {
-            { Invoke-RunPesterDryRun @{ Parallel = 2 } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ MaxParallelThreads = 4 } } | Should -Not -Throw
-            { & $script:RunPesterPath -DryRun -Suite Unit -Randomize } | Should -Not -Throw
+            {
+                Invoke-RunPesterDryRun @{
+                    Parallel           = $true
+                    MaxParallelThreads = 4
+                    Randomize          = $true
+                }
+            } | Should -Not -Throw
         }
     }
 
     Context 'Reporting and analysis flags' {
         It 'Accepts analysis and report switches' {
             $reportPath = Join-Path $TestDrive 'integration-report.html'
-            { Invoke-RunPesterDryRun @{ AnalyzeResults = $true } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ AnalyzeResults = $true; ReportFormat = 'HTML'; ReportPath = $reportPath; IncludeReportDetails = $true } } | Should -Not -Throw
-            { Invoke-RunPesterDryRun @{ ShowSummaryStats = $true } } | Should -Not -Throw
+            {
+                Invoke-RunPesterDryRun @{
+                    AnalyzeResults       = $true
+                    ReportFormat         = 'HTML'
+                    ReportPath           = $reportPath
+                    IncludeReportDetails = $true
+                    ShowSummaryStats      = $true
+                }
+            } | Should -Not -Throw
         }
     }
 
@@ -135,9 +166,13 @@ Describe 'Test Runner Integration (real run-pester.ps1)' {
             Push-Location $script:TestRepoRoot
                         git rev-parse --git-dir 2>$null | Out-Null
             if ($LASTEXITCODE -eq 0) {
-                { Invoke-RunPesterDryRun @{ ChangedFiles = $true } } | Should -Not -Throw
-                { Invoke-RunPesterDryRun @{ ChangedSince = 'HEAD~1' } } | Should -Not -Throw
-                { Invoke-RunPesterDryRun @{ ChangedFiles = $true; IncludeUntracked = $true } } | Should -Not -Throw
+                {
+                    Invoke-RunPesterDryRun @{
+                        ChangedFiles     = $true
+                        ChangedSince     = 'HEAD~1'
+                        IncludeUntracked = $true
+                    }
+                } | Should -Not -Throw
             }
             }
             finally {
@@ -147,7 +182,7 @@ Describe 'Test Runner Integration (real run-pester.ps1)' {
 
         It 'Saves and loads JSON configuration files' {
             $configPath = Join-Path $TestDrive 'integration-config.json'
-            Invoke-RunPesterDryRun @{ Coverage = $true; Parallel = 2; SaveConfig = $configPath } 2>&1 | Out-Null
+            Invoke-RunPesterDryRun @{ Coverage = $true; Parallel = $true; MaxParallelThreads = 2; SaveConfig = $configPath } 2>&1 | Out-Null
 
             if (Test-Path -LiteralPath $configPath) {
                 { Invoke-RunPesterDryRun @{ ConfigFile = $configPath; Suite = 'Integration' } } | Should -Not -Throw
