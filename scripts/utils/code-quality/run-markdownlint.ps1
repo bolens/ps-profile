@@ -103,4 +103,10 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "markdownlint passed!"
+$successMessage = "markdownlint passed!"
+if ($env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+}
+else {
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
+}
