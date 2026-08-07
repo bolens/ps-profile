@@ -22,18 +22,6 @@ BeforeAll {
 }
 
 Describe 'generate-dashboard.ps1 execution' {
-    It 'DryRun previews dashboard generation without writing HTML output' {
-        $outputFile = Join-Path (New-TestTempDirectory -Prefix 'DashboardDryRun') 'dashboard.html'
-            $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDashboardScript -ArgumentList @(
-                '-DryRun',
-                '-OutputPath', $outputFile
-            )
-
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'DRY RUN|Would generate dashboard'
-            Test-Path -LiteralPath $outputFile | Should -BeFalse
-    }
-
     It 'Writes an HTML dashboard file when not in DryRun mode' {
         $outputFile = Join-Path (New-TestTempDirectory -Prefix 'DashboardWrite') 'dashboard.html'
             $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDashboardScript -ArgumentList @(
@@ -69,7 +57,8 @@ Describe 'generate-dashboard.ps1 execution' {
             )
 
             $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'DRY RUN|Would generate dashboard|Historical trend analysis'
+            $result.Output | Should -Match 'DRY RUN|Would generate dashboard'
+            $result.Output | Should -Match 'Historical trend analysis|historical'
             Test-Path -LiteralPath $outputFile | Should -BeFalse
     }
 }
