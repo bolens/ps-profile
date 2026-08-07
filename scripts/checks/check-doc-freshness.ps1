@@ -15,6 +15,10 @@ scripts/checks/check-doc-freshness.ps1
 .PARAMETER DocsPath
     Output directory for generated docs. Defaults to docs/api.
 
+.PARAMETER GeneratorPath
+    Optional path to the documentation generator. Intended for isolated validation
+    and testing; defaults to the repository generator.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1
 
@@ -24,7 +28,8 @@ scripts/checks/check-doc-freshness.ps1
 
 param(
     [string]$ProfilePath,
-    [string]$DocsPath = 'docs/api'
+    [string]$DocsPath = 'docs/api',
+    [string]$GeneratorPath
 )
 
 $scriptsDir = Split-Path -Parent $PSScriptRoot
@@ -45,18 +50,32 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
 }
 
-$generateDocs = Join-Path $repoRoot 'scripts' 'utils' 'docs' 'generate-docs.ps1'
+$generateDocs = if ($GeneratorPath) {
+    if ([System.IO.Path]::IsPathRooted($GeneratorPath)) {
+        $GeneratorPath
+    }
+    else {
+        Join-Path $repoRoot $GeneratorPath
+    }
+}
+else {
+    Join-Path $repoRoot 'scripts' 'utils' 'docs' 'generate-docs.ps1'
+}
 if (-not (Test-Path -LiteralPath $generateDocs)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "generate-docs.ps1 not found at: $generateDocs"
 }
 
 $psExe = Get-PowerShellExecutable
-$docsRelative = $DocsPath.TrimStart('.', '\', '/')
-if ([string]::IsNullOrWhiteSpace($docsRelative)) {
-    $docsRelative = 'docs/api'
+$trackedDocsPath = if ([System.IO.Path]::IsPathRooted($DocsPath)) {
+    $DocsPath
 }
-
-$trackedDocsPath = Join-Path $repoRoot $docsRelative
+else {
+    $docsRelative = $DocsPath.TrimStart('.', '\', '/')
+    if ([string]::IsNullOrWhiteSpace($docsRelative)) {
+        $docsRelative = 'docs/api'
+    }
+    Join-Path $repoRoot $docsRelative
+}
 if (-not (Test-Path -LiteralPath $trackedDocsPath -PathType Container)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Documentation directory not found at: $trackedDocsPath"
 }
@@ -141,4 +160,9 @@ finally {
     }
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'API documentation is up to date.'
+$successMessage = 'API documentation is up to date.'
+if ($GeneratorPath -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+    return
+}
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
