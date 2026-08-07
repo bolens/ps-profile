@@ -95,7 +95,9 @@ function Invoke-WithRetry {
             # Use a default session state so built-in cmdlets exist inside the
             # timeout runspace (bare pools can omit them on some Windows hosts).
             $initialSessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault2()
-            $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1, $initialSessionState, $Host)
+            # The current host can be null in isolated/non-interactive sessions.
+            # This overload creates a single-runspace pool without requiring it.
+            $runspacePool = [runspacefactory]::CreateRunspacePool($initialSessionState)
             $runspacePool.Open()
 
             $powershell = [PowerShell]::Create()
