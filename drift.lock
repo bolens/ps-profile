@@ -6976,8 +6976,8 @@ tests/unit/utility/validate/utility-validate-dependencies-extended.tests.ps1 -> 
 tests/unit/utility/validate/utility-validate-dependencies.tests.ps1 -> scripts/utils/dependencies/validate-dependencies.ps1 sig:890a015604a668f1
 tests/unit/utility/validate/utility-validate-fragment-dependencies-extended.tests.ps1 -> scripts/utils/fragment/validate-fragment-dependencies.ps1 sig:c477755ae68ae721
 tests/unit/utility/validate/utility-validate-fragment-dependencies.tests.ps1 -> scripts/utils/fragment/validate-fragment-dependencies.ps1 sig:c477755ae68ae721
-tests/unit/utility/verify/utility-verify-cache-cleared-extended.tests.ps1 -> scripts/utils/verify-cache-cleared.ps1 sig:9fe86d9c19e3704b
-tests/unit/utility/verify/utility-verify-cache-cleared.tests.ps1 -> scripts/utils/verify-cache-cleared.ps1 sig:9fe86d9c19e3704b
+tests/unit/utility/verify/utility-verify-cache-cleared-extended.tests.ps1 -> scripts/utils/verify-cache-cleared.ps1 sig:1ed1ac695b7a7735
+tests/unit/utility/verify/utility-verify-cache-cleared.tests.ps1 -> scripts/utils/verify-cache-cleared.ps1 sig:1ed1ac695b7a7735
 tests/unit/validation/check/validation-check-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/check/validation-check-commit-messages.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:234e7c99d1ed6d5a
 tests/unit/validation/check/validation-check-idempotency.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
