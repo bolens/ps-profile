@@ -145,28 +145,7 @@ Describe 'validate-dependencies.ps1 execution' {
         $requirementsFile = Join-Path (New-TestTempDirectory -Prefix 'ValidateDepsInvalid') 'requirements.psd1'
         Set-Content -LiteralPath $requirementsFile -Value '@{ Invalid =' -Encoding UTF8
 
-        $moduleLookup = {
-            param($ModuleName)
-            [PSCustomObject]@{ Version = [version]'1.0.0' }
-        }
-        $commandTest = {
-            param($CommandName)
-            $CommandName -eq 'pwsh'
-        }
-        $originalDebug = $env:PS_PROFILE_DEBUG
-        try {
-            $env:PS_PROFILE_DEBUG = '3'
-            $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile `
-                -ModuleLookupAction $moduleLookup -CommandTestAction $commandTest
-        }
-        finally {
-            if ($null -eq $originalDebug) {
-                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
-            }
-            else {
-                $env:PS_PROFILE_DEBUG = $originalDebug
-            }
-        }
+        $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile
 
         $result.ExitCode | Should -Be 2
         $result.Output | Should -Match 'Failed to load requirements file|requirements\.psd1'
