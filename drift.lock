@@ -6867,7 +6867,7 @@ tests/unit/utility/init/utility-init-wrangler-config-extended.tests.ps1 -> scrip
 tests/unit/utility/init/utility-init-wrangler-config.tests.ps1 -> scripts/utils/setup/init-wrangler-config.ps1 sig:ef19531082cab152
 tests/unit/utility/initialize/utility-initialize-databases-extended.tests.ps1 -> scripts/utils/database/initialize-databases.ps1 sig:99ee189ace8f874b
 tests/unit/utility/initialize/utility-initialize-databases.tests.ps1 -> scripts/utils/database/initialize-databases.ps1 sig:99ee189ace8f874b
-tests/unit/utility/install/utility-install-githooks.tests.ps1 -> scripts/git/install-githooks.ps1 sig:a1452b7b6707eb62
+tests/unit/utility/install/utility-install-githooks.tests.ps1 -> scripts/git/install-githooks.ps1 sig:dd1eac9fdc5eefb4
 tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:925dde2c54f274af
 tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:e3418b5e3159e675
 tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:925dde2c54f274af
