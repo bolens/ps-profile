@@ -53,38 +53,6 @@ function Get-GenerateDocsFixture {
         }
     }
 
-    It 'Writes function markdown to an isolated output directory' {
-        $profileDir = New-TestTempDirectory -Prefix 'GenerateDocsApplyProfile'
-        $outputDir = New-TestTempDirectory -Prefix 'GenerateDocsApplyOutput'
-        Set-Content -LiteralPath (Join-Path $profileDir '00-fixture.ps1') -Value @'
-<#
-.SYNOPSIS
-    Fixture function for documentation generation.
-.DESCRIPTION
-    Used by generate-docs behavioral tests.
-#>
-function Get-GenerateDocsFixture {
-    'ok'
-}
-'@ -Encoding UTF8
-
-        try {
-            $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDocsScript -ArgumentList @(
-                '-ProfilePath', $profileDir,
-                '-OutputPath', $outputDir
-            )
-
-            $result.ExitCode | Should -Be 0
-            $expectedDoc = Join-Path $outputDir 'functions' 'Get-GenerateDocsFixture.md'
-            Test-Path -LiteralPath $expectedDoc | Should -BeTrue
-            Get-Content -LiteralPath $expectedDoc -Raw | Should -Match 'Get-GenerateDocsFixture'
-        }
-        finally {
-            foreach ($path in @($profileDir, $outputDir)) {
-            }
-        }
-    }
-
     It 'Runs incremental generation for an isolated profile directory' {
         $profileDir = New-TestTempDirectory -Prefix 'GenerateDocsIncrementalProfile'
         $outputDir = New-TestTempDirectory -Prefix 'GenerateDocsIncrementalOutput'
@@ -106,6 +74,9 @@ function Get-GenerateDocsIncrementalFixture {
                 '-OutputPath', $outputDir
             )
             $initial.ExitCode | Should -Be 0
+            $expectedDoc = Join-Path $outputDir 'functions' 'Get-GenerateDocsIncrementalFixture.md'
+            Test-Path -LiteralPath $expectedDoc | Should -BeTrue
+            Get-Content -LiteralPath $expectedDoc -Raw | Should -Match 'Get-GenerateDocsIncrementalFixture'
 
             $result = Invoke-TestScriptFile -ScriptPath $script:GenerateDocsScript -ArgumentList @(
                 '-Incremental',
