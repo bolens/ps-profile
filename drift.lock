@@ -3899,7 +3899,7 @@ docs/guides/PREFERENCE_AWARE_INSTALL_HINTS.md -> profile.d/bootstrap/MissingTool
 docs/guides/PREFERENCE_AWARE_INSTALL_HINTS.md -> scripts/lib/runtime/NodeJs.psm1 sig:e593757d640f77f2
 docs/guides/PREFERENCE_AWARE_INSTALL_HINTS.md -> scripts/lib/runtime/Python.psm1 sig:09608737394733d4
 docs/guides/PREFERENCE_AWARE_INSTALL_HINTS.md -> scripts/lib/utilities/Command.psm1 sig:4d68807fd241b457
-docs/guides/PREFERENCE_AWARE_INSTALL_HINTS.md -> scripts/utils/code-quality/spellcheck.ps1 sig:e72fca73c471aedd
+docs/guides/PREFERENCE_AWARE_INSTALL_HINTS.md -> scripts/utils/code-quality/spellcheck.ps1 sig:bf1581047a118a2a
 docs/guides/PREFERENCE_AWARE_INSTALL_HINTS.md -> scripts/utils/dependencies/check-missing-packages.ps1 sig:ea6d11c8e4d84be9
 docs/guides/PREFERENCE_AWARE_INSTALL_HINTS.md -> tests/TestSupport/ToolDetection.ps1 sig:45bdee0ff94fc557
 docs/guides/PREFERENCE_AWARE_INSTALL_HINTS.md -> tests/unit/profile/preference/profile-preference-aware-install-hints.tests.ps1 sig:b254a5e44e1c200e
@@ -6781,7 +6781,7 @@ tests/unit/test-runner/run/test-runner-run-pester-extended.tests.ps1 -> scripts/
 tests/unit/test-runner/run/test-runner-run-pester.tests.ps1 -> scripts/utils/code-quality/modules/PesterConfig.psm1 sig:43a7e54f37cf1fb3
 tests/unit/test-runner/run/test-runner-run-pester.tests.ps1 -> scripts/utils/code-quality/run-pester.ps1 sig:1d139c40dd640928
 tests/unit/test-runner/runner/test-runner-runner-helpers-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestRunnerHelpers.psm1 sig:1d62b3310082997f
-tests/unit/test-runner/spellcheck/test-runner-spellcheck-extended.tests.ps1 -> scripts/utils/code-quality/spellcheck.ps1 sig:e72fca73c471aedd
+tests/unit/test-runner/spellcheck/test-runner-spellcheck-extended.tests.ps1 -> scripts/utils/code-quality/spellcheck.ps1 sig:bf1581047a118a2a
 tests/unit/test-runner/summary/test-runner-summary-generation-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryGeneration.psm1 sig:8db896b4a3f921ae
 tests/unit/test-runner/summary/test-runner-summary-generation.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryGeneration.psm1 sig:8db896b4a3f921ae
 tests/unit/test-runner/summary/test-runner-summary-stats-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryStats.psm1 sig:ee6524df1cdada9d
@@ -6957,7 +6957,7 @@ tests/unit/utility/security/utility-security-patterns-structure-extended.tests.p
 tests/unit/utility/security/utility-security-reporter-structure-extended.tests.ps1 -> scripts/utils/security/modules/SecurityReporter.psm1 sig:def268e80f2badc2
 tests/unit/utility/security/utility-security-rules-structure-extended.tests.ps1 -> scripts/utils/security/modules/SecurityRules.psm1 sig:93f639859cefa537
 tests/unit/utility/security/utility-security-scanner-structure-extended.tests.ps1 -> scripts/utils/security/modules/SecurityScanner.psm1 sig:4905c3cd35f4fa07
-tests/unit/utility/spellcheck/utility-spellcheck.tests.ps1 -> scripts/utils/code-quality/spellcheck.ps1 sig:e72fca73c471aedd
+tests/unit/utility/spellcheck/utility-spellcheck.tests.ps1 -> scripts/utils/code-quality/spellcheck.ps1 sig:bf1581047a118a2a
 tests/unit/utility/sync/utility-sync-profile-fragments-extended.tests.ps1 -> scripts/utils/fragment/sync-profile-fragments.ps1 sig:d7b2010618a21e0e
 tests/unit/utility/sync/utility-sync-profile-fragments.tests.ps1 -> scripts/utils/fragment/sync-profile-fragments.ps1 sig:d7b2010618a21e0e
 tests/unit/utility/task/utility-task-comparator-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskComparator.psm1 sig:fae902a57b00e69f
