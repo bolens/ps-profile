@@ -52,6 +52,24 @@ function Get-BodyHelp {
         $output | Should -Match 'All functions have comment-based help'
     }
 
+    It 'resolves a relative fragment path from the repository root' {
+        $content = @'
+<#
+.SYNOPSIS
+    Relative-path fixture help.
+#>
+function Get-RelativeCommentHelpFixture {
+    'documented'
+}
+'@
+        Set-Content -LiteralPath (Join-Path $script:FixtureRoot 'relative.ps1') -Value $content -Encoding UTF8
+        $relativePath = [System.IO.Path]::GetRelativePath($script:TestRepoRoot, $script:FixtureRoot)
+
+        $output = & $script:CheckCommentHelpScript -Path $relativePath 2>&1 | Out-String
+
+        $output | Should -Match 'All functions have comment-based help'
+    }
+
     It 'reports every undocumented function in a fragment' {
         $content = @'
 function Get-FirstMissing {
