@@ -25,13 +25,15 @@ BeforeAll {
         param([hashtable]$Parameters = @{})
 
         $captured = [System.Collections.Generic.List[string]]::new()
-                & $script:RunPesterPath @Parameters 2>&1 | ForEach-Object {
-            $null = $captured.Add("$($_)")
+        try {
+            & $script:RunPesterPath @Parameters 2>&1 | ForEach-Object {
+                $null = $captured.Add("$($_)")
+            }
+            $null = $captured.Add("EXIT:$LASTEXITCODE")
         }
-        $null = $captured.Add("EXIT:$LASTEXITCODE")
-    }
-    catch {
-        $null = $captured.Add($_.Exception.Message)
+        catch {
+            $null = $captured.Add($_.Exception.Message)
+        }
 
         return $captured
     }
