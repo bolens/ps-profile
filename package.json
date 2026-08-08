@@ -122,7 +122,7 @@
     "@cspell/dict-en-ca": "^1.0.61",
     "@cspell/dict-en-gb-ise": "^1.0.29",
     "@cspell/dict-filetypes": "^3.0.18",
-    "@cspell/dict-k8s": "^1.0.12",
+    "@cspell/dict-k8s": "^1.0.13",
     "@cspell/dict-node": "^5.0.9",
     "@cspell/dict-npm": "^5.2.41",
     "@cspell/dict-powershell": "^5.0.15",
