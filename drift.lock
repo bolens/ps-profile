@@ -6937,7 +6937,6 @@ tests/unit/utility/track/utility-track-coverage-trends-extended.tests.ps1 -> scr
 tests/unit/utility/track/utility-track-coverage-trends.tests.ps1 -> scripts/utils/metrics/track-coverage-trends.ps1 sig:2340a411fb7efb2f
 tests/unit/utility/validate/utility-validate-databases-extended.tests.ps1 -> scripts/utils/database/validate-databases.ps1 sig:2f2e9623f1578faf
 tests/unit/utility/validate/utility-validate-databases.tests.ps1 -> scripts/utils/database/validate-databases.ps1 sig:2f2e9623f1578faf
-tests/unit/utility/validate/utility-validate-dependencies-extended.tests.ps1 -> scripts/utils/dependencies/validate-dependencies.ps1 sig:4e0747c3d1eaf5f2
 tests/unit/utility/validate/utility-validate-dependencies.tests.ps1 -> scripts/utils/dependencies/validate-dependencies.ps1 sig:4e0747c3d1eaf5f2
 tests/unit/utility/validate/utility-validate-fragment-dependencies-extended.tests.ps1 -> scripts/utils/fragment/validate-fragment-dependencies.ps1 sig:c477755ae68ae721
 tests/unit/utility/validate/utility-validate-fragment-dependencies.tests.ps1 -> scripts/utils/fragment/validate-fragment-dependencies.ps1 sig:c477755ae68ae721
