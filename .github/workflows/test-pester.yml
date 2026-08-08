@@ -122,16 +122,21 @@ jobs:
               Register-PSRepository -Default -ErrorAction Stop
             }
             catch {
-              # Some Windows images cannot restore the reserved PSGallery name.
-              # A differently named repository can use the same official endpoint.
+              Write-Warning "Could not restore the default PSGallery registration: $($_.Exception.Message)"
+            }
+            if (-not (Get-PSRepository -Name $galleryName -ErrorAction SilentlyContinue)) {
+              # Register-PSRepository can emit a non-terminating NuGet error and
+              # return without creating PSGallery, especially on Windows images.
               $galleryName = 'PSGalleryFallback'
-              Register-PSRepository `
-                -Name $galleryName `
-                -SourceLocation 'https://www.powershellgallery.com/api/v2' `
-                -PublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
-                -ScriptSourceLocation 'https://www.powershellgallery.com/api/v2/items/psscript' `
-                -ScriptPublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
-                -InstallationPolicy Trusted
+              if (-not (Get-PSRepository -Name $galleryName -ErrorAction SilentlyContinue)) {
+                Register-PSRepository `
+                  -Name $galleryName `
+                  -SourceLocation 'https://www.powershellgallery.com/api/v2' `
+                  -PublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
+                  -ScriptSourceLocation 'https://www.powershellgallery.com/api/v2/items/psscript' `
+                  -ScriptPublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
+                  -InstallationPolicy Trusted
+              }
             }
           }
           Set-PSRepository -Name $galleryName -InstallationPolicy Trusted
