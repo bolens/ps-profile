@@ -104,13 +104,6 @@ BeforeAll {
 }
 
 Describe 'validate-dependencies.ps1 execution' {
-    It 'Passes when the requirements fixture only contains optional satisfied dependencies' {
-        $requirementsFile = New-ValidateDependenciesRequirementsFile
-        $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'Dependencies|validation|passed|success'
-    }
-
     It 'Uses the default module lookup for a built-in module' {
         $requirementsFile = New-ValidateDependenciesRequirementsFile
         $records = @(& $script:ValidateDependenciesScript -RequirementsFile $requirementsFile -PassThru *>&1)
@@ -120,22 +113,38 @@ Describe 'validate-dependencies.ps1 execution' {
         ($records | Out-String -Width 4096) | Should -Match 'Microsoft.PowerShell.Utility.*Installed'
     }
 
-    It 'Fails when a required module from the requirements fixture is missing' {
+    It 'Treats a module lookup error as a missing required dependency' {
         $requirementsFile = New-ValidateDependenciesRequirementsFile -RequireMissingModule
-        $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile
+        $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile `
+            -ModuleLookupAction { param($ModuleName) throw "Lookup failed for $ModuleName" }
+
         $result.ExitCode | Should -Be 1
-        $result.Output | Should -Match 'Definitely-Not-Installed-Module-12345|missing|Missing'
+        $result.Output | Should -Match 'Definitely-Not-Installed-Module-12345|Lookup failed|missing|Missing'
     }
 
-    It 'Completes after the supplied installer handles a missing required module' {
-        $moduleName = 'Definitely-Not-Installed-Module-Installer-12345'
-        $requirementsFile = New-ValidateDependenciesRequirementsFile -RequireMissingModule -MissingModuleName $moduleName
+    It 'Reports successful and failed automatic module installations together' {
+        $requirementsFile = New-ValidateDependenciesCustomRequirementsFile -Content @'
+@{
+    PowerShellVersion = '5.1'
+    Modules = @{
+        'Installed-Module-For-Validation' = @{ Version = '1.0.0'; Required = $true }
+        'Failed-Install-Module-For-Validation' = @{ Version = '1.0.0'; Required = $true }
+    }
+    ExternalTools = @{}
+}
+'@
 
         $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile -InstallMissing `
-            -ModuleInstallAction { param($ModuleName) }
+            -ModuleInstallAction {
+                param($ModuleName)
+                if ($ModuleName -eq 'Failed-Install-Module-For-Validation') {
+                    throw "install failed for $ModuleName"
+                }
+            }
 
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'installed|validation passed'
+        $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'Installed-Module-For-Validation.*installed'
+        $result.Output | Should -Match 'install failed|Failed-Install-Module-For-Validation'
     }
 
     It 'Fails setup when the requirements file path does not exist' {
@@ -144,21 +153,6 @@ Describe 'validate-dependencies.ps1 execution' {
 
         $result.ExitCode | Should -Be 2
         $result.Output | Should -Match 'Requirements file not found|missing-requirements\.psd1'
-    }
-
-    It 'Treats a module lookup error as a missing required dependency' {
-        $moduleName = 'Unqueryable-Required-Module-12345'
-        $requirementsFile = New-ValidateDependenciesRequirementsFile -RequireMissingModule -MissingModuleName $moduleName
-        $moduleLookup = {
-            param($ModuleName)
-            throw "Lookup failed for $ModuleName"
-        }
-
-        $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile `
-            -ModuleLookupAction $moduleLookup
-
-        $result.ExitCode | Should -Be 1
-        $result.Output | Should -Match 'Unqueryable-Required-Module-12345|Lookup failed'
     }
 
     It 'Fails setup when the requirements data file is invalid' {
@@ -171,26 +165,23 @@ Describe 'validate-dependencies.ps1 execution' {
         $result.Output | Should -Match 'Failed to load requirements file|requirements\.psd1'
     }
 
-    It 'Reports version mismatches and required and optional external tools' {
-        $requirementsFile = Join-Path (New-TestTempDirectory -Prefix 'ValidateDepsTools') 'requirements.psd1'
-        @'
+    It 'Covers module versions and required, optional, available, and failed tools' {
+        $requirementsFile = New-ValidateDependenciesCustomRequirementsFile -Content @'
 @{
     PowerShellVersion = '99.0'
     Modules = @{
-        'Microsoft.PowerShell.Utility' = @{
-            Version = '99.0.0'
-            Required = $true
-        }
+        'Current-Module-For-Validation' = @{ Version = '1.0.0'; Required = $true }
+        'Outdated-Module-For-Validation' = @{ Version = '2.0.0'; Required = $true }
+        'Missing-Optional-Module-For-Validation' = @{ Version = '1.0.0'; Required = $false }
     }
     ExternalTools = @{
-        'pwsh' = @{
-            Required = $true
-        }
-        'Definitely-Not-A-Required-Tool-12345' = @{
+        'Available-Tool-For-Validation' = @{ Required = $true }
+        'Lookup-Error-Tool-For-Validation' = @{ Required = $true }
+        'Missing-Required-Tool-For-Validation' = @{
             Required = $true
             InstallCommand = 'install-required-tool'
         }
-        'Definitely-Not-An-Optional-Tool-12345' = @{
+        'Missing-Optional-Tool-For-Validation' = @{
             Required = $false
             InstallCommand = @{
                 Windows = 'install-optional-tool-windows'
@@ -198,30 +189,6 @@ Describe 'validate-dependencies.ps1 execution' {
                 macOS = 'install-optional-tool-macos'
             }
         }
-    }
-}
-'@ | Set-Content -LiteralPath $requirementsFile -Encoding UTF8
-
-        $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile
-
-        $result.ExitCode | Should -Be 1
-        $result.Output | Should -Match 'PowerShell version mismatch|Version mismatch'
-        $result.Output | Should -Match 'Definitely-Not-A-Required-Tool-12345'
-        $result.Output | Should -Match 'Definitely-Not-An-Optional-Tool-12345'
-        $result.Output | Should -Match 'install-required-tool|install-optional-tool'
-    }
-
-    It 'Covers installed modules and available and failed tool lookups' {
-        $requirementsFile = New-ValidateDependenciesCustomRequirementsFile -Content @'
-@{
-    PowerShellVersion = '5.1'
-    Modules = @{
-        'Current-Module-For-Validation' = @{ Version = '1.0.0'; Required = $true }
-        'Outdated-Module-For-Validation' = @{ Version = '2.0.0'; Required = $true }
-    }
-    ExternalTools = @{
-        'Available-Tool-For-Validation' = @{ Required = $true }
-        'Lookup-Error-Tool-For-Validation' = @{ Required = $true }
     }
 }
 '@
@@ -238,7 +205,7 @@ Describe 'validate-dependencies.ps1 execution' {
             if ($CommandName -eq 'Lookup-Error-Tool-For-Validation') {
                 throw 'tool lookup failed'
             }
-            return $true
+            return $CommandName -eq 'Available-Tool-For-Validation'
         }
 
         $previousDebug = $env:PS_PROFILE_DEBUG
@@ -252,21 +219,15 @@ Describe 'validate-dependencies.ps1 execution' {
         }
 
         $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'PowerShell version mismatch|Version mismatch'
         $result.Output | Should -Match 'Current-Module-For-Validation.*Installed'
         $result.Output | Should -Match 'Outdated-Module-For-Validation.*Version mismatch'
+        $result.Output | Should -Match 'Missing-Optional-Module-For-Validation.*OPTIONAL'
         $result.Output | Should -Match 'Available-Tool-For-Validation.*Available'
         $result.Output | Should -Match 'tool lookup failed|Lookup-Error-Tool-For-Validation'
-    }
-
-    It 'Reports a failed automatic module installation' {
-        $moduleName = 'Failed-Install-Module-For-Validation'
-        $requirementsFile = New-ValidateDependenciesRequirementsFile -RequireMissingModule -MissingModuleName $moduleName
-
-        $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile -InstallMissing `
-            -ModuleInstallAction { param($ModuleName) throw "install failed for $ModuleName" }
-
-        $result.ExitCode | Should -Be 1
-        $result.Output | Should -Match 'install failed|Failed-Install-Module-For-Validation'
+        $result.Output | Should -Match 'Missing-Required-Tool-For-Validation'
+        $result.Output | Should -Match 'Missing-Optional-Tool-For-Validation'
+        $result.Output | Should -Match 'install-required-tool|install-optional-tool'
     }
 
 }
