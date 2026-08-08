@@ -4904,7 +4904,7 @@ tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/lib/path/
 tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/lib/runtime/PowerShellDetection.psm1 sig:4e7b96eb1e750fb4
 tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/lib/utilities/Command.psm1 sig:4d68807fd241b457
 tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/utils/code-quality/run-pester.ps1 sig:3363180016608ff6
-tests/unit/library/common/library-common.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
+tests/unit/library/common/library-common.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:3dbb0d6fbe924e34
 tests/unit/library/common/library-common.tests.ps1 -> scripts/lib/core/ExitCodes.psm1 sig:2eefcd5aea43478e
 tests/unit/library/common/library-common.tests.ps1 -> scripts/lib/core/PlatformPaths.psm1 sig:f0f4bad472b381e2
 tests/unit/library/common/library-common.tests.ps1 -> scripts/lib/file/FileSystem.psm1 sig:5d00a04e2377ef90
@@ -6945,7 +6945,7 @@ tests/unit/utility/verify/utility-verify-cache-cleared.tests.ps1 -> scripts/util
 tests/unit/validation/check/validation-check-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/check/validation-check-commit-messages.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:234e7c99d1ed6d5a
 tests/unit/validation/check/validation-check-idempotency.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
-tests/unit/validation/check/validation-check-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
+tests/unit/validation/check/validation-check-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:3dbb0d6fbe924e34
 tests/unit/validation/comment/validation-comment-help-extended.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/comment/validation-comment-help-fixtures.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/comment/validation-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
@@ -6957,8 +6957,8 @@ tests/unit/validation/doc/validation-doc-coverage-extended.tests.ps1 -> scripts/
 tests/unit/validation/idempotency/validation-idempotency-extended.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
 tests/unit/validation/idempotency/validation-idempotency-fixtures.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
 tests/unit/validation/idempotency/validation-idempotency.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
-tests/unit/validation/script/validation-script-standards-extended.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
-tests/unit/validation/script/validation-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:5ce1e4a3b08b9bab
+tests/unit/validation/script/validation-script-standards-extended.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:3dbb0d6fbe924e34
+tests/unit/validation/script/validation-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:3dbb0d6fbe924e34
 tests/unit/validation/validate/validation-validate-function-naming.tests.ps1 -> scripts/utils/code-quality/validate-function-naming.ps1 sig:ed98ec71a6eb3e89
 tests/unit/validation/validate/validation-validate-profile-extended.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:16c28ee8c0b00a12
 tests/unit/validation/validate/validation-validate-profile.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:16c28ee8c0b00a12

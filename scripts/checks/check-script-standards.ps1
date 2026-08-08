@@ -14,6 +14,10 @@ scripts/checks/check-script-standards.ps1
 .PARAMETER Path
     The path to check. Defaults to scripts directory relative to repository root.
 
+.PARAMETER IncludeTests
+    Includes files beneath test directories. Intended for validating explicit fixture paths;
+    test directories remain excluded by default.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\checks\check-script-standards.ps1
 
@@ -27,7 +31,9 @@ param(
             }
             $true
         })]
-    [string]$Path = $null
+    [string]$Path = $null,
+
+    [switch]$IncludeTests
 )
 
 # Import ModuleImport first (bootstrap)
@@ -69,7 +75,7 @@ $commonImportPattern = $patterns['ImportModule']
 
 # Get all PowerShell scripts using helper function and filter with FileFiltering module
 $allScripts = Get-PowerShellScripts -Path $Path -Recurse
-$scripts = $allScripts | Filter-Files -ExcludeTests -ExcludeGit -ExcludeNames 'Common.psm1'
+$scripts = $allScripts | Filter-Files -ExcludeTests:(-not $IncludeTests) -ExcludeGit -ExcludeNames 'Common.psm1'
 
 foreach ($script in $scripts) {
     $content = Read-FileContent -Path $script.FullName
