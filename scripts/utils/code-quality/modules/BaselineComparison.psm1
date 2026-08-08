@@ -8,26 +8,18 @@ scripts/utils/code-quality/modules/BaselineComparison.psm1
     Provides functions for comparing test results against baselines and generating regression reports.
 #>
 
-# Import Logging module for Write-ScriptMessage
-$loggingModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'core' 'Logging.psm1'
-if ($loggingModulePath -and -not [string]::IsNullOrWhiteSpace($loggingModulePath) -and (Test-Path -LiteralPath $loggingModulePath)) {
-    try {
-        Import-Module $loggingModulePath -DisableNameChecking -ErrorAction Stop
-    }
-    catch {
-        Write-Verbose "Failed to import Logging module: $($_.Exception.Message). Logging features may be limited."
-    }
-}
+# Bootstrap shared library imports.
+$scriptsDir = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+$moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Try to import JsonUtilities module from scripts/lib (optional)
-$jsonUtilitiesModulePath = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))) 'lib' 'utilities' 'JsonUtilities.psm1'
-if ($jsonUtilitiesModulePath -and -not [string]::IsNullOrWhiteSpace($jsonUtilitiesModulePath) -and (Test-Path -LiteralPath $jsonUtilitiesModulePath)) {
-    try {
-        Import-Module $jsonUtilitiesModulePath -DisableNameChecking -ErrorAction Stop
-    }
-    catch {
-        Write-Verbose "Failed to import JsonUtilities module: $($_.Exception.Message). JSON operations may be limited."
-    }
+try {
+    Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+}
+catch {
+    Write-Verbose "Failed to import JsonUtilities module: $($_.Exception.Message). JSON operations may be limited."
 }
 
 <#
@@ -287,4 +279,3 @@ Export-ModuleMember -Function @(
     'Compare-PerformanceBaseline',
     'New-PerformanceRegressionReport'
 )
-
