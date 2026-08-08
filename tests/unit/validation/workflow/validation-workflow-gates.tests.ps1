@@ -23,6 +23,7 @@ Describe 'Blocking workflow gates' {
     It 'Fails the commit-message job after publishing feedback' {
         $workflow = Get-Content -LiteralPath (Join-Path $script:WorkflowRoot 'commit-message-check.yml') -Raw
 
+        $workflow | Should -Match '(?ms)set \+e\s+pwsh .*?\| tee commit-msg-output\.txt\s+status=\$\{PIPESTATUS\[0\]\}\s+set -e'
         $workflow | Should -Match '(?ms)- name: Fail validation\s+if:.*steps\.validate\.outputs\.status.*\s+run: exit 1'
     }
 

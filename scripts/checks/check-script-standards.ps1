@@ -105,7 +105,7 @@ foreach ($script in $scripts) {
         while ($owner -and $owner.GetType().Name -ne 'FunctionDefinitionAst') {
             $owner = $owner.Parent
         }
-        if ($owner -and $owner.Name -like '*Exit-WithCode') {
+        if ($owner -and $owner.Name -eq 'Exit-WithCode') {
             continue
         }
 

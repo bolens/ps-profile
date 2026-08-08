@@ -6945,7 +6945,7 @@ tests/unit/utility/verify/utility-verify-cache-cleared.tests.ps1 -> scripts/util
 tests/unit/validation/check/validation-check-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/check/validation-check-commit-messages.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:234e7c99d1ed6d5a
 tests/unit/validation/check/validation-check-idempotency.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
-tests/unit/validation/check/validation-check-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:3dbb0d6fbe924e34
+tests/unit/validation/check/validation-check-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:d6c2a8a02d76c802
 tests/unit/validation/comment/validation-comment-help-extended.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/comment/validation-comment-help-fixtures.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/comment/validation-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155

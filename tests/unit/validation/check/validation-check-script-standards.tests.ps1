@@ -72,6 +72,19 @@ exit 2
         } | Should -Throw '*1 issue(s) that need attention*'
     }
 
+    It 'does not exempt functions whose names merely contain Exit-WithCode' {
+        $content = @'
+function Invoke-Exit-WithCodeWrapper {
+    exit 2
+}
+'@
+        Set-Content -LiteralPath (Join-Path $script:FixtureRoot 'similar-name.ps1') -Value $content -Encoding UTF8
+
+        {
+            & $script:ScriptStandardsScript -Path $script:FixtureRoot
+        } | Should -Throw '*1 issue(s) that need attention*'
+    }
+
     It 'checks category-specific Common module import conventions' {
         foreach ($category in @('utils', 'checks', 'git')) {
             $categoryPath = Join-Path $script:FixtureRoot $category

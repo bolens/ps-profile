@@ -392,13 +392,13 @@ Generate API documentation:
 ```powershell
 pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1
 task generate-docs-incremental   # faster local iteration; uses docs/api/.doc-generation-cache.json
-task check-doc-coverage          # informational coverage report for dynamic registrations
-task check-doc-freshness         # CI-style check: regen + fail when docs/api differs from git
+task check-doc-coverage          # strict check for parser gaps and missing generated markdown
+task check-doc-freshness         # clean temp regeneration; fail when output differs from docs/api
 ```
 
 The API generator returns a validation failure when any generation or cleanup step fails, even if other documentation files were produced successfully.
 
-CI runs `check-doc-freshness` in the `api-docs` job (`.github/workflows/validate-profile.yml`) with a cached `.doc-generation-cache.json` for faster incremental runs.
+CI runs `check-doc-freshness` in the `api-docs` job (`.github/workflows/validate-profile.yml`). It regenerates API documentation from scratch in a temporary directory, excluding incremental cache state, and compares that snapshot with the committed `docs/api` tree.
 
 Generate fragment READMEs:
 
