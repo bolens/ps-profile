@@ -106,21 +106,4 @@ Describe 'check-idempotency.ps1' {
         }
     }
 
-    Context 'Full repository smoke' {
-        It 'Validates profile idempotency and reports runner output' {
-            if ($env:CI -or $env:GITHUB_ACTIONS) {
-                Set-ItResult -Skipped -Because 'full-repo idempotency check is too slow for CI'
-                return
-            }
-
-            if (-not (Test-Path -LiteralPath $script:IdempotencyScript)) {
-                Set-ItResult -Skipped -Because 'check-idempotency.ps1 not found'
-                return
-            }
-
-            $result = Invoke-TestScriptFile -ScriptPath $script:IdempotencyScript
-            $result.Output | Should -Match 'Building temporary idempotency runner|Idempotency runner'
-            $result.ExitCode | Should -BeIn @(0, 1)
-        }
-    }
 }

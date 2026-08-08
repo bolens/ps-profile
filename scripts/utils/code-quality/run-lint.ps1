@@ -10,11 +10,25 @@ scripts/utils/run-lint.ps1
     scripts/data/psscriptanalyzer-report.json. Exits with error code 1 if any Error-level
     findings are detected.
 
+.PARAMETER RepositoryRoot
+    Optional repository root override. Primarily useful for validating isolated fixtures.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\run-lint.ps1
 
     Runs PSScriptAnalyzer on all PowerShell files in profile.d and scripts directories.
 #>
+
+[CmdletBinding()]
+param(
+    [ValidateScript({
+            if ($_ -and -not [string]::IsNullOrWhiteSpace($_) -and -not (Test-Path -LiteralPath $_ -PathType Container)) {
+                throw "Repository root does not exist: $_"
+            }
+            $true
+        })]
+    [string]$RepositoryRoot
+)
 
 # Import PathResolution first (required for ModuleImport to work)
 $scriptsDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
@@ -49,7 +63,12 @@ Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableN
 
 # Get repository root using shared function
 try {
-    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    $repoRoot = if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+        Get-RepoRoot -ScriptPath $PSScriptRoot
+    }
+    else {
+        [System.IO.Path]::GetFullPath($RepositoryRoot)
+    }
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
@@ -62,10 +81,10 @@ if ($debugLevel -ge 1) {
 }
 
 # Analyze both profile.d and scripts directories, matching CI behavior
-$paths = @(
+$paths = @(@(
     Join-Path $repoRoot 'profile.d'
     Join-Path $repoRoot 'scripts'
-) | Where-Object { $_ -and -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_) }
+) | Where-Object { $_ -and -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path -LiteralPath $_) })
 
 # Level 2: Path details
 if ($debugLevel -ge 2) {
@@ -171,11 +190,8 @@ if ($failedPaths.Count -gt 0) {
     else {
         Write-ScriptMessage -Message "Warning: Failed to analyze $($failedPaths.Count) path(s): $($failedPaths -join ', ')" -IsWarning
     }
-    
-    # If all paths failed, exit with error
-    if ($failedPaths.Count -eq $paths.Count) {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "All paths failed during linting"
-    }
+
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "$($failedPaths.Count) path(s) failed during linting"
 }
 
 # Save report to JSON (matching CI behavior)
@@ -202,6 +218,10 @@ if ($errorFindings) {
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Errors found by PSScriptAnalyzer"
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "PSScriptAnalyzer: no issues found"
-
-
+$successMessage = "PSScriptAnalyzer: no issues found"
+if ($RepositoryRoot -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+}
+else {
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
+}

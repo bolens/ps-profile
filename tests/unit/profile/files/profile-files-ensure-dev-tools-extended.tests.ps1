@@ -26,7 +26,7 @@ function script:Reset-DevToolsState {
 }
 
 Describe 'profile.d/files.ps1 Ensure-DevTools extended scenarios' {
-    BeforeEach {
+    BeforeAll {
         Reset-DevToolsState
     }
 

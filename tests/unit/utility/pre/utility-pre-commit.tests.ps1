@@ -56,6 +56,30 @@ function global:Invoke-PreCommitScript {
     }
 }
 
+function global:Initialize-PreCommitTrackedFiles {
+    param(
+        [Parameter(Mandatory)]
+        [string]$RepositoryRoot,
+
+        [Parameter(Mandatory)]
+        [string[]]$FileNames
+    )
+
+    Push-Location $RepositoryRoot
+    try {
+        & git config user.email 'pre-commit-tests@example.invalid'
+        & git config user.name 'Pre-Commit Tests'
+        foreach ($fileName in $FileNames) {
+            Set-Content -LiteralPath (Join-Path $RepositoryRoot $fileName) -Value 'initial'
+        }
+        & git add -- @FileNames
+        & git commit -q -m 'test: initialize fixture'
+    }
+    finally {
+        Pop-Location
+    }
+}
+
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -74,6 +98,89 @@ BeforeAll {
 }
 
 Describe 'pre-commit.ps1 execution' {
+    It 'runs a clean temporary repository in-process' {
+        if (-not $script:GitAvailable) {
+            Set-ItResult -Skipped -Because 'git is not installed'
+            return
+        }
+
+        $repo = New-PreCommitTestRepository -FormatExitCode 0 -ValidateExitCode 0
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:PreCommitScript -RepositoryRoot $repo 2>&1 | Out-String
+
+            $output | Should -Match 'Running code formatting'
+            $output | Should -Match 'Running validation'
+            $output | Should -Match 'Pre-commit checks passed'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 're-stages only an originally staged file in-process' {
+        if (-not $script:GitAvailable) {
+            Set-ItResult -Skipped -Because 'git is not installed'
+            return
+        }
+
+        $repo = New-PreCommitTestRepository
+        Initialize-PreCommitTrackedFiles -RepositoryRoot $repo -FileNames @('staged.txt', 'unstaged.txt')
+        Set-Content -LiteralPath (Join-Path $repo 'staged.txt') -Value 'staged change'
+        Set-Content -LiteralPath (Join-Path $repo 'unstaged.txt') -Value 'unstaged change'
+        & git -C $repo add -- 'staged.txt'
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            & $script:PreCommitScript -RepositoryRoot $repo 2>&1 | Out-Null
+
+            @(& git -C $repo diff --cached --name-only) | Should -Be @('staged.txt')
+            @(& git -C $repo diff --name-only) | Should -Contain 'unstaged.txt'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'rejects a partially staged file in-process' {
+        if (-not $script:GitAvailable) {
+            Set-ItResult -Skipped -Because 'git is not installed'
+            return
+        }
+
+        $repo = New-PreCommitTestRepository
+        Initialize-PreCommitTrackedFiles -RepositoryRoot $repo -FileNames @('partial.txt')
+        Set-Content -LiteralPath (Join-Path $repo 'partial.txt') -Value 'staged change'
+        & git -C $repo add -- 'partial.txt'
+        Set-Content -LiteralPath (Join-Path $repo 'partial.txt') -Value 'unstaged change'
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            { & $script:PreCommitScript -RepositoryRoot $repo 2>&1 } |
+                Should -Throw -ExpectedMessage '*Partially staged files cannot be auto-formatted safely*'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'reports formatter failures in-process' {
+        if (-not $script:GitAvailable) {
+            Set-ItResult -Skipped -Because 'git is not installed'
+            return
+        }
+
+        $repo = New-PreCommitTestRepository -FormatExitCode 1
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            { & $script:PreCommitScript -RepositoryRoot $repo 2>&1 } |
+                Should -Throw -ExpectedMessage '*Code formatting failed*'
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
     It 'Passes when formatting and validation both succeed' {
         if (-not $script:GitAvailable) {
             Set-ItResult -Skipped -Because 'git is not installed'
@@ -126,5 +233,61 @@ Describe 'pre-commit.ps1 execution' {
         $result = Invoke-PreCommitScript -RepositoryRoot $repo
         $result.ExitCode | Should -BeIn @(1, 2)
         $result.Output | Should -Match 'validate-profile|not found|Setup'
+    }
+
+    It 'Does not stage unrelated files changed by formatting' {
+        if (-not $script:GitAvailable) {
+            Set-ItResult -Skipped -Because 'git is not installed'
+            return
+        }
+
+        $repo = New-PreCommitTestRepository
+        Initialize-PreCommitTrackedFiles -RepositoryRoot $repo -FileNames @('staged.txt', 'unrelated.txt')
+        Set-Content -LiteralPath (Join-Path $repo 'staged.txt') -Value 'staged change'
+        Set-Content -LiteralPath (Join-Path $repo 'unrelated.txt') -Value 'unrelated change'
+
+        Push-Location $repo
+        try {
+            & git add -- 'staged.txt'
+        }
+        finally {
+            Pop-Location
+        }
+
+        $result = Invoke-PreCommitScript -RepositoryRoot $repo
+        $result.ExitCode | Should -Be 0
+
+        Push-Location $repo
+        try {
+            @(& git diff --cached --name-only) | Should -Be @('staged.txt')
+            @(& git diff --name-only) | Should -Contain 'unrelated.txt'
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    It 'Rejects partially staged files before formatting' {
+        if (-not $script:GitAvailable) {
+            Set-ItResult -Skipped -Because 'git is not installed'
+            return
+        }
+
+        $repo = New-PreCommitTestRepository
+        Initialize-PreCommitTrackedFiles -RepositoryRoot $repo -FileNames @('partial.txt')
+        Set-Content -LiteralPath (Join-Path $repo 'partial.txt') -Value 'staged change'
+
+        Push-Location $repo
+        try {
+            & git add -- 'partial.txt'
+        }
+        finally {
+            Pop-Location
+        }
+        Set-Content -LiteralPath (Join-Path $repo 'partial.txt') -Value 'unstaged change'
+
+        $result = Invoke-PreCommitScript -RepositoryRoot $repo
+        $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'Partially staged files cannot be auto-formatted safely'
     }
 }

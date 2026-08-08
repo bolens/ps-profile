@@ -37,13 +37,14 @@ Describe 'check-commit-messages.ps1 extended scenarios' {
     Context 'Git integration' {
         It 'Uses git rev-list to enumerate commits since the base ref' {
             $content = Get-Content -LiteralPath $script:CommitScript -Raw
-            $content | Should -Match 'git rev-list'
+            $content | Should -Match '& \$GitExecutable rev-list'
             $content | Should -Match '--no-merges'
         }
 
         It 'Attempts to fetch origin/main before validation' {
             $content = Get-Content -LiteralPath $script:CommitScript -Raw
-            $content | Should -Match 'git fetch origin'
+            $content | Should -Match '& \$GitExecutable fetch origin'
+            $content | Should -Match 'refs/heads/main:refs/remotes/origin/main'
         }
     }
 

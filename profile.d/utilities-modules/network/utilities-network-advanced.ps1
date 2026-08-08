@@ -84,7 +84,7 @@ function Invoke-WithRetry {
         $attempt++
 
         $powershell = $null
-        $runspacePool = $null
+        $runspace = $null
         # Initialize before try so StrictMode never sees an unset read if BeginInvoke fails mid-setup.
         $timeoutMs = [Math]::Max(0, $TimeoutSeconds) * 1000
         $pollIntervalMs = 50
@@ -95,11 +95,14 @@ function Invoke-WithRetry {
             # Use a default session state so built-in cmdlets exist inside the
             # timeout runspace (bare pools can omit them on some Windows hosts).
             $initialSessionState = [System.Management.Automation.Runspaces.InitialSessionState]::CreateDefault2()
-            $runspacePool = [runspacefactory]::CreateRunspacePool(1, 1, $initialSessionState, $Host)
-            $runspacePool.Open()
+            # The current host can be null in isolated/non-interactive sessions.
+            # A dedicated runspace avoids the extra pool startup work that can
+            # exhaust short operation timeouts on busy CI hosts.
+            $runspace = [runspacefactory]::CreateRunspace($initialSessionState)
+            $runspace.Open()
 
             $powershell = [PowerShell]::Create()
-            $powershell.RunspacePool = $runspacePool
+            $powershell.Runspace = $runspace
 
             # Wrap the scriptblock to accept arguments
             $wrapperScript = {
@@ -119,30 +122,33 @@ function Invoke-WithRetry {
 
             # Wait for completion or timeout using polling (STA-compatible)
             while ($elapsedMs -lt $timeoutMs) {
-                if ($handle.IsCompleted) {
+                if ($handle.AsyncWaitHandle.WaitOne($pollIntervalMs)) {
                     $completed = $true
                     break
                 }
-                Start-Sleep -Milliseconds $pollIntervalMs
                 $elapsedMs += $pollIntervalMs
             }
 
             if (-not $completed) {
                 # Timeout occurred
-                $powershell.Stop()
-                $powershell.Dispose()
-                $runspacePool.Close()
-                $runspacePool.Dispose()
+                if ($powershell) {
+                    $powershell.Stop()
+                    $powershell.Dispose()
+                }
+                if ($runspace) {
+                    $runspace.Close()
+                    $runspace.Dispose()
+                }
                 throw "Operation timed out after $TimeoutSeconds seconds"
             }
 
             # Get the result (EndInvoke returns Collection[PSObject]; unwrap single values)
             $result = $powershell.EndInvoke($handle)
             $powershell.Dispose()
-            $runspacePool.Close()
-            $runspacePool.Dispose()
+            $runspace.Close()
+            $runspace.Dispose()
             $powershell = $null
-            $runspacePool = $null
+            $runspace = $null
 
             if ($null -ne $result -and $result -is [System.Collections.IList] -and $result.Count -eq 1) {
                 return $result[0]
@@ -163,15 +169,15 @@ function Invoke-WithRetry {
                 }
                 $powershell = $null
             }
-            if ($runspacePool) {
+            if ($runspace) {
                 try {
-                    $runspacePool.Close()
-                    $runspacePool.Dispose()
+                    $runspace.Close()
+                    $runspace.Dispose()
                 }
                 catch {
                     # Ignore cleanup errors
                 }
-                $runspacePool = $null
+                $runspace = $null
             }
 
             # Check if this is a retryable error using Retry module if available.
@@ -218,7 +224,9 @@ function Invoke-WithRetry {
                 Write-Host "Retrying in $RetryDelaySeconds seconds..." -ForegroundColor Yellow
             }
 
-            Start-Sleep -Seconds $RetryDelaySeconds
+            if ($RetryDelaySeconds -gt 0) {
+                Start-Sleep -Seconds $RetryDelaySeconds
+            }
         }
     }
 
@@ -396,4 +404,3 @@ function Resolve-HostWithRetry {
 }
 
 Set-Variable -Name 'NetworkUtilsLoaded' -Value $true -Scope Global -Force
-

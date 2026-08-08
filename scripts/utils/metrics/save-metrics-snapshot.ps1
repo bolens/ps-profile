@@ -18,6 +18,10 @@ scripts/utils/metrics/save-metrics-snapshot.ps1
 .PARAMETER OutputPath
     Directory where snapshot will be saved. Defaults to scripts/data/history.
 
+.PARAMETER RepositoryRoot
+    Optional repository root used to locate metric inputs. Intended for isolated
+    validation and defaults to automatic repository root detection.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\metrics\save-metrics-snapshot.ps1
 
@@ -34,7 +38,9 @@ param(
 
     [switch]$IncludePerformanceMetrics,
 
-    [string]$OutputPath = $null
+    [string]$OutputPath = $null,
+
+    [string]$RepositoryRoot = $null
 )
 
 # Import shared utilities directly (no barrel files)
@@ -56,11 +62,16 @@ Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableN
 Import-LibModule -ModuleName 'MetricsSnapshot' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root
-try {
-    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+if ($RepositoryRoot) {
+    $repoRoot = [System.IO.Path]::GetFullPath($RepositoryRoot)
 }
-catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+else {
+    try {
+        $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    }
 }
 
 # Level 1: Basic operation start
@@ -117,11 +128,11 @@ try {
         Write-ScriptMessage -Message "Snapshot timestamp: $($snapshot.Timestamp)" -LogLevel Info
     }
     
-    if ($snapshot.CodeMetrics) {
+    if ($snapshot.PSObject.Properties['CodeMetrics'] -and $snapshot.CodeMetrics) {
         Write-ScriptMessage -Message "  Code Metrics: $($snapshot.CodeMetrics.TotalFiles) files, $($snapshot.CodeMetrics.TotalLines) lines" -LogLevel Info
     }
     
-    if ($snapshot.PerformanceMetrics) {
+    if ($snapshot.PSObject.Properties['PerformanceMetrics'] -and $snapshot.PerformanceMetrics) {
         Write-ScriptMessage -Message "  Performance Metrics: Included" -LogLevel Info
     }
 }
@@ -129,6 +140,8 @@ catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to save metrics snapshot: $($_.Exception.Message)" -ErrorRecord $_
 }
 
+if ($OutputPath -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    return
+}
+
 Exit-WithCode -ExitCode $EXIT_SUCCESS
-
-

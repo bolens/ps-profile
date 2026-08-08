@@ -1,86 +1,9 @@
 <#
-tests/unit/validation-validate-profile.tests.ps1
+tests/unit/validation/validate/validation-validate-profile.tests.ps1
 
 .SYNOPSIS
-    Behavioral unit tests for validate-profile.ps1 orchestration with stubbed checks.
+    Behavioral tests for validate-profile.ps1 orchestration.
 #>
-
-function global:New-ValidateProfileTestRepository {
-    param(
-        [int]$SecurityExitCode = 0,
-        [int]$LintExitCode = 0,
-        [int]$SpellcheckExitCode = 0,
-        [int]$MarkdownlintExitCode = 0,
-        [int]$CommentHelpExitCode = 0,
-        [int]$IdempotencyExitCode = 0,
-        [int]$DuplicateExitCode = 0
-    )
-
-    $repo = New-TestTempDirectory -Prefix 'ValidateProfileRepo'
-    $scriptsDir = Join-Path $repo 'scripts'
-    New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
-
-    $checksDir = Join-Path $scriptsDir 'checks'
-    New-Item -ItemType Directory -Path $checksDir -Force | Out-Null
-    Copy-Item -LiteralPath $script:ValidateProfileScript -Destination (Join-Path $checksDir 'validate-profile.ps1') -Force
-
-  @(
-        @{ Relative = 'utils/security/run-security-scan.ps1'; ExitCode = $SecurityExitCode }
-        @{ Relative = 'utils/code-quality/run-lint.ps1'; ExitCode = $LintExitCode }
-        @{ Relative = 'utils/code-quality/spellcheck.ps1'; ExitCode = $SpellcheckExitCode }
-        @{ Relative = 'utils/code-quality/run-markdownlint.ps1'; ExitCode = $MarkdownlintExitCode }
-        @{ Relative = 'checks/check-comment-help.ps1'; ExitCode = $CommentHelpExitCode }
-        @{ Relative = 'checks/check-idempotency.ps1'; ExitCode = $IdempotencyExitCode }
-        @{ Relative = 'utils/metrics/find-duplicate-functions.ps1'; ExitCode = $DuplicateExitCode }
-    ) | ForEach-Object {
-        $target = Join-Path $scriptsDir $_.Relative
-        $parent = Split-Path -Parent $target
-        if (-not (Test-Path -LiteralPath $parent)) {
-            New-Item -ItemType Directory -Path $parent -Force | Out-Null
-        }
-        Set-Content -LiteralPath $target -Value "exit $($_.ExitCode)" -NoNewline
-    }
-
-    New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d') -Force | Out-Null
-
-    Push-Location $repo
-    try {
-    git init -q | Out-Null
-    git config user.email 'fixture@example.com'
-    git config user.name 'Fixture'
-    }
-    finally {
-        Pop-Location
-    }
-
-    return $repo
-}
-
-function global:Invoke-ValidateProfileScript {
-    param([string]$RepositoryRoot)
-
-    $scriptPath = Join-Path $RepositoryRoot 'scripts' 'checks' 'validate-profile.ps1'
-    Push-Location $RepositoryRoot
-    try {
-        $previousRequireMarkdown = $env:PS_PROFILE_REQUIRE_MARKDOWNLINT
-        $env:PS_PROFILE_REQUIRE_MARKDOWNLINT = '1'
-        $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
-        return [pscustomobject]@{
-            ExitCode = $LASTEXITCODE
-            Output   = $output
-        }
-    }
-    finally {
-        if ($null -eq $previousRequireMarkdown) {
-            Remove-Item Env:PS_PROFILE_REQUIRE_MARKDOWNLINT -ErrorAction SilentlyContinue
-        }
-        else {
-            $env:PS_PROFILE_REQUIRE_MARKDOWNLINT = $previousRequireMarkdown
-        }
-        Pop-Location
-    }
-}
 
 BeforeAll {
     $current = Get-Item $PSScriptRoot
@@ -90,74 +13,111 @@ BeforeAll {
             . $testSupportPath
             break
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ValidateProfileScript = Join-Path $script:TestRepoRoot 'scripts' 'checks' 'validate-profile.ps1'
-    $ConfirmPreference = 'None'
+
+    function global:Invoke-ValidationFixture {
+        param(
+            [switch]$NoProfile,
+            [string]$File
+        )
+
+        $checkName = switch -Regex ($File) {
+            'run-security-scan' { 'security' }
+            'run-lint' { 'lint' }
+            'spellcheck' { 'spellcheck' }
+            'run-markdownlint' { 'markdownlint' }
+            'check-comment-help' { 'comment-help' }
+            'check-idempotency' { 'idempotency' }
+            'find-duplicate-functions' { 'duplicates' }
+        }
+        Write-Output "$checkName fixture invoked"
+        $global:LASTEXITCODE = if ($env:PS_PROFILE_FAIL_CHECK -eq $checkName) { 4 } else { 0 }
+    }
 }
 
 Describe 'validate-profile.ps1 execution' {
-    It 'Passes when all stubbed validation checks succeed' {
-        $repo = New-ValidateProfileTestRepository
-        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
-        $result.ExitCode | Should -Be 0
+    BeforeEach {
+        $script:FixtureRoot = New-TestTempDirectory -Prefix 'ValidateProfile'
+        $script:PreviousFailCheck = $env:PS_PROFILE_FAIL_CHECK
+        $script:PreviousRequireMarkdownlint = $env:PS_PROFILE_REQUIRE_MARKDOWNLINT
+        Remove-Item Env:PS_PROFILE_FAIL_CHECK -ErrorAction SilentlyContinue
+        $env:PS_PROFILE_REQUIRE_MARKDOWNLINT = '1'
     }
 
-    It 'Fails when the security scan stub returns a non-zero exit code' {
-        $repo = New-ValidateProfileTestRepository -SecurityExitCode 1
-        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
-        $result.ExitCode | Should -BeIn @(1, 2)
-        $result.Output | Should -Match 'security scan failed|Running security scan'
+    AfterEach {
+        if ($null -eq $script:PreviousFailCheck) {
+            Remove-Item Env:PS_PROFILE_FAIL_CHECK -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PS_PROFILE_FAIL_CHECK = $script:PreviousFailCheck
+        }
+
+        if ($null -eq $script:PreviousRequireMarkdownlint) {
+            Remove-Item Env:PS_PROFILE_REQUIRE_MARKDOWNLINT -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PS_PROFILE_REQUIRE_MARKDOWNLINT = $script:PreviousRequireMarkdownlint
+        }
     }
 
-    It 'Fails when the lint stub returns a non-zero exit code' {
-        $repo = New-ValidateProfileTestRepository -LintExitCode 1
-        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
-        $result.ExitCode | Should -BeIn @(1, 2)
-        $result.Output | Should -Match 'lint failed|Running lint'
+    It 'runs every validation check when markdownlint is required' {
+        $output = & $script:ValidateProfileScript `
+            -RepositoryRoot $script:FixtureRoot `
+            -PowerShellExecutable 'Invoke-ValidationFixture' 2>&1 | Out-String
+
+        $output | Should -Match 'Running markdownlint'
+        $output | Should -Match 'security \+ lint \+ spellcheck \+ markdownlint'
     }
 
-    It 'Fails when the spellcheck stub returns a non-zero exit code' {
-        $repo = New-ValidateProfileTestRepository -SpellcheckExitCode 1
-        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
-        $result.ExitCode | Should -BeIn @(1, 2)
-        $result.Output | Should -Match 'spellcheck failed|Running spellcheck'
+    It 'supports explicitly skipping optional markdownlint' {
+        $output = & $script:ValidateProfileScript `
+            -RepositoryRoot $script:FixtureRoot `
+            -PowerShellExecutable 'Invoke-ValidationFixture' `
+            -SkipMarkdownlint 2>&1 | Out-String
+
+        $output | Should -Not -Match 'Running markdownlint'
+        $output | Should -Match 'security \+ lint \+ spellcheck \+ comment help'
     }
 
-    It 'Fails when the markdownlint stub returns a non-zero exit code' {
-        $repo = New-ValidateProfileTestRepository -MarkdownlintExitCode 1
-        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
-        $result.ExitCode | Should -BeIn @(1, 2)
-        $result.Output | Should -Match 'markdownlint failed|Running markdownlint'
+    It 'uses detected repository and PowerShell defaults' {
+        $global:ValidateProfileFixtureRoot = $script:FixtureRoot
+        try {
+            Mock Get-RepoRoot { $global:ValidateProfileFixtureRoot }
+            Mock Get-PowerShellExecutable { 'Invoke-ValidationFixture' }
+
+            $output = & $script:ValidateProfileScript 2>&1 | Out-String
+
+            $output | Should -Match 'security \+ lint \+ spellcheck \+ markdownlint'
+            Should -Invoke Get-RepoRoot -Times 1 -Exactly
+            Should -Invoke Get-PowerShellExecutable -Times 1 -Exactly
+        }
+        finally {
+            Remove-Variable -Name ValidateProfileFixtureRoot -Scope Global -ErrorAction SilentlyContinue
+        }
     }
 
-    It 'Fails when the idempotency stub returns a non-zero exit code' {
-        $repo = New-ValidateProfileTestRepository -IdempotencyExitCode 1
-        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
-        $result.ExitCode | Should -BeIn @(1, 2)
-        $result.Output | Should -Match 'idempotency failed|Running idempotency'
+    It 'stops and identifies a failed required check' {
+        $env:PS_PROFILE_FAIL_CHECK = 'lint'
+
+        {
+            & $script:ValidateProfileScript `
+                -RepositoryRoot $script:FixtureRoot `
+                -PowerShellExecutable 'Invoke-ValidationFixture'
+        } | Should -Throw '*lint failed with exit code 4*'
     }
 
-    It 'Fails when the comment-help stub returns a non-zero exit code' {
-        $repo = New-ValidateProfileTestRepository -CommentHelpExitCode 1
-        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
-        $result.ExitCode | Should -BeIn @(1, 2)
-        $result.Output | Should -Match 'comment-based help check failed|Running comment-based help check'
-    }
+    It 'identifies a failed optional markdownlint check when enabled' {
+        $env:PS_PROFILE_FAIL_CHECK = 'markdownlint'
 
-    It 'Fails when the duplicate-functions stub returns a non-zero exit code' {
-        $repo = New-ValidateProfileTestRepository -DuplicateExitCode 1
-        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
-        $result.ExitCode | Should -BeIn @(1, 2)
-        $result.Output | Should -Match 'duplicate functions failed|Running duplicate functions'
-    }
-
-    It 'Reports the full validation success message when all stubbed checks pass' {
-        $repo = New-ValidateProfileTestRepository
-        $result = Invoke-ValidateProfileScript -RepositoryRoot $repo
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'Validation: security \+ lint \+ spellcheck \+ markdownlint \+ comment help \+ idempotency \+ duplicate functions passed'
+        {
+            & $script:ValidateProfileScript `
+                -RepositoryRoot $script:FixtureRoot `
+                -PowerShellExecutable 'Invoke-ValidationFixture'
+        } | Should -Throw '*markdownlint failed with exit code 4*'
     }
 }

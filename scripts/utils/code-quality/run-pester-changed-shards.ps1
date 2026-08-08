@@ -46,6 +46,10 @@ param(
     [string]$RepoRoot = (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)))
 )
 
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
@@ -105,14 +109,14 @@ else {
 
 if ($shards.Count -eq 0) {
     Write-Host 'No CI shards match the current changes; skipping Pester.' -ForegroundColor Yellow
-    exit 0
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 Write-Host ("Selected shards ({0}): {1}" -f $shards.Count, ($shards -join ', ')) -ForegroundColor Cyan
 
 if ($ListOnly) {
     $shards | ForEach-Object { Write-Output $_ }
-    exit 0
+    Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
 $failed = [System.Collections.Generic.List[string]]::new()
@@ -129,8 +133,8 @@ foreach ($shard in $shards) {
 
 if ($failed.Count -gt 0) {
     Write-Error ("Changed-shard run failed: {0}" -f ($failed -join ', '))
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Write-Host 'All selected shards passed.' -ForegroundColor Green
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS

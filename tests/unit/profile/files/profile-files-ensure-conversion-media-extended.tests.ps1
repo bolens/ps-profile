@@ -26,7 +26,7 @@ function script:Reset-FileConversionMediaState {
 }
 
 Describe 'profile.d/files.ps1 Ensure-FileConversion-Media extended scenarios' {
-    BeforeEach {
+    BeforeAll {
         Reset-FileConversionMediaState
     }
 

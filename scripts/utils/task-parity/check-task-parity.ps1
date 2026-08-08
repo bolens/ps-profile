@@ -899,7 +899,26 @@ else {
 Write-Host ""
 
 # Tasks allowed to differ by runner (e.g. just uses `default: lint` recipe alias, not task --list-all)
-$parityExcludeTasks = @('default')
+$parityExcludeTasks = @(
+    # Runner lifecycle/default entry points have intentionally different syntax.
+    'default'
+    'prepare'
+    # Composite tasks are expressed as dependencies in Task/Make/Just and as
+    # command chains in package.json.
+    'quality-check'
+    'format-and-lint'
+    'all-docs'
+    # Install tasks delegate to package.json outside npm and therefore have
+    # intentionally different command bodies.
+    'install-all'
+    'install-all-global'
+    'install-all-local'
+    'install-js-global'
+    'install-js-local'
+    'install-python-global'
+    'install-python-local'
+    'install-scoop'
+)
 
 # Compare tasks
 Write-Host "Comparing tasks..." -ForegroundColor Yellow

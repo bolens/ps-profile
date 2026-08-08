@@ -433,6 +433,8 @@ else {
                 Write-ScriptMessage -Message "Warning: Documentation generation completed with $($generationErrors.Count) error(s): $($generationErrors -join '; ')" -IsWarning
             }
         }
+
+        Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Documentation generation failed in $($generationErrors.Count) step(s): $($generationErrors -join '; ')"
     }
     
     $totalDuration = $parseDuration + $functionsDuration + $aliasesDuration + $indexDuration + $cleanupDuration

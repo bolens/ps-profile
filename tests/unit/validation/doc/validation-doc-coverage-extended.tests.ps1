@@ -48,9 +48,11 @@ Describe 'check-doc-freshness.ps1 extended scenarios' {
         $content | Should -Match '-Incremental'
     }
 
-    It 'Fails when git detects docs/api changes' {
+    It 'Fails when generated and tracked documentation snapshots differ' {
         $content = Get-Content -LiteralPath $script:FreshnessScript -Raw
-        $content | Should -Match 'git status'
+        $content | Should -Match 'trackedSnapshot'
+        $content | Should -Match 'generatedSnapshot'
+        $content | Should -Match 'changedFiles'
         $content | Should -Match 'EXIT_VALIDATION_FAILURE'
     }
 }

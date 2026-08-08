@@ -1,69 +1,9 @@
 <#
-tests/unit/utility-find-duplicate-functions.tests.ps1
+tests/unit/utility/find/utility-find-duplicate-functions.tests.ps1
 
 .SYNOPSIS
-    Behavioral unit tests for find-duplicate-functions.ps1 with isolated profile.d fixtures.
+    Behavioral tests for duplicate function scanning with isolated fragments.
 #>
-
-function global:New-DuplicateFunctionsFixtureRepository {
-    param(
-        [switch]$IncludeDuplicateDefinition
-    )
-
-    $repo = New-TestTempDirectory -Prefix 'DuplicateFunctionsRepo'
-    $scriptsDir = Join-Path $repo 'scripts'
-    New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
-
-    $metricsDir = Join-Path $scriptsDir 'utils' 'metrics'
-    New-Item -ItemType Directory -Path $metricsDir -Force | Out-Null
-    Copy-Item -LiteralPath $script:DuplicateFunctionsScript -Destination (Join-Path $metricsDir 'find-duplicate-functions.ps1') -Force
-
-    $profileDir = Join-Path $repo 'profile.d'
-    New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
-    Set-Content -LiteralPath (Join-Path $profileDir '00-unique.ps1') -Value @'
-function Test-DuplicateFixtureUnique { 'one' }
-'@
-
-    if ($IncludeDuplicateDefinition) {
-        Set-Content -LiteralPath (Join-Path $profileDir '01-dup-a.ps1') -Value @'
-function Test-DuplicateFixtureShared { 'a' }
-'@
-        Set-Content -LiteralPath (Join-Path $profileDir '02-dup-b.ps1') -Value @'
-function Test-DuplicateFixtureShared { 'b' }
-'@
-    }
-
-    Push-Location $repo
-    try {
-    git init -q | Out-Null
-    git config user.email 'fixture@example.com'
-    git config user.name 'Fixture'
-    git add profile.d/00-unique.ps1
-    if ($IncludeDuplicateDefinition) {
-        git add profile.d/01-dup-a.ps1 profile.d/02-dup-b.ps1
-    }
-    git commit -m 'init duplicate fixture' -q
-    }
-    finally {
-        Pop-Location
-    }
-
-    return $repo
-}
-
-function global:Invoke-FindDuplicateFunctionsScript {
-    param(
-        [string]$RepositoryRoot
-    )
-
-    $scriptPath = Join-Path $RepositoryRoot 'scripts' 'utils' 'metrics' 'find-duplicate-functions.ps1'
-    $output = & pwsh -NoProfile -File $scriptPath 2>&1 | Out-String
-    return [pscustomobject]@{
-        ExitCode = $LASTEXITCODE
-        Output   = $output
-    }
-}
 
 BeforeAll {
     $current = Get-Item $PSScriptRoot
@@ -73,58 +13,47 @@ BeforeAll {
             . $testSupportPath
             break
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:DuplicateFunctionsScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'metrics' 'find-duplicate-functions.ps1'
-    $ConfirmPreference = 'None'
 }
 
 Describe 'find-duplicate-functions.ps1 fixture execution' {
-    It 'Passes when fixture functions are unique across profile fragments' {
-        $repo = New-DuplicateFunctionsFixtureRepository
-        $result = Invoke-FindDuplicateFunctionsScript -RepositoryRoot $repo
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'No duplicate function definitions found'
+    BeforeEach {
+        $script:ProfilePath = New-TestTempDirectory -Prefix 'DuplicateFunctions'
+        $script:PreviousDebug = $env:PS_PROFILE_DEBUG
+        $env:PS_PROFILE_DEBUG = '2'
     }
 
-    It 'Fails when the same function name is defined in multiple fragments' {
-        $repo = New-DuplicateFunctionsFixtureRepository -IncludeDuplicateDefinition
-        $result = Invoke-FindDuplicateFunctionsScript -RepositoryRoot $repo
-        $result.ExitCode | Should -BeIn @(1, 2)
-        $result.Output | Should -Match 'Test-DuplicateFixtureShared'
-        $result.Output | Should -Match 'duplicate function definition'
-    }
-
-    It 'Passes when profile.d exists but contains no PowerShell fragment files' {
-        $repo = New-TestTempDirectory -Prefix 'DuplicateFunctionsEmptyProfile'
-        $scriptsDir = Join-Path $repo 'scripts'
-        $metricsDir = Join-Path $scriptsDir 'utils' 'metrics'
-        New-Item -ItemType Directory -Path $metricsDir -Force | Out-Null
-        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
-        Copy-Item -LiteralPath $script:DuplicateFunctionsScript -Destination (Join-Path $metricsDir 'find-duplicate-functions.ps1') -Force
-        New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d') -Force | Out-Null
-                Push-Location $repo
-        try {
-            git init -q | Out-Null
-            git config user.email 'fixture@example.com'
-            git config user.name 'Fixture'
-            git commit --allow-empty -m 'init empty profile fixture' -q
+    AfterEach {
+        if ($null -eq $script:PreviousDebug) {
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
         }
-        finally {
-            Pop-Location
+        else {
+            $env:PS_PROFILE_DEBUG = $script:PreviousDebug
         }
-                $result = Invoke-FindDuplicateFunctionsScript -RepositoryRoot $repo
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'Scanning 0 file\(s\)|No duplicate function definitions found'
     }
 
-    It 'Reports the number of scanned fragment files in an isolated single-fragment repository' {
-        $repo = New-DuplicateFunctionsFixtureRepository
-        $result = Invoke-FindDuplicateFunctionsScript -RepositoryRoot $repo
-        $result.ExitCode | Should -Be 0
-        $result.Output | Should -Match 'Scanning 1 file\(s\)'
-        $result.Output | Should -Match 'No duplicate function definitions found'
+    It 'passes for unique and global-scoped function definitions' {
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath 'alpha.ps1') -Value @'
+function Get-UniqueAlpha { 'alpha' }
+function global:Get-UniqueGlobal { 'global' }
+'@ -Encoding UTF8
+
+        { & $script:DuplicateFunctionsScript -ProfilePath $script:ProfilePath -Verbose } | Should -Not -Throw
+    }
+
+    It 'fails when fragments define the same function name' {
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath 'alpha.ps1') -Value "function Get-SharedFixture { 'alpha' }" -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath 'beta.ps1') -Value "function global:Get-SharedFixture { 'beta' }" -Encoding UTF8
+
+        { & $script:DuplicateFunctionsScript -ProfilePath $script:ProfilePath } | Should -Throw
+    }
+
+    It 'passes when the profile directory contains no scripts' {
+        { & $script:DuplicateFunctionsScript -ProfilePath $script:ProfilePath } | Should -Not -Throw
     }
 }

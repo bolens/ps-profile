@@ -1,8 +1,8 @@
 <#
-tests/unit/validation-check-doc-freshness.tests.ps1
+tests/unit/validation/check/validation-check-doc-freshness.tests.ps1
 
 .SYNOPSIS
-    Behavioral smoke test for check-doc-freshness.ps1.
+    Behavioral tests for check-doc-freshness.ps1.
 #>
 
 BeforeAll {
@@ -13,102 +13,120 @@ BeforeAll {
             . $testSupportPath
             break
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:CheckDocFreshnessScript = Join-Path $script:TestRepoRoot 'scripts' 'checks' 'check-doc-freshness.ps1'
-    $ConfirmPreference = 'None'
 }
 
 Describe 'check-doc-freshness.ps1 execution' {
-    It 'Regenerates docs incrementally and reports freshness status' {
-        if ($env:CI -or $env:GITHUB_ACTIONS) {
-            Set-ItResult -Skipped -Because 'incremental doc generation is too slow for CI'
-            return
-        }
+    BeforeEach {
+        $script:FixtureRoot = New-TestTempDirectory -Prefix 'DocFreshness'
+        $script:TrackedDocs = Join-Path $script:FixtureRoot 'tracked'
+        $script:Generator = Join-Path $script:FixtureRoot 'generate-docs.ps1'
+        $null = New-Item -ItemType Directory -Path $script:TrackedDocs -Force
 
-        $result = Invoke-TestScriptFile -ScriptPath $script:CheckDocFreshnessScript
+        $generatorContent = @'
+param([string]$OutputPath, [string]$ProfilePath)
+$null = New-Item -ItemType Directory -Path $OutputPath -Force
 
-        $result.Output | Should -Match 'Regenerating API docs incrementally|generate-docs'
-        $result.Output | Should -Match 'API documentation is up to date|freshness check failed|out of date'
-        $result.ExitCode | Should -BeIn @(0, 1)
+switch ($ProfilePath) {
+    'fail' {
+        Write-Output 'fixture generation failed'
+        exit 7
+    }
+    'stale' {
+        Set-Content -LiteralPath (Join-Path $OutputPath 'README.md') -Value 'generated content' -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $OutputPath 'added.md') -Value 'added content' -Encoding UTF8
+    }
+    default {
+        @(
+            '# API'
+            '**Generated:** 2099-12-31'
+            'Defined in: ../../temporary/output/profile.d/example.ps1'
+        ) | Set-Content -LiteralPath (Join-Path $OutputPath 'README.md') -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $OutputPath '.doc-generation-cache.json') -Value '{}' -Encoding UTF8
+    }
+}
+'@
+        Set-Content -LiteralPath $script:Generator -Value $generatorContent -Encoding UTF8
     }
 
-    It 'Passes in an isolated repository when incremental generation leaves docs unchanged' {
-        $repo = New-TestTempDirectory -Prefix 'DocFreshnessClean'
-        try {
-            $checksDir = Join-Path $repo 'scripts' 'checks'
-            $docsDir = Join-Path $repo 'docs' 'api'
-            $generateDir = Join-Path $repo 'scripts' 'utils' 'docs'
-            $null = New-Item -ItemType Directory -Path $checksDir -Force
-            $null = New-Item -ItemType Directory -Path $docsDir -Force
-            $null = New-Item -ItemType Directory -Path $generateDir -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-            Copy-Item -LiteralPath $script:CheckDocFreshnessScript -Destination (Join-Path $checksDir 'check-doc-freshness.ps1') -Force
+    It 'accepts absolute documentation and generator paths portably' {
+        @(
+            '# API'
+            '**Generated:** 2000-01-01'
+            'Defined in: ../../../repo/profile.d/example.ps1'
+        ) | Set-Content -LiteralPath (Join-Path $script:TrackedDocs 'README.md') -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:TrackedDocs '.doc-generation-cache.json') -Value '{"stale":true}' -Encoding UTF8
 
-            $noopGenerate = @'
-param([switch]$Incremental, [string]$OutputPath, [string]$ProfilePath)
-exit 0
-'@
-            Set-Content -LiteralPath (Join-Path $generateDir 'generate-docs.ps1') -Value $noopGenerate -Encoding UTF8
-            Set-Content -LiteralPath (Join-Path $docsDir 'README.md') -Value '# api docs fixture' -Encoding UTF8
+        $output = & $script:CheckDocFreshnessScript `
+            -DocsPath $script:TrackedDocs `
+            -GeneratorPath $script:Generator 2>&1 | Out-String
 
-            Push-Location $repo
-                        git init -q | Out-Null
-            git config user.email 'fixture@example.com'
-            git config user.name 'Fixture'
-            git add docs/api/README.md
-            git commit -m 'init docs' -q
-        }
-        finally {
-            Pop-Location
-
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $checksDir 'check-doc-freshness.ps1')
-
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'API documentation is up to date'
-        }
+        $output | Should -Match 'Regenerating API docs'
+        $output | Should -Match 'API documentation is up to date'
     }
 
-    It 'Fails in an isolated repository when incremental generation modifies docs/api' {
-        $repo = New-TestTempDirectory -Prefix 'DocFreshnessStale'
-        try {
-            $checksDir = Join-Path $repo 'scripts' 'checks'
-            $docsDir = Join-Path $repo 'docs' 'api'
-            $generateDir = Join-Path $repo 'scripts' 'utils' 'docs'
-            $null = New-Item -ItemType Directory -Path $checksDir -Force
-            $null = New-Item -ItemType Directory -Path $docsDir -Force
-            $null = New-Item -ItemType Directory -Path $generateDir -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-            Copy-Item -LiteralPath $script:CheckDocFreshnessScript -Destination (Join-Path $checksDir 'check-doc-freshness.ps1') -Force
+    It 'resolves relative documentation and generator paths from the repository root' {
+        @(
+            '# API'
+            '**Generated:** 2000-01-01'
+            'Defined in: ../../../repo/profile.d/example.ps1'
+        ) | Set-Content -LiteralPath (Join-Path $script:TrackedDocs 'README.md') -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:TrackedDocs '.doc-generation-cache.json') -Value '{}' -Encoding UTF8
+        $relativeDocsPath = [System.IO.Path]::GetRelativePath($script:TestRepoRoot, $script:TrackedDocs)
+        $relativeGeneratorPath = [System.IO.Path]::GetRelativePath($script:TestRepoRoot, $script:Generator)
 
-            $staleGenerate = @'
-param([switch]$Incremental, [string]$OutputPath, [string]$ProfilePath)
-$repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
-$relative = if ($OutputPath) { $OutputPath } else { 'docs/api' }
-$outDir = Join-Path $repoRoot $relative
-$target = Join-Path $outDir 'stale-output.md'
-Set-Content -LiteralPath $target -Value 'generated stale doc' -Encoding UTF8
-exit 0
-'@
-            Set-Content -LiteralPath (Join-Path $generateDir 'generate-docs.ps1') -Value $staleGenerate -Encoding UTF8
-            Set-Content -LiteralPath (Join-Path $docsDir 'README.md') -Value '# api docs fixture' -Encoding UTF8
+        $output = & $script:CheckDocFreshnessScript `
+            -DocsPath $relativeDocsPath `
+            -GeneratorPath $relativeGeneratorPath 2>&1 | Out-String
 
-            Push-Location $repo
-                        git init -q | Out-Null
-            git config user.email 'fixture@example.com'
-            git config user.name 'Fixture'
-            git add docs/api/README.md
-            git commit -m 'init docs' -q
-        }
-        finally {
-            Pop-Location
+        $output | Should -Match 'API documentation is up to date'
+    }
 
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $checksDir 'check-doc-freshness.ps1')
+    It 'reports added, removed, and changed generated documentation' {
+        Set-Content -LiteralPath (Join-Path $script:TrackedDocs 'README.md') -Value 'tracked content' -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:TrackedDocs 'removed.md') -Value 'removed content' -Encoding UTF8
 
-            $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'out of date|freshness check failed'
-        }
+        {
+            & $script:CheckDocFreshnessScript `
+                -ProfilePath 'stale' `
+                -DocsPath $script:TrackedDocs `
+                -GeneratorPath $script:Generator
+        } | Should -Throw '*freshness check failed*'
+    }
+
+    It 'reports generator failures and their captured output' {
+        Set-Content -LiteralPath (Join-Path $script:TrackedDocs 'README.md') -Value 'tracked content' -Encoding UTF8
+
+        {
+            & $script:CheckDocFreshnessScript `
+                -ProfilePath 'fail' `
+                -DocsPath $script:TrackedDocs `
+                -GeneratorPath $script:Generator
+        } | Should -Throw '*failed with exit code 7*'
+    }
+
+    It 'rejects a missing documentation directory' {
+        $missingDocs = Join-Path $script:FixtureRoot 'missing'
+
+        {
+            & $script:CheckDocFreshnessScript `
+                -DocsPath $missingDocs `
+                -GeneratorPath $script:Generator
+        } | Should -Throw '*Documentation directory not found*'
+    }
+
+    It 'rejects a missing generator' {
+        $missingGenerator = Join-Path $script:FixtureRoot 'missing-generator.ps1'
+
+        {
+            & $script:CheckDocFreshnessScript `
+                -DocsPath $script:TrackedDocs `
+                -GeneratorPath $missingGenerator
+        } | Should -Throw '*generate-docs.ps1 not found*'
     }
 }

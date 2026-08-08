@@ -713,6 +713,9 @@ Describe 'MetricsSnapshot extended scenarios' {
             }
 
             Remove-Module PathResolution -ErrorAction SilentlyContinue -Force
+            Mock Test-Path -ModuleName MetricsSnapshot { $false } -ParameterFilter {
+                $LiteralPath -and [System.IO.Path]::GetFileName($LiteralPath) -eq '.git'
+            }
             $previousLocation = Get-Location
 
             try {
@@ -734,6 +737,9 @@ Describe 'MetricsSnapshot extended scenarios' {
                 throw 'repo root walk probe'
             }
 
+            Mock Test-Path -ModuleName MetricsSnapshot { $false } -ParameterFilter {
+                $LiteralPath -and [System.IO.Path]::GetFileName($LiteralPath) -eq '.git'
+            }
             $previousLocation = Get-Location
             try {
                 Set-Location -LiteralPath $isolatedDir

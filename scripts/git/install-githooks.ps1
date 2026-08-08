@@ -15,6 +15,10 @@ scripts/git/install-githooks.ps1
 .PARAMETER DryRun
     If specified, shows what hooks would be installed without actually installing them.
 
+.PARAMETER RepositoryRoot
+    Optional repository root containing scripts/git/hooks and the target Git
+    directory. Defaults to automatic repository root detection.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\git\install-githooks.ps1
 
@@ -34,7 +38,9 @@ scripts/git/install-githooks.ps1
 param(
     [string]$GitDir = '.git/hooks',
 
-    [switch]$DryRun
+    [switch]$DryRun,
+
+    [string]$RepositoryRoot
 )
 
 # Import ModuleImport first (bootstrap)
@@ -54,11 +60,16 @@ Import-LibModule -ModuleName 'Platform' -ScriptPath $PSScriptRoot -DisableNameCh
 Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root
-try {
-    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+if ($RepositoryRoot) {
+    $repoRoot = [System.IO.Path]::GetFullPath($RepositoryRoot)
 }
-catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+else {
+    try {
+        $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    }
 }
 
 $gitHooksDir = Join-Path $repoRoot $GitDir
@@ -71,7 +82,7 @@ if ($srcHooks -and -not [string]::IsNullOrWhiteSpace($srcHooks) -and -not (Test-
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Source hooks directory not found: $srcHooks"
 }
 
-$hookFiles = Get-ChildItem -Path $srcHooks -Filter '*.ps1' -File
+$hookFiles = @(Get-ChildItem -Path $srcHooks -Filter '*.ps1' -File)
 
 if ($DryRun) {
     Write-ScriptMessage -Message "DRY RUN MODE: Would install $($hookFiles.Count) hook(s)..." -ForegroundColor Yellow
@@ -134,8 +145,14 @@ exit `$LASTEXITCODE
 }
 
 if ($DryRun) {
+    if ($RepositoryRoot -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        return
+    }
     Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "DRY RUN: Would install $($hookFiles.Count) hook(s). Run without -DryRun to apply changes."
 }
 else {
+    if ($RepositoryRoot -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        return
+    }
     Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Git hooks installed. Ensure .git/hooks/* are executable if using a Unix-like environment."
 }

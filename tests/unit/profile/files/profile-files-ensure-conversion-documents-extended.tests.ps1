@@ -27,7 +27,7 @@ function script:Reset-FileConversionDocumentsState {
 }
 
 Describe 'profile.d/files.ps1 Ensure-FileConversion-Documents extended scenarios' {
-    BeforeEach {
+    BeforeAll {
         Reset-FileConversionDocumentsState
     }
 

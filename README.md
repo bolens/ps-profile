@@ -30,9 +30,9 @@ In practice the profile bundles helpers for:
 - **Shell quality of life** — PSReadLine, oh-my-posh/Starship prompts, history, diagnostics, and system monitoring
 
 The repo also ships the **tooling that keeps the profile maintainable**: Pester unit/integration/performance tests, PSScriptAnalyzer linting, startup benchmarks,
-auto-generated API docs (`docs/api/`), and 48+ quality tasks via Task, Just, Make, or npm.
+auto-generated API docs (`docs/api/`), and 80+ quality tasks via Task, Just, Make, or npm.
 
-**Current scale:** see [docs/api/README.md](docs/api/README.md) for live function and alias counts (currently ~1,500 of each).
+**Current scale:** see [docs/api/README.md](docs/api/README.md) for live function and alias counts (currently 2,300+ functions and 1,400+ aliases).
 
 ## Quick Start
 
@@ -83,7 +83,7 @@ This project supports multiple task runners for maximum flexibility. All tasks a
 **Common Tasks**:
 
 - `validate` - Full validation (format + security + lint + spellcheck + help + idempotency)
-- `quality-check` - Comprehensive quality check (format + security + lint + spellcheck + markdownlint + help + tests)
+- `quality-check` - Comprehensive quality check (validation + docs + dependencies + task parity + tests + drift)
 - `format-and-lint` - Format and lint code (common pre-commit workflow)
 - `all-docs` - Generate all documentation (API docs + fragment READMEs)
 - `test` - Run Pester tests
@@ -97,7 +97,7 @@ This project supports multiple task runners for maximum flexibility. All tasks a
 - `lint` - Lint code
 - `pre-commit-checks` - Run pre-commit checks manually
 
-See `Taskfile.yml`, `justfile`, `Makefile`, or `package.json` for all available tasks. All task runners have full parity with 48+ tasks available.
+See `Taskfile.yml`, `justfile`, `Makefile`, or `package.json` for all available tasks. All task runners have full parity with 80+ tasks available.
 
 ### Testing
 
@@ -258,4 +258,4 @@ Performance test thresholds can be tuned with environment variables:
 
 ## License
 
-Open source. See individual files for licensing information.
+Licensed under the [MIT License](LICENSE).

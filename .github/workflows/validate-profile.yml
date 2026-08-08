@@ -10,7 +10,7 @@ on:
     paths:
       - 'Microsoft.PowerShell_profile.ps1'
       - 'profile.d/**'
-      - 'Modules/**'
+      - 'requirements/**'
       - 'scripts/checks/**'
       - 'scripts/lib/**'
       - 'scripts/utils/docs/**'
@@ -24,7 +24,7 @@ on:
     paths:
       - 'Microsoft.PowerShell_profile.ps1'
       - 'profile.d/**'
-      - 'Modules/**'
+      - 'requirements/**'
       - 'scripts/checks/**'
       - 'scripts/lib/**'
       - 'scripts/utils/docs/**'
@@ -44,27 +44,34 @@ jobs:
     permissions:
       contents: read
       issues: write
-      pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Verify API documentation freshness
         run: pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1
 
       - name: Comment PR with Documentation Summary
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
 
             try {
-              const docsPath = 'docs/';
+              const docsPath = 'docs/api/';
               if (fs.existsSync(docsPath)) {
+                const functionPath = path.join(docsPath, 'functions');
+                const aliasPath = path.join(docsPath, 'aliases');
+                const functionFiles = fs.existsSync(functionPath)
+                  ? fs.readdirSync(functionPath).filter(f => f.endsWith('.md'))
+                  : [];
+                const aliasFiles = fs.existsSync(aliasPath)
+                  ? fs.readdirSync(aliasPath).filter(f => f.endsWith('.md'))
+                  : [];
+                const docFiles = [...functionFiles, ...aliasFiles];
                 const files = fs.readdirSync(docsPath);
-                const docFiles = files.filter(f => f.endsWith('.md') && f !== 'README.md');
                 const indexFile = files.find(f => f === 'README.md');
 
                 if (docFiles.length > 0) {
@@ -86,9 +93,6 @@ jobs:
                       console.log('Could not parse index file:', e.message);
                     }
                   }
-
-                  const functionFiles = docFiles.filter(f => !f.includes('alias') && !f.includes('Alias'));
-                  const aliasFiles = docFiles.filter(f => f.includes('alias') || f.includes('Alias'));
 
                   let body = '📚 **API Documentation Generated**\n\n';
 
@@ -141,7 +145,7 @@ jobs:
                   body += '\n';
                   body += '*Documentation is automatically generated from comment-based help in PowerShell functions.*';
 
-                  github.rest.issues.createComment({
+                  await github.rest.issues.createComment({
                     issue_number: context.issue.number,
                     owner: context.repo.owner,
                     repo: context.repo.repo,
@@ -154,7 +158,7 @@ jobs:
             }
 
       - name: Upload documentation
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: api-docs-ubuntu-latest-pwsh
@@ -199,7 +203,7 @@ jobs:
           pacman -S --noconfirm git
 
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Trust workspace for git (Arch container)
         if: matrix.label == 'arch-latest'
@@ -231,7 +235,7 @@ jobs:
         run: ${{ matrix.powershell }} -NoProfile -File scripts/checks/check-comment-help.ps1
 
       - name: Upload validation artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: validation-results-${{ matrix.label }}-${{ matrix.powershell }}
           path: |

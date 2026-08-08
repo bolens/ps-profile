@@ -5,18 +5,6 @@ tests/unit/utility-initialize-databases.tests.ps1
     Behavioral unit tests for initialize-databases.ps1 execution.
 #>
 
-function global:Invoke-InitializeDatabasesScript {
-    param(
-        [string[]]$ArgumentList = @()
-    )
-
-    $output = & pwsh -NoProfile -File $script:InitializeDatabasesScript @ArgumentList 2>&1 | Out-String
-    return [pscustomobject]@{
-        ExitCode = $LASTEXITCODE
-        Output   = $output
-    }
-}
-
 BeforeAll {
     $current = Get-Item $PSScriptRoot
     while ($null -ne $current) {
@@ -31,16 +19,18 @@ BeforeAll {
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:InitializeDatabasesScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'database' 'initialize-databases.ps1'
     $script:SqliteAvailable = [bool](Get-Command sqlite3 -ErrorAction SilentlyContinue)
+    $script:CacheDir = New-TestTempDirectory -Prefix 'InitializeDatabasesCache'
+    $script:InitializeResult = Invoke-TestScriptFile -ScriptPath $script:InitializeDatabasesScript -EnvironmentVariables @{
+        PS_PROFILE_CACHE_DIR = $script:CacheDir
+    }
     $ConfirmPreference = 'None'
 }
 
 Describe 'initialize-databases.ps1 execution' {
     It 'Runs initialization and reports SQLite availability' {
-        $result = Invoke-InitializeDatabasesScript
-
-        $result.Output | Should -Match 'Initializing SQLite Databases'
-        $result.Output | Should -Match 'SQLite'
-        $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
+        $script:InitializeResult.Output | Should -Match 'Initializing SQLite Databases'
+        $script:InitializeResult.Output | Should -Match 'SQLite'
+        $script:InitializeResult.ExitCode | Should -BeIn @(0, 1, 2, 3)
     }
 
     It 'Exits with setup error when SQLite is unavailable' {
@@ -49,9 +39,8 @@ Describe 'initialize-databases.ps1 execution' {
             return
         }
 
-        $result = Invoke-InitializeDatabasesScript
-        $result.Output | Should -Match 'SQLite is not available'
-        $result.ExitCode | Should -BeIn @(2, 3)
+        $script:InitializeResult.Output | Should -Match 'SQLite is not available'
+        $script:InitializeResult.ExitCode | Should -BeIn @(2, 3)
     }
 
     It 'Uses an isolated cache directory when PS_PROFILE_CACHE_DIR is set' {
@@ -60,12 +49,7 @@ Describe 'initialize-databases.ps1 execution' {
             return
         }
 
-        $cacheDir = New-TestTempDirectory -Prefix 'InitializeDatabasesCache'
-            $result = Invoke-TestScriptFile -ScriptPath $script:InitializeDatabasesScript -EnvironmentVariables @{
-                PS_PROFILE_CACHE_DIR = $cacheDir
-            }
-
-            $result.Output | Should -Match ([regex]::Escape($cacheDir))
-            $result.ExitCode | Should -BeIn @(0, 1, 2, 3)
+        $script:InitializeResult.Output | Should -Match ([regex]::Escape($script:CacheDir))
+        $script:InitializeResult.ExitCode | Should -BeIn @(0, 1, 2, 3)
     }
 }

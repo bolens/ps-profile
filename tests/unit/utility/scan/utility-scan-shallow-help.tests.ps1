@@ -28,13 +28,8 @@ function global:Invoke-ScanShallowHelp {
         [int]$MinIssues = 1
     )
 
-    Push-Location $FixtureDirectory
-    try {
-    & pwsh -NoProfile -File $script:ScanShallowHelpScript -Path 'fixtures' -MinIssues $MinIssues 2>&1 | Out-String
-    }
-    finally {
-        Pop-Location
-    }
+    $scanPath = Join-Path $FixtureDirectory 'fixtures'
+    & $script:ScanShallowHelpScript -Path $scanPath -MinIssues $MinIssues *>&1 | Out-String -Width 4096
 }
 
 BeforeAll {
@@ -50,16 +45,9 @@ BeforeAll {
     }
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ScanShallowHelpScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'code-quality' 'scan-shallow-help.ps1'
-    $script:NoopScanPath = Join-Path ([System.IO.Path]::GetTempPath()) ('ScanShallowNoop-{0}' -f [System.Guid]::NewGuid())
-    New-Item -ItemType Directory -Path $script:NoopScanPath -Force | Out-Null
+    $script:NoopScanPath = New-TestTempDirectory -Prefix 'ScanShallowNoop'
     . $script:ScanShallowHelpScript -Path $script:NoopScanPath -MinIssues 1 2>&1 | Out-Null
     $ConfirmPreference = 'None'
-}
-
-AfterAll {
-    if (Test-Path -LiteralPath $script:NoopScanPath) {
-        Remove-Item -LiteralPath $script:NoopScanPath -Recurse -Force -ErrorAction SilentlyContinue
-    }
 }
 
 Describe 'scan-shallow-help.ps1 helper functions' {
@@ -270,7 +258,7 @@ function Add-ExampleToHelpBlock {
 
     It 'Reports zero shallow issues when the scan directory contains no PowerShell files' {
         $emptyDir = New-TestTempDirectory -Prefix 'ShallowHelpEmptyDir'
-        $output = & pwsh -NoProfile -File $script:ScanShallowHelpScript -Path $emptyDir -MinIssues 1 2>&1 | Out-String
+        $output = & $script:ScanShallowHelpScript -Path $emptyDir -MinIssues 1 *>&1 | Out-String -Width 4096
         $output | Should -Match 'Total shallow \(1\+ issues\): 0'
     }
 }

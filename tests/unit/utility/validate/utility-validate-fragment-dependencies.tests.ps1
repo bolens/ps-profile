@@ -1,8 +1,8 @@
 <#
-tests/unit/utility-validate-fragment-dependencies.tests.ps1
+tests/unit/utility/validate/utility-validate-fragment-dependencies.tests.ps1
 
 .SYNOPSIS
-    Behavioral unit tests for validate-fragment-dependencies.ps1 smoke execution.
+    Behavioral tests for dependency validation using isolated fragments.
 #>
 
 BeforeAll {
@@ -13,116 +13,68 @@ BeforeAll {
             . $testSupportPath
             break
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ValidateDepsScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'fragment' 'validate-fragment-dependencies.ps1'
-    $ConfirmPreference = 'None'
 }
 
 Describe 'validate-fragment-dependencies.ps1 execution' {
-    It 'Validates fragment dependencies against the repository profile.d directory' {
-        $result = Invoke-TestScriptFile -ScriptPath $script:ValidateDepsScript
-
-        $result.ExitCode | Should -BeIn @(0, 1)
-        $result.Output | Should -Match 'Validating dependencies|fragment'
+    BeforeEach {
+        $script:ProfilePath = New-TestTempDirectory -Prefix 'FragmentDependencies'
+        $script:PreviousDebug = $env:PS_PROFILE_DEBUG
+        Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
     }
 
-    It 'Fails validation when an isolated profile fragment depends on a missing fragment' {
-        $repo = New-TestTempDirectory -Prefix 'ValidateFragmentDepsRepo'
-        try {
-            $fragmentDir = Join-Path $repo 'scripts' 'utils' 'fragment'
-            $profileDir = Join-Path $repo 'profile.d'
-            $null = New-Item -ItemType Directory -Path $fragmentDir -Force
-            $null = New-Item -ItemType Directory -Path $profileDir -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-            Copy-Item -LiteralPath $script:ValidateDepsScript -Destination (Join-Path $fragmentDir 'validate-fragment-dependencies.ps1') -Force
-
-            Set-Content -LiteralPath (Join-Path $profileDir 'consumer.ps1') -Value @'
-#Requires -Fragment 'missing-fragment-dep'
-function Get-ValidateFragmentDepsFixture {
-    'consumer'
-}
-'@ -Encoding UTF8
-
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'validate-fragment-dependencies.ps1')
-
-            $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'Dependency validation failed|Missing dependencies'
-            $result.Output | Should -Match 'missing-fragment-dep'
+    AfterEach {
+        if ($null -eq $script:PreviousDebug) {
+            Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
         }
-        finally {
-            Remove-TestArtifacts
+        else {
+            $env:PS_PROFILE_DEBUG = $script:PreviousDebug
         }
     }
 
-    It 'Passes when an isolated profile fragment has no unresolved dependencies' {
-        $repo = New-TestTempDirectory -Prefix 'ValidateFragmentDepsPass'
-        try {
-            $fragmentDir = Join-Path $repo 'scripts' 'utils' 'fragment'
-            $profileDir = Join-Path $repo 'profile.d'
-            $null = New-Item -ItemType Directory -Path $fragmentDir -Force
-            $null = New-Item -ItemType Directory -Path $profileDir -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-            Copy-Item -LiteralPath $script:ValidateDepsScript -Destination (Join-Path $fragmentDir 'validate-fragment-dependencies.ps1') -Force
-
-            Set-Content -LiteralPath (Join-Path $profileDir 'utilities.ps1') -Value @'
-# Fixture fragment without dependencies.
-function Get-ValidateFragmentDepsFixture {
-    'ok'
-}
+    It 'reports a valid load order with portable debug timing' {
+        $env:PS_PROFILE_DEBUG = '3'
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath 'alpha.ps1') -Value @'
+function Get-FragmentDependencyAlpha { 'alpha' }
 '@ -Encoding UTF8
-
-            Push-Location $repo
-            try {
-                git init -q | Out-Null
-                git config user.email 'fixture@example.com'
-                git config user.name 'Fixture'
-                git add profile.d/utilities.ps1
-                git commit -m 'init fragment deps fixture' -q
-            }
-            finally {
-                Pop-Location
-            }
-
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'validate-fragment-dependencies.ps1')
-
-            $result.ExitCode | Should -Be 0
-            $result.Output | Should -Match 'All dependencies are valid|Validating dependencies'
-            $result.Output | Should -Match 'Fragment load order'
-        }
-        finally {
-            Remove-TestArtifacts
-        }
-    }
-
-    It 'Reports circular dependencies when isolated fragments require each other' {
-        $repo = New-TestTempDirectory -Prefix 'ValidateFragmentDepsCircular'
-        try {
-            $fragmentDir = Join-Path $repo 'scripts' 'utils' 'fragment'
-            $profileDir = Join-Path $repo 'profile.d'
-            $null = New-Item -ItemType Directory -Path $fragmentDir -Force
-            $null = New-Item -ItemType Directory -Path $profileDir -Force
-            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-            Copy-Item -LiteralPath $script:ValidateDepsScript -Destination (Join-Path $fragmentDir 'validate-fragment-dependencies.ps1') -Force
-
-            Set-Content -LiteralPath (Join-Path $profileDir 'alpha.ps1') -Value @'
-#Requires -Fragment 'beta'
-function Get-ValidateFragmentDepsAlpha { 'alpha' }
-'@ -Encoding UTF8
-            Set-Content -LiteralPath (Join-Path $profileDir 'beta.ps1') -Value @'
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath 'beta.ps1') -Value @'
 #Requires -Fragment 'alpha'
-function Get-ValidateFragmentDepsBeta { 'beta' }
+function Get-FragmentDependencyBeta { 'beta' }
+'@ -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath '01-ignored.ps1') -Value '# ignored' -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath 'files-module-registry.ps1') -Value '# ignored' -Encoding UTF8
+
+        { & $script:ValidateDepsScript -ProfilePath $script:ProfilePath -Verbose } | Should -Not -Throw
+    }
+
+    It 'reports a missing fragment dependency' {
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath 'consumer.ps1') -Value @'
+#Requires -Fragment 'missing-fragment'
+function Get-FragmentDependencyConsumer { 'consumer' }
 '@ -Encoding UTF8
 
-            $result = Invoke-TestScriptFile -ScriptPath (Join-Path $fragmentDir 'validate-fragment-dependencies.ps1')
+        {
+            & $script:ValidateDepsScript -ProfilePath $script:ProfilePath
+        } | Should -Throw
+    }
 
-            $result.ExitCode | Should -Be 1
-            $result.Output | Should -Match 'Dependency validation failed|Circular dependencies'
-        }
-        finally {
-            Remove-TestArtifacts
-        }
+    It 'reports circular fragment dependencies' {
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath 'alpha.ps1') -Value @'
+#Requires -Fragment 'beta'
+function Get-FragmentDependencyAlpha { 'alpha' }
+'@ -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $script:ProfilePath 'beta.ps1') -Value @'
+#Requires -Fragment 'alpha'
+function Get-FragmentDependencyBeta { 'beta' }
+'@ -Encoding UTF8
+
+        {
+            & $script:ValidateDepsScript -ProfilePath $script:ProfilePath
+        } | Should -Throw
     }
 }

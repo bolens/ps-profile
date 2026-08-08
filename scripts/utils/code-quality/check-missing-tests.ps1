@@ -7,13 +7,30 @@
     tests/unit/library-*.tests.ps1 naming conventions (including -extended and
     -structure-extended suffixes).
 
+.PARAMETER RepositoryRoot
+    Optional repository root containing scripts/lib and tests/unit. Defaults to
+    the repository containing this script.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts/utils/code-quality/check-missing-tests.ps1
 #>
 
+param(
+    [string]$RepositoryRoot
+)
+
 $ErrorActionPreference = 'Stop'
 
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..')).Path
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
+$repoRoot = if ($RepositoryRoot) {
+    [System.IO.Path]::GetFullPath($RepositoryRoot)
+}
+else {
+    (Resolve-Path (Join-Path $PSScriptRoot '..' '..' '..')).Path
+}
 $libPath = Join-Path $repoRoot 'scripts' 'lib'
 $testPath = Join-Path $repoRoot 'tests' 'unit'
 
@@ -84,7 +101,7 @@ foreach ($moduleName in $modules) {
         $covered = $false
         foreach ($aggregatePrefix in $aggregateTestCoverage[$moduleName]) {
             if ($testFiles.BaseName -contains "$aggregatePrefix.tests" -or
-                ($testFiles.BaseName | Where-Object { $_ -like "$aggregatePrefix*" }).Count -gt 0) {
+                @($testFiles.BaseName | Where-Object { $_ -like "$aggregatePrefix*" }).Count -gt 0) {
                 $covered = $true
                 break
             }
@@ -96,8 +113,8 @@ foreach ($moduleName in $modules) {
     }
 }
 
-$testedModules = $testedModules | Select-Object -Unique
-$missing = $modules | Where-Object { $testedModules -notcontains $_ }
+$testedModules = @($testedModules | Select-Object -Unique)
+$missing = @($modules | Where-Object { $testedModules -notcontains $_ })
 
 Write-Host "Total modules: $($modules.Count)"
 Write-Host "Total test files: $($testFiles.Count)"
@@ -111,7 +128,10 @@ else {
 }
 
 if ($missing.Count -gt 0) {
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
-exit 0
+if ($RepositoryRoot -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    return
+}
+Exit-WithCode -ExitCode $EXIT_SUCCESS

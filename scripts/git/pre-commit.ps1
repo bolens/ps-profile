@@ -1,20 +1,38 @@
 <#
 scripts/git/pre-commit.ps1
 
+cspell:ignore ACMR
+
 .SYNOPSIS
     Cross-platform pre-commit hook that runs formatting and validation.
 
 .DESCRIPTION
     Cross-platform helper invoked by .git/hooks/pre-commit. It runs code formatting
-    first, adds any formatted files to the commit, then runs validate-profile
+    first, re-stages only files that were already staged, then runs validate-profile
     (security, lint, cspell, markdownlint, comment help, idempotency, duplicates).
-    cspell is required when node tooling is available (same gate as CI).
+    Partially staged files are rejected before formatting so unstaged hunks cannot
+    be absorbed into the commit. cspell is required when node tooling is available
+    (same gate as CI).
+
+.PARAMETER RepositoryRoot
+    Optional repository root override for isolated hook validation.
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\git\pre-commit.ps1
 
     Runs formatting and validation checks as part of the git pre-commit hook.
 #>
+
+[CmdletBinding()]
+param(
+    [ValidateScript({
+            if ($_ -and -not [string]::IsNullOrWhiteSpace($_) -and -not (Test-Path -LiteralPath $_ -PathType Container)) {
+                throw "Repository root does not exist: $_"
+            }
+            $true
+        })]
+    [string]$RepositoryRoot
+)
 
 # Import PathResolution first (required for ModuleImport to work)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
@@ -38,10 +56,38 @@ Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -Di
 
 # Get repository root
 try {
-    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+    $repoRoot = if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+        Get-RepoRoot -ScriptPath $PSScriptRoot
+    }
+    else {
+        [System.IO.Path]::GetFullPath($RepositoryRoot)
+    }
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+# Capture the index before formatting. Re-staging every modified file can silently
+# add unrelated work, while re-staging a partially staged file absorbs its
+# unstaged hunks. Refuse the latter and preserve the former.
+$stagedFiles = @(& git -C $repoRoot diff --cached --name-only --diff-filter=ACMR)
+if ($LASTEXITCODE -ne 0) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'Unable to inspect staged files.'
+}
+
+$unstagedFiles = @(& git -C $repoRoot diff --name-only --diff-filter=ACMR)
+if ($LASTEXITCODE -ne 0) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'Unable to inspect unstaged files.'
+}
+
+$unstagedSet = [System.Collections.Generic.HashSet[string]]::new(
+    [string[]]$unstagedFiles,
+    [System.StringComparer]::Ordinal
+)
+$partiallyStagedFiles = @($stagedFiles | Where-Object { $unstagedSet.Contains($_) })
+if ($partiallyStagedFiles.Count -gt 0) {
+    $fileList = $partiallyStagedFiles -join ', '
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Partially staged files cannot be auto-formatted safely: $fileList"
 }
 
 # Run formatting first
@@ -54,11 +100,17 @@ if ($formatScript -and -not [string]::IsNullOrWhiteSpace($formatScript) -and (Te
         Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Code formatting failed"
     }
 
-    # Add any files that were formatted
-    $formattedFiles = & git diff --name-only
-    if ($formattedFiles) {
-        Write-ScriptMessage -Message "Adding formatted files to commit..."
-        $formattedFiles | ForEach-Object { & git add $_ }
+    # Re-stage only paths that were already in the index before formatting.
+    if ($stagedFiles.Count -gt 0) {
+        Write-ScriptMessage -Message "Re-staging formatted files already in the commit..."
+        foreach ($stagedFile in $stagedFiles) {
+            if (Test-Path -LiteralPath (Join-Path $repoRoot $stagedFile)) {
+                & git -C $repoRoot add -- $stagedFile
+                if ($LASTEXITCODE -ne 0) {
+                    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Unable to re-stage formatted file: $stagedFile"
+                }
+            }
+        }
     }
 }
 else {
@@ -87,4 +139,10 @@ if ($LASTEXITCODE -ne 0) {
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Validation checks failed"
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Pre-commit checks passed"
+$successMessage = "Pre-commit checks passed"
+if ($RepositoryRoot -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+}
+else {
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
+}

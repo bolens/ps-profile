@@ -24,7 +24,7 @@ Describe 'create-release.ps1 extended scenarios' {
     It 'Determines version bumps from conventional commits' {
         $c = Get-Content -LiteralPath $script:Script -Raw
         $c | Should -Match 'conventional'
-        $c | Should -Match 'git describe'
+        $c | Should -Match 'GitExecutable.*describe'
     }
     It 'Creates and pushes git tags for releases' {
         $c = Get-Content -LiteralPath $script:Script -Raw

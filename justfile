@@ -14,7 +14,7 @@ check-comment-help:
     pwsh -NoProfile -File scripts/checks/check-comment-help.ps1
 
 check-doc-coverage *ARGS:
-    pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 {{ ARGS }}
+    pwsh -NoProfile -File scripts/checks/check-doc-coverage.ps1 -Strict {{ ARGS }}
 
 check-doc-freshness *ARGS:
     pwsh -NoProfile -File scripts/checks/check-doc-freshness.ps1 {{ ARGS }}
@@ -42,6 +42,10 @@ test-coverage *ARGS:
 # Run CI shards for git changes (same filters as GitHub Actions)
 test-changed-shards *ARGS:
     pwsh -NoProfile -File scripts/utils/code-quality/run-pester-changed-shards.ps1 {{ ARGS }}
+
+# Run one explicit CI shard
+test-ci-shard *ARGS:
+    pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 {{ ARGS }}
 
 # Run Performance Benchmark
 benchmark:
@@ -190,8 +194,8 @@ save-metrics-snapshot:
 track-coverage-trends:
     pwsh -NoProfile -File scripts/utils/metrics/track-coverage-trends.ps1
 
-# Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests + function naming)
-quality-check format security-scan lint spellcheck markdownlint check-comment-help test validate-function-naming:
+# Full repository quality gate
+quality-check format security-scan lint spellcheck markdownlint validate check-comment-help check-doc-coverage check-doc-freshness check-script-standards check-missing-tests validate-dependencies check-task-parity test validate-function-naming drift-check:
     @echo "All quality checks passed"
 
 # Run Pre-commit Checks

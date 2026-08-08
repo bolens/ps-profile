@@ -429,6 +429,24 @@ Set-AgentModeFunction -Name 'Get-GitLog' -Body { git log @args } | Out-Null
     }
 
     Context 'Alias parsing' {
+        It 'keeps the last case-insensitive alias definition to match PowerShell runtime behavior' {
+            $docsModulesPath = Join-Path $script:ScriptsUtilsDocsPath 'modules'
+            Import-Module (Join-Path $docsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+            $testFile = Join-Path $script:TestTempRoot 'case_variant_alias.ps1'
+            $testContent = @'
+Set-AgentModeAlias -Name 'ls' -Target 'Get-ChildItemEza'
+Set-AgentModeAlias -Name 'lS' -Target 'Get-ChildItemEzaBySize'
+'@
+            Set-Content -Path $testFile -Value $testContent -Encoding UTF8
+
+            $parsed = Get-DocumentedCommands -ProfilePath (Split-Path -Parent $testFile) -Files @($testFile)
+
+            @($parsed.Aliases).Count | Should -Be 1
+            $parsed.Aliases[0].Name | Should -BeExactly 'lS'
+            $parsed.Aliases[0].Target | Should -Be 'Get-ChildItemEzaBySize'
+        }
+
         It 'extracts aliases from Register-LazyFunction -Alias registrations' {
             $aliasParserPath = Join-Path $script:ScriptsUtilsDocsPath 'modules' 'DocAliasParser.psm1'
             Import-Module $aliasParserPath -DisableNameChecking -Force

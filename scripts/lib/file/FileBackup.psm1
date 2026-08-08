@@ -229,7 +229,8 @@ function New-FileBackup {
         $metadata | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $metaPath -Encoding UTF8
 
         if (-not $SkipPrune -and $KeepCount -gt 0) {
-            Remove-OldFileBackups -RepoRoot $RepoRoot -Category $Category -SourcePath $resolvedSource -KeepCount $KeepCount
+            Remove-OldFileBackups -RepoRoot $RepoRoot -Category $Category -SourcePath $resolvedSource -KeepCount $KeepCount |
+                Out-Null
         }
 
         return [pscustomobject]$metadata

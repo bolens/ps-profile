@@ -104,10 +104,23 @@ function Exit-WithCode {
         Write-Output $Message
     }
 
-    # In test mode, throw before Write-Error so a session ErrorActionPreference of
-    # Stop cannot turn the diagnostic Write-Error into the sole terminating path
-    # (or suppress the intended rethrow when callers assert on the exception).
+    # Only replace process exits while the call is actually running under Pester.
+    # PS_PROFILE_TEST_MODE is inherited by child pwsh processes, where scripts
+    # must still return their documented process exit codes.
+    $calledFromPester = $false
     if ($env:PS_PROFILE_TEST_MODE -eq '1') {
+        $calledFromPester = @(
+            Get-PSCallStack |
+                Where-Object {
+                    $_.ScriptName -and
+                    [System.IO.Path]::GetFileName($_.ScriptName) -in @('Pester.ps1', 'Pester.psm1')
+                }
+        ).Count -gt 0
+    }
+
+    # In in-process test mode, throw before Write-Error so a session
+    # ErrorActionPreference of Stop cannot suppress the intended rethrow.
+    if ($calledFromPester) {
         if ($ErrorRecord) {
             Write-Error -ErrorRecord $ErrorRecord -ErrorAction Continue
             throw $ErrorRecord

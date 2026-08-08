@@ -43,6 +43,10 @@ param(
     [int]$Parallel = 0
 )
 
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
 $expectedRepoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 $conversionRootCheck = Join-Path $RepoRoot 'tests' 'integration' 'conversion'
 if (-not (Test-Path -LiteralPath $conversionRootCheck)) {
@@ -58,7 +62,7 @@ if (-not (Test-Path -LiteralPath $conversionRootCheck)) {
     }
     else {
         Write-Error "Invalid -RepoRoot '$RepoRoot'. Pass one -RelativePath value per invocation when calling via pwsh -File."
-        exit 2
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
     }
 }
 
@@ -67,7 +71,7 @@ $batchRunner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-convers
 
 if (-not (Test-Path -LiteralPath $batchRunner)) {
     Write-Error "Batch runner not found: $batchRunner"
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 function Get-ConversionBatchPaths {
@@ -103,7 +107,7 @@ else {
 
 if ($paths.Count -eq 0) {
     Write-Error 'No conversion batch paths discovered.'
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 Write-Host "Conversion all-batch: $($paths.Count) sub-batches" -ForegroundColor Cyan
@@ -175,8 +179,8 @@ $bad = @($results | Where-Object {
     })
 if ($bad.Count -gt 0) {
     Write-Host "Sub-batches with failures: $($bad.Count)" -ForegroundColor Red
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Write-Host 'All conversion sub-batches passed.' -ForegroundColor Green
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS

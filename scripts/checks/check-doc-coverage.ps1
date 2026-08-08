@@ -83,7 +83,13 @@ catch {
 
 if ($Json) {
     $report | ConvertTo-Json -Depth 6
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'Documentation coverage report emitted as JSON.'
+    $successMessage = 'Documentation coverage report emitted as JSON.'
+    if ($ProfilePath -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        Write-ScriptMessage -Message $successMessage
+        return
+    }
+
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
 }
 
 Write-ScriptMessage -Message 'Documentation coverage summary:'
@@ -135,4 +141,10 @@ if ($failureCount -gt 0) {
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Documentation coverage check failed with $failureCount blocking issue(s)."
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'Documentation coverage check completed.'
+$successMessage = 'Documentation coverage check completed.'
+if ($ProfilePath -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+}
+else {
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
+}

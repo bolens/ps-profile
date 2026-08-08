@@ -33,6 +33,8 @@ Describe 'repro_set_agentmode.ps1 execution' {
         $repo = New-TestTempDirectory -Prefix 'ReproMissingBootstrap'
         $scriptsDir = Join-Path $repo 'scripts'
         $null = New-Item -ItemType Directory -Path $scriptsDir -Force
+        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') `
+            -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
         Copy-Item -LiteralPath $script:ReproSetAgentModeScript -Destination (Join-Path $scriptsDir 'repro_set_agentmode.ps1') -Force
                 $result = Invoke-TestScriptFile -ScriptPath (Join-Path $scriptsDir 'repro_set_agentmode.ps1')
                 $result.ExitCode | Should -Be 1
@@ -45,6 +47,8 @@ Describe 'repro_set_agentmode.ps1 execution' {
         $profileDir = Join-Path $repo 'profile.d'
         $null = New-Item -ItemType Directory -Path $scriptsDir -Force
         $null = New-Item -ItemType Directory -Path $profileDir -Force
+        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') `
+            -Destination (Join-Path $scriptsDir 'lib') -Recurse -Force
         Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'profile.d' 'bootstrap.ps1') -Destination (Join-Path $profileDir 'bootstrap.ps1') -Force
         Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'profile.d' 'bootstrap') -Destination (Join-Path $profileDir 'bootstrap') -Recurse -Force
         Copy-Item -LiteralPath $script:ReproSetAgentModeScript -Destination (Join-Path $scriptsDir 'repro_set_agentmode.ps1') -Force

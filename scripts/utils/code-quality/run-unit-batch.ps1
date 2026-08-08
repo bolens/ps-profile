@@ -30,10 +30,14 @@ param(
     [switch]$Quiet
 )
 
+$moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
+Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
+Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+
 $unitRoot = Join-Path $RepoRoot 'tests' 'unit'
 if (-not (Test-Path -LiteralPath $unitRoot)) {
     Write-Error "Unit test directory not found: $unitRoot"
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
@@ -44,7 +48,7 @@ if (-not [string]::IsNullOrWhiteSpace($Filter)) {
 
 if ($files.Count -eq 0) {
     Write-Error "No unit test files matched under: $unitRoot (filter: '$Filter')"
-    exit 2
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
 function Get-PesterRunStats {
@@ -133,8 +137,8 @@ $results | Format-Table -AutoSize
 $bad = @($results | Where-Object { $_.Failed -gt 0 })
 if ($bad.Count -gt 0) {
     Write-Host "Files with failures: $($bad.Count)" -ForegroundColor Red
-    exit 1
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE
 }
 
 Write-Host "All tests passed in batch: $label" -ForegroundColor Green
-exit 0
+Exit-WithCode -ExitCode $EXIT_SUCCESS

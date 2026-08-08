@@ -10,6 +10,9 @@ The security scanning script (`scripts/utils/security/run-security-scan.ps1`) in
 - Example code or placeholders that match secret patterns
 - Test files that contain intentional security anti-patterns
 
+The scan fails if any selected file cannot be analyzed, preventing partial
+results from being treated as a successful security check.
+
 ## Allowlist File Format
 
 The allowlist file is a JSON file with three optional sections:

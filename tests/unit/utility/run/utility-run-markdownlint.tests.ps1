@@ -24,31 +24,67 @@ BeforeAll {
 }
 
 Describe 'run-markdownlint.ps1 execution' {
-    It 'Runs markdownlint or npx fallback without interactive prompts' {
-        if (-not $script:MarkdownlintAvailable -and -not $script:NpxAvailable) {
-            Set-ItResult -Skipped -Because 'markdownlint and npx are not available'
-            return
+    It 'prefers an available markdownlint command in-process' {
+        function global:markdownlint {
+            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+            $global:LASTEXITCODE = 0
         }
 
-        $result = Invoke-TestScriptFile -ScriptPath $script:RunMarkdownlintScript
+        $previousVersion = $env:MARKDOWNLINT_VERSION
+        $env:MARKDOWNLINT_VERSION = '0.47.0'
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:RunMarkdownlintScript 2>&1 | Out-String
 
-        $result.ExitCode | Should -BeIn @(0, 1, 2)
-        $result.Output | Should -Match 'markdownlint'
+            $output | Should -Match 'version: 0.47.0'
+            $output | Should -Match 'markdownlint passed'
+        }
+        finally {
+            Remove-Item Function:\markdownlint -ErrorAction SilentlyContinue
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+            if ($null -eq $previousVersion) {
+                Remove-Item Env:MARKDOWNLINT_VERSION -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:MARKDOWNLINT_VERSION = $previousVersion
+            }
+        }
     }
 
-    It 'Reports the configured MARKDOWNLINT_VERSION in output' {
-        if (-not $script:MarkdownlintAvailable -and -not $script:NpxAvailable) {
-            Set-ItResult -Skipped -Because 'markdownlint and npx are not available'
-            return
+    It 'uses the npx fallback in-process when markdownlint is unavailable' {
+        function global:npx {
+            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+            $global:LASTEXITCODE = 0
         }
 
-        $customVersion = '0.35.0'
-        $result = Invoke-TestScriptFile -ScriptPath $script:RunMarkdownlintScript -EnvironmentVariables @{
-            MARKDOWNLINT_VERSION = $customVersion
+        Mock Get-Command { $null } -ParameterFilter { $Name -eq 'markdownlint' }
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:RunMarkdownlintScript 2>&1 | Out-String
+
+            $output | Should -Match 'markdownlint passed'
+        }
+        finally {
+            Remove-Item Function:\npx -ErrorAction SilentlyContinue
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'reports markdownlint violations in-process' {
+        function global:markdownlint {
+            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+            $global:LASTEXITCODE = 1
         }
 
-        $result.ExitCode | Should -BeIn @(0, 1, 2)
-        $result.Output | Should -Match "version: $customVersion"
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            { & $script:RunMarkdownlintScript 2>&1 } |
+                Should -Throw -ExpectedMessage '*markdownlint found errors*'
+        }
+        finally {
+            Remove-Item Function:\markdownlint -ErrorAction SilentlyContinue
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
     }
 
     It 'Fails when markdownlint finds violations in an isolated repository' {

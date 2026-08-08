@@ -83,17 +83,15 @@ if ($dbPath -and (Test-Path -LiteralPath $dbPath)) {
     Write-Host "  Last modified: $($dbInfo.LastWriteTime)" -ForegroundColor DarkGray
     
     $sqliteCmd = $null
-    if ((Get-Command Test-SqliteAvailable -ErrorAction SilentlyContinue) -and (Test-SqliteAvailable)) {
-        if (Get-Command Get-SqliteCommandName -ErrorAction SilentlyContinue) {
-            $sqliteCmd = Get-SqliteCommandName
-        }
-    }
-    if (-not $sqliteCmd -and (Get-Command sqlite3 -ErrorAction SilentlyContinue)) {
+    if (Get-Command sqlite3 -ErrorAction SilentlyContinue) {
         $sqliteCmd = (Get-Command sqlite3).Source
     }
     if (-not $sqliteCmd) {
         Write-Host "⚠ SQLite not available - cannot query database entry counts" -ForegroundColor Yellow
         Write-Host "  Database file exists; run clear-fragment-cache if you expected an empty cache." -ForegroundColor Yellow
+        if ($env:PS_PROFILE_CACHE_DIR -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+            return
+        }
         Exit-WithCode -ExitCode $EXIT_SUCCESS
     }
     
@@ -104,78 +102,51 @@ if ($dbPath -and (Test-Path -LiteralPath $dbPath)) {
     $astCountQuery = "SELECT COUNT(*) FROM fragment_ast_cache;"
     $contentCountQuery = "SELECT COUNT(*) FROM fragment_content_cache;"
     
-    $tempOut = [System.IO.Path]::GetTempFileName()
-    $tempErr = [System.IO.Path]::GetTempFileName()
-    $tempSql = [System.IO.Path]::GetTempFileName()
-    
-    try {
-        $astCount = 0
-        $contentCount = 0
-        
-        # Count AST entries - write query to temp file and pipe to sqlite3
-        $astCountQuery | Out-File -FilePath $tempSql -Encoding UTF8 -NoNewline
-        $astProcess = Start-Process -FilePath $sqliteCmd -ArgumentList $dbPath -NoNewWindow -Wait -PassThru -RedirectStandardInput $tempSql -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr
-        if ($astProcess.ExitCode -eq 0) {
-            $astCountStr = (Get-Content -Path $tempOut -Raw -ErrorAction SilentlyContinue).Trim()
-            if ([int]::TryParse($astCountStr, [ref]$astCount)) {
-                Write-Host "  AST cache entries: $astCount" -ForegroundColor $(if ($astCount -eq 0) { 'Green' } else { 'Yellow' })
-            }
-            else {
-                Write-Host "  AST cache entries: (could not parse: $astCountStr)" -ForegroundColor Yellow
-            }
+    $astCount = 0
+    $contentCount = 0
+
+    $astOutput = @(& $sqliteCmd $dbPath $astCountQuery 2>&1)
+    if ($LASTEXITCODE -eq 0) {
+        $astCountStr = ($astOutput -join [Environment]::NewLine).Trim()
+        if ([int]::TryParse($astCountStr, [ref]$astCount)) {
+            Write-Host "  AST cache entries: $astCount" -ForegroundColor $(if ($astCount -eq 0) { 'Green' } else { 'Yellow' })
         }
         else {
-            $errorOutput = Get-Content -Path $tempErr -Raw -ErrorAction SilentlyContinue
-            Write-Host "  ✗ Failed to query AST cache: $errorOutput" -ForegroundColor Red
-        }
-        
-        # Clear temp files
-        Remove-Item -Path $tempOut -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path $tempErr -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path $tempSql -Force -ErrorAction SilentlyContinue
-        
-        # Count content entries
-        $tempOut = [System.IO.Path]::GetTempFileName()
-        $tempErr = [System.IO.Path]::GetTempFileName()
-        $tempSql = [System.IO.Path]::GetTempFileName()
-        
-        $contentCountQuery | Out-File -FilePath $tempSql -Encoding UTF8 -NoNewline
-        $contentProcess = Start-Process -FilePath $sqliteCmd -ArgumentList $dbPath -NoNewWindow -Wait -PassThru -RedirectStandardInput $tempSql -RedirectStandardOutput $tempOut -RedirectStandardError $tempErr
-        if ($contentProcess.ExitCode -eq 0) {
-            $contentCountStr = (Get-Content -Path $tempOut -Raw -ErrorAction SilentlyContinue).Trim()
-            if ([int]::TryParse($contentCountStr, [ref]$contentCount)) {
-                Write-Host "  Content cache entries: $contentCount" -ForegroundColor $(if ($contentCount -eq 0) { 'Green' } else { 'Yellow' })
-            }
-            else {
-                Write-Host "  Content cache entries: (could not parse: $contentCountStr)" -ForegroundColor Yellow
-            }
-        }
-        else {
-            $errorOutput = Get-Content -Path $tempErr -Raw -ErrorAction SilentlyContinue
-            Write-Host "  ✗ Failed to query content cache: $errorOutput" -ForegroundColor Red
-        }
-        
-        # Summary
-        Write-Host ""
-        if ($astCount -eq 0 -and $contentCount -eq 0) {
-            Write-Host "✓ Cache is cleared (both AST and content caches are empty)" -ForegroundColor Green
-        }
-        else {
-            Write-Host "⚠ Cache is NOT fully cleared:" -ForegroundColor Yellow
-            if ($astCount -gt 0) {
-                Write-Host "  - AST cache has $astCount entries" -ForegroundColor Yellow
-            }
-            if ($contentCount -gt 0) {
-                Write-Host "  - Content cache has $contentCount entries" -ForegroundColor Yellow
-            }
-            Write-Host ""
-            Write-Host "  Run: task clear-fragment-cache" -ForegroundColor Cyan
+            Write-Host "  AST cache entries: (could not parse: $astCountStr)" -ForegroundColor Yellow
         }
     }
-    finally {
-        Remove-Item -Path $tempOut -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path $tempErr -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path $tempSql -Force -ErrorAction SilentlyContinue
+    else {
+        Write-Host "  ✗ Failed to query AST cache: $($astOutput -join [Environment]::NewLine)" -ForegroundColor Red
+    }
+
+    $contentOutput = @(& $sqliteCmd $dbPath $contentCountQuery 2>&1)
+    if ($LASTEXITCODE -eq 0) {
+        $contentCountStr = ($contentOutput -join [Environment]::NewLine).Trim()
+        if ([int]::TryParse($contentCountStr, [ref]$contentCount)) {
+            Write-Host "  Content cache entries: $contentCount" -ForegroundColor $(if ($contentCount -eq 0) { 'Green' } else { 'Yellow' })
+        }
+        else {
+            Write-Host "  Content cache entries: (could not parse: $contentCountStr)" -ForegroundColor Yellow
+        }
+    }
+    else {
+        Write-Host "  ✗ Failed to query content cache: $($contentOutput -join [Environment]::NewLine)" -ForegroundColor Red
+    }
+
+    Write-Host ""
+    if ($astCount -eq 0 -and $contentCount -eq 0) {
+        Write-Host "✓ Cache is cleared (both AST and content caches are empty)" -ForegroundColor Green
+    }
+    else {
+        Write-Host "⚠ Cache is NOT fully cleared:" -ForegroundColor Yellow
+        if ($astCount -gt 0) {
+            Write-Host "  - AST cache has $astCount entries" -ForegroundColor Yellow
+        }
+        if ($contentCount -gt 0) {
+            Write-Host "  - Content cache has $contentCount entries" -ForegroundColor Yellow
+        }
+        Write-Host ""
+        Write-Host "  Run: task clear-fragment-cache" -ForegroundColor Cyan
     }
 }
 else {
@@ -183,4 +154,8 @@ else {
 }
 
 Write-Host ""
+if ($env:PS_PROFILE_CACHE_DIR -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    return
+}
+
 Exit-WithCode -ExitCode $EXIT_SUCCESS

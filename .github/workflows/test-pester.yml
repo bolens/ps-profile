@@ -25,7 +25,7 @@ jobs:
       matrix: ${{ steps.build.outputs.matrix }}
       any: ${{ steps.build.outputs.any }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
@@ -103,7 +103,7 @@ jobs:
           set -euo pipefail
           pacman -Sy --noconfirm
           pacman -S --noconfirm git
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Trust workspace for git (Arch container)
         if: matrix.label == 'arch-latest'
         shell: bash
@@ -116,13 +116,33 @@ jobs:
       - name: Install Pester
         shell: pwsh
         run: |
-          if (-not (Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
-            Register-PSRepository -Default
+          $galleryName = 'PSGallery'
+          if (-not (Get-PSRepository -Name $galleryName -ErrorAction SilentlyContinue)) {
+            try {
+              Register-PSRepository -Default -ErrorAction Stop
+            }
+            catch {
+              Write-Warning "Could not restore the default PSGallery registration: $($_.Exception.Message)"
+            }
+            if (-not (Get-PSRepository -Name $galleryName -ErrorAction SilentlyContinue)) {
+              # Register-PSRepository can emit a non-terminating NuGet error and
+              # return without creating PSGallery, especially on Windows images.
+              $galleryName = 'PSGalleryFallback'
+              if (-not (Get-PSRepository -Name $galleryName -ErrorAction SilentlyContinue)) {
+                Register-PSRepository `
+                  -Name $galleryName `
+                  -SourceLocation 'https://www.powershellgallery.com/api/v2' `
+                  -PublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
+                  -ScriptSourceLocation 'https://www.powershellgallery.com/api/v2/items/psscript' `
+                  -ScriptPublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
+                  -InstallationPolicy Trusted
+              }
+            }
           }
-          Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+          Set-PSRepository -Name $galleryName -InstallationPolicy Trusted
           # Pin to 5.7.x: Pester 5.9+ regresses Mock scoping ("Mock data are not setup for this scope")
           # and TestDrive collisions across sequential containers; Pester 6+ breaks tracer teardown.
-          Install-Module -Name Pester -MinimumVersion 5.7.0 -MaximumVersion 5.7.99 -Force -Scope CurrentUser -AllowClobber
+          Install-Module -Name Pester -Repository $galleryName -MinimumVersion 5.7.0 -MaximumVersion 5.7.99 -Force -Scope CurrentUser -AllowClobber
           $pester5 = Get-Module -ListAvailable Pester |
             Where-Object { $_.Version -ge [version]'5.7.0' -and $_.Version -lt [version]'5.8.0' } |
             Sort-Object Version -Descending |
@@ -136,14 +156,14 @@ jobs:
           pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard '${{ matrix.shard }}' -Quiet
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: pester-${{ matrix.label }}-${{ matrix.shard }}
           path: tests/test-artifacts/ci-${{ matrix.shard }}/**
           if-no-files-found: ignore
       - name: Upload coverage report
         if: matrix.shard == 'coverage-smoke' && matrix.label == 'ubuntu-latest'
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: coverage-ubuntu-smoke
           path: |

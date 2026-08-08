@@ -19,14 +19,18 @@ jobs:
   commit-message-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Run commit message validation
         id: validate
         run: |
           set -o pipefail
-          pwsh -NoProfile -File scripts/checks/check-commit-messages.ps1 2>&1 | tee commit-msg-output.txt || true
-          echo "status=$?" >> $GITHUB_OUTPUT
+          set +e
+          pwsh -NoProfile -File scripts/checks/check-commit-messages.ps1 2>&1 | tee commit-msg-output.txt
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "status=${status}" >> "$GITHUB_OUTPUT"
+          exit 0
 
       - name: Prepare comment body (on failure)
         if: ${{ steps.validate.outputs.status != '0' }}
@@ -50,3 +54,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           labels: commit-message-invalid
+
+      - name: Fail validation
+        if: ${{ steps.validate.outputs.status != '0' }}
+        run: exit 1

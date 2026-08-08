@@ -9,11 +9,19 @@ scripts/utils/metrics/find-duplicate-functions.ps1
     functions that are defined in multiple files. This helps detect potential conflicts
     or duplicate function definitions that could cause issues.
 
+.PARAMETER ProfilePath
+    Optional profile fragment directory to scan. Defaults to the repository's
+    profile.d directory.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\find-duplicate-functions.ps1
 
     Scans profile.d directory and reports any duplicate function definitions.
 #>
+
+param(
+    [string]$ProfilePath
+)
 
 # Import ModuleImport first (bootstrap)
 $moduleImportPath = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'lib' 'ModuleImport.psm1'
@@ -32,15 +40,20 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChe
 Import-LibModule -ModuleName 'FileSystem' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get profile directory using shared function
-try {
-    $profileDir = Get-ProfileDirectory -ScriptPath $PSScriptRoot
-    Test-PathExists -Path $profileDir -PathType 'Directory'
+if ($ProfilePath) {
+    $profileDir = [System.IO.Path]::GetFullPath($ProfilePath)
 }
-catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+else {
+    try {
+        $profileDir = Get-ProfileDirectory -ScriptPath $PSScriptRoot
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    }
 }
+Test-PathExists -Path $profileDir -PathType 'Directory'
 
-$files = Get-PowerShellScripts -Path $profileDir -SortByName
+$files = @(Get-PowerShellScripts -Path $profileDir -SortByName)
 
 # Regex that skips optional 'global:' scope qualifier on function names
 $functionRegex = [regex]::new(
@@ -81,13 +94,16 @@ if ($debugLevel -ge 2) {
     Write-Verbose "[metrics.find-duplicates] Scan completed in ${scanMs}ms, found $($found.Count) definitions"
 }
 
-$groups = $found | Group-Object Name | Where-Object { $_.Count -gt 1 }
+$groups = @($found | Group-Object Name | Where-Object { $_.Count -gt 1 })
 
 if ($debugLevel -ge 2) {
     Write-Verbose "[metrics.find-duplicates] Duplicate groups: $($groups.Count)"
 }
 
 if ($groups.Count -eq 0) {
+    if ($ProfilePath -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        return
+    }
     Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No duplicate function definitions found in profile.d"
 }
 

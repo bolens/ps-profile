@@ -22,6 +22,14 @@
 .PARAMETER ExceptionsFile
     Optional path to exceptions documentation file. Defaults to docs/guides/FUNCTION_NAMING_EXCEPTIONS.md
 
+.PARAMETER IncludeTests
+    Includes functions located under test directories. Test functions are excluded
+    by default.
+
+.PARAMETER RepositoryRoot
+    Optional repository root used to resolve default paths. Defaults to the
+    repository containing this script.
+
 
 .OUTPUTS
     PSCustomObject with validation results including:
@@ -49,7 +57,11 @@ param(
 
     [string]$OutputPath = $null,
 
-    [string]$ExceptionsFile = $null
+    [string]$ExceptionsFile = $null,
+
+    [switch]$IncludeTests,
+
+    [string]$RepositoryRoot
 )
 
 # Import shared utilities directly (no barrel files)
@@ -69,12 +81,17 @@ Import-Module (Join-Path $modulesPath 'ExceptionHandler.psm1') -ErrorAction Stop
 Import-Module (Join-Path $modulesPath 'ValidationReporter.psm1') -ErrorAction Stop
 
 # Get repository root
-try {
-    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+$repoRoot = if ($RepositoryRoot) {
+    [System.IO.Path]::GetFullPath($RepositoryRoot)
 }
-catch {
-    # Fallback if Get-RepoRoot not available
-    $repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+else {
+    try {
+        Get-RepoRoot -ScriptPath $PSScriptRoot
+    }
+    catch {
+        # Fallback if Get-RepoRoot not available
+        Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+    }
 }
 
 # Set default paths
@@ -87,7 +104,7 @@ if (-not $ExceptionsFile) {
 }
 
 # Discover functions
-$functions = Get-FunctionsFromPath -Path $Path -RepoRoot $repoRoot
+$functions = @(Get-FunctionsFromPath -Path $Path -RepoRoot $repoRoot)
 
 # Load exceptions
 $exceptionData = Get-NamingExceptions -ExceptionsFile $ExceptionsFile
@@ -95,7 +112,11 @@ $exceptions = $exceptionData.Exceptions
 $exceptionVerbs = $exceptionData.ExceptionVerbs
 
 # Analyze results
-$results = Get-ValidationResults -Functions $functions -Exceptions $exceptions -ExceptionVerbs $exceptionVerbs
+$results = Get-ValidationResults `
+    -Functions $functions `
+    -Exceptions $exceptions `
+    -ExceptionVerbs $exceptionVerbs `
+    -IncludeTests:$IncludeTests
 
 # Display results
 Write-ValidationReport -Results $results
@@ -116,7 +137,12 @@ if ($results.Issues.Count -gt 0) {
 }
 else {
     if (Get-Command Exit-WithCode -ErrorAction SilentlyContinue) {
-        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Function naming validation passed with no issues."
+        $successMessage = 'Function naming validation passed with no issues.'
+        if ($Path -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+            Write-Output $successMessage
+            return
+        }
+        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
     }
     else {
         return

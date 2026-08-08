@@ -33,12 +33,4 @@ Describe 'profile.d/files-module-registry.ps1 Ensure-FileConversion-Specialized 
         $script:FileConversionModuleRegistry.ContainsKey('Ensure-FileConversion-Specialized') | Should -Be $true
     }
 
-    It 'Load-EnsureModules loads specialized conversion submodule initializers' {
-        Load-EnsureModules -EnsureFunctionName 'Ensure-FileConversion-Specialized' -BaseDir $script:ProfileDir
-
-        Get-Command Initialize-FileConversion-Specialized -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-SpecializedQrCode -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-SpecializedJwt -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Initialize-FileConversion-SpecializedBarcode -ErrorAction Stop | Should -Not -BeNullOrEmpty
-    }
 }

@@ -13,6 +13,12 @@ scripts/checks/check-commit-messages.ps1
 .PARAMETER Base
     The base branch or commit to compare against. Defaults to 'origin/main'.
 
+.PARAMETER GitExecutable
+    Git executable or command used to inspect commits. Defaults to git.
+
+.PARAMETER SkipFetch
+    Skips refreshing origin/main before validating the commit range.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\checks\check-commit-messages.ps1
 
@@ -25,7 +31,9 @@ scripts/checks/check-commit-messages.ps1
 #>
 
 param(
-    [string]$Base = 'origin/main'
+    [string]$Base = 'origin/main',
+    [string]$GitExecutable = 'git',
+    [switch]$SkipFetch
 )
 
 # Import ModuleImport first (bootstrap)
@@ -38,24 +46,34 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChe
 
 Write-ScriptMessage -Message "Checking commits against base: $Base"
 
-try {
-    # Ensure we have the base ref locally
-    & git fetch origin +refs/heads/main:refs/remotes/origin/main 2>$null
-}
-catch {
-    # ignore
+if (-not $SkipFetch) {
+    try {
+        # Ensure we have the base ref locally
+        & $GitExecutable fetch origin +refs/heads/main:refs/remotes/origin/main 2>$null
+    }
+    catch {
+        # A local base may still be available, so validation continues.
+    }
 }
 
 # Get commit list between base and HEAD (exclude merges)
 $commitRange = '{0}..HEAD' -f $Base
-$commits = & git rev-list --no-merges --reverse $commitRange 2>$null
+$commits = & $GitExecutable rev-list --no-merges --reverse $commitRange 2>$null
+if ($LASTEXITCODE -ne 0) {
+    Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message "Unable to read commit range $commitRange (git exit code $LASTEXITCODE)"
+}
 if (-not $commits) {
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "No commits to check against $Base"
+    $successMessage = "No commits to check against $Base"
+    if ($GitExecutable -ne 'git' -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+        Write-ScriptMessage -Message $successMessage
+        return
+    }
+    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
 }
 
 # Use List for better performance than array concatenation
 $errors = [System.Collections.Generic.List[PSCustomObject]]::new()
-$typeRegex = 'feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert|wip|ci'
+$typeRegex = 'feat|fix|chore|docs|style|refactor|perf|test|build|ci|revert|wip'
 $convRegex = "^(?:($typeRegex))(?:\([a-z0-9_\-]+\))?:\s.+$"
 
 # Compile regex patterns once for better performance
@@ -65,7 +83,11 @@ $autoMergeRegex = [regex]::new('^Auto-merge', [System.Text.RegularExpressions.Re
 $convRegexCompiled = [regex]::new($convRegex, [System.Text.RegularExpressions.RegexOptions]::Compiled)
 
 foreach ($c in $commits) {
-    $subject = (& git log -1 --pretty=format:%s $c).Trim()
+    $subjectOutput = & $GitExecutable log -1 --pretty=format:%s $c
+    if ($LASTEXITCODE -ne 0) {
+        Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message "Unable to read commit $c (git exit code $LASTEXITCODE)"
+    }
+    $subject = ([string]$subjectOutput).Trim()
     if (-not $subject) { continue }
 
     if ($mergeRegex.IsMatch($subject) -or $revertRegex.IsMatch($subject) -or $autoMergeRegex.IsMatch($subject)) {
@@ -83,5 +105,9 @@ if ($errors.Count -gt 0) {
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message $errorMessage
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "All commit subjects conform to Conventional Commits"
-
+$successMessage = 'All commit subjects conform to Conventional Commits'
+if ($GitExecutable -ne 'git' -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+    return
+}
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage

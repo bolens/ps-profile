@@ -10,11 +10,24 @@ scripts/checks/check-idempotency.ps1
     loaded multiple times without errors. This ensures fragments are idempotent
     and safe to reload.
 
+.PARAMETER ProfilePath
+    Optional profile fragment directory to validate. Defaults to profile.d in the
+    repository root.
+
+.PARAMETER PowerShellExecutable
+    Optional PowerShell executable or command used to run the generated script.
+    Defaults to the executable detected for the current platform.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\checks\check-idempotency.ps1
 
     Checks that all profile.d fragments can be loaded twice without errors.
 #>
+
+param(
+    [string]$ProfilePath,
+    [string]$PowerShellExecutable
+)
 
 # Import PathResolution first (required for ModuleImport to work)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
@@ -39,10 +52,24 @@ Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -Di
 # Get repository root using shared function
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
-    $profileD = Join-Path $repoRoot 'profile.d'
+    $profileD = if ($ProfilePath) {
+        if ([System.IO.Path]::IsPathRooted($ProfilePath)) {
+            $ProfilePath
+        }
+        else {
+            Join-Path $repoRoot $ProfilePath
+        }
+    }
+    else {
+        Join-Path $repoRoot 'profile.d'
+    }
 }
 catch {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+}
+
+if (-not (Test-Path -LiteralPath $profileD -PathType Container)) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Profile fragment directory not found at: $profileD"
 }
 
 Write-ScriptMessage -Message "Building temporary idempotency runner..."
@@ -72,16 +99,27 @@ $content = [System.Collections.Generic.List[string]]::new()
 $content.Add("# Auto-generated idempotency runner")
 $content.Add("`$ErrorActionPreference = 'Stop'")
 $content.Add("Write-Output 'Idempotency runner starting: dot-sourcing all fragments in order (pass 1)...'")
-foreach ($f in $files) { $content.Add(". '$f'") }
+foreach ($f in $files) {
+    $escapedPath = $f.Replace("'", "''")
+    $content.Add(". '$escapedPath'")
+}
 $content.Add("Write-Output 'Pass 1 complete'")
 $content.Add("Write-Output 'Pass 2 starting: dot-sourcing all fragments in order (pass 2)...'")
-foreach ($f in $files) { $content.Add(". '$f'") }
+foreach ($f in $files) {
+    $escapedPath = $f.Replace("'", "''")
+    $content.Add(". '$escapedPath'")
+}
 $content.Add("Write-Output 'Pass 2 complete'")
 
 [System.IO.File]::WriteAllLines($temp, $content)
 
 # Determine which PowerShell executable to use
-$psExe = Get-PowerShellExecutable
+$psExe = if ($PowerShellExecutable) {
+    $PowerShellExecutable
+}
+else {
+    Get-PowerShellExecutable
+}
 
 Write-ScriptMessage -Message "Running idempotency runner: $temp"
 $out = & $psExe -NoProfile -File $temp 2>&1
@@ -91,9 +129,15 @@ Remove-Item -LiteralPath $temp -ErrorAction SilentlyContinue
 
 if ($code -ne 0) {
     $outputText = if ($null -eq $out) { '' } else { ($out | Out-String).TrimEnd() }
-    Write-ScriptMessage -Message $outputText
+    if (-not [string]::IsNullOrWhiteSpace($outputText)) {
+        Write-ScriptMessage -Message $outputText
+    }
     Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Idempotency runner failed (exit code $code)"
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Idempotency: all profile.d fragments loaded twice without errors"
-
+$successMessage = 'Idempotency: all profile.d fragments loaded twice without errors'
+if ($ProfilePath -and $PowerShellExecutable -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+    return
+}
+Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage

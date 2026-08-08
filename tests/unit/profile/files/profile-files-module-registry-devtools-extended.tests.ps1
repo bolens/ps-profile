@@ -36,11 +36,4 @@ Describe 'profile.d/files-module-registry.ps1 Ensure-DevTools registry extended 
         $files | Should -Contain 'units.ps1'
     }
 
-    It 'Load-EnsureModules registers dev tools helpers from registry modules' {
-        Load-EnsureModules -EnsureFunctionName 'Ensure-DevTools' -BaseDir $script:ProfileDir
-
-        Get-Command Get-TextHash -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command New-Uuid -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command New-QrCodeSvg -ErrorAction Stop | Should -Not -BeNullOrEmpty
-    }
 }

@@ -47,12 +47,17 @@ function Get-DeduplicatedDocumentedCommands {
     [OutputType([System.Collections.Generic.List[PSCustomObject]])]
     param(
         [Parameter(Mandatory)]
+        [AllowNull()]
         [AllowEmptyCollection()]
         [System.Collections.Generic.List[PSCustomObject]]$Commands,
 
         [Parameter(Mandatory)]
         [string]$PropertyName
     )
+
+    if ($null -eq $Commands) {
+        $Commands = [System.Collections.Generic.List[PSCustomObject]]::new()
+    }
 
     $commandByName = @{}
     foreach ($command in $Commands) {
@@ -62,7 +67,7 @@ function Get-DeduplicatedDocumentedCommands {
         }
 
         $existing = $commandByName[$name]
-        if (-not $existing -or ($command.File -and $existing.File -and $command.File -gt $existing.File)) {
+        if (-not $existing -or ($command.File -and $existing.File -and $command.File -ge $existing.File)) {
             $commandByName[$name] = $command
         }
     }
@@ -72,7 +77,9 @@ function Get-DeduplicatedDocumentedCommands {
         $deduped.Add($commandByName[$name])
     }
 
-    return $deduped
+    # Prevent PowerShell from unrolling an empty list into $null. Callers rely on
+    # receiving a strongly typed collection even when no commands were parsed.
+    Write-Output -NoEnumerate $deduped
 }
 
 <#

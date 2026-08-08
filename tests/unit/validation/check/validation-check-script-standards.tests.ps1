@@ -1,57 +1,9 @@
 <#
-tests/unit/validation-check-script-standards.tests.ps1
+tests/unit/validation/check/validation-check-script-standards.tests.ps1
 
 .SYNOPSIS
-    Behavioral unit tests for check-script-standards.ps1 with isolated script fixtures.
+    Behavioral tests for check-script-standards.ps1 using isolated fixtures.
 #>
-
-function global:New-ScriptStandardsFixture {
-    param(
-        [switch]$IncludeDirectExit
-    )
-
-    # Outside tests/ so Filter-Files -ExcludeTests does not skip fixture scripts.
-    $repo = New-TestExternalTempDirectory -Prefix 'ScriptStandardsRepo'
-    $scriptsDir = Join-Path $repo 'scripts' 'utils'
-    New-Item -ItemType Directory -Path $scriptsDir -Force | Out-Null
-
-    Set-Content -LiteralPath (Join-Path $scriptsDir 'compliant.ps1') -Value @'
-<#
-.SYNOPSIS
-    Compliant fixture script.
-#>
-param()
-Write-Output 'ok'
-'@
-
-    if ($IncludeDirectExit) {
-        Set-Content -LiteralPath (Join-Path $scriptsDir 'noncompliant.ps1') -Value @'
-<#
-.SYNOPSIS
-    Noncompliant fixture script.
-#>
-param()
-exit 2
-'@
-    }
-
-    return @{
-        RepositoryRoot = $repo
-        ScriptsPath    = $scriptsDir
-    }
-}
-
-function global:Invoke-ScriptStandardsCheck {
-    param(
-        [string]$ScriptsPath
-    )
-
-    $output = & pwsh -NoProfile -File $script:ScriptStandardsScript -Path $ScriptsPath 2>&1 | Out-String
-    return [pscustomobject]@{
-        ExitCode = $LASTEXITCODE
-        Output   = $output
-    }
-}
 
 BeforeAll {
     $current = Get-Item $PSScriptRoot
@@ -61,33 +13,107 @@ BeforeAll {
             . $testSupportPath
             break
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
         $current = $current.Parent
     }
+
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ScriptStandardsScript = Join-Path $script:TestRepoRoot 'scripts' 'checks' 'check-script-standards.ps1'
-    $ConfirmPreference = 'None'
 }
 
 Describe 'check-script-standards.ps1 execution' {
-    It 'Passes when scripts only have informational findings' {
-        $fixture = New-ScriptStandardsFixture
-        Invoke-ScriptStandardsCheck -ScriptsPath $fixture.ScriptsPath | Select-Object -ExpandProperty ExitCode | Should -Be 0
+    BeforeEach {
+        # Keep fixtures outside tests/ because the production filter excludes test paths.
+        $script:FixtureRoot = New-TestExternalTempDirectory -Prefix 'ScriptStandards'
     }
 
-    It 'Fails when a script uses a direct exit call' {
-        $fixture = New-ScriptStandardsFixture -IncludeDirectExit
-        $result = Invoke-ScriptStandardsCheck -ScriptsPath $fixture.ScriptsPath
+    It 'accepts a script with the expected import and protected risky operation' {
+        $content = @'
+$commonModulePath = Join-Path (Split-Path -Parent $PSScriptRoot) 'lib' 'Common.psm1'
+Import-Module $commonModulePath
+try {
+    Get-Content -LiteralPath 'fixture.txt'
+}
+catch {
+    Write-Warning $_
+}
+'@
+        Set-Content -LiteralPath (Join-Path $script:FixtureRoot 'compliant.ps1') -Value $content -Encoding UTF8
 
-        $result.ExitCode | Should -BeIn @(1, 2)
-        $result.Output | Should -Match 'noncompliant|direct exit|exit call'
+        $output = & $script:ScriptStandardsScript -Path $script:FixtureRoot 2>&1 | Out-String
+
+        $output | Should -Match 'All scripts comply with codebase standards'
     }
 
-    It 'Fails parameter validation when the requested path does not exist' {
-        $missingPath = Join-Path (New-TestTempDirectory -Prefix 'ScriptStandardsMissingPath') 'does-not-exist'
-        $result = Invoke-ScriptStandardsCheck -ScriptsPath $missingPath
+    It 'reports informational import and error-handling findings' {
+        $content = @'
+Get-Content -LiteralPath 'fixture.txt'
+'@
+        Set-Content -LiteralPath (Join-Path $script:FixtureRoot 'informational.ps1') -Value $content -Encoding UTF8
 
-        $result.ExitCode | Should -Not -Be 0
-        $result.Output | Should -Match 'Path does not exist|does not exist'
+        $output = & $script:ScriptStandardsScript -Path $script:FixtureRoot 2>&1 | Out-String
+
+        $output | Should -Match 'informational issue'
+    }
+
+    It 'detects direct exits while allowing the Exit-WithCode implementation' {
+        $content = @'
+function Exit-WithCode {
+    param([int]$Code)
+    exit $Code
+}
+
+exit 2
+'@
+        Set-Content -LiteralPath (Join-Path $script:FixtureRoot 'exit-calls.ps1') -Value $content -Encoding UTF8
+
+        {
+            & $script:ScriptStandardsScript -Path $script:FixtureRoot
+        } | Should -Throw '*1 issue(s) that need attention*'
+    }
+
+    It 'does not exempt functions whose names merely contain Exit-WithCode' {
+        $content = @'
+function Invoke-Exit-WithCodeWrapper {
+    exit 2
+}
+'@
+        Set-Content -LiteralPath (Join-Path $script:FixtureRoot 'similar-name.ps1') -Value $content -Encoding UTF8
+
+        {
+            & $script:ScriptStandardsScript -Path $script:FixtureRoot
+        } | Should -Throw '*1 issue(s) that need attention*'
+    }
+
+    It 'checks category-specific Common module import conventions' {
+        foreach ($category in @('utils', 'checks', 'git')) {
+            $categoryPath = Join-Path $script:FixtureRoot $category
+            $null = New-Item -ItemType Directory -Path $categoryPath -Force
+            $content = @'
+$commonModulePath = Join-Path $PSScriptRoot 'Common.psm1'
+Import-Module $commonModulePath
+'@
+            Set-Content -LiteralPath (Join-Path $categoryPath "$category.ps1") -Value $content -Encoding UTF8
+        }
+
+        $output = & $script:ScriptStandardsScript -Path $script:FixtureRoot 2>&1 | Out-String
+
+        $output | Should -Match 'informational issue'
+    }
+
+    It 'ignores empty scripts' {
+        [System.IO.File]::WriteAllText((Join-Path $script:FixtureRoot 'empty.ps1'), '')
+
+        $output = & $script:ScriptStandardsScript -Path $script:FixtureRoot 2>&1 | Out-String
+
+        $output | Should -Match 'All scripts comply with codebase standards'
+    }
+
+    It 'rejects a missing path during parameter validation' {
+        $missingPath = Join-Path $script:FixtureRoot 'missing'
+
+        {
+            & $script:ScriptStandardsScript -Path $missingPath
+        } | Should -Throw '*Path does not exist*'
     }
 }

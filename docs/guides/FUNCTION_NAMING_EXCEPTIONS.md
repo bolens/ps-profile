@@ -55,6 +55,23 @@ Functions that use common, widely-understood verbs that aren't in the approved l
 
 **Reason**: These verbs (`Reload`, `Continue`, `Jump`, `Time`) are widely used and understood in the PowerShell community, even if not officially approved.
 
+### Domain-Specific Command Verbs
+
+Some commands intentionally retain terminology established by their underlying
+tool or problem domain:
+
+- Analysis and automation: `Analyze`, `Apply`, `Audit`, `Compile`, `Decompile`,
+  `Describe`, `Dump`, `Exec`, `Explain`, `Lint`, `Normalize`, `Process`, `Release`
+- Content and data operations: `Archive`, `Decode`, `Download`, `Encode`, `Extract`,
+  `Grep`, `Parse`, `Query`, `Render`, `Sanitize`, `Tag`, `View`
+- Application and device operations: `Clean`, `Flash`, `Health`, `Launch`, `Load`,
+  `Mirror`, `Navigate`, `Pin`, `PortForward`, `Rip`, `Tail`
+
+**Reason**: Replacing these terms with superficially similar approved verbs would
+make the commands less recognizable, diverge from upstream tool vocabulary, or
+misstate their behavior. New exceptions must fit one of these documented domains;
+this list is not a general waiver from PowerShell naming conventions.
+
 ### Short Convenience Functions
 
 Functions with intentionally short names for quick access:
@@ -104,6 +121,8 @@ This pattern allows expensive initialization to be deferred until the function i
 2. **New lazy-loading helpers** may use `Ensure-` prefix (documented exception)
 3. **Bootstrap functions** must be defined directly (cannot use `Set-AgentModeFunction`)
 4. **Test functions** may use any naming convention
+5. **Domain-specific verbs** must be listed above and retain clearer established
+   terminology than an approved-verb alternative
 
 ## API documentation for dynamic registrations
 

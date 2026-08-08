@@ -10,11 +10,28 @@ scripts/checks/validate-profile.ps1
     idempotency, and duplicate-function checks. Fails if any step fails. Used by
     CI/CD pipelines and git hooks (pre-commit runs format first, then this script).
 
+.PARAMETER RepositoryRoot
+    Optional repository root containing the validation scripts. Defaults to the
+    repository containing this script.
+
+.PARAMETER SkipMarkdownlint
+    Skips the optional markdownlint check even when Node tooling is available.
+
+.PARAMETER PowerShellExecutable
+    Optional PowerShell executable or command used to run each validation check.
+    Defaults to the executable detected for the current platform.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\checks\validate-profile.ps1
 
     Runs all validation checks on the PowerShell profile.
 #>
+
+param(
+    [string]$RepositoryRoot,
+    [switch]$SkipMarkdownlint,
+    [string]$PowerShellExecutable
+)
 
 # Import PathResolution first (required for ModuleImport to work)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
@@ -37,11 +54,16 @@ Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChe
 Import-LibModule -ModuleName 'PowerShellDetection' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 # Get repository root using shared function
-try {
-    $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
+$repoRoot = if ($RepositoryRoot) {
+    [System.IO.Path]::GetFullPath($RepositoryRoot)
 }
-catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+else {
+    try {
+        Get-RepoRoot -ScriptPath $PSScriptRoot
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    }
 }
 
 # Build paths to validation scripts
@@ -56,7 +78,12 @@ $idemp = Join-Path $scriptDir 'check-idempotency.ps1'
 $fragReadme = Join-Path $scriptDir 'check-comment-help.ps1'
 
 # Determine which PowerShell executable to use
-$psExe = Get-PowerShellExecutable
+$psExe = if ($PowerShellExecutable) {
+    $PowerShellExecutable
+}
+else {
+    Get-PowerShellExecutable
+}
 
 # Build path to duplicate function check
 $duplicateCheck = Join-Path $utilsDir 'metrics' 'find-duplicate-functions.ps1'
@@ -71,7 +98,7 @@ $checks = @(
     @{ Name = 'spellcheck'; Path = $spellcheck }
 )
 
-$hasNodeTooling = (
+$hasNodeTooling = -not $SkipMarkdownlint -and (
     (Test-Path -LiteralPath (Join-Path $repoRoot 'node_modules' '.bin' 'markdownlint')) -or
     (Test-Path -LiteralPath (Join-Path $repoRoot 'node_modules' '.bin' 'markdownlint.cmd')) -or
     [bool](Get-Command pnpm -ErrorAction SilentlyContinue) -or
@@ -102,5 +129,8 @@ $successMessage = if ($hasNodeTooling) {
 else {
     'Validation: security + lint + spellcheck + comment help + idempotency + duplicate functions passed'
 }
+if ($RepositoryRoot -and $env:PS_PROFILE_TEST_MODE -eq '1') {
+    Write-ScriptMessage -Message $successMessage
+    return
+}
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message $successMessage
-

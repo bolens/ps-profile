@@ -41,6 +41,7 @@ function Get-SecurityScanResults {
     [OutputType([hashtable])]
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyCollection()]
         [PSCustomObject[]]$SecurityIssues
     )
 
@@ -58,21 +59,21 @@ function Get-SecurityScanResults {
     }
 
     # Check for scan errors
-    $scanErrors = $SecurityIssues | Where-Object { $_.Rule -eq 'ScanError' }
+    $scanErrors = @($SecurityIssues | Where-Object { $_.Rule -eq 'ScanError' })
     if ($scanErrors.Count -gt 0) {
         foreach ($error in $scanErrors) {
             Write-ScriptMessage -Message "Failed to scan $($error.File): $($error.Message)" -IsWarning
         }
     }
 
-    $blockingIssues = $SecurityIssues | Where-Object {
+    $blockingIssues = @($SecurityIssues | Where-Object {
         $severity = $_.Severity
         $severity -eq [SeverityLevel]::Error.ToString() -or $severity -eq [SeverityLevel]::Error
-    }
-    $warningIssues = $SecurityIssues | Where-Object {
+    })
+    $warningIssues = @($SecurityIssues | Where-Object {
         $severity = $_.Severity
         $severity -ne [SeverityLevel]::Error.ToString() -and $severity -ne [SeverityLevel]::Error
-    }
+    })
 
     return @{
         BlockingIssues = $blockingIssues
@@ -122,4 +123,3 @@ function Write-SecurityReport {
 }
 
 Export-ModuleMember -Function Get-SecurityScanResults, Write-SecurityReport
-

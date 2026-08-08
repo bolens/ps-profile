@@ -314,6 +314,8 @@ if ($sourceFiles.Count -gt 0 -and $testFiles.Count -eq 0) {
             'JsonUtilities'        = @('library-json-utilities*.tests.ps1', 'library-json-utilities-extended*.tests.ps1')
             'EnvFile'              = @('library-envfile*.tests.ps1')
             'RequirementsLoader'   = @('library-requirements-loader*.tests.ps1')
+            'DocGenerator'         = @('utility-doc-generator*.tests.ps1', 'utility-docs-generation*.tests.ps1', 'utility-generate-docs*.tests.ps1')
+            'pre-commit'           = @('utility-pre-commit.tests.ps1')
         }
         
         $patterns = @()
@@ -351,8 +353,14 @@ if ($sourceFiles.Count -gt 0 -and $testFiles.Count -eq 0) {
     }
 }
 
-# Remove duplicates (force arrays — Select-Object -Unique returns a scalar when count is 1)
-$testFiles = @($testFiles | Select-Object -Unique)
+# Remove duplicates and transient staged test copies. Test artifacts are outputs,
+# never discovery roots, even when they contain files named *.tests.ps1.
+$testFiles = @($testFiles |
+    Where-Object {
+        $relativeTestPath = [System.IO.Path]::GetRelativePath($testsRoot, $_.FullName) -replace '\\', '/'
+        $relativeTestPath -notmatch '^(test-artifacts|test-data)/'
+    } |
+    Select-Object -Unique)
 $sourceFiles = @($sourceFiles | Select-Object -Unique)
 
 $discoveryDuration = ((Get-Date) - $discoveryStartTime).TotalMilliseconds
@@ -390,16 +398,15 @@ if ($testFiles.Count -eq 0 -and $sourceFiles.Count -eq 0) {
     Exit-WithCode -ExitCode $EXIT_SUCCESS
 }
 
+if ($sourceFiles.Count -gt 0 -and $testFiles.Count -eq 0) {
+    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message 'No matching tests found for the requested source path. Pass a source path with a supported test mapping instead of falling back to the entire suite.'
+}
+
 # Create Pester configuration
 $config = New-PesterConfiguration
 if ($testFiles.Count -gt 0) {
     $config.Run.Path = $testFiles.FullName
     Write-Host "Running $($testFiles.Count) test file(s)..." -ForegroundColor Cyan
-}
-else {
-    Write-Warning "No test files found. Running all tests (coverage may be inaccurate)."
-    $allTestFiles = Get-ChildItem -Path $testsRoot -Filter '*.tests.ps1' -Recurse -File -ErrorAction SilentlyContinue
-    $config.Run.Path = $allTestFiles.FullName
 }
 
 # Only enable coverage if we have source files to analyze
@@ -682,7 +689,6 @@ elseif ($hasCoverage) {
     }
 }
 
-exit $exitCode
+Exit-WithCode -ExitCode $exitCode
 
 return $result
-

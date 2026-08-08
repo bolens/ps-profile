@@ -24,6 +24,9 @@ scripts/git/install-pre-commit-hook.ps1
 .PARAMETER Force
     Overwrite the existing hook when restoring.
 
+.PARAMETER PassThru
+    Returns an exit result instead of terminating the current process.
+
 .EXAMPLE
     pwsh -NoProfile -File scripts\git\install-pre-commit-hook.ps1
 
@@ -45,15 +48,23 @@ param(
 
     [int]$KeepCount = 10,
 
-    [switch]$Force
+    [switch]$Force,
+
+    [scriptblock]$PlatformTestAction = { Test-IsWindows },
+
+    [scriptblock]$CommandTestAction = {
+        param($CommandName)
+        Test-CommandAvailable -CommandName $CommandName
+    },
+
+    [scriptblock]$PowerShellExecutableAction = { Get-PowerShellExecutable },
+
+    [switch]$PassThru
 )
 
 # Import ModuleImport first (bootstrap)
 $scriptsDir = Split-Path -Parent $PSScriptRoot
 $moduleImportPath = Join-Path $scriptsDir 'lib' 'ModuleImport.psm1'
-if ($moduleImportPath -and -not [string]::IsNullOrWhiteSpace($moduleImportPath) -and -not (Test-Path -LiteralPath $moduleImportPath)) {
-    throw "ModuleImport module not found at: $moduleImportPath. PSScriptRoot: $PSScriptRoot"
-}
 Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 
 # Import shared utilities using ModuleImport
@@ -65,38 +76,66 @@ Import-LibModule -ModuleName 'Platform' -ScriptPath $PSScriptRoot -DisableNameCh
 Import-LibModule -ModuleName 'Command' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'FileBackup' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
+function Complete-HookInstallation {
+    param(
+        [Parameter(Mandatory)]
+        [int]$ExitCode,
+
+        [string]$Message,
+
+        [System.Management.Automation.ErrorRecord]$ErrorRecord
+    )
+
+    if ($PassThru) {
+        [PSCustomObject]@{
+            ExitCode    = $ExitCode
+            Message     = $Message
+            ErrorRecord = $ErrorRecord
+        }
+        return
+    }
+
+    Exit-WithCode -ExitCode $ExitCode -Message $Message -ErrorRecord $ErrorRecord
+}
+
 # Get repository root if not specified
 if (-not $RepoRoot) {
     try {
         $RepoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        Complete-HookInstallation -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+        return
     }
 }
 
 $hookPath = Join-Path $RepoRoot '.git' 'hooks' 'pre-commit'
 if (-not (Test-Path -Path (Join-Path $RepoRoot '.git') -PathType Container -ErrorAction SilentlyContinue)) {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message 'No .git directory found. Run this from the repository root.'
+    Complete-HookInstallation -ExitCode $EXIT_SETUP_ERROR -Message 'No .git directory found. Run this from the repository root.'
+    return
 }
 
 if ($Restore) {
     try {
         $restoredPath = Restore-FileBackup -RepoRoot $RepoRoot -Category 'git-hooks' -SourcePath $hookPath -Latest -Force:$Force
-        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Restored pre-commit hook from backup to $restoredPath"
+        Complete-HookInstallation -ExitCode $EXIT_SUCCESS -Message "Restored pre-commit hook from backup to $restoredPath"
+        return
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message $_.Exception.Message
+        Complete-HookInstallation -ExitCode $EXIT_RUNTIME_ERROR -Message $_.Exception.Message
+        return
     }
 }
 
 if ($Prune) {
     try {
         $removed = Remove-OldFileBackups -RepoRoot $RepoRoot -Category 'git-hooks' -SourcePath $hookPath -KeepCount $KeepCount
-        Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Pruned $removed pre-commit hook backup(s)"
+        Complete-HookInstallation -ExitCode $EXIT_SUCCESS -Message "Pruned $removed pre-commit hook backup(s)"
+        return
     }
     catch {
-        Exit-WithCode -ExitCode $EXIT_RUNTIME_ERROR -Message $_.Exception.Message
+        Complete-HookInstallation -ExitCode $EXIT_RUNTIME_ERROR -Message $_.Exception.Message
+        return
     }
 }
 
@@ -105,11 +144,11 @@ if ($hookPath -and -not [string]::IsNullOrWhiteSpace($hookPath) -and (Test-Path 
     Write-ScriptMessage -Message "Backing up existing hook to $($backup.BackupPath)"
 }
 
-$psExe = Get-PowerShellExecutable
+$psExe = & $PowerShellExecutableAction
 $preCommitScript = Join-Path $RepoRoot 'scripts' 'git' 'pre-commit.ps1'
 $psExeLiteral = $psExe -replace "'", "''"
 $preCommitLiteral = $preCommitScript -replace "'", "''"
-if (Test-IsWindows) {
+if (& $PlatformTestAction) {
     $script = @"
 #!/usr/bin/env pwsh
 # pre-commit hook to format and validate PowerShell profile
@@ -138,15 +177,15 @@ exit 0
 Set-Content -LiteralPath $hookPath -Value $script -NoNewline -Force
 # Make executable on supported systems (Git for Windows respects the hook file, Unix needs +x)
 try {
-    if (Test-IsWindows) {
+    if (& $PlatformTestAction) {
         # On Windows, try to grant read+execute permissions using icacls (best-effort)
-        if (Test-CommandAvailable -CommandName 'icacls') {
+        if (& $CommandTestAction -CommandName 'icacls') {
             icacls $hookPath /grant Everyone:RX *>&1 | Out-Null
         }
     }
     else {
         # On Unix-like systems, use chmod to set executable bit
-        if (Test-CommandAvailable -CommandName 'chmod') {
+        if (& $CommandTestAction -CommandName 'chmod') {
             & chmod +x $hookPath
         }
     }
@@ -155,4 +194,4 @@ catch {
     # Non-fatal - permissions may not be critical on all systems
 }
 
-Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Installed pre-commit hook at $hookPath"
+Complete-HookInstallation -ExitCode $EXIT_SUCCESS -Message "Installed pre-commit hook at $hookPath"

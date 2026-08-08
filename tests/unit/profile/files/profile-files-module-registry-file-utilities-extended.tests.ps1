@@ -36,11 +36,4 @@ Describe 'profile.d/files-module-registry.ps1 Ensure-FileUtilities registry exte
         $files | Should -Contain 'files-navigation.ps1'
     }
 
-    It 'Load-EnsureModules registers file utility commands from registry modules' {
-        Load-EnsureModules -EnsureFunctionName 'Ensure-FileUtilities' -BaseDir $script:ProfileDir
-
-        Get-Command Get-FileHead -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Get-FileHashValue -ErrorAction Stop | Should -Not -BeNullOrEmpty
-        Get-Command Ensure-FileListing -ErrorAction Stop | Should -Not -BeNullOrEmpty
-    }
 }

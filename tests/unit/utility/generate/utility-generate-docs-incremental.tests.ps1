@@ -19,6 +19,153 @@ BeforeAll {
 }
 
 Describe 'Incremental documentation generation' {
+    It 'covers dry-run diagnostics without writing documentation or removing legacy files' {
+        $profileDir = New-TestTempDirectory -Prefix 'GenerateDocsDryRunProfile'
+        $outputRoot = New-TestTempDirectory -Prefix 'GenerateDocsDryRunOutput'
+        $outputDir = Join-Path $outputRoot 'api'
+        $fixturePath = Join-Path $profileDir 'fixture.ps1'
+        $legacyDoc = Join-Path $outputRoot 'LegacyCommand.md'
+        Set-Content -LiteralPath $fixturePath -Value @'
+<#
+.SYNOPSIS
+    Dry-run fixture function.
+#>
+function Get-DryRunFixture {
+    'ok'
+}
+
+Set-Alias -Name dry-run-fixture -Value Get-DryRunFixture
+'@ -Encoding UTF8
+        Set-Content -LiteralPath $legacyDoc -Value '# Legacy command' -Encoding UTF8
+
+        $previousDebug = $env:PS_PROFILE_DEBUG
+        $env:PS_PROFILE_DEBUG = '2'
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:GenerateDocsScript -DryRun -ProfilePath $profileDir -OutputPath $outputDir -Verbose 4>&1
+            $outputText = $output | Out-String
+
+            $outputText | Should -Match 'DRY RUN'
+            Test-Path -LiteralPath $outputDir | Should -BeFalse
+            Test-Path -LiteralPath $legacyDoc | Should -BeTrue
+        }
+        finally {
+            if ($null -eq $previousDebug) {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_DEBUG = $previousDebug
+            }
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'generates function and alias docs and removes stale and legacy documentation' {
+        $profileDir = New-TestTempDirectory -Prefix 'GenerateDocsCleanupProfile'
+        $outputRoot = New-TestTempDirectory -Prefix 'GenerateDocsCleanupOutput'
+        $outputDir = Join-Path $outputRoot 'api'
+        $functionsDir = Join-Path $outputDir 'functions'
+        $aliasesDir = Join-Path $outputDir 'aliases'
+        $fixturePath = Join-Path $profileDir 'fixture.ps1'
+        $legacyDoc = Join-Path $outputRoot 'LegacyCommand.md'
+        New-Item -ItemType Directory -Path $functionsDir, $aliasesDir -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $functionsDir 'Stale-Function.md') -Value '# stale' -Encoding UTF8
+        Set-Content -LiteralPath (Join-Path $aliasesDir 'stale-alias.md') -Value '# stale' -Encoding UTF8
+        Set-Content -LiteralPath $legacyDoc -Value '# legacy' -Encoding UTF8
+        Set-Content -LiteralPath $fixturePath -Value @'
+<#
+.SYNOPSIS
+    Cleanup fixture function.
+#>
+function Get-CleanupFixture {
+    'ok'
+}
+
+Set-Alias -Name cleanup-fixture -Value Get-CleanupFixture
+'@ -Encoding UTF8
+
+        $previousDebug = $env:PS_PROFILE_DEBUG
+        $env:PS_PROFILE_DEBUG = '3'
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            $output = & $script:GenerateDocsScript -ProfilePath $profileDir -OutputPath $outputDir -Verbose 4>&1
+            $outputText = $output | Out-String
+
+            Test-Path -LiteralPath (Join-Path $functionsDir 'Get-CleanupFixture.md') | Should -BeTrue
+            Test-Path -LiteralPath (Join-Path $aliasesDir 'cleanup-fixture.md') | Should -BeTrue
+            Test-Path -LiteralPath (Join-Path $functionsDir 'Stale-Function.md') | Should -BeFalse
+            Test-Path -LiteralPath (Join-Path $aliasesDir 'stale-alias.md') | Should -BeFalse
+            Test-Path -LiteralPath $legacyDoc | Should -BeFalse
+            $outputText | Should -Match 'Generated documentation for 1 functions and 1 aliases'
+        }
+        finally {
+            if ($null -eq $previousDebug) {
+                Remove-Item Env:PS_PROFILE_DEBUG -ErrorAction SilentlyContinue
+            }
+            else {
+                $env:PS_PROFILE_DEBUG = $previousDebug
+            }
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'reports partial generation failures when an output subdirectory is unusable' {
+        $profileDir = New-TestTempDirectory -Prefix 'GenerateDocsFailureProfile'
+        $outputDir = New-TestTempDirectory -Prefix 'GenerateDocsFailureOutput'
+        $fixturePath = Join-Path $profileDir 'fixture.ps1'
+        $functionsDir = Join-Path $outputDir 'functions'
+        New-Item -ItemType Directory -Path (Join-Path $functionsDir 'Get-GenerationFailureFixture.md') -Force | Out-Null
+        Set-Content -LiteralPath $fixturePath -Value @'
+<#
+.SYNOPSIS
+    Failure fixture function.
+#>
+function Get-GenerationFailureFixture {
+    'ok'
+}
+'@ -Encoding UTF8
+
+        $env:PS_PROFILE_TEST_MODE = '1'
+        try {
+            {
+                & $script:GenerateDocsScript -ProfilePath $profileDir -OutputPath $outputDir 2>&1
+            } | Should -Throw -ExpectedMessage '*Documentation generation failed in 1 step*'
+
+            Test-Path -LiteralPath (Join-Path $outputDir 'README.md') | Should -BeTrue
+        }
+        finally {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+    }
+
+    It 'handles an empty function collection without creating an output directory' {
+        Import-Module (Join-Path $script:DocsModulesPath 'DocGenerator.psm1') -DisableNameChecking -Force
+        $outputDir = Join-Path (New-TestTempDirectory -Prefix 'EmptyFunctionDocs') 'functions'
+        $functions = [System.Collections.Generic.List[PSCustomObject]]::new()
+        $aliases = [System.Collections.Generic.List[PSCustomObject]]::new()
+        $documentedNames = [System.Collections.Generic.List[string]]::new()
+
+        { Write-FunctionDocumentation -Functions $functions -Aliases $aliases -DocsPath $outputDir -DocumentedCommandNames $documentedNames } |
+            Should -Not -Throw
+        Test-Path -LiteralPath $outputDir | Should -BeFalse
+    }
+
+    It 'returns typed empty collections when a profile file has no documented commands' {
+        Remove-Module Doc* -ErrorAction SilentlyContinue
+        Import-Module (Join-Path $script:DocsModulesPath 'DocParser.psm1') -DisableNameChecking -Force
+
+        $profileDir = New-TestTempDirectory -Prefix 'IncrementalEmptyProfile'
+        $fixturePath = Join-Path $profileDir 'empty.ps1'
+        Set-Content -LiteralPath $fixturePath -Value '$value = 1' -Encoding UTF8
+
+        $parsed = Get-DocumentedCommands -ProfilePath $profileDir -Files @($fixturePath)
+
+        $parsed.Functions.GetType().FullName | Should -Match '^System\.Collections\.Generic\.List'
+        $parsed.Aliases.GetType().FullName | Should -Match '^System\.Collections\.Generic\.List'
+        $parsed.Functions.Count | Should -Be 0
+        $parsed.Aliases.Count | Should -Be 0
+    }
+
     It 'parses only requested profile files when -Files is supplied' {
         Remove-Module Doc* -ErrorAction SilentlyContinue
         Import-Module (Join-Path $script:DocsModulesPath 'DocParser.psm1') -DisableNameChecking -Force

@@ -45,7 +45,9 @@ function Remove-StaleDocumentation {
     Write-ScriptMessage -Message "`nCleaning up stale documentation..."
     $allDocFiles = @(Get-ChildItem -Path $DocsPath -Filter '*.md' -File -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -ne 'README.md' })
-    $documentedBaseNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    # Documentation filenames preserve command casing. Use an ordinal comparer so
+    # stale case variants are removed on case-sensitive filesystems.
+    $documentedBaseNames = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($commandName in $DocumentedCommandNames) {
         $fileName = Get-DocumentationMarkdownFileName -CommandName $commandName
         [void]$documentedBaseNames.Add([System.IO.Path]::GetFileNameWithoutExtension($fileName))
@@ -75,4 +77,3 @@ function Remove-StaleDocumentation {
 }
 
 Export-ModuleMember -Function Remove-StaleDocumentation
-

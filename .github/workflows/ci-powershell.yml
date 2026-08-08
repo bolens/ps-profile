@@ -10,7 +10,7 @@ on:
     paths:
       - 'Microsoft.PowerShell_profile.ps1'
       - 'profile.d/**'
-      - 'Modules/**'
+      - 'requirements/**'
       - 'scripts/checks/**'
       - 'scripts/lib/**'
       - 'PSScriptAnalyzerSettings.psd1'
@@ -22,7 +22,7 @@ on:
     paths:
       - 'Microsoft.PowerShell_profile.ps1'
       - 'profile.d/**'
-      - 'Modules/**'
+      - 'requirements/**'
       - 'scripts/checks/**'
       - 'scripts/lib/**'
       - 'PSScriptAnalyzerSettings.psd1'
@@ -65,7 +65,7 @@ jobs:
           set -euo pipefail
           pacman -Sy --noconfirm
           pacman -S --noconfirm git
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Trust workspace for git (Arch container)
         if: matrix.label == 'arch-latest'
         shell: bash

@@ -19,6 +19,22 @@
     modular requirements loader (requirements/load-requirements.ps1) which
     automatically loads all category files.
 
+.PARAMETER ExitAction
+    Exit handler used after validation completes. Defaults to Exit-WithCode. Intended for
+    callers that need to observe the result without terminating the current process.
+
+.PARAMETER ModuleInstallAction
+    Module installation handler used with InstallMissing. Defaults to Ensure-ModuleAvailable.
+
+.PARAMETER ModuleLookupAction
+    Module lookup handler used during validation. Defaults to Get-Module -ListAvailable.
+
+.PARAMETER CommandTestAction
+    External command lookup handler. Defaults to Test-CommandAvailable.
+
+.PARAMETER PassThru
+    Returns an exit result object instead of terminating the current process.
+
 
 .NOTES
     Exit Codes:
@@ -41,7 +57,35 @@
 param(
     [switch]$InstallMissing,
 
-    [string]$RequirementsFile = $null
+    [string]$RequirementsFile = $null,
+
+    [scriptblock]$ExitAction = {
+        param($ExitCode, $Message, $ErrorRecord)
+
+        Exit-WithCode -ExitCode $ExitCode -Message $Message -ErrorRecord $ErrorRecord
+    },
+
+    [scriptblock]$ModuleInstallAction = {
+        param($ModuleName)
+
+        Ensure-ModuleAvailable -ModuleName $ModuleName -ErrorAction Stop
+    },
+
+    [scriptblock]$ModuleLookupAction = {
+        param($ModuleName)
+
+        @(Get-Module -ListAvailable -Name $ModuleName -ErrorAction Stop) |
+            Sort-Object -Property Version -Descending |
+            Select-Object -First 1
+    },
+
+    [scriptblock]$CommandTestAction = {
+        param($CommandName)
+
+        Test-CommandAvailable -CommandName $CommandName -ErrorAction Stop
+    },
+
+    [switch]$PassThru
 )
 
 # Import shared utilities directly (no barrel files)
@@ -65,12 +109,91 @@ Import-LibModule -ModuleName 'Cache' -ScriptPath $PSScriptRoot -DisableNameCheck
 Import-LibModule -ModuleName 'DataFile' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'RequirementsLoader' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
+<#
+.SYNOPSIS
+    Writes the platform-appropriate installation hint for an external tool.
+.PARAMETER ToolName
+    External tool name used when resolving package installation commands.
+.PARAMETER InstallCommand
+    String or platform-keyed command configuration from the requirements file.
+#>
+function Write-DependencyInstallHint {
+    param(
+        [Parameter(Mandatory)]
+        [string]$ToolName,
+
+        [Parameter(Mandatory)]
+        $InstallCommand
+    )
+
+    try {
+        $resolvedCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
+            Resolve-InstallCommand -InstallCommand $InstallCommand -PackageName $ToolName -ErrorAction Stop
+        }
+        else {
+            $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
+            elseif ($IsLinux) { 'Linux' }
+            elseif ($IsMacOS) { 'macOS' }
+            else { 'Windows' }
+            if ($InstallCommand -is [hashtable]) {
+                $InstallCommand[$platform]
+            }
+            else {
+                $InstallCommand
+            }
+        }
+        if ($resolvedCmd) {
+            Write-ScriptMessage -Message "    Install with: $resolvedCmd" -LogLevel Info
+        }
+    }
+    catch {
+        if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
+            Write-StructuredWarning -Message "Failed to resolve install command" -OperationName 'dependencies.validate.resolve-install' -Context @{
+                tool_name = $ToolName
+            } -Code 'InstallCommandResolutionFailed'
+        }
+    }
+}
+
+<#
+.SYNOPSIS
+    Completes dependency validation by returning or exiting with the supplied result.
+.PARAMETER ExitCode
+    Standardized validation exit code.
+.PARAMETER Message
+    Optional completion message.
+.PARAMETER ErrorRecord
+    Optional error that caused validation to stop.
+#>
+function Complete-DependencyValidation {
+    param(
+        [Parameter(Mandatory)]
+        [int]$ExitCode,
+
+        [string]$Message,
+
+        [System.Management.Automation.ErrorRecord]$ErrorRecord
+    )
+
+    if ($PassThru) {
+        [PSCustomObject]@{
+            ExitCode    = $ExitCode
+            Message     = $Message
+            ErrorRecord = $ErrorRecord
+        }
+        return
+    }
+
+    & $ExitAction -ExitCode $ExitCode -Message $Message -ErrorRecord $ErrorRecord
+}
+
 # Get repository root
 try {
     $repoRoot = Get-RepoRoot -ScriptPath $PSScriptRoot
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    Complete-DependencyValidation -ExitCode $EXIT_SETUP_ERROR -ErrorRecord $_
+    return
 }
 
 # Load requirements file using the new loader
@@ -78,7 +201,8 @@ try {
     if ($RequirementsFile) {
         # If specific file provided, use legacy import
         if (-not (Test-Path -Path $RequirementsFile)) {
-            Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Requirements file not found: $RequirementsFile"
+            Complete-DependencyValidation -ExitCode $EXIT_SETUP_ERROR -Message "Requirements file not found: $RequirementsFile"
+            return
         }
         if (Get-Command Import-CachedPowerShellDataFile -ErrorAction SilentlyContinue) {
             $requirements = Import-CachedPowerShellDataFile -Path $RequirementsFile -ErrorAction Stop
@@ -93,7 +217,8 @@ try {
     }
 }
 catch {
-    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Failed to load requirements file: $($_.Exception.Message)" -ErrorRecord $_
+    Complete-DependencyValidation -ExitCode $EXIT_SETUP_ERROR -Message "Failed to load requirements file: $($_.Exception.Message)" -ErrorRecord $_
+    return
 }
 
 # Level 1: Basic operation start
@@ -159,19 +284,17 @@ if ($requirements.Modules) {
             }
             else {
                 try {
-                    $installedModule = @(Get-Module -ListAvailable -Name $moduleName -ErrorAction Stop) |
-                        Sort-Object -Property Version -Descending |
-                        Select-Object -First 1
+                    $installedModule = & $ModuleLookupAction -ModuleName $moduleName
                     if (@($installedModule).Count -eq 0) {
                         $installedModule = $null
                     }
-                    # Cache the result (even if null)
-                    Set-CachedValue -Key $cacheKey -Value $installedModule -ExpirationSeconds 300
+                    if ($null -ne $installedModule) {
+                        Set-CachedValue -Key $cacheKey -Value $installedModule -ExpirationSeconds 300
+                    }
                 }
                 catch {
                     # If Get-Module fails, treat as not installed
                     $installedModule = $null
-                    Set-CachedValue -Key $cacheKey -Value $null -ExpirationSeconds 300
                 }
             }
             
@@ -184,7 +307,7 @@ if ($requirements.Modules) {
                     if ($InstallMissing) {
                         try {
                             Write-ScriptMessage -Message "    Installing $moduleName..." -LogLevel Info
-                            Ensure-ModuleAvailable -ModuleName $moduleName -ErrorAction Stop
+                            & $ModuleInstallAction -ModuleName $moduleName
                             Write-ScriptMessage -Message "    ✓ $moduleName installed" -LogLevel Info
                             $missingRequired.Remove($moduleName) | Out-Null
                         }
@@ -270,7 +393,7 @@ if ($requirements.ExternalTools) {
             $toolReq = $requirements.ExternalTools[$toolName]
             $required = $toolReq.Required
             
-            $isAvailable = Test-CommandAvailable -CommandName $toolName -ErrorAction Stop
+            $isAvailable = & $CommandTestAction -CommandName $toolName
             
             if (-not $isAvailable) {
                 if ($required) {
@@ -279,34 +402,7 @@ if ($requirements.ExternalTools) {
                     Write-ScriptMessage -Message "  ✗ $toolName (REQUIRED) - Missing" -IsError
                     
                     if ($toolReq.InstallCommand) {
-                        try {
-                            $resolvedCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
-                                Resolve-InstallCommand -InstallCommand $toolReq.InstallCommand -PackageName $toolName -ErrorAction Stop
-                            }
-                            else {
-                                # Fallback: resolve platform-specific command manually
-                                $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
-                                elseif ($IsLinux) { 'Linux' }
-                                elseif ($IsMacOS) { 'macOS' }
-                                else { 'Windows' }
-                                if ($toolReq.InstallCommand -is [hashtable]) {
-                                    $toolReq.InstallCommand[$platform]
-                                }
-                                else {
-                                    $toolReq.InstallCommand
-                                }
-                            }
-                            if ($resolvedCmd) {
-                                Write-ScriptMessage -Message "    Install with: $resolvedCmd" -LogLevel Info
-                            }
-                        }
-                        catch {
-                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                                Write-StructuredWarning -Message "Failed to resolve install command" -OperationName 'dependencies.validate.resolve-install' -Context @{
-                                    tool_name = $toolName
-                                } -Code 'InstallCommandResolutionFailed'
-                            }
-                        }
+                        Write-DependencyInstallHint -ToolName $toolName -InstallCommand $toolReq.InstallCommand
                     }
                 }
                 else {
@@ -314,34 +410,7 @@ if ($requirements.ExternalTools) {
                     Write-ScriptMessage -Message "  ⚠ $toolName (OPTIONAL) - Missing" -IsWarning
                     
                     if ($toolReq.InstallCommand) {
-                        try {
-                            $resolvedCmd = if (Get-Command Resolve-InstallCommand -ErrorAction SilentlyContinue) {
-                                Resolve-InstallCommand -InstallCommand $toolReq.InstallCommand -PackageName $toolName -ErrorAction Stop
-                            }
-                            else {
-                                # Fallback: resolve platform-specific command manually
-                                $platform = if ($IsWindows -or $PSVersionTable.PSVersion.Major -lt 6) { 'Windows' }
-                                elseif ($IsLinux) { 'Linux' }
-                                elseif ($IsMacOS) { 'macOS' }
-                                else { 'Windows' }
-                                if ($toolReq.InstallCommand -is [hashtable]) {
-                                    $toolReq.InstallCommand[$platform]
-                                }
-                                else {
-                                    $toolReq.InstallCommand
-                                }
-                            }
-                            if ($resolvedCmd) {
-                                Write-ScriptMessage -Message "    Install with: $resolvedCmd" -LogLevel Info
-                            }
-                        }
-                        catch {
-                            if (Get-Command Write-StructuredWarning -ErrorAction SilentlyContinue) {
-                                Write-StructuredWarning -Message "Failed to resolve install command" -OperationName 'dependencies.validate.resolve-install' -Context @{
-                                    tool_name = $toolName
-                                } -Code 'InstallCommandResolutionFailed'
-                            }
-                        }
+                        Write-DependencyInstallHint -ToolName $toolName -InstallCommand $toolReq.InstallCommand
                     }
                 }
             }
@@ -407,7 +476,8 @@ if ($missingRequired.Count -eq 0 -and $versionMismatches.Count -eq 0) {
         Write-ScriptMessage -Message "  ⚠ $($missingOptional.Count) optional dependency(ies) missing" -IsWarning
     }
     
-    Exit-WithCode -ExitCode $EXIT_SUCCESS -Message "Dependency validation passed"
+    Complete-DependencyValidation -ExitCode $EXIT_SUCCESS -Message "Dependency validation passed"
+    return
 }
 else {
     Write-ScriptMessage -Message "  ✗ Missing or invalid dependencies found:" -IsError
@@ -426,7 +496,6 @@ else {
         Write-ScriptMessage -Message "`nRun with -InstallMissing to automatically install missing PowerShell modules." -LogLevel Info
     }
     
-    Exit-WithCode -ExitCode $EXIT_VALIDATION_FAILURE -Message "Dependency validation failed"
+    Complete-DependencyValidation -ExitCode $EXIT_VALIDATION_FAILURE -Message "Dependency validation failed"
+    return
 }
-
-

@@ -649,10 +649,13 @@ if (-not (Test-Path $scriptRoot)) {
 $libPath = Join-Path (Join-Path $scriptRoot 'scripts') 'lib'
 try {
     Write-Host "Loading shared modules..." -ForegroundColor Yellow
-    
+
+    $script:RunnerModuleImportPath = Join-Path $libPath 'ModuleImport.psm1'
+    Import-Module $script:RunnerModuleImportPath -DisableNameChecking -ErrorAction Stop -Force
+
     # Import core modules first (needed by others)
     $corePath = Join-Path $libPath 'core'
-    Import-Module (Join-Path $corePath 'ExitCodes.psm1') -DisableNameChecking -ErrorAction Stop -Global
+    Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
     # Snapshot exit codes so test cleanup (Remove-Module ExitCodes) cannot break runner shutdown.
     $script:RunnerExitSuccess = $EXIT_SUCCESS
     $script:RunnerExitTestFailure = $EXIT_TEST_FAILURE
@@ -763,14 +766,18 @@ function Exit-WithCleanup {
         & $exitCmd -ExitCode $ExitCode -Message $Message -ErrorRecord $ErrorRecord
     }
     else {
-        # Fallback: if Exit-WithCode isn't available, just exit directly
+        # Module-isolation tests can unload ExitCodes. Restore it before
+        # terminating so the runner still returns the requested process code.
         if ($ErrorRecord) {
             Write-Error -ErrorRecord $ErrorRecord
         }
         elseif ($Message) {
             Write-Host $Message -ForegroundColor Red
         }
-        exit $ExitCode
+
+        Import-Module $script:RunnerModuleImportPath -DisableNameChecking -ErrorAction Stop -Force
+        Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
+        Exit-WithCode -ExitCode $ExitCode
     }
 }
 
