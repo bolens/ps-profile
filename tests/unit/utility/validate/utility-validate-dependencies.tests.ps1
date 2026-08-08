@@ -47,6 +47,17 @@ function global:New-ValidateDependenciesRequirementsFile {
     return $requirementsPath
 }
 
+function global:New-ValidateDependenciesCustomRequirementsFile {
+    param(
+        [Parameter(Mandatory)]
+        [string]$Content
+    )
+
+    $requirementsPath = Join-Path (New-TestTempDirectory -Prefix 'ValidateDepsCustom') 'requirements.psd1'
+    Set-Content -LiteralPath $requirementsPath -Value $Content -Encoding UTF8
+    return $requirementsPath
+}
+
 function global:Invoke-ValidateDependenciesInProcess {
     param(
         [Parameter(Mandatory)]
@@ -98,6 +109,15 @@ Describe 'validate-dependencies.ps1 execution' {
         $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile
         $result.ExitCode | Should -Be 0
         $result.Output | Should -Match 'Dependencies|validation|passed|success'
+    }
+
+    It 'Uses the default module lookup for a built-in module' {
+        $requirementsFile = New-ValidateDependenciesRequirementsFile
+        $records = @(& $script:ValidateDependenciesScript -RequirementsFile $requirementsFile -PassThru *>&1)
+        $exitResult = $records | Where-Object { $_.PSObject.Properties.Name -contains 'ExitCode' } | Select-Object -Last 1
+
+        $exitResult.ExitCode | Should -Be 0
+        ($records | Out-String -Width 4096) | Should -Match 'Microsoft.PowerShell.Utility.*Installed'
     }
 
     It 'Fails when a required module from the requirements fixture is missing' {
@@ -189,6 +209,64 @@ Describe 'validate-dependencies.ps1 execution' {
         $result.Output | Should -Match 'Definitely-Not-A-Required-Tool-12345'
         $result.Output | Should -Match 'Definitely-Not-An-Optional-Tool-12345'
         $result.Output | Should -Match 'install-required-tool|install-optional-tool'
+    }
+
+    It 'Covers installed modules and available and failed tool lookups' {
+        $requirementsFile = New-ValidateDependenciesCustomRequirementsFile -Content @'
+@{
+    PowerShellVersion = '5.1'
+    Modules = @{
+        'Current-Module-For-Validation' = @{ Version = '1.0.0'; Required = $true }
+        'Outdated-Module-For-Validation' = @{ Version = '2.0.0'; Required = $true }
+    }
+    ExternalTools = @{
+        'Available-Tool-For-Validation' = @{ Required = $true }
+        'Lookup-Error-Tool-For-Validation' = @{ Required = $true }
+    }
+}
+'@
+        $moduleLookup = {
+            param($ModuleName)
+            switch ($ModuleName) {
+                'Current-Module-For-Validation' { [PSCustomObject]@{ Version = [version]'1.0.0' } }
+                'Outdated-Module-For-Validation' { [PSCustomObject]@{ Version = [version]'1.0.0' } }
+                default { $null }
+            }
+        }
+        $commandLookup = {
+            param($CommandName)
+            if ($CommandName -eq 'Lookup-Error-Tool-For-Validation') {
+                throw 'tool lookup failed'
+            }
+            return $true
+        }
+
+        $previousDebug = $env:PS_PROFILE_DEBUG
+        try {
+            $env:PS_PROFILE_DEBUG = '3'
+            $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile `
+                -ModuleLookupAction $moduleLookup -CommandTestAction $commandLookup
+        }
+        finally {
+            $env:PS_PROFILE_DEBUG = $previousDebug
+        }
+
+        $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'Current-Module-For-Validation.*Installed'
+        $result.Output | Should -Match 'Outdated-Module-For-Validation.*Version mismatch'
+        $result.Output | Should -Match 'Available-Tool-For-Validation.*Available'
+        $result.Output | Should -Match 'tool lookup failed|Lookup-Error-Tool-For-Validation'
+    }
+
+    It 'Reports a failed automatic module installation' {
+        $moduleName = 'Failed-Install-Module-For-Validation'
+        $requirementsFile = New-ValidateDependenciesRequirementsFile -RequireMissingModule -MissingModuleName $moduleName
+
+        $result = Invoke-ValidateDependenciesInProcess -RequirementsFile $requirementsFile -InstallMissing `
+            -ModuleInstallAction { param($ModuleName) throw "install failed for $ModuleName" }
+
+        $result.ExitCode | Should -Be 1
+        $result.Output | Should -Match 'install failed|Failed-Install-Module-For-Validation'
     }
 
 }
