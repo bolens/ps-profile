@@ -1,3 +1,22 @@
+## [1.10.12] - 2026-08-08
+
+### 🐛 Bug Fixes
+
+- *(quality)* Harden validation and coverage workflows (#50)
+
+### 💼 Other
+
+- *(deps-dev)* Bump markdownlint-cli from 0.48.0 to 0.49.1 (#44)
+- *(deps-dev)* Bump @cspell/dict-software-terms from 5.2.2 to 5.2.4 (#43)
+- *(deps-dev)* Bump @cspell/dict-python from 4.2.27 to 4.2.29 (#42)
+- *(deps)* Bump protobufjs in the npm_and_yarn group across 1 directory (#46)
+- *(deps)* Bump thrift from 0.23.0 to 0.24.0 (#48)
+- *(deps-dev)* Bump @cspell/dict-en-ca from 1.0.60 to 1.0.61 (#47)
+- *(deps-dev)* Bump @cspell/dict-companies from 3.2.11 to 3.2.12 (#49)
+
+### ⚙️ Miscellaneous Tasks
+
+- *(deps)* Bump pnpm/action-setup (#45)
 ## [1.10.11] - 2026-07-20
 
 ### 🐛 Bug Fixes
@@ -8,6 +27,7 @@
 
 - *(deps)* Bump actions/setup-node from 6 to 7 (#40)
 - Add Arch Linux coverage with shared Dev Containers (#35)
+- *(release)* 1.10.11 [skip ci]
 ## [1.10.10] - 2026-07-20
 
 ### 🐛 Bug Fixes
