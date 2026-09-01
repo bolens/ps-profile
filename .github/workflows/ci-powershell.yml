@@ -66,6 +66,8 @@ jobs:
           pacman -Sy --noconfirm
           pacman -S --noconfirm git
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
       - name: Trust workspace for git (Arch container)
         if: matrix.label == 'arch-latest'
         shell: bash
