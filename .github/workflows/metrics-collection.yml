@@ -137,6 +137,7 @@ jobs:
   analyze-trends:
     name: Analyze Metrics Trends
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     needs: collect-metrics
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     permissions:

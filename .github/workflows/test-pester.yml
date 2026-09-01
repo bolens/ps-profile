@@ -21,6 +21,7 @@ jobs:
   changes:
     name: Detect changed paths
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     outputs:
       matrix: ${{ steps.build.outputs.matrix }}
       any: ${{ steps.build.outputs.any }}

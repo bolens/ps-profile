@@ -41,6 +41,7 @@ env:
 jobs:
   api-docs:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
       issues: write
@@ -170,6 +171,7 @@ jobs:
   validate:
     name: Validate on ${{ matrix.label }} (${{ matrix.powershell }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     container: ${{ matrix.container }}
     permissions:
       contents: read

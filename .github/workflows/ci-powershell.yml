@@ -55,6 +55,7 @@ jobs:
             os: ubuntu-latest
             container: archlinux:latest
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
     container: ${{ matrix.container }}
     steps:
       # Arch images ship without git; checkout then uses a REST archive (no .git).
