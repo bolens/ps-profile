@@ -156,8 +156,10 @@ jobs:
           Write-Host "Installed Pester $($pester5.Version)"
       - name: Run Pester shard
         shell: pwsh
+        env:
+          PESTER_SHARD: ${{ matrix.shard }}
         run: |
-          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard '${{ matrix.shard }}' -Quiet
+          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard "$env:PESTER_SHARD" -Quiet
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

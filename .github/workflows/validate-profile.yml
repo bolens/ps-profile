@@ -194,7 +194,7 @@ jobs:
           # Arch has no hosted runner: host on ubuntu-latest, run inside archlinux container.
           - label: arch-latest
             os: ubuntu-latest
-            container: archlinux:latest
+            container: archlinux:latest@sha256:82b1b08faae9d61e3e7e13d562f4d09114d939105b0d59ff34140f3bd418593a
             powershell: pwsh
     steps:
       # Arch images ship without git; checkout then uses a REST archive (no .git).
