@@ -21,3 +21,12 @@ the affected fragment or script. Keep the main profile loader minimal.
 - Do not install modules, alter the live user profile, publish packages, stage,
   or commit unless explicitly requested. Test with isolated fixtures and
   `-NoProfile` where applicable.
+
+## Spec-driven changes
+
+Use Spec Kit for new capabilities, architecture, security-sensitive behavior,
+migrations, and coordinated multi-file changes. Keep narrow fixes, dependency
+updates, prose edits, and release housekeeping in the normal repository
+workflow unless their risk warrants a written specification. Keep completed
+feature directories under `specs/` as decision history; do not backfill them for
+finished work.
