@@ -70,7 +70,7 @@ Describe 'install-pre-commit-hook.ps1 execution' {
         $result = Invoke-InstallHookInProcess -RepoRoot $repo
 
         $result.ExitCode | Should -Not -Be 0
-        $result.Output | Should -Match 'No \.git directory found'
+        $result.Output | Should -Match 'No Git worktree found'
     }
 
     It 'Installs a pre-commit hook that invokes scripts/git/pre-commit.ps1' {

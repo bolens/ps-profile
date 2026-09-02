@@ -72,8 +72,20 @@ else {
     }
 }
 
+$gitTopLevel = (& git -C $repoRoot rev-parse --show-toplevel 2>$null).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($gitTopLevel) -or
+    [System.IO.Path]::GetFullPath($gitTopLevel) -ne [System.IO.Path]::GetFullPath($repoRoot)) {
+    Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Repository root '$repoRoot' is not a Git worktree."
+}
+
 $gitHooksDir = if ($GitDir -eq '.git/hooks') {
-    (& git -C $repoRoot rev-parse --git-path hooks).Trim()
+    $resolvedHooks = (& git -C $repoRoot rev-parse --git-path hooks).Trim()
+    if ([System.IO.Path]::IsPathRooted($resolvedHooks)) {
+        $resolvedHooks
+    }
+    else {
+        Join-Path $repoRoot $resolvedHooks
+    }
 }
 else {
     Join-Path $repoRoot $GitDir

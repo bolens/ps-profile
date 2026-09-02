@@ -27,7 +27,8 @@ Describe 'install-githooks.ps1 execution' {
         $script:SourceHooks = Join-Path $script:RepositoryRoot 'scripts' 'git' 'hooks'
         $script:TargetHooks = Join-Path $script:RepositoryRoot '.git' 'hooks'
         $null = New-Item -ItemType Directory -Path $script:SourceHooks -Force
-        $null = New-Item -ItemType Directory -Path $script:TargetHooks -Force
+        & git init --quiet $script:RepositoryRoot
+        if ($LASTEXITCODE -ne 0) { throw 'Failed to initialize fixture repository' }
         Set-Content -LiteralPath (Join-Path $script:SourceHooks 'commit-msg.ps1') -Value '# commit hook' -Encoding UTF8
         Set-Content -LiteralPath (Join-Path $script:SourceHooks 'pre-push.ps1') -Value '# push hook' -Encoding UTF8
     }
@@ -54,7 +55,9 @@ Describe 'install-githooks.ps1 execution' {
         & $script:InstallHooksScript -RepositoryRoot $script:RepositoryRoot
         { & $script:InstallHooksScript -RepositoryRoot $script:RepositoryRoot } | Should -Not -Throw
 
-        @(Get-ChildItem -LiteralPath $script:TargetHooks -File).Count | Should -Be 2
+        $installedHooks = @(Get-ChildItem -LiteralPath $script:TargetHooks -File |
+            Where-Object Name -In @('commit-msg', 'pre-push'))
+        $installedHooks.Count | Should -Be 2
     }
 
     It 'fails when the requested hook directory does not exist' {
