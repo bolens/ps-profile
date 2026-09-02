@@ -88,15 +88,15 @@ else {
     Write-ScriptMessage -Message 'pre-push: skipping validate-profile (set PS_PROFILE_PUSH_VALIDATE=1 to enable; pre-commit already validated commits)'
 }
 
-# Changed CI shards — opt-in only (can expand to many shards and hang pushes).
-$wantTests = ($env:PS_PROFILE_PUSH_TESTS -eq '1') -and
-($env:PS_PROFILE_SKIP_PUSH_TESTS -ne '1') -and
-($env:PS_PROFILE_PUSH_TESTS -ne '0')
+# Changed CI shards are opt-in because even a focused run can take several minutes.
+$wantTests =
+($env:PS_PROFILE_PUSH_TESTS -eq '1') -and
+($env:PS_PROFILE_SKIP_PUSH_TESTS -ne '1')
 
 if ($wantTests) {
     $changedShards = Join-Path $repoRoot 'scripts' 'utils' 'code-quality' 'run-pester-changed-shards.ps1'
     if (Test-Path -LiteralPath $changedShards) {
-        Write-ScriptMessage -Message 'pre-push: running Pester CI shards for local changes (PS_PROFILE_PUSH_TESTS=1)'
+        Write-ScriptMessage -Message 'pre-push: running Pester CI shards for local changes'
         $since = if ($env:PS_PROFILE_PUSH_TESTS_SINCE) { $env:PS_PROFILE_PUSH_TESTS_SINCE } else { 'origin/main' }
         & $psExe -NoProfile -File $changedShards -ChangedSince $since -IncludeUntracked -Quiet
         if ($LASTEXITCODE -ne 0) {
@@ -108,7 +108,7 @@ if ($wantTests) {
     }
 }
 else {
-    Write-ScriptMessage -Message 'pre-push: skipping changed-shard tests (set PS_PROFILE_PUSH_TESTS=1 to enable; CI runs shards on PR)'
+    Write-ScriptMessage -Message 'pre-push: skipping changed-shard tests (set PS_PROFILE_PUSH_TESTS=1 to enable)'
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'pre-push: all checks passed'

@@ -109,11 +109,21 @@ if (-not $RepoRoot) {
     }
 }
 
-$hookPath = Join-Path $RepoRoot '.git' 'hooks' 'pre-commit'
-if (-not (Test-Path -Path (Join-Path $RepoRoot '.git') -PathType Container -ErrorAction SilentlyContinue)) {
-    Complete-HookInstallation -ExitCode $EXIT_SETUP_ERROR -Message 'No .git directory found. Run this from the repository root.'
+$gitTopLevel = (& git -C $RepoRoot rev-parse --show-toplevel 2>$null).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($gitTopLevel) -or
+    [System.IO.Path]::GetFullPath($gitTopLevel) -ne [System.IO.Path]::GetFullPath($RepoRoot)) {
+    Complete-HookInstallation -ExitCode $EXIT_SETUP_ERROR -Message "No Git worktree found at '$RepoRoot'."
     return
 }
+$hooksDir = (& git -C $RepoRoot rev-parse --git-path hooks).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($hooksDir)) {
+    Complete-HookInstallation -ExitCode $EXIT_SETUP_ERROR -Message 'Unable to resolve the Git hooks directory.'
+    return
+}
+if (-not [System.IO.Path]::IsPathRooted($hooksDir)) {
+    $hooksDir = Join-Path $RepoRoot $hooksDir
+}
+$hookPath = Join-Path $hooksDir 'pre-commit'
 
 if ($Restore) {
     try {

@@ -114,7 +114,7 @@ jobs:
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Setup Arch Linux
         if: matrix.label == 'arch-latest'
-        uses: ./.github/actions/setup-arch-linux
+        uses: ./.github/actions/setup-arch-linux # zizmor: ignore[self-repository] actionlint 1.7.12 requires the current local-action syntax.
         with:
           pwsh-version: 7.4.7
       - name: Install Pester

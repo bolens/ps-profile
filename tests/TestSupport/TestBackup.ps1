@@ -37,10 +37,11 @@ function New-TestGitRepositoryWithHook {
     )
 
     $repo = New-TestTempDirectory -Prefix 'BackupGitRepo'
+    & git init --quiet $repo
+    if ($LASTEXITCODE -ne 0) { throw 'Failed to initialize fixture repository' }
     $hooksDir = Join-Path $repo '.git' 'hooks'
     $scriptsGitDir = Join-Path $repo 'scripts' 'git'
 
-    $null = New-Item -ItemType Directory -Path $hooksDir -Force
     $null = New-Item -ItemType Directory -Path $scriptsGitDir -Force
 
     $repoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot

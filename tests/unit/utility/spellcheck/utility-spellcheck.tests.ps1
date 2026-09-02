@@ -23,6 +23,20 @@ BeforeAll {
 }
 
 Describe 'spellcheck.ps1 execution' {
+    BeforeEach {
+        $script:OriginalRequireCspell = $env:PS_PROFILE_REQUIRE_CSPELL
+        Remove-Item Env:PS_PROFILE_REQUIRE_CSPELL -ErrorAction SilentlyContinue
+    }
+
+    AfterEach {
+        if ($null -eq $script:OriginalRequireCspell) {
+            Remove-Item Env:PS_PROFILE_REQUIRE_CSPELL -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PS_PROFILE_REQUIRE_CSPELL = $script:OriginalRequireCspell
+        }
+    }
+
     It 'runs an available cspell command in-process with portable path normalization' {
         $repo = New-TestTempDirectory -Prefix 'SpellcheckInProcess'
         $docPath = Join-Path $repo 'fixture.md'
