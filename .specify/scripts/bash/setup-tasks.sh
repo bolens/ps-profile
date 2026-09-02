@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck source-path=SCRIPTDIR
-# shellcheck disable=SC2153 # Uppercase values are populated by common.sh.
 
 set -e
 
