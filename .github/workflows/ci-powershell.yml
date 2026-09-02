@@ -14,7 +14,7 @@ on:
       - 'scripts/checks/**'
       - 'scripts/lib/**'
       - 'PSScriptAnalyzerSettings.psd1'
-      - '.github/workflows/ci-powershell.yml'
+      - '.github/workflows/**'
       - '.github/actions/setup-arch-linux/**'
       - '.devcontainer/install-pwsh-linux.sh'
   pull_request:
@@ -26,7 +26,7 @@ on:
       - 'scripts/checks/**'
       - 'scripts/lib/**'
       - 'PSScriptAnalyzerSettings.psd1'
-      - '.github/workflows/ci-powershell.yml'
+      - '.github/workflows/**'
       - '.github/actions/setup-arch-linux/**'
       - '.devcontainer/install-pwsh-linux.sh'
 
@@ -38,6 +38,15 @@ permissions:
   contents: read
 
 jobs:
+  workflow-security:
+    name: Workflow security
+    permissions:
+      contents: read
+      security-events: write
+    uses: bolens/.github/.github/workflows/reusable-actionlint.yml@d30ff6a56b47317d3d565e7b4747d133966db8d2
+    with:
+      security-audit: true
+
   validate:
     name: Validate on ${{ matrix.label }}
     strategy:
