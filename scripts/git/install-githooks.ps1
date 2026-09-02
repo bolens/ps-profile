@@ -72,7 +72,12 @@ else {
     }
 }
 
-$gitHooksDir = Join-Path $repoRoot $GitDir
+$gitHooksDir = if ($GitDir -eq '.git/hooks') {
+    (& git -C $repoRoot rev-parse --git-path hooks).Trim()
+}
+else {
+    Join-Path $repoRoot $GitDir
+}
 if ($gitHooksDir -and -not [string]::IsNullOrWhiteSpace($gitHooksDir) -and -not (Test-Path -LiteralPath $gitHooksDir)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Git hooks directory '$gitHooksDir' not found. Run this from the repo root."
 }

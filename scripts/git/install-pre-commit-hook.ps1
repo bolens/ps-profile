@@ -109,11 +109,12 @@ if (-not $RepoRoot) {
     }
 }
 
-$hookPath = Join-Path $RepoRoot '.git' 'hooks' 'pre-commit'
-if (-not (Test-Path -Path (Join-Path $RepoRoot '.git') -PathType Container -ErrorAction SilentlyContinue)) {
-    Complete-HookInstallation -ExitCode $EXIT_SETUP_ERROR -Message 'No .git directory found. Run this from the repository root.'
+$hooksDir = (& git -C $RepoRoot rev-parse --git-path hooks).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($hooksDir)) {
+    Complete-HookInstallation -ExitCode $EXIT_SETUP_ERROR -Message 'Unable to resolve the Git hooks directory.'
     return
 }
+$hookPath = Join-Path $hooksDir 'pre-commit'
 
 if ($Restore) {
     try {
