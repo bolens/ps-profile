@@ -1,6 +1,6 @@
 # Release playbook
 
-PS Profile uses semantic-release from protected `main`; `.releaserc.json` is
+PS Profile uses semantic-release from protected `main`; the semantic-release configuration is
 the release authority. Do not create versions or tags manually. Conventional
 commit semantics determine whether the Release workflow publishes a version.
 
