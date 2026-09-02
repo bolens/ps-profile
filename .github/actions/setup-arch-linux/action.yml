@@ -10,8 +10,10 @@ runs:
   steps:
     - name: Install PowerShell on Arch Linux
       shell: bash
+      env:
+        PWSH_VERSION: ${{ inputs.pwsh-version }}
       run: |
         set -euo pipefail
         script="${GITHUB_WORKSPACE}/.devcontainer/install-pwsh-linux.sh"
         chmod +x "${script}"
-        "${script}" '${{ inputs.pwsh-version }}'
+        "${script}" "${PWSH_VERSION}"

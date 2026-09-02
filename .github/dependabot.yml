@@ -14,6 +14,8 @@ updates:
     labels:
       - "dependencies"
       - "ci/cd"
+    cooldown:
+      default-days: 7
 
   # NPM dependencies (for tools like cspell, markdownlint-cli)
   - package-ecosystem: "npm"
@@ -29,3 +31,5 @@ updates:
     labels:
       - "dependencies"
       - "npm"
+    cooldown:
+      default-days: 7
