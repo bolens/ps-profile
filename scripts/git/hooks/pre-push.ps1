@@ -88,10 +88,10 @@ else {
     Write-ScriptMessage -Message 'pre-push: skipping validate-profile (set PS_PROFILE_PUSH_VALIDATE=1 to enable; pre-commit already validated commits)'
 }
 
-# Changed CI shards run by default; explicit skip variables remain available.
+# Changed CI shards are opt-in because even a focused run can take several minutes.
 $wantTests =
-($env:PS_PROFILE_SKIP_PUSH_TESTS -ne '1') -and
-($env:PS_PROFILE_PUSH_TESTS -ne '0')
+($env:PS_PROFILE_PUSH_TESTS -eq '1') -and
+($env:PS_PROFILE_SKIP_PUSH_TESTS -ne '1')
 
 if ($wantTests) {
     $changedShards = Join-Path $repoRoot 'scripts' 'utils' 'code-quality' 'run-pester-changed-shards.ps1'
@@ -108,7 +108,7 @@ if ($wantTests) {
     }
 }
 else {
-    Write-ScriptMessage -Message 'pre-push: skipping changed-shard tests (PS_PROFILE_SKIP_PUSH_TESTS=1 or PS_PROFILE_PUSH_TESTS=0)'
+    Write-ScriptMessage -Message 'pre-push: skipping changed-shard tests (set PS_PROFILE_PUSH_TESTS=1 to enable)'
 }
 
 Exit-WithCode -ExitCode $EXIT_SUCCESS -Message 'pre-push: all checks passed'
