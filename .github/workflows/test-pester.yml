@@ -175,3 +175,30 @@ jobs:
           path: |
             coverage.xml
             tests/test-artifacts/ci-coverage-smoke/**
+
+  ci-result:
+    name: Pester result
+    if: always()
+    needs: [changes, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require successful applicable checks
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PYTHON'
+          import json
+          import os
+          import sys
+
+          jobs = json.loads(os.environ["NEEDS_JSON"])
+          failed = [name for name, job in jobs.items()
+                    if job["result"] not in ("success", "skipped")]
+          if jobs["changes"]["result"] != "success":
+              failed.append("changes")
+          if failed:
+              print("Failed or cancelled checks: " + ", ".join(sorted(set(failed))))
+              sys.exit(1)
+          PYTHON
