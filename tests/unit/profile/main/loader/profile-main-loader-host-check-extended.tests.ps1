@@ -17,37 +17,33 @@ BeforeAll {
 
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) { 'HOST_BYPASS_OK' }
+if (Select-String -Path `$log -Pattern 'Before host check' -Quiet) { 'HOST_LOG_BEFORE_OK' }
+if (Select-String -Path `$log -Pattern 'Host check passed' -Quiet) { 'HOST_LOG_PASSED_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 non-interactive host check extended scenarios' {
     It 'Bypasses non-interactive host exit when PS_PROFILE_TEST_MODE is set' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) { 'HOST_BYPASS_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'HOST_BYPASS_OK'
     }
 
     It 'Logs host check progress to the profile load log' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Before host check' -Quiet) { 'HOST_LOG_BEFORE_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'HOST_LOG_BEFORE_OK'
     }
 
     It 'Records host check passed in the profile load log' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Host check passed' -Quiet) { 'HOST_LOG_PASSED_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'HOST_LOG_PASSED_OK'
     }

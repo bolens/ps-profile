@@ -17,17 +17,22 @@ BeforeAll {
 
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$env:PS_PROFILE_DEBUG = '1'
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+Remove-Item -LiteralPath `$log -Force -ErrorAction SilentlyContinue
+. '$escapedProfile'
+if (Select-String -Path `$log -Pattern "Debug check: PS_PROFILE_DEBUG='1'" -Quiet) { 'DEBUG_CHECK_LOG_OK' }
+if (`$VerbosePreference -eq 'Continue') { 'VERBOSE_PREF_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 debug setup extended scenarios' {
-    It 'Parses PS_PROFILE_DEBUG and records debug mode check in the load log' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$env:PS_PROFILE_DEBUG = '1'
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Debug mode check' -Quiet) { 'DEBUG_CHECK_LOG_OK' }
-"@
+    It 'Parses PS_PROFILE_DEBUG and records debug check in the load log' {
+        $result = $script:StartupObservations
 
         $result | Should -Match 'DEBUG_CHECK_LOG_OK'
     }
@@ -37,6 +42,7 @@ if (Select-String -Path `$log -Pattern 'Debug mode check' -Quiet) { 'DEBUG_CHECK
         $result = Invoke-TestPwshScript -ScriptContent @"
 `$env:PS_PROFILE_DEBUG = '2'
 `$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+Remove-Item -LiteralPath `$log -Force -ErrorAction SilentlyContinue
 . '$escapedProfile'
 if (Select-String -Path `$log -Pattern 'Debug parsed: level=2' -Quiet) { 'DEBUG_LEVEL_LOG_OK' }
 "@
@@ -45,12 +51,7 @@ if (Select-String -Path `$log -Pattern 'Debug parsed: level=2' -Quiet) { 'DEBUG_
     }
 
     It 'Enables verbose preference when debug level is at least 1' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$env:PS_PROFILE_DEBUG = '1'
-. '$escapedProfile'
-if (`$VerbosePreference -eq 'Continue') { 'VERBOSE_PREF_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'VERBOSE_PREF_OK'
     }

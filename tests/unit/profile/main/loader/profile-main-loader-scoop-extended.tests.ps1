@@ -18,6 +18,15 @@ BeforeAll {
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
     $script:ProfileScoopModule = Join-Path $script:TestRepoRoot 'scripts/lib/profile/ProfileScoop.psm1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Get-Command Initialize-ProfileScoop -ErrorAction SilentlyContinue) { 'SCOOP_CMD_OK' }
+if (Select-String -Path `$log -Pattern 'Before fragment loading section' -Quiet) { 'SCOOP_LOAD_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 Scoop integration extended scenarios' {
@@ -26,22 +35,13 @@ Describe 'Microsoft.PowerShell_profile.ps1 Scoop integration extended scenarios'
     }
 
     It 'Initialize-ProfileScoop is available after profile load' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if (Get-Command Initialize-ProfileScoop -ErrorAction SilentlyContinue) { 'SCOOP_CMD_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'SCOOP_CMD_OK'
     }
 
     It 'Profile load completes after Scoop bootstrap section runs' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Before fragment loading section' -Quiet) { 'SCOOP_LOAD_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'SCOOP_LOAD_OK'
     }

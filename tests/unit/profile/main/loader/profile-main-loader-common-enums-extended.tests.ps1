@@ -18,6 +18,19 @@ BeforeAll {
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
     $script:CommonEnumsModule = Join-Path $script:TestRepoRoot 'scripts/lib/core/CommonEnums.psm1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+try {
+    `$null = [enum]::GetNames([FileSystemPathType])
+    'COMMON_ENUMS_TYPE_OK'
+}
+catch { }
+if (Select-String -Path `$log -Pattern 'Before fragment loading section' -Quiet) { 'COMMON_ENUMS_LOAD_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 CommonEnums bootstrap extended scenarios' {
@@ -26,26 +39,13 @@ Describe 'Microsoft.PowerShell_profile.ps1 CommonEnums bootstrap extended scenar
     }
 
     It 'Loads FileSystemPathType globally before fragment modules run' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-try {
-    `$null = [enum]::GetNames([FileSystemPathType])
-    'COMMON_ENUMS_TYPE_OK'
-}
-catch { }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'COMMON_ENUMS_TYPE_OK'
     }
 
     It 'Profile load proceeds to fragment loading after CommonEnums import' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Before fragment loading section' -Quiet) { 'COMMON_ENUMS_LOAD_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'COMMON_ENUMS_LOAD_OK'
     }

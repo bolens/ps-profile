@@ -19,6 +19,15 @@ BeforeAll {
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
     $script:FragmentConfigModule = Join-Path $script:TestRepoRoot 'scripts/lib/fragment/FragmentConfig.psm1'
     $script:FragmentLoadingModule = Join-Path $script:TestRepoRoot 'scripts/lib/fragment/FragmentLoading.psm1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Select-String -Path `$log -Pattern 'Fragment loader module imported successfully' -Quiet) { 'LOADER_IMPORT_OK' }
+if (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) { 'BOOTSTRAP_FRAGMENT_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 fragment loading extended scenarios' {
@@ -28,22 +37,13 @@ Describe 'Microsoft.PowerShell_profile.ps1 fragment loading extended scenarios' 
     }
 
     It 'Profile load imports the fragment loader module successfully' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Fragment loader module imported successfully' -Quiet) { 'LOADER_IMPORT_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'LOADER_IMPORT_OK'
     }
 
     It 'Registers bootstrap helpers after modular fragments are loaded' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if (Get-Command Test-CachedCommand -ErrorAction SilentlyContinue) { 'BOOTSTRAP_FRAGMENT_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'BOOTSTRAP_FRAGMENT_OK'
     }

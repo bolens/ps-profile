@@ -18,6 +18,15 @@ BeforeAll {
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
     $script:FragmentLoaderModule = Join-Path $script:TestRepoRoot 'scripts/lib/profile/ProfileFragmentLoader.psm1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Select-String -Path `$log -Pattern 'Before fragment loading section' -Quiet) { 'FALLBACK_SECTION_LOG_OK' }
+if ((Select-String -Path `$log -Pattern 'Initialize-FragmentLoading completed' -Quiet) -and (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue)) { 'FALLBACK_COMPLETE_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 fallback fragment loading extended scenarios' {
@@ -26,23 +35,13 @@ Describe 'Microsoft.PowerShell_profile.ps1 fallback fragment loading extended sc
     }
 
     It 'Profile load logs fragment loader initialization progress' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Before fragment loading section' -Quiet) { 'FALLBACK_SECTION_LOG_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'FALLBACK_SECTION_LOG_OK'
     }
 
     It 'Completes fragment loading and exposes bootstrap commands afterward' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if ((Select-String -Path `$log -Pattern 'Initialize-FragmentLoading completed' -Quiet) -and (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue)) { 'FALLBACK_COMPLETE_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'FALLBACK_COMPLETE_OK'
     }

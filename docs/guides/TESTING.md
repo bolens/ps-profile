@@ -685,6 +685,14 @@ changed-path selection. This split targets elapsed CI time by avoiding serial
 The matrix submits files and miscellaneous profile shards first, followed by
 main-loader and integration-core shards. GitHub controls actual runner scheduling.
 
+Loader tests share one fresh eager startup per file when their environment setup
+is identical and their observations are read-only. Different debug settings,
+interception modes, and state-changing scenarios retain separate processes.
+This reduces startup processes across the loader suite from 46 to 25 while
+preserving all 48 checks in the affected files. Debug setup clears its load log
+before each startup and checks the message emitted for the configured level,
+avoiding a false positive from an earlier startup's log.
+
 Ordinary Pester shards explicitly pass `-Coverage:$false` while retaining `-CI`.
 The underlying runner enables coverage by default with `-CI`, so omitting the
 coverage switch adds tracing to every ordinary shard. `coverage-smoke` keeps

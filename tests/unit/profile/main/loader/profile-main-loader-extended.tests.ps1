@@ -17,36 +17,33 @@ BeforeAll {
 
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Test-Path (Join-Path `$env:PS_PROFILE_REPO_ROOT 'profile.d')) { 'PROFILE_DIR_OK' }
+if (Select-String -Path `$log -Pattern 'Profile execution started' -Quiet) { 'LOG_OK' }
+if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) { 'BOOTSTRAP_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 extended scenarios' {
     It 'Loads profile.d when executed with PS_PROFILE_REPO_ROOT' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if (Test-Path (Join-Path `$env:PS_PROFILE_REPO_ROOT 'profile.d')) { 'PROFILE_DIR_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'PROFILE_DIR_OK'
     }
 
     It 'Writes profile execution started to the load log' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Profile execution started' -Quiet) { 'LOG_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'LOG_OK'
     }
 
     It 'Loads bootstrap helpers from profile.d after profile execution' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) { 'BOOTSTRAP_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'BOOTSTRAP_OK'
     }
