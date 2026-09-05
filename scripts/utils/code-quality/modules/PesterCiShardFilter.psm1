@@ -23,6 +23,12 @@ function Get-PesterCiFilterRules {
         'unit-profile-core-main-b'
         'unit-profile-core-main-c'
         'unit-profile-core-main-d'
+        'unit-profile-core-main-e'
+        'unit-profile-core-main-f'
+        'unit-profile-core-main-g'
+        'unit-profile-core-main-h'
+        'unit-profile-core-main-i'
+        'unit-profile-core-main-j'
         'unit-profile-core-git-util-sys'
     )
     $integrationToolsShards = @(
@@ -82,7 +88,8 @@ function Get-PesterCiFilterRules {
             ) + $unitProfileCoreShards + @(
                 'unit-profile-infra'
                 'unit-profile-misc-a', 'unit-profile-misc-b'
-                'integration-core'
+                'integration-core', 'integration-core-profile', 'integration-core-loading',
+                'integration-core-fragments', 'integration-core-fragment-loading'
             ) + $integrationToolsShards + @(
                 'coverage-smoke'
             ) + $performanceShards
@@ -209,7 +216,8 @@ function Get-PesterCiFilterRules {
                 'tests/integration/cross-platform/**'
                 'tests/integration/cloud-provider/**'
             )
-            Shards = @('integration-core')
+            Shards = @('integration-core', 'integration-core-profile', 'integration-core-loading',
+                'integration-core-fragments', 'integration-core-fragment-loading')
         }
         performance = @{
             Patterns = @(
@@ -231,12 +239,16 @@ function Get-PesterCiAllShards {
         'unit-profile-conversion'
         'unit-profile-core-lang', 'unit-profile-core-files'
         'unit-profile-core-bootstrap', 'unit-profile-core-main-a', 'unit-profile-core-main-b'
-        'unit-profile-core-main-c', 'unit-profile-core-main-d', 'unit-profile-core-git-util-sys'
+        'unit-profile-core-main-c', 'unit-profile-core-main-d'
+        'unit-profile-core-main-e', 'unit-profile-core-main-f', 'unit-profile-core-main-g'
+        'unit-profile-core-main-h', 'unit-profile-core-main-i', 'unit-profile-core-main-j'
+        'unit-profile-core-git-util-sys'
         'unit-profile-infra'
         'unit-profile-misc-a', 'unit-profile-misc-b'
         'integration-tools-ab', 'integration-tools-c', 'integration-tools-d'
         'integration-tools-eh', 'integration-tools-il', 'integration-tools-m', 'integration-tools-s'
-        'integration-core'
+        'integration-core', 'integration-core-profile', 'integration-core-loading',
+        'integration-core-fragments', 'integration-core-fragment-loading'
         'conversion-document-markdown-core', 'conversion-document-markdown-extra'
         'conversion-document-other', 'conversion-media'
         'conversion-data-structured-a', 'conversion-data-structured-n', 'conversion-data-structured-t'
@@ -257,10 +269,14 @@ function Get-PesterCiWindowsShards {
         'unit-library'
         'unit-profile-core-lang', 'unit-profile-core-files'
         'unit-profile-core-bootstrap', 'unit-profile-core-main-a', 'unit-profile-core-main-b'
-        'unit-profile-core-main-c', 'unit-profile-core-main-d', 'unit-profile-core-git-util-sys'
+        'unit-profile-core-main-c', 'unit-profile-core-main-d'
+        'unit-profile-core-main-e', 'unit-profile-core-main-f', 'unit-profile-core-main-g'
+        'unit-profile-core-main-h', 'unit-profile-core-main-i', 'unit-profile-core-main-j'
+        'unit-profile-core-git-util-sys'
         'integration-tools-ab', 'integration-tools-c', 'integration-tools-d'
         'integration-tools-eh', 'integration-tools-il', 'integration-tools-m', 'integration-tools-s'
-        'integration-core'
+        'integration-core', 'integration-core-profile', 'integration-core-loading',
+        'integration-core-fragments', 'integration-core-fragment-loading'
         'performance-lang-core', 'performance-profile-a', 'performance-profile-b'
     )
 }
@@ -272,7 +288,7 @@ function Get-PesterCiArchShards {
 
     .DESCRIPTION
         Curated subset for Arch coverage without doubling the full Ubuntu suite.
-        Prefer core library/profile smoke plus one integration shard.
+        Preserves core library/profile smoke and the full integration-core file set.
     #>
     [CmdletBinding()]
     [OutputType([string[]])]
@@ -281,7 +297,8 @@ function Get-PesterCiArchShards {
     return @(
         'unit-library'
         'unit-profile-core-bootstrap'
-        'integration-core'
+        'integration-core', 'integration-core-profile', 'integration-core-loading',
+        'integration-core-fragments', 'integration-core-fragment-loading'
         'coverage-smoke'
     )
 }

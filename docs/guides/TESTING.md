@@ -663,15 +663,25 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard 
 | Shard kind | Examples | Runner |
 |------------|----------|--------|
 | Unit | `unit-library`, `unit-profile-core`, `unit-profile-misc-a` | `run-pester.ps1 -Parallel` |
-| Integration (non-conversion) | `integration-core` | `run-pester.ps1 -Parallel` |
+| Integration (non-conversion) | `integration-core`, `integration-core-loading` | Serial `run-pester.ps1` within each job |
 | Tools integration | `integration-tools` | `run-tools-integration-batch.ps1` |
 | Conversion integration | `conversion-data-structured`, `conversion-media` | conversion batch scripts |
 | Performance | `performance` (Windows only) | `run-performance-batch.ps1` |
 | Coverage smoke | `coverage-smoke` (Ubuntu only) | `run-pester.ps1 -Coverage` on bootstrap + library |
 
-**OS matrix:** every enabled shard runs on Ubuntu (except `performance`). Windows also
-runs `unit-library`, `unit-profile-core`, `integration-tools`, `integration-core`, and
-`performance` when those shards are selected.
+**OS matrix:** every enabled shard runs on Ubuntu except performance shards.
+Windows also runs library, core profile, tools integration, all five integration-core
+shards, and performance shards. Arch runs library, bootstrap, all five
+integration-core shards, and coverage smoke.
+
+Main-loader tests run in ten groups of at most two files. The original
+integration-core paths run in five groups: general integration, profile loading,
+other profile tests, fragment loading/idempotency, and other fragment tests.
+Each group remains serial in its own hosted job. Tests that spawn child processes
+still use eager profile loading and isolated runner filesystems. The partition
+tests verify the original file union, reject duplicates, and verify platform and
+changed-path selection. This split targets elapsed CI time by avoiding serial
+40-59 minute jobs; it does not claim an equivalent reduction in total runner time.
 
 Ordinary Pester shards explicitly pass `-Coverage:$false` while retaining `-CI`.
 The underlying runner enables coverage by default with `-CI`, so omitting the
