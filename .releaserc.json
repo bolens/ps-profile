@@ -10,12 +10,15 @@
       }
     ],
     [
-      "@semantic-release/git",
+      "@semantic-release/github",
       {
-        "assets": ["CHANGELOG.md"],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        "assets": [
+          {
+            "path": "CHANGELOG.md",
+            "label": "Generated release changelog"
+          }
+        ]
       }
-    ],
-    "@semantic-release/github"
+    ]
   ]
 }
