@@ -30,6 +30,12 @@ A transparent command dispatcher hooks into PowerShell's `CommandNotFoundAction`
 - Transparent integration with existing code
 - Chains with existing CommandNotFound handlers
 
+The callback retains its dispatcher command when imported through another module.
+Names absent from the registry return immediately, avoiding repeated discovery
+during eager fragment loading. Nested lookups inside the callback do not re-enter
+the handler; declared fragment dependencies still load through the fragment loader.
+Forced registration preserves the previous handler, and unregistering restores it.
+
 ### 4. Standalone Script Wrappers
 
 Executable PowerShell script wrappers can be generated for all fragment commands, enabling:

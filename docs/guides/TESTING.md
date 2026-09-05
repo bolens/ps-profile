@@ -682,6 +682,8 @@ still use eager profile loading and isolated runner filesystems. The partition
 tests verify the original file union, reject duplicates, and verify platform and
 changed-path selection. This split targets elapsed CI time by avoiding serial
 40-59 minute jobs; it does not claim an equivalent reduction in total runner time.
+The matrix submits files and miscellaneous profile shards first, followed by
+main-loader and integration-core shards. GitHub controls actual runner scheduling.
 
 Ordinary Pester shards explicitly pass `-Coverage:$false` while retaining `-CI`.
 The underlying runner enables coverage by default with `-CI`, so omitting the
@@ -693,9 +695,17 @@ The September 5, 2026 baseline is [PR #83's Pester run](https://github.com/bolen
 at head `214ca4e586f579ccc71b3fe1bd62db86631f0f7e`. Its completed
 `unit-profile-core-files` test steps took 1,327 seconds on Ubuntu and 1,462 seconds
 on Windows for 74 passing tests. The Ubuntu log shows coverage tracing across
-394 source files. The workflow was still running when these measurements were
-collected, so they are step durations, not its final completion time.
+394 source files. The complete workflow finished in 66 minutes 47 seconds.
 PR #80's latest runs required approval and supplied no execution baseline.
+
+The [coverage-and-partition candidate](https://github.com/bolens/ps-profile/actions/runs/33994298645)
+passed all 88 jobs in 49 minutes 55 seconds, while total test-step execution fell
+only 3%. Further investigation found repeated command-dispatcher discovery during
+profile startup. The dispatcher now retains its module command, rejects names
+outside the registry before discovery, and guards callback re-entry. A fresh
+Linux child-process probe with eager loading and debug level 2 fell from 260.75
+to 78.72 seconds. The delivery target is a successful complete PR run under
+20 minutes; local timing alone does not establish that result.
 
 A local comparison using `profile-files-navigation-extended.tests.ps1`, Pester
 5.7.1, PowerShell 7.7.0-preview.3, and `run-pester.ps1 -CI -Quiet` took 62.31 seconds with implicit coverage

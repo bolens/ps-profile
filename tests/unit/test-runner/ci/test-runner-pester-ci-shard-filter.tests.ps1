@@ -98,6 +98,25 @@ Describe 'PesterCiShardFilter' {
         $matrix | Where-Object { $_.label -eq 'arch-latest' -and $_.shard -eq 'coverage-smoke' } | Should -Not -BeNullOrEmpty
     }
 
+    It 'Submits slow profile families before short shards without changing their platform entries' {
+        $matrix = @(Get-PesterCiShardMatrix -Shards @(
+                'coverage-smoke', 'unit-profile-core-main-a', 'unit-profile-core-files',
+                'unit-profile-misc-a', 'integration-core-loading', 'unit-library', 'coverage-smoke'
+            ))
+        $orderedShards = @($matrix.shard | Select-Object -Unique)
+        $orderedShards | Should -Be @(
+            'unit-profile-core-files', 'unit-profile-misc-a', 'integration-core-loading',
+            'unit-profile-core-main-a', 'coverage-smoke', 'unit-library'
+        )
+        foreach ($shard in $orderedShards) {
+            $labels = @($matrix | Where-Object shard -EQ $shard | Select-Object -ExpandProperty label)
+            $expected = @('ubuntu-latest')
+            if ($shard -in @(Get-PesterCiWindowsShards)) { $expected += 'windows-latest' }
+            if ($shard -in @(Get-PesterCiArchShards)) { $expected += 'arch-latest' }
+            $labels | Should -Be $expected
+        }
+    }
+
     It 'Accepts empty or blank shard lists without throwing' {
         @(Get-PesterCiShardMatrix -Shards @()) | Should -HaveCount 0
         @(Get-PesterCiShardMatrix -Shards @('')) | Should -HaveCount 0

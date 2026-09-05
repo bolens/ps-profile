@@ -432,7 +432,7 @@ function Resolve-PesterCiShards {
 function Get-PesterCiShardMatrix {
     <#
     .SYNOPSIS
-        Builds GitHub Actions matrix include entries for the given shards (Ubuntu-first).
+        Builds matrix entries with slow profile families first and Ubuntu first within each shard.
     #>
     [CmdletBinding()]
     [OutputType([pscustomobject[]])]
@@ -454,6 +454,15 @@ function Get-PesterCiShardMatrix {
             Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
             Sort-Object -Unique
     )
+    # Submit historically slow families first to reduce the tail when runners queue.
+    # GitHub controls actual scheduling; this preserves every selected matrix entry.
+    $shardNames = @($shardNames | Sort-Object @{
+            Expression = {
+                if ($_ -eq 'unit-profile-core-files' -or $_ -like 'unit-profile-misc-*') { 0 }
+                elseif ($_ -like 'unit-profile-core-main-*' -or $_ -like 'integration-core*') { 1 }
+                else { 2 }
+            }
+        }, @{ Expression = { $_ } })
     foreach ($shard in $shardNames) {
         # Performance shards are Windows-only (historically flaky / slow on Ubuntu).
         if ($shard -notlike 'performance*') {
