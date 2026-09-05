@@ -245,13 +245,13 @@ function Invoke-PesterShard {
     Suite          = $Definition.Suite
     Path           = $paths
     CI             = $true
+    # run-pester defaults coverage on with -CI. Ordinary shards must bind false
+    # explicitly so only coverage shards (or -Coverage) pay for tracing.
+    Coverage       = [bool]($Coverage -or ($Definition.Contains('Coverage') -and $Definition.Coverage))
     TestResultPath = $resultDir
   }
   if ($Quiet) {
     $params.Quiet = $true
-  }
-  if ($Coverage -or ($Definition.Contains('Coverage') -and $Definition.Coverage)) {
-    $params.Coverage = $true
   }
   # Pester 5.7 has no Run.Parallel / MaximumThreadCount / Initialization.
   # Only enable -Parallel when the shard asks for more than one thread; serial

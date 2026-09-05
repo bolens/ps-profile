@@ -3937,7 +3937,7 @@ docs/guides/TESTING.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:68
 docs/guides/TESTING.md -> scripts/utils/code-quality/modules/PesterCiShardFilter.psm1 sig:9381cdd1408fcc0f
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-pester-changed-shards.ps1 sig:d170c2ce054afaf1
-docs/guides/TESTING.md -> scripts/utils/code-quality/run-pester-ci-shard.ps1 sig:3d403031890d915e
+docs/guides/TESTING.md -> scripts/utils/code-quality/run-pester-ci-shard.ps1 sig:fab6fbd32c38cb5a
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-pester.ps1 sig:3363180016608ff6
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-tools-integration-batch.ps1 sig:02a6b3157f500079
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-unit-batch.ps1 sig:cbed57563e9a8dad
@@ -6481,6 +6481,8 @@ tests/unit/test-runner/check/test-runner-check-missing-tests-extended.tests.ps1 
 tests/unit/test-runner/check/test-runner-check-missing-tests.tests.ps1 -> scripts/utils/code-quality/check-missing-tests.ps1 sig:4754eeede4f5f829
 tests/unit/test-runner/ci/test-runner-pester-ci-shard-filter.tests.ps1 -> profile.d/conversion-modules/data/core/csv.ps1 sig:a684f3cb48f6e0ff
 tests/unit/test-runner/ci/test-runner-pester-ci-shard-filter.tests.ps1 -> scripts/utils/code-quality/modules/PesterCiShardFilter.psm1 sig:9381cdd1408fcc0f
+tests/unit/test-runner/ci/test-runner-run-pester-ci-shard.tests.ps1 -> scripts/lib/ModuleImport.psm1 sig:e334f0766c976bc1
+tests/unit/test-runner/ci/test-runner-run-pester-ci-shard.tests.ps1 -> scripts/utils/code-quality/run-pester-ci-shard.ps1 sig:fab6fbd32c38cb5a
 tests/unit/test-runner/comprehensive/test-runner-comprehensive-reporting-extended.tests.ps1 -> scripts/lib/core/CommonEnums.psm1 sig:52f25a2636735296
 tests/unit/test-runner/comprehensive/test-runner-comprehensive-reporting-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestComprehensiveReporting.psm1 sig:798f52bdfc93d487
 tests/unit/test-runner/comprehensive/test-runner-comprehensive-reporting.tests.ps1 -> scripts/utils/code-quality/modules/TestComprehensiveReporting.psm1 sig:798f52bdfc93d487

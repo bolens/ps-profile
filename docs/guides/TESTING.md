@@ -673,6 +673,26 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard 
 runs `unit-library`, `unit-profile-core`, `integration-tools`, `integration-core`, and
 `performance` when those shards are selected.
 
+Ordinary Pester shards explicitly pass `-Coverage:$false` while retaining `-CI`.
+The underlying runner enables coverage by default with `-CI`, so omitting the
+coverage switch adds tracing to every ordinary shard. `coverage-smoke` keeps
+coverage enabled, and `run-pester-ci-shard.ps1 -Coverage` enables it for a chosen
+Pester shard. Test selection and platform coverage stay the same.
+
+The September 5, 2026 baseline is [PR #83's Pester run](https://github.com/bolens/ps-profile/actions/runs/33989732846)
+at head `214ca4e586f579ccc71b3fe1bd62db86631f0f7e`. Its completed
+`unit-profile-core-files` test steps took 1,327 seconds on Ubuntu and 1,462 seconds
+on Windows for 74 passing tests. The Ubuntu log shows coverage tracing across
+394 source files. The workflow was still running when these measurements were
+collected, so they are step durations, not its final completion time.
+PR #80's latest runs required approval and supplied no execution baseline.
+
+A local comparison using `profile-files-navigation-extended.tests.ps1`, Pester
+5.7.1, PowerShell 7.7.0-preview.3, and `run-pester.ps1 -CI -Quiet` took 62.31 seconds with implicit coverage
+and 14.61 seconds with `-Coverage:$false`. Both runs passed all three tests.
+These are single-run process durations on the same Linux workstation. Measure
+the next GitHub run before treating that reduction as an overall CI speedup.
+
 Wall-clock time is dominated by the slowest shard; tune shards in `run-pester-ci-shard.ps1`
 and filter→shard maps in `.github/workflows/test-pester.yml` when buckets grow too large.
 
