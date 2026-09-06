@@ -29,40 +29,45 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-          fetch-depth: 0
+
+      - name: Detect PR paths
+        if: github.event_name == 'pull_request'
+        id: paths
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
+        with:
+          list-files: json
+          filters: |
+            changed:
+              - '**'
 
       - name: Build matrix from shared shard filter
         id: build
         shell: pwsh
         env:
           EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CHANGED_FILES: ${{ steps.paths.outputs.changed_files }}
         run: |
           $filterModule = Join-Path $env:GITHUB_WORKSPACE 'scripts/utils/code-quality/modules/PesterCiShardFilter.psm1'
           Import-Module $filterModule -Force -DisableNameChecking
+          Import-Module (Join-Path $env:GITHUB_WORKSPACE 'scripts/utils/code-quality/modules/PesterCiJobs.psm1') -DisableNameChecking
 
-          $isDispatch = $env:EVENT_NAME -eq 'workflow_dispatch'
-          if ($isDispatch) {
+          if ($env:EVENT_NAME -ne 'pull_request') {
             $shards = @(Resolve-PesterCiShards -All)
           }
           else {
-            $base = $env:BASE_SHA
-            $head = $env:HEAD_SHA
-            if ([string]::IsNullOrWhiteSpace($base) -or [string]::IsNullOrWhiteSpace($head)) {
-              $shards = @(Resolve-PesterCiShards -All)
+            # Dorny fails the job on API errors. Never turn absent output into
+            # a successful empty selection; filenames remain JSON data.
+            if ([string]::IsNullOrWhiteSpace($env:CHANGED_FILES)) {
+              throw 'Missing changed-file output from paths-filter'
             }
-            else {
-              $changed = @(git diff --name-only --diff-filter=ACMRD "${base}...${head}")
-              Write-Host "Changed files: $($changed.Count)"
-              $shards = @(Resolve-PesterCiShards -ChangedFiles $changed)
-            }
+            $changed = @(ConvertFrom-Json -InputObject $env:CHANGED_FILES)
+            $shards = @(Resolve-PesterCiShards -ChangedFiles $changed)
           }
 
           # Coerce to [string[]] so empty "no matching shards" stays an empty array
           # (bare @() / $null can bind as '' and fail Mandatory [string[]]).
           $shardList = [string[]]@($shards | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
-          $include = @(Get-PesterCiShardMatrix -Shards $shardList)
+          $include = @(Get-PesterCiJobs -Shards $shardList)
           $any = $include.Count -gt 0
           $matrix = if ($any) {
             @{ include = @($include) } | ConvertTo-Json -Compress -Depth 5
@@ -72,7 +77,9 @@ jobs:
                   label     = 'ubuntu-latest'
                   os        = 'ubuntu-latest'
                   container = $null
-                  shard     = 'unit-library'
+                  job       = 'none'
+                  maxParallelShards = 2
+                  shards    = @('unit-library')
                 }) } | ConvertTo-Json -Compress -Depth 5
           }
 
@@ -87,7 +94,7 @@ jobs:
           Write-Host "Matrix jobs: $($include.Count)"
 
   test:
-    name: test (${{ matrix.label }}, ${{ matrix.shard }})
+    name: test (${{ matrix.label }}, ${{ matrix.job }})
     needs: changes
     if: needs.changes.outputs.any == 'true'
     runs-on: ${{ matrix.os }}
@@ -154,24 +161,51 @@ jobs:
           if (-not $pester5) { throw 'Pester 5.7.x is required but was not installed' }
           Import-Module Pester -RequiredVersion $pester5.Version -Force
           Write-Host "Installed Pester $($pester5.Version)"
-      - name: Run Pester shard
+      - name: Run isolated Pester shards
         shell: pwsh
         env:
-          PESTER_SHARD: ${{ matrix.shard }}
+          PESTER_MAX_WORKERS: ${{ matrix.maxParallelShards }}
+          PESTER_SHARDS_JSON: ${{ toJSON(matrix.shards) }}
         run: |
-          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard "$env:PESTER_SHARD" -Quiet
+          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-job.ps1 -ShardsJson "$env:PESTER_SHARDS_JSON" -MaxParallelShards "$env:PESTER_MAX_WORKERS" -OutputPath "$env:GITHUB_WORKSPACE/tests/test-artifacts/ci-job"
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: pester-${{ matrix.label }}-${{ matrix.shard }}
-          path: tests/test-artifacts/ci-${{ matrix.shard }}/**
+          name: pester-${{ matrix.label }}-${{ matrix.job }}
+          path: tests/test-artifacts/ci-job/**
           if-no-files-found: ignore
       - name: Upload coverage report
-        if: matrix.shard == 'coverage-smoke' && matrix.label == 'ubuntu-latest'
+        if: always() && contains(matrix.shards, 'coverage-smoke') && matrix.label == 'ubuntu-latest'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: coverage-ubuntu-smoke
           path: |
-            coverage.xml
-            tests/test-artifacts/ci-coverage-smoke/**
+            tests/test-artifacts/ci-job/coverage-smoke/**
+
+  ci-result:
+    name: Pester result
+    if: always()
+    needs: [changes, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Require successful applicable checks
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PYTHON'
+          import json
+          import os
+          import sys
+
+          jobs = json.loads(os.environ["NEEDS_JSON"])
+          selected = jobs["changes"].get("outputs", {}).get("any")
+          expected = "success" if selected == "true" else "skipped"
+          if (jobs["changes"]["result"] != "success"
+                  or selected not in ("true", "false")
+                  or jobs["test"]["result"] != expected):
+              print("Pester selection or required shard execution failed")
+              sys.exit(1)
+          PYTHON

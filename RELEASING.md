@@ -27,6 +27,9 @@ Open a pull request, require every applicable check, resolve conversations, and
 squash-merge. The squash commit message must accurately express release impact
 because semantic-release consumes it. The push-triggered Release workflow owns
 version calculation, tag creation, changelog/release notes, and publication.
+It generates `CHANGELOG.md` as a downloadable release asset without committing
+it back to `main`. The tag stays on the reviewed merge commit. Update the tracked
+changelog only through the normal generated-changelog PR process.
 
 ## Verify and recover
 
@@ -41,3 +44,27 @@ Fix a failed workflow configuration through a new PR; correct a public defect
 with a new semantic-release-compatible commit and release.
 
 Fleet policy: <https://github.com/bolens/.github/blob/main/RELEASING.md>.
+
+## Branch protection
+
+The default branch requires pull requests, resolved conversations, linear
+history, and an up-to-date branch with passing required checks, including
+`Pester result` and `commit-message-check`. These rules also apply to
+administrators; force pushes and branch deletion are disabled. Zero approving
+reviews are required because this is a solo-maintainer repository; review the
+complete diff before merging.
+
+Keep required checks available on every pull request. Filter expensive work
+inside jobs or use an always-running result job that rejects failures and
+cancellations. Update the protection settings when renaming required jobs.
+
+## Source lint
+
+The Source lint workflow checks maintained python, shell files selected by
+[`.github/source-lint.json`](.github/source-lint.json) on every pull request
+and push to `main`. Existing native checks remain part of the merge gate.
+Use the [shared local reproduction instructions](https://github.com/bolens/.github/blob/7603518f305fb76f7bb1b9979f2692521f633b82/docs/source-lint.md)
+with the same tooling revision pinned in
+[the workflow](.github/workflows/source-lint.yml). Review exclusions when adding
+source files; generated and imported files retain their native validation.
+Require the new check to pass on the current PR head before merging.

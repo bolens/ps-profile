@@ -18,30 +18,28 @@ BeforeAll {
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
     $script:InterceptScript = Join-Path $script:TestRepoRoot 'scripts/utils/debug/intercept-testpath.ps1'
-}
 
-Describe 'Microsoft.PowerShell_profile.ps1 Test-Path interception extended scenarios' {
-    It 'Records the expected intercept script path in the load log when enabled' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $escapedIntercept = $script:InterceptScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $escapedIntercept = $script:InterceptScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
 `$env:PS_PROFILE_DEBUG_TESTPATH = '1'
 `$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
 . '$escapedProfile'
 if (Select-String -Path `$log -Pattern 'Intercept script path: $escapedIntercept' -SimpleMatch -Quiet) { 'INTERCEPT_PATH_LOG_OK' }
+if (Select-String -Path `$log -Pattern 'Test-Path interception enabled' -Quiet) { 'INTERCEPT_ENABLED_LOG_OK' }
 "@
+}
+
+Describe 'Microsoft.PowerShell_profile.ps1 Test-Path interception extended scenarios' {
+    It 'Records the expected intercept script path in the load log when enabled' {
+        $result = $script:StartupObservations
 
         $result | Should -Match 'INTERCEPT_PATH_LOG_OK'
     }
 
     It 'Logs Test-Path interception as enabled when debug flag is set' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$env:PS_PROFILE_DEBUG_TESTPATH = '1'
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Test-Path interception enabled' -Quiet) { 'INTERCEPT_ENABLED_LOG_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'INTERCEPT_ENABLED_LOG_OK'
     }

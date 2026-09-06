@@ -61,13 +61,12 @@ $conversionAllBatch = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-
 $performanceBatch = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-performance-batch.ps1'
 
 function Get-PesterCiShardDefinitions {
+  $definitionRoot = (Get-Item -LiteralPath $RepoRoot -ErrorAction Stop).FullName
   $integrationCore = @(
     'tests/integration/bootstrap'
     'tests/integration/system'
-    'tests/integration/profile'
     'tests/integration/filesystem'
     'tests/integration/terminal'
-    'tests/integration/fragments'
     'tests/integration/test-runner'
     'tests/integration/utilities'
     'tests/integration/error-handling'
@@ -75,6 +74,15 @@ function Get-PesterCiShardDefinitions {
     'tests/integration/cross-platform'
     'tests/integration/cloud-provider'
   )
+
+  # Keep the original integration file union while bounding the slowest jobs.
+  $integrationProfile = @(Get-ChildItem -LiteralPath (Join-Path $RepoRoot 'tests/integration/profile') -Filter '*.tests.ps1' -File -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -ne (Join-Path $definitionRoot 'tests/integration/profile/loading.tests.ps1') } | ForEach-Object { $_.FullName })
+  $integrationFragments = @(Get-ChildItem -LiteralPath (Join-Path $RepoRoot 'tests/integration/fragments') -Filter '*.tests.ps1' -File -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notin @(
+        (Join-Path $definitionRoot 'tests/integration/fragments/fragment-idempotency.tests.ps1')
+        (Join-Path $definitionRoot 'tests/integration/fragments/fragment-loading-failures.tests.ps1')
+      ) } | ForEach-Object { $_.FullName })
 
   $unitProfileInfra = @(
     'tests/unit/profile/dev-tools'
@@ -135,45 +143,75 @@ function Get-PesterCiShardDefinitions {
     'unit-profile-conversion'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/conversion') }
     'unit-profile-core-lang'     = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/lang'); MaxParallelThreads = 1 }
     'unit-profile-core-files'    = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/files'); MaxParallelThreads = 1 }
-    # bootstrap stays serial; main loader-extended files take ~7–10 min each, so
-    # split into ~5-file shards (~40–50m) to stay under the 90m job timeout.
+    # Child profile loads are isolated per test; keep serial execution and at most
+    # two loader files per hosted job instead of the measured 40-45 minute groups.
     'unit-profile-core-bootstrap' = @{ Kind = 'Pester'; Suite = 'Unit'; Paths = @('tests/unit/profile/bootstrap'); MaxParallelThreads = 1 }
-    'unit-profile-core-main-a'   = @{
+    'unit-profile-core-main-a' = @{
       Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
       Paths = @(
         'tests/unit/profile/main/loader/profile-main-loader-common-enums-extended.tests.ps1'
         'tests/unit/profile/main/loader/profile-main-loader-debug-setup-extended.tests.ps1'
-        'tests/unit/profile/main/loader/profile-main-loader-discovery-extended.tests.ps1'
-        'tests/unit/profile/main/loader/profile-main-loader-env-display-extended.tests.ps1'
-        'tests/unit/profile/main/loader/profile-main-loader-extended.tests.ps1'
       )
     }
-    'unit-profile-core-main-b'   = @{
+    'unit-profile-core-main-b' = @{
       Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
       Paths = @(
+        'tests/unit/profile/main/loader/profile-main-loader-discovery-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-env-display-extended.tests.ps1'
+      )
+    }
+    'unit-profile-core-main-c' = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
+        'tests/unit/profile/main/loader/profile-main-loader-extended.tests.ps1'
         'tests/unit/profile/main/loader/profile-main-loader-fallback-loading-extended.tests.ps1'
+      )
+    }
+    'unit-profile-core-main-d' = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
         'tests/unit/profile/main/loader/profile-main-loader-fragment-config-extended.tests.ps1'
         'tests/unit/profile/main/loader/profile-main-loader-fragment-timing-extended.tests.ps1'
+      )
+    }
+    'unit-profile-core-main-e' = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
         'tests/unit/profile/main/loader/profile-main-loader-fragments-extended.tests.ps1'
         'tests/unit/profile/main/loader/profile-main-loader-host-check-extended.tests.ps1'
       )
     }
-    'unit-profile-core-main-c'   = @{
+    'unit-profile-core-main-f' = @{
       Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
       Paths = @(
         'tests/unit/profile/main/loader/profile-main-loader-noprofile-extended.tests.ps1'
         'tests/unit/profile/main/loader/profile-main-loader-prompt-extended.tests.ps1'
-        'tests/unit/profile/main/loader/profile-main-loader-psreadline-deferred-extended.tests.ps1'
-        'tests/unit/profile/main/loader/profile-main-loader-scoop-extended.tests.ps1'
-        'tests/unit/profile/main/loader/profile-main-loader-startup-logging-extended.tests.ps1'
       )
     }
-    'unit-profile-core-main-d'   = @{
+    'unit-profile-core-main-g' = @{
       Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
       Paths = @(
+        'tests/unit/profile/main/loader/profile-main-loader-psreadline-deferred-extended.tests.ps1'
+        'tests/unit/profile/main/loader/profile-main-loader-scoop-extended.tests.ps1'
+      )
+    }
+    'unit-profile-core-main-h' = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
+        'tests/unit/profile/main/loader/profile-main-loader-startup-logging-extended.tests.ps1'
         'tests/unit/profile/main/loader/profile-main-loader-startup-summary-extended.tests.ps1'
+      )
+    }
+    'unit-profile-core-main-i' = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
         'tests/unit/profile/main/loader/profile-main-loader-test-env-bool-extended.tests.ps1'
         'tests/unit/profile/main/loader/profile-main-loader-testpath-interception-extended.tests.ps1'
+      )
+    }
+    'unit-profile-core-main-j' = @{
+      Kind = 'Pester'; Suite = 'Unit'; MaxParallelThreads = 1
+      Paths = @(
         'tests/unit/profile/main/loader/profile-main-loader-version-extended.tests.ps1'
       )
     }
@@ -190,7 +228,17 @@ function Get-PesterCiShardDefinitions {
     'integration-tools-il'       = @{ Kind = 'ToolsBatch'; NamePattern = '^[i-l]' }
     'integration-tools-m'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[m-r]' }
     'integration-tools-s'        = @{ Kind = 'ToolsBatch'; NamePattern = '^[s-z]' }
-    'integration-core'           = @{ Kind = 'Pester'; Suite = 'Integration'; Paths = $integrationCore }
+    'integration-core'           = @{ Kind = 'Pester'; Suite = 'Integration'; Paths = $integrationCore; MaxParallelThreads = 1 }
+    'integration-core-profile'   = @{ Kind = 'Pester'; Suite = 'Integration'; Paths = $integrationProfile; MaxParallelThreads = 1 }
+    'integration-core-loading'   = @{ Kind = 'Pester'; Suite = 'Integration'; Paths = @('tests/integration/profile/loading.tests.ps1'); MaxParallelThreads = 1 }
+    'integration-core-fragments' = @{ Kind = 'Pester'; Suite = 'Integration'; Paths = $integrationFragments; MaxParallelThreads = 1 }
+    'integration-core-fragment-loading' = @{
+      Kind = 'Pester'; Suite = 'Integration'; MaxParallelThreads = 1
+      Paths = @(
+        'tests/integration/fragments/fragment-idempotency.tests.ps1'
+        'tests/integration/fragments/fragment-loading-failures.tests.ps1'
+      )
+    }
     # markdown shard is only 3 files but each is heavy under PerFile; split core vs extras.
     'conversion-document-markdown-core' = @{ Kind = 'ConversionBatch'; Paths = @('document'); NamePattern = '^markdown\.tests' }
     'conversion-document-markdown-extra' = @{ Kind = 'ConversionBatch'; Paths = @('document'); NamePattern = '^markdown-' }
@@ -245,13 +293,13 @@ function Invoke-PesterShard {
     Suite          = $Definition.Suite
     Path           = $paths
     CI             = $true
+    # run-pester defaults coverage on with -CI. Ordinary shards must bind false
+    # explicitly so only coverage shards (or -Coverage) pay for tracing.
+    Coverage       = [bool]($Coverage -or ($Definition.Contains('Coverage') -and $Definition.Coverage))
     TestResultPath = $resultDir
   }
   if ($Quiet) {
     $params.Quiet = $true
-  }
-  if ($Coverage -or ($Definition.Contains('Coverage') -and $Definition.Coverage)) {
-    $params.Coverage = $true
   }
   # Pester 5.7 has no Run.Parallel / MaximumThreadCount / Initialization.
   # Only enable -Parallel when the shard asks for more than one thread; serial

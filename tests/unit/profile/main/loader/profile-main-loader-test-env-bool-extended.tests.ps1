@@ -17,35 +17,32 @@ BeforeAll {
 
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+. '$escapedProfile'
+if (Get-Command Test-EnvBool -ErrorAction SilentlyContinue) { 'ENVBOOL_CMD_OK' }
+if ((Test-EnvBool -Value 'true') -and (Test-EnvBool -Value '1')) { 'ENVBOOL_TRUE_OK' }
+if ((-not (Test-EnvBool -Value '')) -and (-not (Test-EnvBool -Value '0')) -and (-not (Test-EnvBool -Value 'false'))) { 'ENVBOOL_FALSE_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 Test-EnvBool fallback extended scenarios' {
     It 'Test-EnvBool is available after profile load' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if (Get-Command Test-EnvBool -ErrorAction SilentlyContinue) { 'ENVBOOL_CMD_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'ENVBOOL_CMD_OK'
     }
 
     It 'Test-EnvBool treats true-like values as enabled' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if ((Test-EnvBool -Value 'true') -and (Test-EnvBool -Value '1')) { 'ENVBOOL_TRUE_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'ENVBOOL_TRUE_OK'
     }
 
     It 'Test-EnvBool treats empty and false-like values as disabled' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if ((-not (Test-EnvBool -Value '')) -and (-not (Test-EnvBool -Value '0')) -and (-not (Test-EnvBool -Value 'false'))) { 'ENVBOOL_FALSE_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'ENVBOOL_FALSE_OK'
     }

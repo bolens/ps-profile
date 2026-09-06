@@ -11,7 +11,8 @@ scripts/lib/fragment/CommandDispatcher.psm1
 #>
 
 $script:DispatcherRegistered = $false
-$script:PreviousCommandNotFoundAction = $null
+$script:DispatcherState = @{ PreviousHandler = $null; Active = $false }
+$script:InstalledHandler = $null
 
 function Get-SessionScopedCommand {
     [CmdletBinding()]
@@ -112,6 +113,12 @@ function Invoke-CommandDispatcher {
         return $false
     }
 
+    # Most misses are optional commands probed during fragment registration.
+    # Reject them before command discovery can recursively invoke this handler.
+    if (-not $global:FragmentCommandRegistry.ContainsKey($CommandName)) {
+        return $false
+    }
+
     $null = Get-AutoLoadTimeoutSeconds
 
     $dispatch = {
@@ -135,7 +142,10 @@ function Invoke-CommandDispatcher {
 
         $resolved = Get-SessionScopedCommand -Name $CommandName
         if ($resolved -and $CommandLookupEventArgs) {
-            if ($CommandLookupEventArgs.PSObject.Properties.Match('CommandFound').Count -gt 0) {
+            if ($CommandLookupEventArgs.PSObject.Properties.Match('Command').Count -gt 0) {
+                $CommandLookupEventArgs.Command = $resolved
+            }
+            elseif ($CommandLookupEventArgs.PSObject.Properties.Match('CommandFound').Count -gt 0) {
                 $CommandLookupEventArgs.CommandFound = $resolved
             }
             if ($CommandLookupEventArgs.PSObject.Properties.Match('StopSearch').Count -gt 0) {
@@ -199,11 +209,12 @@ function Register-CommandDispatcher {
 
     try {
         $currentHandler = $ExecutionContext.SessionState.InvokeCommand.CommandNotFoundAction
-        if ($currentHandler -ne $script:DispatcherHandler) {
-            $script:PreviousCommandNotFoundAction = $currentHandler
+        if ($currentHandler -ne $script:InstalledHandler) {
+            $script:DispatcherState.PreviousHandler = $currentHandler
         }
 
         $ExecutionContext.SessionState.InvokeCommand.CommandNotFoundAction = $script:DispatcherHandler
+        $script:InstalledHandler = $ExecutionContext.SessionState.InvokeCommand.CommandNotFoundAction
         $script:DispatcherRegistered = $true
         return $true
     }
@@ -236,7 +247,7 @@ function Unregister-CommandDispatcher {
     }
 
     try {
-        $ExecutionContext.SessionState.InvokeCommand.CommandNotFoundAction = $script:PreviousCommandNotFoundAction
+        $ExecutionContext.SessionState.InvokeCommand.CommandNotFoundAction = $script:DispatcherState.PreviousHandler
         $script:DispatcherRegistered = $false
         return $true
     }
@@ -266,24 +277,33 @@ function Test-CommandDispatcherRegistered {
     return [bool]$script:DispatcherRegistered
 }
 
+# Capture the command itself: callbacks can run outside this module's scope.
+$dispatcherCommand = Get-Command Invoke-CommandDispatcher -CommandType Function
+$handlerState = $script:DispatcherState
 $script:DispatcherHandler = {
     param(
         [string]$CommandName,
         $CommandLookupEventArgs
     )
 
-    $handled = $false
-    if (Get-Command Invoke-CommandDispatcher -ErrorAction SilentlyContinue) {
-        $handled = Invoke-CommandDispatcher -CommandName $CommandName -CommandLookupEventArgs $CommandLookupEventArgs
+    # Discovery inside the dispatcher or a previous handler must not re-enter it.
+    if ($handlerState.Active) {
+        return
     }
-
-    if (-not $handled -and $script:PreviousCommandNotFoundAction) {
-        try {
-            & $script:PreviousCommandNotFoundAction $CommandName $CommandLookupEventArgs
+    $handlerState.Active = $true
+    try {
+        $handled = & $dispatcherCommand -CommandName $CommandName -CommandLookupEventArgs $CommandLookupEventArgs
+        if (-not $handled -and $handlerState.PreviousHandler) {
+            try {
+                $handlerState.PreviousHandler.Invoke($CommandName, $CommandLookupEventArgs)
+            }
+            catch {
+                # Preserve existing handler behavior
+            }
         }
-        catch {
-            # Preserve existing handler behavior
-        }
+    }
+    finally {
+        $handlerState.Active = $false
     }
 }.GetNewClosure()
 
