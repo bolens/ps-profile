@@ -677,13 +677,33 @@ integration-core shards, and coverage smoke.
 Main-loader tests run in ten groups of at most two files. The original
 integration-core paths run in five groups: general integration, profile loading,
 other profile tests, fragment loading/idempotency, and other fragment tests.
-Each group remains serial in its own hosted job. Tests that spawn child processes
-still use eager profile loading and isolated runner filesystems. The partition
+Each shard remains serial in its own process and checkout. Tests that spawn child
+processes still use eager profile loading and isolated temporary directories. The partition
 tests verify the original file union, reject duplicates, and verify platform and
 changed-path selection. This split targets elapsed CI time by avoiding serial
 40-59 minute jobs; it does not claim an equivalent reduction in total runner time.
-The matrix submits files and miscellaneous profile shards first, followed by
-main-loader and integration-core shards. GitHub controls actual runner scheduling.
+The 86 shard/platform pairs are packed into 20 compatible jobs using measured
+per-platform durations. Each job runs up to two separate-process workers; every
+worker creates a fresh local clone of the checked-out revision, including PR merge
+commits, and uses its own temporary directory and fragment cache. Installed module
+and tool discovery remain available. The error-handling integration test uses its
+own home fixture for log assertions.
+
+`pester-ci-durations.json` contains scheduling estimates with source-run provenance;
+it never changes test selection or performance assertions. `Get-PesterCiShardMatrix`
+remains the authoritative inventory. GitHub controls actual runner scheduling.
+
+The [job entrypoint](../../scripts/utils/code-quality/run-pester-ci-job.ps1) clones
+committed `HEAD`. Local verification therefore needs a committed isolated fixture.
+Its [coordination module](../../scripts/utils/code-quality/modules/PesterCiJobs.psm1)
+keeps scheduling and execution separate from the existing shard definitions.
+
+Each shard keeps its existing entrypoint, test mode, and coverage setting. The job
+collects all `tests/test-artifacts` output and both supported coverage XML locations
+before cleanup. Separate shard directories and worker summaries prevent collisions.
+Any setup, test, artifact, or worker-cleanup failure fails the job while remaining
+shards continue. `Pester result` remains the required aggregate check. Parent-process
+coverage does not trace native child test execution.
 
 Loader tests share one fresh eager startup per file when their environment setup
 is identical and their observations are read-only. Different debug settings,
@@ -714,6 +734,12 @@ outside the registry before discovery, and guards callback re-entry. A fresh
 Linux child-process probe with eager loading and debug level 2 fell from 260.75
 to 78.72 seconds. The delivery target is a successful complete PR run under
 20 minutes; local timing alone does not establish that result.
+
+The [dispatcher-and-fixture candidate](https://github.com/bolens/ps-profile/actions/runs/33999907789)
+passed all 88 jobs in 30 minutes 45 seconds. Aggregate test-step execution fell
+from 42,699 to 21,955 seconds (48.6%). Long jobs still queued late in the run,
+which motivated balanced jobs with two isolated workers per runner. Hosted timing
+on that implementation must establish whether the complete run meets the target.
 
 A local comparison using `profile-files-navigation-extended.tests.ps1`, Pester
 5.7.1, PowerShell 7.7.0-preview.3, and `run-pester.ps1 -CI -Quiet` took 62.31 seconds with implicit coverage

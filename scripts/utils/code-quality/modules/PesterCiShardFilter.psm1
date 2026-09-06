@@ -65,6 +65,8 @@ function Get-PesterCiFilterRules {
                 'PSScriptAnalyzerSettings.psd1'
                 'scripts/utils/code-quality/run-pester.ps1'
                 'scripts/utils/code-quality/run-pester-ci-shard.ps1'
+                'scripts/utils/code-quality/run-pester-ci-job.ps1'
+                'scripts/utils/code-quality/pester-ci-durations.json'
                 'scripts/utils/code-quality/run-pester-changed-shards.ps1'
                 'scripts/utils/code-quality/modules/PesterCiShardFilter.psm1'
                 'scripts/utils/code-quality/run-*-batch.ps1'
