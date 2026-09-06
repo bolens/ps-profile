@@ -1,11 +1,8 @@
 {
-  // PowerShell settings
   "powershell.powerShellDefaultVersion": "PowerShell",
   "powershell.enableProfileLoading": false,
   "powershell.scriptAnalysis.enable": true,
   "powershell.scriptAnalysis.settingsPath": "PSScriptAnalyzerSettings.psd1",
-
-  // Editor settings for PowerShell
   "[powershell]": {
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
@@ -14,36 +11,33 @@
     },
     "editor.defaultFormatter": "ms-vscode.powershell"
   },
-
-  // File associations
   "files.associations": {
     "*.ps1": "powershell",
     "*.psd1": "powershell",
     "*.psm1": "powershell"
   },
-
-  // Exclude patterns
   "files.exclude": {
     "**/.git": true,
     "**/.DS_Store": true,
     "**/node_modules": true,
     "**/Modules/*/": false
   },
-
-  // Search excludes
   "search.exclude": {
     "**/node_modules": true,
     "**/Modules/": true,
-    "**/.git": true
+    "**/.git": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/.devenv": true,
+    "**/.direnv": true
   },
-
-  // Match .editorconfig / .gitattributes (LF, UTF-8, no BOM)
   "files.encoding": "utf8",
   "files.eol": "\n",
   "files.insertFinalNewline": true,
   "files.trimTrailingWhitespace": true,
   "[markdown]": {
-    "files.trimTrailingWhitespace": false
+    "files.trimTrailingWhitespace": false,
+    "editor.wordWrap": "on"
   },
   "[yaml]": {
     "editor.tabSize": 2,
@@ -57,23 +51,13 @@
     "editor.tabSize": 2,
     "editor.insertSpaces": true
   },
-
-  // Editor settings
   "editor.insertSpaces": true,
   "editor.tabSize": 4,
   "editor.trimAutoWhitespace": true,
   "editor.renderWhitespace": "boundary",
   "editor.wordWrap": "on",
-
-  // Terminal settings
-  "terminal.integrated.shell.windows": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
-  "terminal.integrated.shell.linux": "/usr/bin/pwsh",
-
-  // Git settings
   "git.autofetch": true,
   "git.enableSmartCommit": true,
-
-  // Spell checking (if cspell extension is installed)
   "cSpell.language": "en",
   "cSpell.enabled": true,
   "cSpell.words": [
@@ -84,13 +68,8 @@
     "git-cliff",
     "semantic-release"
   ],
-
-  // Task settings
   "task.quickOpen.detail": true,
   "task.quickOpen.showAll": true,
-
-  // Workspace settings
-  "workspace.trusted": true,
   "kiroAgent.configureMCP": "Disabled",
   "makefile.configureOnOpen": false,
   "dbcode.connections": [
@@ -107,5 +86,23 @@
       },
       "idleTimeout": 0
     }
-  ]
+  ],
+  "files.watcherExclude": {
+    "**/.devenv/**": true,
+    "**/.direnv/**": true,
+    "**/.venv/**": true
+  },
+  "terminal.integrated.profiles.windows": {
+    "PowerShell": {
+      "source": "PowerShell"
+    }
+  },
+  "terminal.integrated.profiles.linux": {
+    "PowerShell": {
+      "path": "pwsh",
+      "args": [
+        "-NoProfile"
+      ]
+    }
+  }
 }

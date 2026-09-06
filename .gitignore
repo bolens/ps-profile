@@ -454,3 +454,13 @@ cache/powershell-profile/
 !.env.example
 !.env.*.example
 .ruff_cache/
+
+# Shared VS Code configuration; keep personal editor state ignored.
+!/.vscode/
+/.vscode/*
+!/.vscode/settings.json
+!/.vscode/extensions.json
+!/.vscode/tasks.json
+!/.vscode/launch.json
+!/.vscode/*.code-snippets
+!/.vscode/README.md

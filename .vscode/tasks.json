@@ -3,70 +3,82 @@
   "tasks": [
     {
       "label": "Lint profile.d",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-lint.ps1"
+        "${workspaceFolder}/scripts/utils/code-quality/run-lint.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Validate profile (lint + idempotency)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\checks\\validate-profile.ps1"
+        "${workspaceFolder}/scripts/checks/validate-profile.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Check comment-based help",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\checks\\check-comment-help.ps1"
+        "${workspaceFolder}/scripts/checks/check-comment-help.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Run Pester Tests",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
+        "${workspaceFolder}/scripts/utils/code-quality/run-pester.ps1",
         "-Coverage",
         "-Parallel"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Run Pester Tests (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
+        "${workspaceFolder}/scripts/utils/code-quality/run-pester.ps1",
         "-Coverage",
         "-Parallel",
         "-DryRun"
@@ -74,16 +86,19 @@
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Run Pester Unit Tests",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
+        "${workspaceFolder}/scripts/utils/code-quality/run-pester.ps1",
         "-Suite",
         "Unit",
         "-Parallel"
@@ -91,16 +106,19 @@
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Run Pester Integration Tests",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
+        "${workspaceFolder}/scripts/utils/code-quality/run-pester.ps1",
         "-Suite",
         "Integration",
         "-Parallel"
@@ -108,16 +126,19 @@
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Run Pester Performance Tests",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
+        "${workspaceFolder}/scripts/utils/code-quality/run-pester.ps1",
         "-Suite",
         "Performance",
         "-Parallel"
@@ -125,60 +146,72 @@
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Run Pester Tests with Coverage",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-pester.ps1",
+        "${workspaceFolder}/scripts/utils/code-quality/run-pester.ps1",
         "-Coverage",
         "-Parallel"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Run Performance Benchmark",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1"
+        "${workspaceFolder}/scripts/utils/metrics/benchmark-startup.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Run Security Scan",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\security\\run-security-scan.ps1"
+        "${workspaceFolder}/scripts/utils/security/run-security-scan.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Diagnose Profile Performance",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\performance\\diagnose-profile-performance.ps1"
+        "${workspaceFolder}/scripts/utils/performance/diagnose-profile-performance.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -190,12 +223,12 @@
     },
     {
       "label": "Optimize Git Performance",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\performance\\optimize-git-performance.ps1"
+        "${workspaceFolder}/scripts/utils/performance/optimize-git-performance.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -207,12 +240,12 @@
     },
     {
       "label": "Optimize Git Performance (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\performance\\optimize-git-performance.ps1",
+        "${workspaceFolder}/scripts/utils/performance/optimize-git-performance.ps1",
         "-DryRun"
       ],
       "options": {
@@ -225,70 +258,82 @@
     },
     {
       "label": "Check Module Updates",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1"
+        "${workspaceFolder}/scripts/utils/dependencies/check-module-updates.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Check Module Updates (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1",
+        "${workspaceFolder}/scripts/utils/dependencies/check-module-updates.ps1",
         "-DryRun"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Install Module Updates",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1",
+        "${workspaceFolder}/scripts/utils/dependencies/check-module-updates.ps1",
         "-Update"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Generate Changelog",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\docs\\generate-changelog.ps1"
+        "${workspaceFolder}/scripts/utils/docs/generate-changelog.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Generate Metrics Dashboard",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\generate-dashboard.ps1"
+        "${workspaceFolder}/scripts/utils/metrics/generate-dashboard.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -300,12 +345,12 @@
     },
     {
       "label": "Generate Metrics Dashboard (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\generate-dashboard.ps1",
+        "${workspaceFolder}/scripts/utils/metrics/generate-dashboard.ps1",
         "-DryRun"
       ],
       "options": {
@@ -318,193 +363,229 @@
     },
     {
       "label": "Create Release (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\release\\create-release.ps1",
+        "${workspaceFolder}/scripts/utils/release/create-release.ps1",
         "-DryRun"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Generate API Documentation",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\docs\\generate-docs.ps1"
+        "${workspaceFolder}/scripts/utils/docs/generate-docs.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Generate API Documentation (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\docs\\generate-docs.ps1",
+        "${workspaceFolder}/scripts/utils/docs/generate-docs.ps1",
         "-DryRun"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Run Spellcheck",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\spellcheck.ps1"
+        "${workspaceFolder}/scripts/utils/code-quality/spellcheck.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Database Health Check",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "${workspaceFolder}/scripts/utils/database/database-maintenance.ps1",
         "-Action",
         "health"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Database Statistics",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "${workspaceFolder}/scripts/utils/database/database-maintenance.ps1",
         "-Action",
         "statistics"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Optimize Databases",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "${workspaceFolder}/scripts/utils/database/database-maintenance.ps1",
         "-Action",
         "optimize"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Backup Databases",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "${workspaceFolder}/scripts/utils/database/database-maintenance.ps1",
         "-Action",
         "backup"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Repair Databases",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\database\\database-maintenance.ps1",
+        "${workspaceFolder}/scripts/utils/database/database-maintenance.ps1",
         "-Action",
         "repair"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Validate Databases",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\database\\validate-databases.ps1"
+        "${workspaceFolder}/scripts/utils/database/validate-databases.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Validate Databases (Full)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\database\\validate-databases.ps1",
+        "${workspaceFolder}/scripts/utils/database/validate-databases.ps1",
         "-TestOperations"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Initialize Databases",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\database\\initialize-databases.ps1"
+        "${workspaceFolder}/scripts/utils/database/initialize-databases.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Clear Fragment Cache",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\clear-fragment-cache.ps1"
+        "${workspaceFolder}/scripts/utils/clear-fragment-cache.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -516,12 +597,12 @@
     },
     {
       "label": "Clear Fragment Cache (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\clear-fragment-cache.ps1",
+        "${workspaceFolder}/scripts/utils/clear-fragment-cache.ps1",
         "-WhatIf"
       ],
       "options": {
@@ -534,12 +615,12 @@
     },
     {
       "label": "Build Fragment Cache",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\build-fragment-cache.ps1"
+        "${workspaceFolder}/scripts/utils/build-fragment-cache.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -551,12 +632,12 @@
     },
     {
       "label": "Build Fragment Cache (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\build-fragment-cache.ps1",
+        "${workspaceFolder}/scripts/utils/build-fragment-cache.ps1",
         "-WhatIf"
       ],
       "options": {
@@ -569,12 +650,12 @@
     },
     {
       "label": "Validate Fragment Cache",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\verify-cache-cleared.ps1"
+        "${workspaceFolder}/scripts/utils/verify-cache-cleared.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -586,12 +667,12 @@
     },
     {
       "label": "Check Script Standards",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\checks\\check-script-standards.ps1"
+        "${workspaceFolder}/scripts/checks/check-script-standards.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -603,26 +684,29 @@
     },
     {
       "label": "Run Markdownlint",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-markdownlint.ps1"
+        "${workspaceFolder}/scripts/utils/code-quality/run-markdownlint.ps1"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Install Git hooks",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\git\\install-githooks.ps1"
+        "${workspaceFolder}/scripts/git/install-githooks.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -634,12 +718,12 @@
     },
     {
       "label": "Install Git hooks (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\git\\install-githooks.ps1",
+        "${workspaceFolder}/scripts/git/install-githooks.ps1",
         "-DryRun"
       ],
       "options": {
@@ -652,12 +736,12 @@
     },
     {
       "label": "Install Pre-commit Hook",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\git\\install-pre-commit-hook.ps1"
+        "${workspaceFolder}/scripts/git/install-pre-commit-hook.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -669,12 +753,12 @@
     },
     {
       "label": "Format Code",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-format.ps1"
+        "${workspaceFolder}/scripts/utils/code-quality/run-format.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -686,12 +770,12 @@
     },
     {
       "label": "Format Code (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\run-format.ps1",
+        "${workspaceFolder}/scripts/utils/code-quality/run-format.ps1",
         "-DryRun"
       ],
       "options": {
@@ -704,12 +788,12 @@
     },
     {
       "label": "Find Duplicate Functions",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\find-duplicate-functions.ps1"
+        "${workspaceFolder}/scripts/utils/metrics/find-duplicate-functions.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -721,12 +805,12 @@
     },
     {
       "label": "Generate Fragment READMEs",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\docs\\generate-fragment-readmes.ps1"
+        "${workspaceFolder}/scripts/utils/docs/generate-fragment-readmes.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -738,12 +822,12 @@
     },
     {
       "label": "Generate Fragment READMEs (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\docs\\generate-fragment-readmes.ps1",
+        "${workspaceFolder}/scripts/utils/docs/generate-fragment-readmes.ps1",
         "-DryRun"
       ],
       "options": {
@@ -756,12 +840,12 @@
     },
     {
       "label": "Create New Fragment",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\fragment\\new-fragment.ps1"
+        "${workspaceFolder}/scripts/utils/fragment/new-fragment.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -773,12 +857,12 @@
     },
     {
       "label": "Check Commit Messages",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\checks\\check-commit-messages.ps1"
+        "${workspaceFolder}/scripts/checks/check-commit-messages.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -790,43 +874,49 @@
     },
     {
       "label": "Update Performance Baseline",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1",
+        "${workspaceFolder}/scripts/utils/metrics/benchmark-startup.ps1",
         "-UpdateBaseline"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Update Performance Baseline (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\benchmark-startup.ps1",
+        "${workspaceFolder}/scripts/utils/metrics/benchmark-startup.ps1",
         "-UpdateBaseline",
         "-DryRun"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "Collect Code Metrics",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\collect-code-metrics.ps1"
+        "${workspaceFolder}/scripts/utils/metrics/collect-code-metrics.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -838,12 +928,12 @@
     },
     {
       "label": "Export Metrics",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\export-metrics.ps1"
+        "${workspaceFolder}/scripts/utils/metrics/export-metrics.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -855,12 +945,12 @@
     },
     {
       "label": "Save Metrics Snapshot",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\save-metrics-snapshot.ps1"
+        "${workspaceFolder}/scripts/utils/metrics/save-metrics-snapshot.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -872,63 +962,12 @@
     },
     {
       "label": "Track Coverage Trends",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\metrics\\track-coverage-trends.ps1"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "presentation": {
-        "reveal": "always"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Add Missing Help",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-File",
-        "${workspaceFolder}\\scripts\\utils\\add-missing-help.ps1"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "presentation": {
-        "reveal": "always"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Fix Markdown Blank Lines",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-File",
-        "${workspaceFolder}\\scripts\\utils\\fix-markdown-blank-lines.ps1"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "presentation": {
-        "reveal": "always"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Fix Markdown README Formatting",
-      "type": "shell",
-      "command": "pwsh",
-      "args": [
-        "-NoProfile",
-        "-File",
-        "${workspaceFolder}\\scripts\\utils\\fix-markdown-readme-formatting.ps1"
+        "${workspaceFolder}/scripts/utils/metrics/track-coverage-trends.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -940,37 +979,28 @@
     },
     {
       "label": "Full Quality Check",
-      "dependsOn": [
-        "Format Code",
-        "Run Security Scan",
-        "Lint profile.d",
-        "Run Spellcheck",
-        "Run Markdownlint",
-        "Validate profile (lint + idempotency)",
-        "Check comment-based help",
-        "check-doc-coverage",
-        "check-doc-freshness",
-        "Check Script Standards",
-        "Check Missing Tests",
-        "Validate Dependencies",
-        "check-task-parity",
-        "Run Pester Tests",
-        "Validate Function Naming",
-        "drift-check"
-      ],
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [
+        "run",
+        "quality-check"
+      ],
+      "type": "process",
+      "command": "pnpm"
     },
     {
       "label": "Pre-commit Checks",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\git\\pre-commit.ps1"
+        "${workspaceFolder}/scripts/git/pre-commit.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -982,12 +1012,12 @@
     },
     {
       "label": "Check Idempotency",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\checks\\check-idempotency.ps1"
+        "${workspaceFolder}/scripts/checks/check-idempotency.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -999,12 +1029,12 @@
     },
     {
       "label": "Validate Function Naming",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\validate-function-naming.ps1"
+        "${workspaceFolder}/scripts/utils/code-quality/validate-function-naming.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -1016,12 +1046,12 @@
     },
     {
       "label": "Check Missing Tests",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\code-quality\\check-missing-tests.ps1"
+        "${workspaceFolder}/scripts/utils/code-quality/check-missing-tests.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -1033,12 +1063,12 @@
     },
     {
       "label": "Validate Dependencies",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\dependencies\\validate-dependencies.ps1"
+        "${workspaceFolder}/scripts/utils/dependencies/validate-dependencies.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -1050,12 +1080,12 @@
     },
     {
       "label": "Check Missing Packages",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-missing-packages.ps1"
+        "${workspaceFolder}/scripts/utils/dependencies/check-missing-packages.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -1067,27 +1097,16 @@
     },
     {
       "label": "Check Vulnerabilities",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\dependencies\\check-module-updates.ps1"
+        "${workspaceFolder}/scripts/utils/dependencies/check-module-updates.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "presentation": {
-        "reveal": "always"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Fix All Markdown",
-      "dependsOn": [
-        "Fix Markdown Blank Lines",
-        "Fix Markdown README Formatting"
-      ],
       "presentation": {
         "reveal": "always"
       },
@@ -1102,7 +1121,12 @@
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [],
+      "dependsOrder": "sequence"
     },
     {
       "label": "Generate All Documentation",
@@ -1113,16 +1137,21 @@
       "presentation": {
         "reveal": "always"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "args": [],
+      "dependsOrder": "sequence"
     },
     {
       "label": "Initialize Wrangler Config",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\setup\\init-wrangler-config.ps1"
+        "${workspaceFolder}/scripts/utils/setup/init-wrangler-config.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -1134,12 +1163,12 @@
     },
     {
       "label": "Initialize Wrangler Config (Dry Run)",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\utils\\setup\\init-wrangler-config.ps1",
+        "${workspaceFolder}/scripts/utils/setup/init-wrangler-config.ps1",
         "-DryRun"
       ],
       "options": {
@@ -1152,12 +1181,12 @@
     },
     {
       "label": "Development Setup",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
       "args": [
         "-NoProfile",
         "-File",
-        "${workspaceFolder}\\scripts\\dev\\setup.ps1"
+        "${workspaceFolder}/scripts/dev/setup.ps1"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -1170,17 +1199,19 @@
     {
       "label": "all-docs",
       "detail": "Generate All Documentation (API docs + fragment READMEs)",
-      "command": "echo",
+      "command": "pnpm",
       "problemMatcher": [],
       "args": [
-        "\"All",
-        "documentation",
-        "generated\""
+        "run",
+        "all-docs"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "drift-check",
@@ -1193,7 +1224,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "install-all-global",
@@ -1207,7 +1241,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "db-repair",
@@ -1224,7 +1261,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "test-coverage",
@@ -1241,7 +1281,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "drift-status",
@@ -1254,7 +1297,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "shell",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "test-performance",
@@ -1272,7 +1318,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "install-python-local",
@@ -1286,23 +1335,27 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "format-and-lint",
       "detail": "Format and Lint Code",
-      "command": "echo",
+      "command": "pnpm",
       "problemMatcher": [],
       "args": [
-        "\"Format",
-        "and",
-        "lint",
-        "completed\""
+        "run",
+        "format-and-lint"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "test-integration",
@@ -1320,7 +1373,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "db-backup",
@@ -1337,7 +1393,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "install-all-local",
@@ -1351,23 +1410,27 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "quality-check",
       "detail": "Full Quality Check (format + security + lint + spellcheck + markdownlint + help + tests + function naming + drift)",
-      "command": "echo",
+      "command": "pnpm",
       "problemMatcher": [],
       "args": [
-        "\"All",
-        "quality",
-        "checks",
-        "passed\""
+        "run",
+        "quality-check"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "db-health",
@@ -1384,7 +1447,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "install-js-local",
@@ -1398,7 +1464,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "benchmark",
@@ -1413,7 +1482,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "install-scoop",
@@ -1427,7 +1499,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "db-statistics",
@@ -1444,7 +1519,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "install-python-global",
@@ -1458,7 +1536,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "check-task-parity",
@@ -1473,7 +1554,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "check-module-updates",
@@ -1488,7 +1572,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "install-module-updates",
@@ -1504,7 +1591,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "generate-command-wrappers",
@@ -1519,7 +1609,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "install-js-global",
@@ -1533,7 +1626,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "db-validate-full",
@@ -1549,7 +1645,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "generate-task-parity",
@@ -1565,7 +1664,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "install-all",
@@ -1579,7 +1681,10 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "test-unit",
@@ -1597,20 +1702,26 @@
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "default",
       "detail": "Run default task",
-      "command": "task",
+      "command": "pnpm",
       "problemMatcher": [],
       "args": [
-        "--list-all"
+        "run"
       ],
       "presentation": {
         "reveal": "always"
       },
-      "type": "shell"
+      "type": "process",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "command": "pwsh",
@@ -1629,9 +1740,12 @@
         "-Refresh"
       ],
       "detail": "Link tests and guides to source targets (drift.lock)",
-      "type": "shell",
+      "type": "process",
       "label": "drift-link",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "command": "pwsh",
@@ -1646,9 +1760,12 @@
         "-Parallel"
       ],
       "detail": "Run Pester Tests",
-      "type": "shell",
+      "type": "process",
       "label": "test",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "command": "pwsh",
@@ -1662,9 +1779,12 @@
         "${workspaceFolder}/scripts/utils/code-quality/run-performance-batch.ps1"
       ],
       "detail": "Run performance tests per file with summary",
-      "type": "shell",
+      "type": "process",
       "label": "test-performance-batch",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "command": "pwsh",
@@ -1678,9 +1798,12 @@
         "${workspaceFolder}/scripts/utils/code-quality/run-unit-batch.ps1"
       ],
       "detail": "Run unit tests per file with summary (use -Filter profile- etc.)",
-      "type": "shell",
+      "type": "process",
       "label": "test-unit-batch",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "command": "pwsh",
@@ -1694,9 +1817,12 @@
         "${workspaceFolder}/scripts/utils/code-quality/run-conversion-integration-batch.ps1"
       ],
       "detail": "Run conversion integration tests by subdirectory (use -- -RelativePath data/structured etc.)",
-      "type": "shell",
+      "type": "process",
       "label": "test-conversion-batch",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "command": "pwsh",
@@ -1710,9 +1836,12 @@
         "${workspaceFolder}/scripts/utils/code-quality/run-conversion-all-batch.ps1"
       ],
       "detail": "Run all conversion integration sub-batches (document, media/*, data/*)",
-      "type": "shell",
+      "type": "process",
       "label": "test-conversion-all-batch",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "command": "pwsh",
@@ -1726,44 +1855,646 @@
         "${workspaceFolder}/scripts/utils/code-quality/run-tools-integration-batch.ps1"
       ],
       "detail": "Run tools integration tests (per-file isolation)",
-      "type": "shell",
+      "type": "process",
       "label": "test-tools",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "check-doc-coverage",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/checks/check-doc-coverage.ps1", "-Strict"],
-      "problemMatcher": []
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/checks/check-doc-coverage.ps1",
+        "-Strict"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "check-doc-freshness",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/checks/check-doc-freshness.ps1"],
-      "problemMatcher": []
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/checks/check-doc-freshness.ps1"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "pre-push-checks",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/git/hooks/pre-push.ps1"],
-      "problemMatcher": []
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/git/hooks/pre-push.ps1"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "test-changed-shards",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/utils/code-quality/run-pester-changed-shards.ps1"],
-      "problemMatcher": []
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/run-pester-changed-shards.ps1"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     },
     {
       "label": "test-ci-shard",
-      "type": "shell",
+      "type": "process",
       "command": "pwsh",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/utils/code-quality/run-pester-ci-shard.ps1"],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/utils/code-quality/run-pester-ci-shard.ps1"
+      ],
+      "problemMatcher": [],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "prepare",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "prepare"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": []
+    },
+    {
+      "label": "lint",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "lint"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "validate",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "validate"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "check-comment-help",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "check-comment-help"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "security-scan",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "security-scan"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "diagnose-profile-performance",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "diagnose-profile-performance"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "optimize-git-performance",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "optimize-git-performance"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "generate-changelog",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "generate-changelog"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "generate-dashboard",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "generate-dashboard"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "create-release",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "create-release"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "generate-docs",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "generate-docs"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "generate-docs-incremental",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "generate-docs-incremental"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "spellcheck",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "spellcheck"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "db-optimize",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "db-optimize"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "db-validate",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "db-validate"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "db-init",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "db-init"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "clear-fragment-cache",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "clear-fragment-cache"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "build-fragment-cache",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "build-fragment-cache"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "validate-fragment-cache",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "validate-fragment-cache"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "check-script-standards",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "check-script-standards"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "markdownlint",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "markdownlint"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "install-githooks",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "install-githooks"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "install-pre-commit-hook",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "install-pre-commit-hook"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "format",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "format"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "find-duplicates",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "find-duplicates"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "generate-fragment-readmes",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "generate-fragment-readmes"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "new-fragment",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "new-fragment"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "check-commit-messages",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "check-commit-messages"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "update-baseline",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "update-baseline"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "collect-code-metrics",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "collect-code-metrics"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "export-metrics",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "export-metrics"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "save-metrics-snapshot",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "save-metrics-snapshot"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "track-coverage-trends",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "track-coverage-trends"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "pre-commit-checks",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "pre-commit-checks"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "check-idempotency",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "check-idempotency"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "validate-function-naming",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "validate-function-naming"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "check-missing-tests",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "check-missing-tests"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "validate-dependencies",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "validate-dependencies"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "check-missing-packages",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "check-missing-packages"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "check-vulnerabilities",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "check-vulnerabilities"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "init-wrangler-config",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "init-wrangler-config"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "dev-setup",
+      "type": "process",
+      "command": "pnpm",
+      "args": [
+        "run",
+        "dev-setup"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check diff whitespace",
+      "type": "process",
+      "command": "git",
+      "args": [
+        "diff",
+        "--check"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
     }
   ]
 }
