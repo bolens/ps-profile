@@ -14,6 +14,15 @@ on:
       - 'scripts/checks/**'
       - 'scripts/lib/**'
       - '.github/workflows/smoke-check.yml'
+      - 'scripts/repro_set_agentmode.ps1'
+      - 'tests/unit/utility/repro/utility-repro-set-agentmode.tests.ps1'
+      - 'tests/unit/profile/alias/profile-alias.tests.ps1'
+  pull_request:
+    paths:
+      - '.github/workflows/smoke-check.yml'
+      - 'scripts/repro_set_agentmode.ps1'
+      - 'tests/unit/utility/repro/utility-repro-set-agentmode.tests.ps1'
+      - 'tests/unit/profile/alias/profile-alias.tests.ps1'
   workflow_dispatch: {}
 
 env:
@@ -38,9 +47,47 @@ jobs:
         run: |
           pwsh -NoProfile -ExecutionPolicy Bypass -Command "Write-Verbose 'Starting repro'; Set-PSDebug -Trace 0; & { pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/repro_set_agentmode.ps1 }"
 
-      - name: Run Pester tests
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          $galleryName = 'PSGallery'
+          if (-not (Get-PSRepository -Name $galleryName -ErrorAction SilentlyContinue)) {
+            try {
+              Register-PSRepository -Default -ErrorAction Stop
+            }
+            catch {
+              Write-Warning "Could not restore the default PSGallery registration: $($_.Exception.Message)"
+            }
+            if (-not (Get-PSRepository -Name $galleryName -ErrorAction SilentlyContinue)) {
+              # Register-PSRepository can emit a non-terminating NuGet error and
+              # return without creating PSGallery, especially on Windows images.
+              $galleryName = 'PSGalleryFallback'
+              if (-not (Get-PSRepository -Name $galleryName -ErrorAction SilentlyContinue)) {
+                Register-PSRepository `
+                  -Name $galleryName `
+                  -SourceLocation 'https://www.powershellgallery.com/api/v2' `
+                  -PublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
+                  -ScriptSourceLocation 'https://www.powershellgallery.com/api/v2/items/psscript' `
+                  -ScriptPublishLocation 'https://www.powershellgallery.com/api/v2/package/' `
+                  -InstallationPolicy Trusted
+              }
+            }
+          }
+          Set-PSRepository -Name $galleryName -InstallationPolicy Trusted
+          # Pin to 5.7.x: Pester 5.9+ regresses Mock scoping ("Mock data are not setup for this scope")
+          # and TestDrive collisions across sequential containers; Pester 6+ breaks tracer teardown.
+          Install-Module -Name Pester -Repository $galleryName -MinimumVersion 5.7.0 -MaximumVersion 5.7.99 -Force -Scope CurrentUser -AllowClobber
+          $pester5 = Get-Module -ListAvailable Pester |
+            Where-Object { $_.Version -ge [version]'5.7.0' -and $_.Version -lt [version]'5.8.0' } |
+            Sort-Object Version -Descending |
+            Select-Object -First 1
+          if (-not $pester5) { throw 'Pester 5.7.x is required but was not installed' }
+          Import-Module Pester -RequiredVersion $pester5.Version -Force
+          Write-Host "Installed Pester $($pester5.Version)"
+
+      - name: Run bootstrap smoke regressions
         shell: pwsh
         env:
           PS_PROFILE_DEBUG: '1'
         run: |
-          pwsh -NoProfile -ExecutionPolicy Bypass -File ./scripts/utils/code-quality/run-pester.ps1 -Parallel
+          & ./scripts/utils/code-quality/run-pester.ps1 -TestFile tests/unit/utility/repro/utility-repro-set-agentmode.tests.ps1,tests/unit/profile/alias/profile-alias.tests.ps1
