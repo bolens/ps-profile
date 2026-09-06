@@ -40,6 +40,8 @@ Independent scheduling review completed; targeted host-state review remains part
 
 ## Runner capacity
 
-**Decision**: Default to 16 jobs (eight Ubuntu, six Windows, two Arch), retaining the configurable budget and all 86 shard/platform pairs.
+**Decision**: Default to 16 jobs (seven Ubuntu, seven Windows, two Arch), retaining the configurable budget and all 86 shard/platform pairs.
 
 **Rationale**: The 20-job hosted candidate still queued bundles behind concurrent validation. Modeling two workers with the same completed-run estimates gives a longest job of 838 seconds at 16 jobs versus 827 seconds at 20. Leaving capacity for other checks should reduce queue delays; the model is not hosted timing proof.
+
+The completed worker trial (run 34003602400) supplied all 86 execution durations, including checkout and collection. All test executions passed; one Windows permission-fixture cleanup failed and is repaired separately. Refreshing the scheduling estimates with these measurements moves one job from Ubuntu to Windows and models a longest job of 928 seconds at 16 jobs. Hosted validation remains the acceptance gate.

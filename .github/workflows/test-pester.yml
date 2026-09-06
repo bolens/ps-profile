@@ -29,35 +29,39 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-          fetch-depth: 0
+
+      - name: Detect PR paths
+        if: github.event_name == 'pull_request'
+        id: paths
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
+        with:
+          list-files: json
+          filters: |
+            changed:
+              - '**'
 
       - name: Build matrix from shared shard filter
         id: build
         shell: pwsh
         env:
           EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CHANGED_FILES: ${{ steps.paths.outputs.changed_files }}
         run: |
           $filterModule = Join-Path $env:GITHUB_WORKSPACE 'scripts/utils/code-quality/modules/PesterCiShardFilter.psm1'
           Import-Module $filterModule -Force -DisableNameChecking
           Import-Module (Join-Path $env:GITHUB_WORKSPACE 'scripts/utils/code-quality/modules/PesterCiJobs.psm1') -DisableNameChecking
 
-          $isDispatch = $env:EVENT_NAME -eq 'workflow_dispatch'
-          if ($isDispatch) {
+          if ($env:EVENT_NAME -ne 'pull_request') {
             $shards = @(Resolve-PesterCiShards -All)
           }
           else {
-            $base = $env:BASE_SHA
-            $head = $env:HEAD_SHA
-            if ([string]::IsNullOrWhiteSpace($base) -or [string]::IsNullOrWhiteSpace($head)) {
-              $shards = @(Resolve-PesterCiShards -All)
+            # Dorny fails the job on API errors. Never turn absent output into
+            # a successful empty selection; filenames remain JSON data.
+            if ([string]::IsNullOrWhiteSpace($env:CHANGED_FILES)) {
+              throw 'Missing changed-file output from paths-filter'
             }
-            else {
-              $changed = @(git diff --name-only --diff-filter=ACMRD "${base}...${head}")
-              Write-Host "Changed files: $($changed.Count)"
-              $shards = @(Resolve-PesterCiShards -ChangedFiles $changed)
-            }
+            $changed = @(ConvertFrom-Json -InputObject $env:CHANGED_FILES)
+            $shards = @(Resolve-PesterCiShards -ChangedFiles $changed)
           }
 
           # Coerce to [string[]] so empty "no matching shards" stays an empty array
@@ -195,11 +199,11 @@ jobs:
           import sys
 
           jobs = json.loads(os.environ["NEEDS_JSON"])
-          failed = [name for name, job in jobs.items()
-                    if job["result"] not in ("success", "skipped")]
-          if jobs["changes"]["result"] != "success":
-              failed.append("changes")
-          if failed:
-              print("Failed or cancelled checks: " + ", ".join(sorted(set(failed))))
+          selected = jobs["changes"].get("outputs", {}).get("any")
+          expected = "success" if selected == "true" else "skipped"
+          if (jobs["changes"]["result"] != "success"
+                  or selected not in ("true", "false")
+                  or jobs["test"]["result"] != expected):
+              print("Pester selection or required shard execution failed")
               sys.exit(1)
           PYTHON
