@@ -55,7 +55,20 @@ Describe 'TestSupport Modules' {
 
             It 'Throws error when repository root cannot be found' {
                 $tempDir = New-TestExternalTempDirectory -Prefix 'NoGitRepo'
-                { Get-TestRepoRoot -StartPath $tempDir } | Should -Throw
+                $originalRoot = $env:PS_PROFILE_REPO_ROOT
+                try {
+                    Remove-Item Env:\PS_PROFILE_REPO_ROOT -ErrorAction SilentlyContinue
+                    # The temporary directory's ancestors may themselves have Git markers.
+                    Mock Test-Path { $false } -ParameterFilter {
+                        $LiteralPath -and ((Split-Path -Leaf $LiteralPath) -in @(
+                            '.git', 'Microsoft.PowerShell_profile.ps1', 'profile.d'
+                        ))
+                    }
+                    { Get-TestRepoRoot -StartPath $tempDir } | Should -Throw
+                }
+                finally {
+                    $env:PS_PROFILE_REPO_ROOT = $originalRoot
+                }
             }
         }
 
@@ -213,6 +226,22 @@ Describe 'TestSupport Modules' {
         }
 
         Context 'Clear-TestRepoRootSpillover' {
+            It 'Preserves changelog configuration while removing transient spillover' {
+                $script:CleanupFixture = Join-Path $TestDrive 'cleanup-repository'
+                New-Item -ItemType Directory -Path $script:CleanupFixture -Force | Out-Null
+                $configPath = Join-Path $script:CleanupFixture 'cliff.toml'
+                $spillPath = Join-Path $script:CleanupFixture 'hook-test-spill.txt'
+                Set-Content -LiteralPath $configPath -Value '[changelog]' -NoNewline
+                Set-Content -LiteralPath $spillPath -Value 'spill'
+                Mock Get-TestRepoRoot { $script:CleanupFixture }
+
+                Clear-TestRepoRootSpillover -StartPath $script:CleanupFixture
+
+                Test-Path -LiteralPath $configPath | Should -Be $true
+                Get-Content -LiteralPath $configPath -Raw | Should -Be '[changelog]'
+                Test-Path -LiteralPath $spillPath | Should -Be $false
+            }
+
             It 'Removes known transient files from the repository root' {
                 $spillFile = Join-Path $script:RepoRoot 'hook-test-spill.txt'
                 Set-Content -LiteralPath $spillFile -Value 'spill' -Force
@@ -829,4 +858,3 @@ function Test-MyFunction {
         }
     }
 }
-
