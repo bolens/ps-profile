@@ -663,15 +663,93 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard 
 | Shard kind | Examples | Runner |
 |------------|----------|--------|
 | Unit | `unit-library`, `unit-profile-core`, `unit-profile-misc-a` | `run-pester.ps1 -Parallel` |
-| Integration (non-conversion) | `integration-core` | `run-pester.ps1 -Parallel` |
+| Integration (non-conversion) | `integration-core`, `integration-core-loading` | Serial `run-pester.ps1` within each job |
 | Tools integration | `integration-tools` | `run-tools-integration-batch.ps1` |
 | Conversion integration | `conversion-data-structured`, `conversion-media` | conversion batch scripts |
 | Performance | `performance` (Windows only) | `run-performance-batch.ps1` |
 | Coverage smoke | `coverage-smoke` (Ubuntu only) | `run-pester.ps1 -Coverage` on bootstrap + library |
 
-**OS matrix:** every enabled shard runs on Ubuntu (except `performance`). Windows also
-runs `unit-library`, `unit-profile-core`, `integration-tools`, `integration-core`, and
-`performance` when those shards are selected.
+**OS matrix:** every enabled shard runs on Ubuntu except performance shards.
+Windows also runs library, core profile, tools integration, all five integration-core
+shards, and performance shards. Arch runs library, bootstrap, all five
+integration-core shards, and coverage smoke.
+
+Main-loader tests run in ten groups of at most two files. The original
+integration-core paths run in five groups: general integration, profile loading,
+other profile tests, fragment loading/idempotency, and other fragment tests.
+Each shard remains serial in its own process and checkout. Tests that spawn child
+processes still use eager profile loading and isolated temporary directories. The partition
+tests verify the original file union, reject duplicates, and verify platform and
+changed-path selection. This split targets elapsed CI time by avoiding serial
+40-59 minute jobs; it does not claim an equivalent reduction in total runner time.
+The default job budget leaves capacity for the other required checks.
+The 86 shard/platform pairs are packed into 17 compatible jobs using measured
+per-platform durations. Performance shards use a dedicated serial Windows job so
+timing assertions do not compete with another shard. Other jobs run up to two
+separate-process workers; every
+worker creates a fresh local clone of the checked-out revision, including PR merge
+commits, and uses its own temporary directory and fragment cache. Installed module
+and tool discovery remain available. The error-handling integration test uses its
+own home fixture for log assertions.
+
+`pester-ci-durations.json` contains scheduling estimates with source-run provenance;
+it never changes test selection or performance assertions. Performance batches
+retain per-file XML reports and captured output under `tests/test-artifacts/performance-batch/`. `Get-PesterCiShardMatrix`
+remains the authoritative inventory. GitHub controls actual runner scheduling.
+
+The [job entrypoint](../../scripts/utils/code-quality/run-pester-ci-job.ps1) clones
+committed `HEAD`. Local verification therefore needs a committed isolated fixture.
+Its [coordination module](../../scripts/utils/code-quality/modules/PesterCiJobs.psm1)
+keeps scheduling and execution separate from the existing shard definitions.
+
+Each shard keeps its existing entrypoint, test mode, and coverage setting. The job
+collects all `tests/test-artifacts` output and both supported coverage XML locations
+before cleanup. Separate shard directories and worker summaries prevent collisions.
+Any setup, test, artifact, or worker-cleanup failure fails the job while remaining
+shards continue. `Pester result` remains the required aggregate check. Parent-process
+coverage does not trace native child test execution.
+
+Loader tests share one fresh eager startup per file when their environment setup
+is identical and their observations are read-only. Different debug settings,
+interception modes, and state-changing scenarios retain separate processes.
+This reduces startup processes across the loader suite from 46 to 25 while
+preserving all 48 checks in the affected files. Debug setup clears its load log
+before each startup and checks the message emitted for the configured level,
+avoiding a false positive from an earlier startup's log.
+
+Ordinary Pester shards explicitly pass `-Coverage:$false` while retaining `-CI`.
+The underlying runner enables coverage by default with `-CI`, so omitting the
+coverage switch adds tracing to every ordinary shard. `coverage-smoke` keeps
+coverage enabled, and `run-pester-ci-shard.ps1 -Coverage` enables it for a chosen
+Pester shard. Test selection and platform coverage stay the same.
+
+The September 5, 2026 baseline is [PR #83's Pester run](https://github.com/bolens/ps-profile/actions/runs/33989732846)
+at head `214ca4e586f579ccc71b3fe1bd62db86631f0f7e`. Its completed
+`unit-profile-core-files` test steps took 1,327 seconds on Ubuntu and 1,462 seconds
+on Windows for 74 passing tests. The Ubuntu log shows coverage tracing across
+394 source files. The complete workflow finished in 66 minutes 47 seconds.
+PR #80's latest runs required approval and supplied no execution baseline.
+
+The [coverage-and-partition candidate](https://github.com/bolens/ps-profile/actions/runs/33994298645)
+passed all 88 jobs in 49 minutes 55 seconds, while total test-step execution fell
+only 3%. Further investigation found repeated command-dispatcher discovery during
+profile startup. The dispatcher now retains its module command, rejects names
+outside the registry before discovery, and guards callback re-entry. A fresh
+Linux child-process probe with eager loading and debug level 2 fell from 260.75
+to 78.72 seconds. The delivery target is a successful complete PR run under
+20 minutes; local timing alone does not establish that result.
+
+The [dispatcher-and-fixture candidate](https://github.com/bolens/ps-profile/actions/runs/33999907789)
+passed all 88 jobs in 30 minutes 45 seconds. Aggregate test-step execution fell
+from 42,699 to 21,955 seconds (48.6%). Long jobs still queued late in the run,
+which motivated balanced jobs with two isolated workers per runner. Hosted timing
+on that implementation must establish whether the complete run meets the target.
+
+A local comparison using `profile-files-navigation-extended.tests.ps1`, Pester
+5.7.1, PowerShell 7.7.0-preview.3, and `run-pester.ps1 -CI -Quiet` took 62.31 seconds with implicit coverage
+and 14.61 seconds with `-Coverage:$false`. Both runs passed all three tests.
+These are single-run process durations on the same Linux workstation. Measure
+the next GitHub run before treating that reduction as an overall CI speedup.
 
 Wall-clock time is dominated by the slowest shard; tune shards in `run-pester-ci-shard.ps1`
 and filter→shard maps in `.github/workflows/test-pester.yml` when buckets grow too large.

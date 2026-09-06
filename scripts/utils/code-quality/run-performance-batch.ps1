@@ -49,6 +49,9 @@ if (-not (Test-Path -LiteralPath $perfRoot)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
+# Relative paths follow the PowerShell location, not the process working directory.
+$perfRoot = (Get-Item -LiteralPath $perfRoot -ErrorAction Stop).FullName
+
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
 $files = @(Get-ChildItem -Path $perfRoot -Filter '*.tests.ps1' -File -Recurse | Sort-Object FullName)
 if (-not [string]::IsNullOrWhiteSpace($Filter)) {
@@ -100,7 +103,7 @@ function Get-PesterRunStats {
 }
 
 function New-PerformanceRunnerArgs {
-    param([string]$TargetPath)
+    param([string]$TargetPath, [string]$ResultPath)
 
     $args = @(
         '-NoProfile'
@@ -110,6 +113,8 @@ function New-PerformanceRunnerArgs {
         'Performance'
         '-Path'
         $TargetPath
+        '-OutputPath'
+        (Join-Path $ResultPath 'test-results.xml')
     )
     if ($Quiet) {
         $args += '-Quiet'
@@ -133,8 +138,12 @@ Write-Host ''
 $results = @()
 foreach ($file in $files) {
     Write-Host "=== $($file.Name) ===" -ForegroundColor Cyan
-    $output = & pwsh -NoProfile -NonInteractive @((New-PerformanceRunnerArgs -TargetPath $file.FullName)) 2>&1 | Out-String
+    $relativePath = [IO.Path]::GetRelativePath($perfRoot, $file.FullName)
+    $resultPath = Join-Path $RepoRoot 'tests/test-artifacts/performance-batch' $relativePath
+    New-Item -ItemType Directory -Path $resultPath -Force -ErrorAction Stop | Out-Null
+    $output = & pwsh -NoProfile -NonInteractive @((New-PerformanceRunnerArgs -TargetPath $file.FullName -ResultPath $resultPath)) 2>&1 | Out-String
     $exitCode = if ($null -ne $LASTEXITCODE) { $LASTEXITCODE } else { 0 }
+    Set-Content -LiteralPath (Join-Path $resultPath 'batch-output.log') -Value $output -ErrorAction Stop
     $stats = Get-PesterRunStats -Output $output
 
     if ($stats.Passed -lt 0 -and $exitCode -ne 0) {

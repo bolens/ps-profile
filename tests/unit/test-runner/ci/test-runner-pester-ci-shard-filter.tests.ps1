@@ -3,6 +3,27 @@ Describe 'PesterCiShardFilter' {
     BeforeAll {
         $modulePath = Join-Path $PSScriptRoot '../../../../scripts/utils/code-quality/modules/PesterCiShardFilter.psm1' | Resolve-Path
         Import-Module $modulePath -Force -DisableNameChecking
+        $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../../../..')).Path
+        # Read the real definitions without executing a shard or its process exit.
+        $runnerPath = Join-Path $repoRoot 'scripts/utils/code-quality/run-pester-ci-shard.ps1'
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile($runnerPath, [ref]$null, [ref]$null)
+        $definitionFunction = $ast.Find({
+            param($node)
+            $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and
+                $node.Name -eq 'Get-PesterCiShardDefinitions'
+        }, $true)
+        . ([scriptblock]::Create($definitionFunction.Extent.Text))
+        $definitions = Get-PesterCiShardDefinitions
+
+        function Get-ShardTestFiles {
+            param([string[]]$Paths)
+            foreach ($path in $Paths) {
+                $resolved = if ([System.IO.Path]::IsPathRooted($path)) { $path } else { Join-Path $repoRoot $path }
+                Test-Path -LiteralPath $resolved | Should -BeTrue -Because "shard path $path must exist"
+                Get-ChildItem -LiteralPath $resolved -Filter '*.tests.ps1' -File -Recurse |
+                    ForEach-Object { $_.FullName }
+            }
+        }
     }
 
     It 'Returns no shards for docs-only changes' {
@@ -85,6 +106,25 @@ Describe 'PesterCiShardFilter' {
         $matrix | Where-Object { $_.label -eq 'arch-latest' -and $_.shard -eq 'coverage-smoke' } | Should -Not -BeNullOrEmpty
     }
 
+    It 'Submits slow profile families before short shards without changing their platform entries' {
+        $matrix = @(Get-PesterCiShardMatrix -Shards @(
+                'coverage-smoke', 'unit-profile-core-main-a', 'unit-profile-core-files',
+                'unit-profile-misc-a', 'integration-core-loading', 'unit-library', 'coverage-smoke'
+            ))
+        $orderedShards = @($matrix.shard | Select-Object -Unique)
+        $orderedShards | Should -Be @(
+            'unit-profile-core-files', 'unit-profile-misc-a', 'integration-core-loading',
+            'unit-profile-core-main-a', 'coverage-smoke', 'unit-library'
+        )
+        foreach ($shard in $orderedShards) {
+            $labels = @($matrix | Where-Object shard -EQ $shard | Select-Object -ExpandProperty label)
+            $expected = @('ubuntu-latest')
+            if ($shard -in @(Get-PesterCiWindowsShards)) { $expected += 'windows-latest' }
+            if ($shard -in @(Get-PesterCiArchShards)) { $expected += 'arch-latest' }
+            $labels | Should -Be $expected
+        }
+    }
+
     It 'Accepts empty or blank shard lists without throwing' {
         @(Get-PesterCiShardMatrix -Shards @()) | Should -HaveCount 0
         @(Get-PesterCiShardMatrix -Shards @('')) | Should -HaveCount 0
@@ -126,12 +166,110 @@ Describe 'PesterCiShardFilter' {
         $all | Should -Contain 'conversion-data-structured-n'
     }
 
+    It 'Keeps the filter and executable shard inventories identical' {
+        @(Get-PesterCiAllShards | Sort-Object) | Should -Be @($definitions.Keys | Sort-Object)
+    }
+
+    It 'Runs every main loader file exactly once in groups of at most two on both hosted platforms' {
+        $names = @($definitions.Keys | Where-Object { $_ -like 'unit-profile-core-main-*' })
+        $actual = @(
+            foreach ($name in $names) {
+                $definitions[$name].Paths.Count | Should -BeLessOrEqual 2
+                $definitions[$name].MaxParallelThreads | Should -Be 1
+                Get-ShardTestFiles -Paths $definitions[$name].Paths
+            }
+        )
+        $expected = @(Get-ShardTestFiles -Paths @('tests/unit/profile/main'))
+        @($actual | Sort-Object) | Should -Be @($expected | Sort-Object)
+        @($actual | Select-Object -Unique).Count | Should -Be $actual.Count
+        foreach ($name in $names) {
+            $labels = @(Get-PesterCiShardMatrix -Shards @($name) | ForEach-Object { $_.label })
+            $labels | Should -Be @('ubuntu-latest', 'windows-latest')
+            Resolve-PesterCiShards -ChangedFiles @('tests/unit/profile/main/loader/example.tests.ps1') |
+                Should -Contain $name
+        }
+    }
+
+    It 'Preserves every integration-core file exactly once on Ubuntu Windows and Arch' {
+        $names = @($definitions.Keys | Where-Object { $_ -like 'integration-core*' })
+        $actual = @(
+            foreach ($name in $names) {
+                $definitions[$name].MaxParallelThreads | Should -Be 1
+                Get-ShardTestFiles -Paths $definitions[$name].Paths
+            }
+        )
+        $originalDirectories = @(
+            'bootstrap', 'system', 'profile', 'filesystem', 'terminal', 'fragments',
+            'test-runner', 'utilities', 'error-handling', 'validation', 'cross-platform', 'cloud-provider'
+        ) | ForEach-Object { "tests/integration/$_" }
+        $expected = @(Get-ShardTestFiles -Paths $originalDirectories)
+        @($actual | Sort-Object) | Should -Be @($expected | Sort-Object)
+        @($actual | Select-Object -Unique).Count | Should -Be $actual.Count
+        foreach ($name in $names) {
+            $labels = @(Get-PesterCiShardMatrix -Shards @($name) | ForEach-Object { $_.label })
+            $labels | Should -Be @('ubuntu-latest', 'windows-latest', 'arch-latest')
+            Resolve-PesterCiShards -ChangedFiles @('tests/integration/profile/loading.tests.ps1') |
+                Should -Contain $name
+            Resolve-PesterCiShards -ChangedFiles @('Microsoft.PowerShell_profile.ps1') |
+                Should -Contain $name
+        }
+    }
+
+    It 'Keeps nested integration files with relative root <RelativeRoot>' -ForEach @(
+        @{ RelativeRoot = $false }
+        @{ RelativeRoot = $true }
+    ) {
+        $repoRoot = Join-Path $TestDrive 'nested-repo'
+        $relativeFiles = @(
+            'tests/integration/profile/loading.tests.ps1'
+            'tests/integration/profile/nested/loading.tests.ps1'
+            'tests/integration/fragments/fragment-idempotency.tests.ps1'
+            'tests/integration/fragments/nested/fragment-idempotency.tests.ps1'
+            'tests/integration/fragments/fragment-loading-failures.tests.ps1'
+            'tests/integration/fragments/nested/fragment-loading-failures.tests.ps1'
+        )
+        foreach ($relative in $relativeFiles) {
+            $path = Join-Path $repoRoot $relative
+            $null = New-Item -ItemType Directory -Path (Split-Path -Parent $path) -Force
+            Set-Content -LiteralPath $path -Value '# fixture'
+        }
+        $absoluteRepoRoot = $repoRoot
+        Push-Location $repoRoot
+        try {
+            if ($RelativeRoot) { $repoRoot = '.' }
+            $nestedDefinitions = Get-PesterCiShardDefinitions
+        }
+        finally {
+            Pop-Location
+            $repoRoot = $absoluteRepoRoot
+        }
+        $nestedDefinitions['integration-core-profile'].Paths |
+            Should -Be @(Join-Path $repoRoot 'tests/integration/profile/nested/loading.tests.ps1')
+        @($nestedDefinitions['integration-core-fragments'].Paths).Count | Should -Be 2
+        $nestedDefinitions['integration-core-fragments'].Paths |
+            Should -Contain (Join-Path $repoRoot 'tests/integration/fragments/nested/fragment-idempotency.tests.ps1')
+        $nestedDefinitions['integration-core-fragments'].Paths |
+            Should -Contain (Join-Path $repoRoot 'tests/integration/fragments/nested/fragment-loading-failures.tests.ps1')
+    }
+
     It 'Assigns every maintained test to exactly one shard plus optional coverage' {
         $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../../../..')).Path
         $ast = [System.Management.Automation.Language.Parser]::ParseFile("$RepoRoot/scripts/utils/code-quality/run-pester-ci-shard.ps1", [ref]$null, [ref]$null)
         $fn = $ast.Find({param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Get-PesterCiShardDefinitions'}, $true)
         . ([scriptblock]::Create($fn.Extent.Text))
         $defs = Get-PesterCiShardDefinitions
+        # Grouped integration definitions contain absolute paths; compare every
+        # definition with the repository-relative paths used by this inventory.
+        foreach ($definition in $defs.Values) {
+            if ($definition.Kind -eq 'Pester') {
+                $definition.Paths = @(foreach ($path in $definition.Paths) {
+                        if ([IO.Path]::IsPathRooted($path)) {
+                            [IO.Path]::GetRelativePath($RepoRoot, $path) -replace '\\', '/'
+                        }
+                        else { $path -replace '\\', '/' }
+                    })
+            }
+        }
         @(Compare-Object @($defs.Keys | Sort-Object) @(Get-PesterCiAllShards | Sort-Object)) | Should -HaveCount 0
         $files = Get-ChildItem "$RepoRoot/tests/unit", "$RepoRoot/tests/integration", "$RepoRoot/tests/performance" -File -Recurse -Filter '*.tests.ps1'
         $missing = @(); $duplicate = @()

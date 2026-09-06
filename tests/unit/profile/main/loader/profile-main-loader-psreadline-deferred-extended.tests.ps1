@@ -18,6 +18,15 @@ BeforeAll {
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
     $script:PSReadLineFragment = Join-Path $script:TestRepoRoot 'profile.d/psreadline.ps1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (-not (Get-Module -Name PSReadLine -ErrorAction SilentlyContinue)) { 'PSREADLINE_DEFERRED_OK' }
+if (Select-String -Path `$log -Pattern 'Initialize-FragmentLoading completed' -Quiet) { 'PSREADLINE_DEFERRED_LOAD_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 deferred PSReadLine loading extended scenarios' {
@@ -26,22 +35,13 @@ Describe 'Microsoft.PowerShell_profile.ps1 deferred PSReadLine loading extended 
     }
 
     It 'Does not eagerly import PSReadLine during main profile startup' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if (-not (Get-Module -Name PSReadLine -ErrorAction SilentlyContinue)) { 'PSREADLINE_DEFERRED_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'PSREADLINE_DEFERRED_OK'
     }
 
     It 'Profile load completes before optional PSReadLine enablement' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Initialize-FragmentLoading completed' -Quiet) { 'PSREADLINE_DEFERRED_LOAD_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'PSREADLINE_DEFERRED_LOAD_OK'
     }

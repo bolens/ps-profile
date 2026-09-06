@@ -17,37 +17,33 @@ BeforeAll {
 
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) { 'NOPROFILE_BYPASS_OK' }
+if (Select-String -Path `$log -Pattern 'PSCommandPath check passed' -Quiet) { 'NOPROFILE_LOG_OK' }
+if (Select-String -Path `$log -Pattern 'Profile execution started' -Quiet) { 'START_LOG_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 NoProfile detection extended scenarios' {
     It 'Continues profile load in test mode when PSCommandPath would otherwise exit early' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-. '$escapedProfile'
-if (Get-Command Set-AgentModeFunction -ErrorAction SilentlyContinue) { 'NOPROFILE_BYPASS_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'NOPROFILE_BYPASS_OK'
     }
 
     It 'Logs PSCommandPath check progress to the profile load log' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'PSCommandPath check passed' -Quiet) { 'NOPROFILE_LOG_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'NOPROFILE_LOG_OK'
     }
 
     It 'Records profile execution start before NoProfile detection' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Profile execution started' -Quiet) { 'START_LOG_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'START_LOG_OK'
     }

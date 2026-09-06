@@ -41,7 +41,9 @@ Describe 'run-performance-batch.ps1 execution' {
         $null = New-Item -ItemType File -Path (Join-Path $perfDir 'failing-performance.tests.ps1') -Force
 
         $stubRunner = @'
-param()
+param([string]$OutputPath)
+New-Item -ItemType Directory -Path (Split-Path $OutputPath) -Force | Out-Null
+Set-Content -LiteralPath $OutputPath -Value '<test-results failures="1" />'
 Write-Host 'Tests Passed: 0, Failed: 1, Skipped: 0'
 exit 1
 '@
@@ -56,6 +58,9 @@ exit 1
         $result.ExitCode | Should -Be 1
         $result.Output | Should -Match 'Batch: performance \(failing-performance\*\)'
         $result.Output | Should -Match '0P / 1F / 0S|failed'
+        $reports = Join-Path $tempRoot 'tests/test-artifacts/performance-batch/failing-performance.tests.ps1'
+        Get-Content (Join-Path $reports 'test-results.xml') | Should -Match 'failures="1"'
+        Get-Content (Join-Path $reports 'batch-output.log') -Raw | Should -Match 'Failed: 1'
     }
 
     It 'Discovers performance tests in nested subdirectories under tests/performance' {
@@ -73,15 +78,21 @@ exit 0
 '@
         Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
 
-        $result = Invoke-TestScriptFile -ScriptPath $script:RunPerformanceBatchScript -ArgumentList @(
-            '-RepoRoot', $tempRoot,
-            '-Filter', 'nested-performance',
-            '-Quiet'
+        # PowerShell's location can differ from the process working directory.
+        $driver = Join-Path $tempRoot 'relative-root-driver.ps1'
+        @'
+param([string]$BatchScript)
+Set-Location -LiteralPath $PSScriptRoot
+& $BatchScript -RepoRoot . -Filter nested-performance -Quiet
+'@ | Set-Content -LiteralPath $driver
+        $result = Invoke-TestScriptFile -ScriptPath $driver -ArgumentList @(
+            '-BatchScript', $script:RunPerformanceBatchScript
         )
 
         $result.ExitCode | Should -Be 0
         $result.Output | Should -Match 'Batch: performance \(nested-performance\*\)'
         $result.Output | Should -Match '1P / 0F / 0S'
+        Test-Path (Join-Path $tempRoot 'tests/test-artifacts/performance-batch/nested/batch/nested-performance.tests.ps1/batch-output.log') | Should -BeTrue
     }
 
     It 'Marks unparsed runner output as a crash failure in the batch summary table' {

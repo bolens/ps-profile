@@ -49,6 +49,7 @@ jobs:
         run: |
           $filterModule = Join-Path $env:GITHUB_WORKSPACE 'scripts/utils/code-quality/modules/PesterCiShardFilter.psm1'
           Import-Module $filterModule -Force -DisableNameChecking
+          Import-Module (Join-Path $env:GITHUB_WORKSPACE 'scripts/utils/code-quality/modules/PesterCiJobs.psm1') -DisableNameChecking
 
           if ($env:EVENT_NAME -ne 'pull_request') {
             $shards = @(Resolve-PesterCiShards -All)
@@ -66,7 +67,7 @@ jobs:
           # Coerce to [string[]] so empty "no matching shards" stays an empty array
           # (bare @() / $null can bind as '' and fail Mandatory [string[]]).
           $shardList = [string[]]@($shards | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
-          $include = @(Get-PesterCiShardMatrix -Shards $shardList)
+          $include = @(Get-PesterCiJobs -Shards $shardList)
           $any = $include.Count -gt 0
           $matrix = if ($any) {
             @{ include = @($include) } | ConvertTo-Json -Compress -Depth 5
@@ -76,7 +77,9 @@ jobs:
                   label     = 'ubuntu-latest'
                   os        = 'ubuntu-latest'
                   container = $null
-                  shard     = 'unit-library'
+                  job       = 'none'
+                  maxParallelShards = 2
+                  shards    = @('unit-library')
                 }) } | ConvertTo-Json -Compress -Depth 5
           }
 
@@ -91,7 +94,7 @@ jobs:
           Write-Host "Matrix jobs: $($include.Count)"
 
   test:
-    name: test (${{ matrix.label }}, ${{ matrix.shard }})
+    name: test (${{ matrix.label }}, ${{ matrix.job }})
     needs: changes
     if: needs.changes.outputs.any == 'true'
     runs-on: ${{ matrix.os }}
@@ -158,27 +161,27 @@ jobs:
           if (-not $pester5) { throw 'Pester 5.7.x is required but was not installed' }
           Import-Module Pester -RequiredVersion $pester5.Version -Force
           Write-Host "Installed Pester $($pester5.Version)"
-      - name: Run Pester shard
+      - name: Run isolated Pester shards
         shell: pwsh
         env:
-          PESTER_SHARD: ${{ matrix.shard }}
+          PESTER_MAX_WORKERS: ${{ matrix.maxParallelShards }}
+          PESTER_SHARDS_JSON: ${{ toJSON(matrix.shards) }}
         run: |
-          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard "$env:PESTER_SHARD" -Quiet
+          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-job.ps1 -ShardsJson "$env:PESTER_SHARDS_JSON" -MaxParallelShards "$env:PESTER_MAX_WORKERS" -OutputPath "$env:GITHUB_WORKSPACE/tests/test-artifacts/ci-job"
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: pester-${{ matrix.label }}-${{ matrix.shard }}
-          path: tests/test-artifacts/ci-${{ matrix.shard }}/**
+          name: pester-${{ matrix.label }}-${{ matrix.job }}
+          path: tests/test-artifacts/ci-job/**
           if-no-files-found: ignore
       - name: Upload coverage report
-        if: matrix.shard == 'coverage-smoke' && matrix.label == 'ubuntu-latest'
+        if: always() && contains(matrix.shards, 'coverage-smoke') && matrix.label == 'ubuntu-latest'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: coverage-ubuntu-smoke
           path: |
-            coverage.xml
-            tests/test-artifacts/ci-coverage-smoke/**
+            tests/test-artifacts/ci-job/coverage-smoke/**
 
   ci-result:
     name: Pester result

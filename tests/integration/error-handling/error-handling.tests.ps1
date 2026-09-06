@@ -1,6 +1,7 @@
 
 
 BeforeAll {
+    . (Join-Path $PSScriptRoot '../../TestSupport/TestEnvironmentStubs.ps1')
     try {
         # Load the bootstrap fragment first to ensure Test-CachedCommand is available
         $bootstrapFragment = Get-TestPath "profile.d\bootstrap.ps1" -StartPath $PSScriptRoot -EnsureExists
@@ -38,6 +39,14 @@ BeforeAll {
 
 Describe 'Error Handling Module' {
     BeforeEach {
+        # Keep log assertions independent of other shards and the real user home.
+        $script:absentHomeVariables = @('HOME', 'USERPROFILE' | Where-Object {
+                $null -eq [Environment]::GetEnvironmentVariable($_, 'Process')
+            })
+        $errorTestHome = Join-Path $TestDrive 'error-home'
+        Mock-EnvironmentVariable -Name HOME -Value $errorTestHome
+        Mock-EnvironmentVariable -Name USERPROFILE -Value $errorTestHome
+
         # Clear any existing error log file for clean testing
         $userHome = if ($env:HOME) { $env:HOME } else { $env:USERPROFILE }
         $logDir = Join-Path $userHome '.local' 'share' 'powershell'
@@ -51,6 +60,12 @@ Describe 'Error Handling Module' {
     AfterEach {
         # Clean up environment
         $env:PS_PROFILE_DEBUG = $null
+        Restore-EnvironmentVariable -Name HOME
+        Restore-EnvironmentVariable -Name USERPROFILE
+        # The shared mock registry only records nonempty original values.
+        foreach ($name in $script:absentHomeVariables) {
+            Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
+        }
     }
 
     Context 'Write-ProfileError' {
@@ -226,4 +241,3 @@ $global:TestRetryFragmentLoaded = $true
         }
     }
 }
-

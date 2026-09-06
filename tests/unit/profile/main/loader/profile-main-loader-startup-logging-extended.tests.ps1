@@ -17,16 +17,20 @@ BeforeAll {
 
     $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
     $script:ProfileScript = Join-Path $script:TestRepoRoot 'Microsoft.PowerShell_profile.ps1'
+
+    # Capture read-only observations from one eager startup in a fresh child process.
+    $escapedProfile = $script:ProfileScript.Replace("'", "''")
+    $script:StartupObservations = Invoke-TestPwshScript -ScriptContent @"
+`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
+. '$escapedProfile'
+if (Select-String -Path `$log -Pattern 'Profile execution started' -Quiet) { 'STARTUP_LOG_OK' }
+if (Select-String -Path `$log -Pattern 'Before .env load' -Quiet) { 'ENV_LOAD_LOG_OK' }
+"@
 }
 
 Describe 'Microsoft.PowerShell_profile.ps1 startup logging extended scenarios' {
     It 'Writes profile execution started to the load log on startup' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Profile execution started' -Quiet) { 'STARTUP_LOG_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'STARTUP_LOG_OK'
     }
@@ -44,12 +48,7 @@ if (Select-String -Path `$log -Pattern 'Profile startup' -Quiet) { 'STARTUP_META
     }
 
     It 'Logs environment file loading before debug checks' {
-        $escapedProfile = $script:ProfileScript.Replace("'", "''")
-        $result = Invoke-TestPwshScript -ScriptContent @"
-`$log = Join-Path ([System.IO.Path]::GetTempPath()) 'powershell-profile-load.log'
-. '$escapedProfile'
-if (Select-String -Path `$log -Pattern 'Before .env load' -Quiet) { 'ENV_LOAD_LOG_OK' }
-"@
+        $result = $script:StartupObservations
 
         $result | Should -Match 'ENV_LOAD_LOG_OK'
     }
