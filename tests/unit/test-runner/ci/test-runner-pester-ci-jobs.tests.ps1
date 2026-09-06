@@ -91,6 +91,7 @@ if ($env:PESTER_CI_FIXTURE_BARRIER) {
     if (@(Get-ChildItem $env:PESTER_CI_FIXTURE_BARRIER).Count -lt 2) { throw 'Workers did not overlap' }
 }
 Set-Content (Join-Path $results 'finished.txt') ([DateTimeOffset]::UtcNow.ToString('o'))
+[Console]::Error.WriteLine('Expected native diagnostic; exit status determines success')
 if ($Shard -eq 'unit-support') { throw 'Expected fixture failure' }
 '@
         | Set-Content $entry
@@ -179,6 +180,8 @@ if ($Shard -eq 'unit-support') { throw 'Expected fixture failure' }
         $result.Succeeded | Should -BeFalse
         $result.Results.Count | Should -Be 2
         @($result.Results | Where-Object { $_.ExitCode -eq 0 }).Count | Should -Be 1
+        @($result.Results | Where-Object { $_.Error }).Count | Should -Be 0
+        ($result.Results | Where-Object Shard -EQ 'unit-support').ExitCode | Should -Be 1
         $observed = foreach ($shard in @('unit-support', 'unit-utility')) {
             $artifactPath = Join-Path $outputPath "$shard/test-artifacts/tools-batch"
             $item = Get-Content (Join-Path $artifactPath 'fixture.json') -Raw | ConvertFrom-Json

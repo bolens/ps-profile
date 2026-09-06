@@ -40,6 +40,9 @@ BeforeAll {
 Describe 'Error Handling Module' {
     BeforeEach {
         # Keep log assertions independent of other shards and the real user home.
+        $script:absentHomeVariables = @('HOME', 'USERPROFILE' | Where-Object {
+                $null -eq [Environment]::GetEnvironmentVariable($_, 'Process')
+            })
         $errorTestHome = Join-Path $TestDrive 'error-home'
         Mock-EnvironmentVariable -Name HOME -Value $errorTestHome
         Mock-EnvironmentVariable -Name USERPROFILE -Value $errorTestHome
@@ -59,6 +62,10 @@ Describe 'Error Handling Module' {
         $env:PS_PROFILE_DEBUG = $null
         Restore-EnvironmentVariable -Name HOME
         Restore-EnvironmentVariable -Name USERPROFILE
+        # The shared mock registry only records nonempty original values.
+        foreach ($name in $script:absentHomeVariables) {
+            Remove-Item -LiteralPath "Env:$name" -ErrorAction SilentlyContinue
+        }
     }
 
     Context 'Write-ProfileError' {

@@ -204,7 +204,7 @@ function Invoke-PesterCiJob {
             Push-Location -LiteralPath $clone
             $locationPushed = $true
             Write-Host "Running $shard at $revision"
-            & $pwsh -NoProfile -NonInteractive -File (Join-Path $clone 'scripts/utils/code-quality/run-pester-ci-shard.ps1') -Shard $shard -Quiet | Out-Host
+            & $pwsh -NoProfile -NonInteractive -File (Join-Path $clone 'scripts/utils/code-quality/run-pester-ci-shard.ps1') -Shard $shard -Quiet 2>&1 | Out-Host
             $result.ExitCode = $LASTEXITCODE
         }
         catch {
