@@ -168,7 +168,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
+/build/
 develop-eggs/
 dist/
 downloads/
@@ -211,15 +211,6 @@ cover/
 # IPython
 profile_default/
 ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# poetry
-poetry.lock
 
 # Celery
 celerybeat-schedule
@@ -279,7 +270,7 @@ obj/
 
 # Build outputs
 dist/
-build/
+/build/
 out/
 target/
 *.class
@@ -457,3 +448,9 @@ cache/powershell-profile/
 .fallow/cache/
 .fallow/snapshots/
 .fallow/regression-baseline.json
+
+# Local tooling and runtime artifacts
+.env.*
+!.env.example
+!.env.*.example
+.ruff_cache/
