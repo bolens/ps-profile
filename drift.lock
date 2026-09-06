@@ -3934,7 +3934,7 @@ docs/guides/TESTING.md -> profile.d/git.ps1 sig:a7f9055956a7be64
 docs/guides/TESTING.md -> scripts/git/hooks/pre-push.ps1 sig:981ba4c4be6664fa
 docs/guides/TESTING.md -> scripts/lib/path/PathResolution.psm1 sig:77cd28d0062bfc09
 docs/guides/TESTING.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:682de92c5a08d2b3
-docs/guides/TESTING.md -> scripts/utils/code-quality/modules/PesterCiJobs.psm1 sig:2af25d8650fea15c
+docs/guides/TESTING.md -> scripts/utils/code-quality/modules/PesterCiJobs.psm1 sig:6f6ddca7cffad9c0
 docs/guides/TESTING.md -> scripts/utils/code-quality/modules/PesterCiShardFilter.psm1 sig:db57d77fe3e88b6e
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-pester-changed-shards.ps1 sig:d170c2ce054afaf1
@@ -6483,7 +6483,7 @@ tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/util
 tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-unit-batch.ps1 sig:cbed57563e9a8dad
 tests/unit/test-runner/check/test-runner-check-missing-tests-extended.tests.ps1 -> scripts/utils/code-quality/check-missing-tests.ps1 sig:4754eeede4f5f829
 tests/unit/test-runner/check/test-runner-check-missing-tests.tests.ps1 -> scripts/utils/code-quality/check-missing-tests.ps1 sig:4754eeede4f5f829
-tests/unit/test-runner/ci/test-runner-pester-ci-jobs.tests.ps1 -> scripts/utils/code-quality/modules/PesterCiJobs.psm1 sig:55dd53c431ba9acf
+tests/unit/test-runner/ci/test-runner-pester-ci-jobs.tests.ps1 -> scripts/utils/code-quality/modules/PesterCiJobs.psm1 sig:6f6ddca7cffad9c0
 tests/unit/test-runner/ci/test-runner-pester-ci-jobs.tests.ps1 -> scripts/utils/code-quality/modules/PesterCiShardFilter.psm1 sig:db57d77fe3e88b6e
 tests/unit/test-runner/ci/test-runner-pester-ci-jobs.tests.ps1 -> scripts/utils/code-quality/run-pester-ci-job.ps1 sig:9193763fe0d38717
 tests/unit/test-runner/ci/test-runner-pester-ci-jobs.tests.ps1 -> scripts/utils/code-quality/run-pester-ci-shard.ps1 sig:5f05093067ccc63b

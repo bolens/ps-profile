@@ -37,3 +37,9 @@ Independent scheduling review completed; targeted host-state review remains part
 **Rationale**: The complete 3119aa2c candidate passed in 30m45s with 21,955 test-step seconds. Serial packing still estimates more than 20 minutes on the busiest job. Separate processes permit concurrent use of runner cores without sharing PowerShell environment variables.
 
 **Validation**: Prove worker overlap, unique process/repo/temp/cache paths, retained failures, and native-child termination on worker cancellation. Keep the host-state audit limitation above.
+
+## Runner capacity
+
+**Decision**: Default to 16 jobs (eight Ubuntu, six Windows, two Arch), retaining the configurable budget and all 86 shard/platform pairs.
+
+**Rationale**: The 20-job hosted candidate still queued bundles behind concurrent validation. Modeling two workers with the same completed-run estimates gives a longest job of 838 seconds at 16 jobs versus 827 seconds at 20. Leaving capacity for other checks should reduce queue delays; the model is not hosted timing proof.

@@ -16,11 +16,12 @@ function Get-PesterCiJobs {
         Selected shard names from Resolve-PesterCiShards.
     .PARAMETER MaxJobs
         Maximum total jobs, with at least one for each selected platform.
+        Defaults to 16 to leave runner capacity for other required checks.
     #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][AllowEmptyCollection()][AllowNull()][AllowEmptyString()][string[]]$Shards,
-        [ValidateRange(1, 256)][int]$MaxJobs = 20
+        [ValidateRange(1, 256)][int]$MaxJobs = 16
     )
     $names = @($Shards | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique)
     $known = @(Get-PesterCiAllShards)

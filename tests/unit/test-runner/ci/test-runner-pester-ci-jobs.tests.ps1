@@ -6,11 +6,13 @@ Describe 'Pester CI job packing' {
         Import-Module (Join-Path $repoRoot 'scripts/utils/code-quality/modules/PesterCiJobs.psm1') -Force
     }
 
-    It 'preserves every full-inventory shard and platform exactly once' {
+    It 'preserves every full-inventory shard and platform exactly once with <Budget> jobs' -ForEach @(
+        @{ Budget = 16 }, @{ Budget = 20 }
+    ) {
         $shards = @(Get-PesterCiAllShards)
         $original = @(Get-PesterCiShardMatrix -Shards $shards)
-        $jobs = @(Get-PesterCiJobs -Shards $shards -MaxJobs 20)
-        $jobs.Count | Should -Be 20
+        $jobs = @(Get-PesterCiJobs -Shards $shards -MaxJobs $Budget)
+        $jobs.Count | Should -Be $Budget
         $actual = @($jobs | ForEach-Object {
                 $job = $_
                 foreach ($shard in $job.shards) { "$($job.label)|$($job.os)|$($job.container)|$shard" }
@@ -41,6 +43,7 @@ Describe 'Pester CI job packing' {
 
     It 'produces deterministic assignments' {
         $shards = @(Get-PesterCiAllShards)
+        @(Get-PesterCiJobs -Shards $shards).Count | Should -Be 16
         (Get-PesterCiJobs -Shards $shards | ConvertTo-Json -Depth 6) |
             Should -Be (Get-PesterCiJobs -Shards ($shards | Sort-Object -Descending) | ConvertTo-Json -Depth 6)
     }

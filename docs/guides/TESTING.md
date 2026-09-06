@@ -682,7 +682,8 @@ processes still use eager profile loading and isolated temporary directories. Th
 tests verify the original file union, reject duplicates, and verify platform and
 changed-path selection. This split targets elapsed CI time by avoiding serial
 40-59 minute jobs; it does not claim an equivalent reduction in total runner time.
-The 86 shard/platform pairs are packed into 20 compatible jobs using measured
+The default job budget leaves capacity for the other required checks.
+The 86 shard/platform pairs are packed into 16 compatible jobs using measured
 per-platform durations. Each job runs up to two separate-process workers; every
 worker creates a fresh local clone of the checked-out revision, including PR merge
 commits, and uses its own temporary directory and fragment cache. Installed module
