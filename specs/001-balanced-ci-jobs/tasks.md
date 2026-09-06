@@ -37,12 +37,15 @@
 
 ## Dependencies and execution
 
-T001 precedes T002. US1 tests precede packing implementation; US2 tests precede execution implementation. Workflow integration requires both stories. Delivery requires all earlier validation.
+T001 precedes T002. US1 tests precede packing implementation; US2 tests precede execution implementation.
+Workflow integration requires both stories. Delivery requires all earlier validation.
 
 Packing tests and execution-fixture design can be reviewed independently after the foundation is complete. Implementation remains coordinated in this checkout.
 
 ## Implementation strategy
 
-First prove inventory preservation, then prove failure and isolation behavior with committed fixtures. Switch the workflow only after both pass. Measure complete hosted elapsed time before declaring the under-20-minute target achieved.
+First prove inventory preservation, then prove failure and isolation behavior with committed fixtures. Switch
+the workflow only after both pass. Measure complete hosted elapsed time before declaring the under-20-minute
+target achieved.
 
-Hosted acceptance remains pending after implementation: record the pushed head, full elapsed time, and every applicable check in PR #84 before merge. This external delivery evidence is not replaced by local task completion.
+Hosted acceptance was verified in PR #84: the final Pester run completed in 19m36s including queue time, and all applicable checks passed. See the dated receipt in `quickstart.md`.

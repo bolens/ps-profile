@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-06
 
-**Status**: Implemented; hosted acceptance pending
+**Status**: Implemented and delivered; hosted acceptance verified
 
 **Input**: Improve PR CI toward under 20 minutes without losing functionality.
 

@@ -965,4 +965,3 @@ function Remove-TestArtifacts {
 if (-not $env:TERM -or $env:TERM -eq 'dumb') {
     $env:TERM = 'xterm-256color'
 }
-
