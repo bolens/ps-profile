@@ -73,3 +73,5 @@ task drift-check   # included in quality-check
 
 After a full API doc regeneration, run `task drift-link` again so `docs/api/**` source anchors stay
 current.
+
+- [Editor setup](../.vscode/README.md)
