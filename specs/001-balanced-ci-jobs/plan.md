@@ -4,7 +4,10 @@
 
 ## Summary
 
-Pack the authoritative shard/platform matrix into a bounded set of compatible jobs using longest-processing-time assignment. Run up to two shards concurrently in separate worker processes, fresh local clones, and temporary directories, through its existing entrypoint. Preserve reports and failure status across the bundle.
+Pack the authoritative shard/platform matrix into a bounded set of compatible jobs using
+longest-processing-time assignment. Run up to two shards concurrently in separate worker processes, fresh
+local clones, and temporary directories, through its existing entrypoint. Preserve reports and failure status
+across the bundle.
 
 ## Technical Context
 
@@ -22,14 +25,17 @@ Pack the authoritative shard/platform matrix into a bounded set of compatible jo
 
 **Performance Goals**: Complete successful PR validation under 20 minutes including queueing.
 
-**Constraints**: Preserve 86 shard/platform pairs, test modes, coverage, required aggregate identity, read-only workflow permissions, immutable action pins, and existing module installation policy.
+**Constraints**: Preserve 86 shard/platform pairs, test modes, coverage, required aggregate identity,
+read-only workflow permissions, immutable action pins, and existing module installation policy.
 
 **Scale/Scope**: 17 compatible jobs for the full inventory; smaller selections never gain extra work.
 
 ## Constitution Check
 
 - Startup runtime and lazy/idempotent behavior remain unchanged by this feature.
-- Bootstrap shared libraries through ModuleImport; reuse path, platform, logging, and exit helpers. Existing libraries have no general process execution wrapper; native invocation is limited to Git and fresh PowerShell processes.
+- Bootstrap shared libraries through ModuleImport; reuse path, platform, logging, and exit helpers. Existing
+  libraries have no general process execution wrapper; native invocation is limited to Git and fresh
+  PowerShell processes.
 - Maintain strict mode, exact native exit handling, and all existing platforms.
 - Use isolated committed fixtures; do not install modules or alter the live profile locally.
 - Run focused coverage, full native validation, separate review, and hosted platform checks. Parent coverage cannot trace child fixture execution; report that boundary.
