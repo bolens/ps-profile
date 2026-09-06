@@ -51,3 +51,9 @@ The completed worker trial (run 34003602400) supplied all 86 execution durations
 **Decision**: Performance shards have a dedicated serial Windows job. Ordinary shards retain two workers. The full budget is 17 jobs so the dedicated job does not lengthen the other Windows groups.
 
 **Rationale**: Run 34005288918 completed in 19m46s but failed one security-tools performance assertion while sharing a runner with eager loader work. The quiet batch runner retained only counts, so the exact assertion was unavailable. Keep performance thresholds unchanged, remove competing shard execution, and retain per-file XML and captured output for diagnosis. The completed-run estimates model a longest job of about 16 minutes with 17 jobs; only successful hosted execution establishes acceptance.
+
+## Refresh estimates from successful runs
+
+**Decision**: Keep the 17-job budget and use the maximum observed duration of each shard from successful runs 34006983434 and 34008071025. This allocates eight Ubuntu, seven ordinary Windows, one Arch, and one serial Windows performance job while preserving all 86 platform/shard pairs.
+
+**Rationale**: Complete elapsed times were 25m16s and 20m19s, including queueing. The older estimates understated several Ubuntu shards. The refreshed estimates model a longest execution of 16m21s before runner setup and queue delay; budgets of 18–20 jobs do not improve that maximum. Hosted validation remains the acceptance test.
