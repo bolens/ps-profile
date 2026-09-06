@@ -1,5 +1,7 @@
 # Contributing
 
+[Documentation](docs/README.md)
+
 Thank you for contributing to this PowerShell profile project.
 
 > **Note:** This profile is under active development and may be unstable at any time. See [README.md](README.md) for the full warning.

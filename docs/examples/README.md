@@ -163,7 +163,7 @@ Write-MissingToolWarning -Tool 'docker' -InstallHint 'Install with: scoop instal
 
 - [AGENTS.md](../../AGENTS.md) - Quick start guide for AI assistants
 - [Module Loading Standard](../guides/MODULE_LOADING_STANDARD.md) - Detailed module loading specification
-- [Guide Index](../guides/README.md#testing) - Full testing documentation index
+- [Guide Index](../guides/TESTING.md) - Full testing documentation index
 
 ## Contributing
 

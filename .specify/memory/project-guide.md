@@ -1,5 +1,7 @@
 # ps-profile Spec Kit project guide
 
+[Documentation](../../docs/README.md)
+
 A modular PowerShell profile and shared script library with lazy startup and cross-
 platform behavior.
 

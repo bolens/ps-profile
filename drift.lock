@@ -3922,8 +3922,12 @@ docs/guides/README.md -> scripts/utils/code-quality/link-test-drift.ps1 sig:5d38
 docs/guides/SECURITY_ALLOWLIST.md -> PSScriptAnalyzerSettings.psd1 sig:9ac4c7d7762df7fc
 docs/guides/SECURITY_ALLOWLIST.md -> scripts/utils/security/run-security-scan.ps1 sig:9183bb6b55a22b91
 docs/guides/SQLITE_DATABASES.md -> profile.d/diagnostics-modules/monitoring/diagnostics-performance.ps1 sig:8c26a59dc5053e79
+docs/guides/SQLITE_DATABASES.md -> scripts/lib/core/PlatformPaths.psm1 sig:f0f4bad472b381e2
+docs/guides/SQLITE_DATABASES.md -> scripts/lib/fragment/FragmentCachePath.psm1 sig:b60af16b746f7102
 docs/guides/SQLITE_DATABASES.md -> scripts/lib/metrics/MetricsHistory.psm1 sig:698151fa91ff6fe0
 docs/guides/SQLITE_DATABASES.md -> scripts/lib/performance/PerformanceMeasurement.psm1 sig:4d1f40fecf24bdb4
+docs/guides/SQLITE_DATABASES.md -> scripts/utils/build-fragment-cache.ps1 sig:8e4543e55c50f268
+docs/guides/SQLITE_DATABASES.md -> scripts/utils/clear-fragment-cache.ps1 sig:0be965fcb9c15d51
 docs/guides/SQLITE_DATABASES.md -> scripts/utils/code-quality/modules/TestCache.psm1 sig:262d9731ce8a977c
 docs/guides/SQLITE_DATABASES.md -> scripts/utils/database/database-maintenance.ps1 sig:a46109af8a3abe7c
 docs/guides/SQLITE_DATABASES.md -> scripts/utils/database/initialize-databases.ps1 sig:99ee189ace8f874b
@@ -3947,7 +3951,7 @@ docs/guides/TESTING.md -> tests/TestSupport.ps1 sig:60c2d3807b910a2b
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport.ps1 sig:60c2d3807b910a2b
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestCommandAvailability.ps1 sig:2efaccf608c2c699
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestEnvironmentStubs.ps1 sig:d0e87d7840b90211
-docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestMocks.ps1 sig:f8b98d533f3c5473
+docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestMocks.ps1 sig:1ba2636ad37dc917
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestReflectionHelpers.ps1 sig:7fd79c03dc23c2c4
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/ToolDetection.ps1 sig:45bdee0ff94fc557
 docs/guides/TOOL_REQUIREMENTS.md -> requirements.txt sig:a9257ea294261766
@@ -6800,7 +6804,7 @@ tests/unit/test-support/test/test-support-test-execution-extended.tests.ps1 -> t
 tests/unit/test-support/test/test-support-test-execution-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
 tests/unit/test-support/test/test-support-test-linux-package-helpers-extended.tests.ps1 -> tests/TestSupport/TestLinuxPackageHelpers.ps1 sig:7c49a3a3042ff7ec
 tests/unit/test-support/test/test-support-test-linux-package-helpers-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
-tests/unit/test-support/test/test-support-test-mocks-extended.tests.ps1 -> tests/TestSupport/TestMocks.ps1 sig:f8b98d533f3c5473
+tests/unit/test-support/test/test-support-test-mocks-extended.tests.ps1 -> tests/TestSupport/TestMocks.ps1 sig:1ba2636ad37dc917
 tests/unit/test-support/test/test-support-test-mocks-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
 tests/unit/test-support/test/test-support-test-module-loading-extended.tests.ps1 -> tests/TestSupport/TestModuleLoading.ps1 sig:953d9fd3da9de9ea
 tests/unit/test-support/test/test-support-test-module-loading-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
