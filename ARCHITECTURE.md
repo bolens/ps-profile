@@ -1,5 +1,7 @@
 # PowerShell Profile Architecture
 
+[Documentation](docs/README.md)
+
 This document provides detailed technical information about the profile architecture, internals, and design decisions.
 
 ## Overview

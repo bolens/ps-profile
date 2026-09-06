@@ -1,113 +1,81 @@
-# SQLite Databases Guide
+# SQLite databases guide
 
-SQLite databases used for persistent storage in this profile.
+[Documentation](../README.md) · [Architecture](../../ARCHITECTURE.md) ·
+[Fragment cache usage](FRAGMENT_CACHE_USAGE.md) · [Testing](TESTING.md)
+
+SQLite integration is optional. This checkout includes cache-path helpers and
+maintenance entry points, but it does not contain `SqliteDatabase.psm1` or the
+per-database modules expected under `scripts/lib/database/`. Do not interpret
+those entry points as proof that all named databases can be initialized or used.
 
 ## Overview
 
-| Database | File | Purpose | Documentation |
-| -------- | ---- | ------- | --------------- |
-| Fragment cache | `fragment-cache.db` | Parsed fragment content and AST command caches | [Fragment Cache Usage](FRAGMENT_CACHE_USAGE.md) |
-| Command history | `command-history.db` | Cross-session command execution history | This guide (when module available) |
-| Performance metrics | `performance-metrics.db` | Startup and operation timing history | This guide (when module available) |
-| Test cache | `test-cache.db` | Test result caching for CI | [Testing Guide](TESTING.md) |
+The intended stores separate parsed-fragment caches, command history, performance
+metrics, and test results. Cache data may be replaceable from source, while history
+and retained metrics can be user data. Keep that distinction when clearing,
+backing up, or restoring a profile cache directory.
 
-All databases live under the profile cache directory:
+[PlatformPaths.psm1](../../scripts/lib/core/PlatformPaths.psm1) owns cache-directory
+selection. [FragmentCachePath.psm1](../../scripts/lib/fragment/FragmentCachePath.psm1)
+resolves the fragment database path and honors the shared cache-directory policy.
+A path helper does not establish that the database implementation exists.
 
-1. `PS_PROFILE_CACHE_DIR` when set (recommended: project-local `.cache/`)
-2. Otherwise platform defaults:
-   - Windows: `%LOCALAPPDATA%\PowerShellProfile`
-   - Linux/macOS: `~/.cache/powershell-profile` or `$XDG_CACHE_HOME/powershell-profile`
+## Maintenance scripts
 
-Database files are gitignored. Use `Get-FragmentCacheDbPath` from `FragmentCachePath.psm1` for the fragment cache path.
+[Database scripts](../../scripts/utils/database/) describe their parameters in
+source help. Check their required modules before running initialization, backup,
+repair, or migration. Installing `sqlite3` alone does not supply the missing
+PowerShell modules. Maintenance reports a setup error when required utilities
+are unavailable. Do not use a live profile to test that failure path.
 
-## Maintenance Scripts
+## Fragment cache (primary)
 
-Primary entry points under `scripts/utils/database/`:
+The fragment cache path is defined by
+[Get-FragmentCacheDbPath](../../scripts/lib/fragment/FragmentCachePath.psm1).
+[Build](../../scripts/utils/build-fragment-cache.ps1) and
+[clear](../../scripts/utils/clear-fragment-cache.ps1) scripts own the available
+cache operations. Follow [fragment cache usage](FRAGMENT_CACHE_USAGE.md) for
+startup integration, and verify backend availability before claiming persistent
+SQLite caching is active.
 
-```powershell
-# Initialize schemas (requires sqlite3 and lib database modules)
-pwsh -NoProfile -File scripts/utils/database/initialize-databases.ps1
+## Command history database
 
-# Health, optimize, backup, repair, statistics
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action health
+[Diagnostics monitoring](../../profile.d/diagnostics-modules/monitoring/diagnostics-performance.ps1)
+contains optional command-history integration. `CommandHistoryDatabase.psm1` is
+not present in this checkout. Do not advertise its functions as installed commands
+or assume cross-session records exist. Treat any externally supplied history
+backend as sensitive user state.
 
-# Validate database files and schemas
-pwsh -NoProfile -File scripts/utils/database/validate-databases.ps1
-```
+## Performance metrics database
 
-These scripts import helpers from `scripts/lib/utilities/SqliteDatabase.psm1` and per-database modules under `scripts/lib/database/` when present. They degrade gracefully when optional modules are not installed.
+[Performance measurement](../../scripts/lib/performance/PerformanceMeasurement.psm1)
+and [metrics history](../../scripts/lib/metrics/MetricsHistory.psm1) own metric
+collection and persistence behavior. The optional `PerformanceMetricsDatabase.psm1`
+backend is absent. Read the actual fallback before choosing a backup or migration
+procedure.
 
-## Fragment Cache (Primary)
+## Test cache database
 
-The fragment cache is the most actively used SQLite database. It stores:
+[TestCache.psm1](../../scripts/utils/code-quality/modules/TestCache.psm1) tries the
+optional `TestCacheDatabase.psm1` backend and falls back to JSON. That database
+module is absent here. Tests must cover the selected backend without depending
+on personal cache contents or a successful database initialization.
 
-- **Content cache** — fragment source for regex parsing
-- **AST cache** — function and command names from AST parsing
+## Database maintenance
 
-Operations:
+Before introducing a backend, define its schema owner, compatibility with retained
+records, migration behavior, and restore procedure. Test failure and rollback with
+disposable data. A code rollback does not undo database writes. Preserve history
+and metrics before any destructive repair or reset.
 
-```powershell
-task build-fragment-cache   # warm cache
-task clear-fragment-cache   # reset cache
-```
+## Best practices
 
-See [Fragment Cache Usage](FRAGMENT_CACHE_USAGE.md) for configuration (`PS_PROFILE_PREWARM_CACHE`, `PS_PROFILE_CACHE_DIR`) and troubleshooting.
+Use an isolated cache directory for tests. Keep database files and sensitive
+history out of Git. Share configuration for cache placement, not the cache's user
+data. Report missing backends as unavailable rather than successful maintenance.
 
-## Command History Database
+## Related documentation
 
-Tracks command execution across sessions when `CommandHistoryDatabase.psm1` is available (loaded by diagnostics performance monitoring).
-
-Typical functions when the module is present:
-
-```powershell
-Get-CommandHistory -Limit 50
-Get-CommandUsageStats -Limit 20
-Clear-CommandHistory -OlderThan (Get-Date).AddMonths(-6)
-```
-
-Integrated via `profile.d/diagnostics-modules/monitoring/diagnostics-performance.ps1`.
-
-## Performance Metrics Database
-
-Stores timing data from `Measure-Operation` (`scripts/lib/performance/PerformanceMeasurement.psm1`), `benchmark-startup.ps1`, and test performance monitoring.
-
-## Test Cache Database
-
-The test runner uses `scripts/utils/code-quality/modules/TestCache.psm1`, which prefers `TestCacheDatabase.psm1` when available and falls back to JSON file caching otherwise.
-
-## Database Maintenance
-
-```powershell
-# All databases
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action health
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action optimize
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action backup
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action repair
-pwsh -NoProfile -File scripts/utils/database/database-maintenance.ps1 -Action statistics -OutputFormat json
-```
-
-Target a single database with `-Database command-history`, `-Database performance-metrics`, or `-Database test-cache`.
-
-Low-level SQLite helpers (when `SqliteDatabase.psm1` is available):
-
-```powershell
-Import-Module scripts/lib/utilities/SqliteDatabase.psm1
-Test-DatabaseIntegrity -DatabasePath (Join-Path $cacheDir 'command-history.db')
-Backup-Database -DatabasePath (Join-Path $cacheDir 'command-history.db')
-Repair-Database -DatabasePath (Join-Path $cacheDir 'command-history.db') -BackupBeforeRepair
-```
-
-## Best Practices
-
-1. Use `PS_PROFILE_CACHE_DIR=.cache` for a project-local, team-shareable cache directory
-2. Run `database-maintenance.ps1 -Action health` periodically in long-lived environments
-3. Clear or rebuild the fragment cache after large profile refactors (`task clear-fragment-cache`)
-4. Back up `.cache/` when preserving metrics history matters
-
-## Related Documentation
-
-- [Fragment Cache Usage](FRAGMENT_CACHE_USAGE.md)
-- [Fragment Loading Optimization](FRAGMENT_LOADING_OPTIMIZATION.md)
-- [Profile Load Time Optimization](PROFILE_LOAD_TIME_OPTIMIZATION.md)
-- [Testing Guide](TESTING.md)
-- [ARCHITECTURE.md](../../ARCHITECTURE.md)
+- [Fragment loading](FRAGMENT_LOADING_OPTIMIZATION.md)
+- [Profile load-time optimization](PROFILE_LOAD_TIME_OPTIMIZATION.md)
+- [Delivery and recovery](../../RELEASING.md)
