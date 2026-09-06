@@ -78,10 +78,15 @@ exit 0
 '@
         Set-Content -LiteralPath (Join-Path $runnerDir 'run-pester.ps1') -Value $stubRunner -Encoding UTF8
 
-        $result = Invoke-TestScriptFile -ScriptPath $script:RunPerformanceBatchScript -ArgumentList @(
-            '-RepoRoot', $tempRoot,
-            '-Filter', 'nested-performance',
-            '-Quiet'
+        # PowerShell's location can differ from the process working directory.
+        $driver = Join-Path $tempRoot 'relative-root-driver.ps1'
+        @'
+param([string]$BatchScript)
+Set-Location -LiteralPath $PSScriptRoot
+& $BatchScript -RepoRoot . -Filter nested-performance -Quiet
+'@ | Set-Content -LiteralPath $driver
+        $result = Invoke-TestScriptFile -ScriptPath $driver -ArgumentList @(
+            '-BatchScript', $script:RunPerformanceBatchScript
         )
 
         $result.ExitCode | Should -Be 0

@@ -6695,7 +6695,7 @@ tests/unit/test-runner/output/test-runner-output-utils.tests.ps1 -> scripts/util
 tests/unit/test-runner/output/test-runner-output-utils.tests.ps1 -> scripts/utils/code-quality/modules/OutputSanitizer.psm1 sig:4efc429aab2f11fe
 tests/unit/test-runner/output/test-runner-output-utils.tests.ps1 -> scripts/utils/code-quality/modules/PesterConfig.psm1 sig:43a7e54f37cf1fb3
 tests/unit/test-runner/performance/test-runner-performance-analysis-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestPerformanceAnalysis.psm1 sig:228d724a3de28791
-tests/unit/test-runner/performance/test-runner-performance-batch-extended.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:be0c76c42d2a3d83
+tests/unit/test-runner/performance/test-runner-performance-batch-extended.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:371519e060c3d811
 tests/unit/test-runner/performance/test-runner-performance-monitoring-extended.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
 tests/unit/test-runner/performance/test-runner-performance-monitoring-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestPerformanceMonitoring.psm1 sig:d9f55f3500d21a41
 tests/unit/test-runner/pester/test-runner-pester-config-extended.tests.ps1 -> scripts/utils/code-quality/modules/PesterConfig.psm1 sig:43a7e54f37cf1fb3
@@ -6914,7 +6914,7 @@ tests/unit/utility/run/utility-run-conversion-integration-batch.tests.ps1 -> scr
 tests/unit/utility/run/utility-run-format.tests.ps1 -> scripts/utils/code-quality/run-format.ps1 sig:31997fbb63847fe9
 tests/unit/utility/run/utility-run-lint.tests.ps1 -> scripts/utils/code-quality/run-lint.ps1 sig:defbba736969a474
 tests/unit/utility/run/utility-run-markdownlint.tests.ps1 -> scripts/utils/code-quality/run-markdownlint.ps1 sig:7ac3156ffcf78cbf
-tests/unit/utility/run/utility-run-performance-batch.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:be0c76c42d2a3d83
+tests/unit/utility/run/utility-run-performance-batch.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:371519e060c3d811
 tests/unit/utility/run/utility-run-security-scan-extended.tests.ps1 -> scripts/utils/security/run-security-scan.ps1 sig:9183bb6b55a22b91
 tests/unit/utility/run/utility-run-security-scan.tests.ps1 -> scripts/utils/security/modules/SecurityReporter.psm1 sig:def268e80f2badc2
 tests/unit/utility/run/utility-run-security-scan.tests.ps1 -> scripts/utils/security/run-security-scan.ps1 sig:9183bb6b55a22b91

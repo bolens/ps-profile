@@ -49,6 +49,9 @@ if (-not (Test-Path -LiteralPath $perfRoot)) {
     Exit-WithCode -ExitCode $EXIT_SETUP_ERROR
 }
 
+# Relative paths follow the PowerShell location, not the process working directory.
+$perfRoot = (Get-Item -LiteralPath $perfRoot -ErrorAction Stop).FullName
+
 $runner = Join-Path $RepoRoot 'scripts' 'utils' 'code-quality' 'run-pester.ps1'
 $files = @(Get-ChildItem -Path $perfRoot -Filter '*.tests.ps1' -File -Recurse | Sort-Object FullName)
 if (-not [string]::IsNullOrWhiteSpace($Filter)) {
