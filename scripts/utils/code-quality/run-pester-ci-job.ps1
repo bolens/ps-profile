@@ -13,6 +13,7 @@
     Directory for per-shard artifacts and the job summary.
 .PARAMETER MaxParallelShards
     Maximum independent shard worker processes, default two for hosted CI.
+    Performance shards always run serially to preserve timing assertions.
 .EXAMPLE
     ./run-pester-ci-job.ps1 -ShardsJson '["unit-support"]' -OutputPath ./tests/test-artifacts/ci-job
 #>

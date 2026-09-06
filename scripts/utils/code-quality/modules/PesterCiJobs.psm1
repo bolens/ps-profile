@@ -16,12 +16,12 @@ function Get-PesterCiJobs {
         Selected shard names from Resolve-PesterCiShards.
     .PARAMETER MaxJobs
         Maximum total jobs, with at least one for each selected platform.
-        Defaults to 16 to leave runner capacity for other required checks.
+        Defaults to 17 to leave runner capacity for other required checks.
     #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)][AllowEmptyCollection()][AllowNull()][AllowEmptyString()][string[]]$Shards,
-        [ValidateRange(1, 256)][int]$MaxJobs = 16
+        [ValidateRange(1, 256)][int]$MaxJobs = 17
     )
     $names = @($Shards | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique)
     $known = @(Get-PesterCiAllShards)
@@ -31,16 +31,22 @@ function Get-PesterCiJobs {
     $inventory = @(Get-PesterCiShardMatrix -Shards $names)
     if ($inventory.Count -eq 0) { return @() }
     $estimates = Get-Content (Join-Path $PSScriptRoot '../pester-ci-durations.json') -Raw | ConvertFrom-Json -AsHashtable
-    $platforms = @($inventory | Group-Object label | Sort-Object Name | ForEach-Object {
+    $platforms = @($inventory | Group-Object {
+            if ($_.shard -like 'performance-*') { "$($_.label)-performance" } else { $_.label }
+        } | Sort-Object Name | ForEach-Object {
             $entries = @($_.Group | ForEach-Object {
                     $key = "$($_.label)/$($_.shard)"
                     $seconds = if ($estimates.seconds.ContainsKey($key)) { [double]$estimates.seconds[$key] } else { 300.0 }
                     if ($seconds -le 0) { throw "Invalid duration estimate: $key" }
                     [pscustomobject]@{ Entry = $_; Seconds = $seconds + 5 }
                 })
-            [pscustomobject]@{ Name = $_.Name; Entries = $entries; Count = 1; Total = ($entries.Seconds | Measure-Object -Sum).Sum }
+            [pscustomobject]@{
+                Name = $_.Name; Entries = $entries; Count = 1
+                Parallelism = if ($entries[0].Entry.shard -like 'performance-*') { 1 } else { 2 }
+                Total = ($entries.Seconds | Measure-Object -Sum).Sum
+            }
         })
-    if ($MaxJobs -lt $platforms.Count) { throw 'Job budget must cover every selected platform.' }
+    if ($MaxJobs -lt $platforms.Count) { throw 'Job budget must cover every selected platform and execution mode.' }
     $budget = [Math]::Min($MaxJobs, $inventory.Count)
     for ($assigned = $platforms.Count; $assigned -lt $budget; $assigned++) {
         $platform = $platforms | Where-Object { $_.Count -lt $_.Entries.Count } |
@@ -52,7 +58,9 @@ function Get-PesterCiJobs {
         $bins = @(for ($index = 1; $index -le $platform.Count; $index++) {
                 [pscustomobject]@{
                     label = $first.label; os = $first.os; container = $first.container
-                    job = "bundle-$index"; shards = [System.Collections.Generic.List[string]]::new(); estimatedSeconds = 0.0
+                    job = if ($platform.Parallelism -eq 1) { "performance-$index" } else { "bundle-$index" }
+                    maxParallelShards = $platform.Parallelism
+                    shards = [System.Collections.Generic.List[string]]::new(); estimatedSeconds = 0.0
                 }
             })
         foreach ($item in @($platform.Entries | Sort-Object @{ Expression = { $_.Seconds }; Descending = $true }, @{ Expression = { $_.Entry.shard } })) {
@@ -79,6 +87,7 @@ function Invoke-PesterCiJob {
         Job-owned result directory outside every temporary clone.
     .PARAMETER MaxParallelShards
         Maximum isolated worker processes. One retains serial execution.
+        Selections containing performance shards always run serially.
     .PARAMETER SummaryFile
         Unique summary filename for a worker sharing the collection directory.
     #>
@@ -90,6 +99,8 @@ function Invoke-PesterCiJob {
         [ValidateRange(1, 2)][int]$MaxParallelShards = 1,
         [ValidatePattern('^[a-z0-9-]+\.json$')][string]$SummaryFile = 'summary.json'
     )
+    # Timing assertions must never compete with another shard on this runner.
+    if (@($Shards | Where-Object { $_ -like 'performance-*' }).Count -gt 0) { $MaxParallelShards = 1 }
     $ErrorActionPreference = 'Stop'
     # Native failures are recorded per shard instead of terminating the remaining work.
     $PSNativeCommandUseErrorActionPreference = $false

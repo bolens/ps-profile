@@ -78,6 +78,7 @@ jobs:
                   os        = 'ubuntu-latest'
                   container = $null
                   job       = 'none'
+                  maxParallelShards = 2
                   shards    = @('unit-library')
                 }) } | ConvertTo-Json -Compress -Depth 5
           }
@@ -163,9 +164,10 @@ jobs:
       - name: Run isolated Pester shards
         shell: pwsh
         env:
+          PESTER_MAX_WORKERS: ${{ matrix.maxParallelShards }}
           PESTER_SHARDS_JSON: ${{ toJSON(matrix.shards) }}
         run: |
-          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-job.ps1 -ShardsJson "$env:PESTER_SHARDS_JSON" -OutputPath "$env:GITHUB_WORKSPACE/tests/test-artifacts/ci-job"
+          pwsh -NoProfile -NonInteractive -File scripts/utils/code-quality/run-pester-ci-job.ps1 -ShardsJson "$env:PESTER_SHARDS_JSON" -MaxParallelShards "$env:PESTER_MAX_WORKERS" -OutputPath "$env:GITHUB_WORKSPACE/tests/test-artifacts/ci-job"
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

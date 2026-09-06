@@ -24,7 +24,7 @@ Pack the authoritative shard/platform matrix into a bounded set of compatible jo
 
 **Constraints**: Preserve 86 shard/platform pairs, test modes, coverage, required aggregate identity, read-only workflow permissions, immutable action pins, and existing module installation policy.
 
-**Scale/Scope**: 16 compatible jobs for the full inventory; smaller selections never gain extra work.
+**Scale/Scope**: 17 compatible jobs for the full inventory; smaller selections never gain extra work.
 
 ## Constitution Check
 

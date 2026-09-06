@@ -7,7 +7,7 @@ Describe 'Pester CI job packing' {
     }
 
     It 'preserves every full-inventory shard and platform exactly once with <Budget> jobs' -ForEach @(
-        @{ Budget = 16 }, @{ Budget = 20 }
+        @{ Budget = 16 }, @{ Budget = 17 }, @{ Budget = 20 }
     ) {
         $shards = @(Get-PesterCiAllShards)
         $original = @(Get-PesterCiShardMatrix -Shards $shards)
@@ -22,6 +22,14 @@ Describe 'Pester CI job packing' {
         @($actual | Sort-Object -Unique).Count | Should -Be 86
         ($actual | Sort-Object) | Should -Be ($expected | Sort-Object)
         @($jobs | Where-Object { $_.shards.Count -eq 0 }).Count | Should -Be 0
+        foreach ($job in $jobs) {
+            $performance = @($job.shards | Where-Object { $_ -like 'performance-*' })
+            if ($performance.Count -gt 0) {
+                $performance.Count | Should -Be $job.shards.Count
+                $job.maxParallelShards | Should -Be 1
+            }
+            else { $job.maxParallelShards | Should -Be 2 }
+        }
     }
 
     It 'preserves a filtered selection and deduplicates input names' {
@@ -43,7 +51,7 @@ Describe 'Pester CI job packing' {
 
     It 'produces deterministic assignments' {
         $shards = @(Get-PesterCiAllShards)
-        @(Get-PesterCiJobs -Shards $shards).Count | Should -Be 16
+        @(Get-PesterCiJobs -Shards $shards).Count | Should -Be 17
         (Get-PesterCiJobs -Shards $shards | ConvertTo-Json -Depth 6) |
             Should -Be (Get-PesterCiJobs -Shards ($shards | Sort-Object -Descending) | ConvertTo-Json -Depth 6)
     }
@@ -196,6 +204,17 @@ if ($Shard -eq 'unit-support') { throw 'Expected fixture failure' }
         $observed[0].cache | Should -Not -Be $observed[1].cache
         [DateTimeOffset]$observed[0].started | Should -BeLessThan ([DateTimeOffset]$observed[1].finished)
         [DateTimeOffset]$observed[1].started | Should -BeLessThan ([DateTimeOffset]$observed[0].finished)
+    }
+
+    It 'serializes timing-sensitive shards even when two workers are requested' {
+        $outputPath = Join-Path $TestDrive 'serial performance'
+        $result = Invoke-PesterCiJob -Shards @('performance-profile-a', 'performance-profile-b') -RepoRoot $fixture -OutputPath $outputPath -MaxParallelShards 2
+        $result.Succeeded | Should -BeTrue
+        $first = Join-Path $outputPath 'performance-profile-a/test-artifacts/tools-batch'
+        $second = Join-Path $outputPath 'performance-profile-b/test-artifacts/tools-batch'
+        $finished = [DateTimeOffset](Get-Content (Join-Path $first 'finished.txt'))
+        $started = [DateTimeOffset](Get-Content (Join-Path $second 'fixture.json') -Raw | ConvertFrom-Json).started
+        $finished | Should -BeLessThan $started
     }
 
     It 'stops a native child and cleans its clone when its worker is cancelled' {

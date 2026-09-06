@@ -683,15 +683,18 @@ tests verify the original file union, reject duplicates, and verify platform and
 changed-path selection. This split targets elapsed CI time by avoiding serial
 40-59 minute jobs; it does not claim an equivalent reduction in total runner time.
 The default job budget leaves capacity for the other required checks.
-The 86 shard/platform pairs are packed into 16 compatible jobs using measured
-per-platform durations. Each job runs up to two separate-process workers; every
+The 86 shard/platform pairs are packed into 17 compatible jobs using measured
+per-platform durations. Performance shards use a dedicated serial Windows job so
+timing assertions do not compete with another shard. Other jobs run up to two
+separate-process workers; every
 worker creates a fresh local clone of the checked-out revision, including PR merge
 commits, and uses its own temporary directory and fragment cache. Installed module
 and tool discovery remain available. The error-handling integration test uses its
 own home fixture for log assertions.
 
 `pester-ci-durations.json` contains scheduling estimates with source-run provenance;
-it never changes test selection or performance assertions. `Get-PesterCiShardMatrix`
+it never changes test selection or performance assertions. Performance batches
+retain per-file XML reports and captured output under `tests/test-artifacts/performance-batch/`. `Get-PesterCiShardMatrix`
 remains the authoritative inventory. GitHub controls actual runner scheduling.
 
 The [job entrypoint](../../scripts/utils/code-quality/run-pester-ci-job.ps1) clones

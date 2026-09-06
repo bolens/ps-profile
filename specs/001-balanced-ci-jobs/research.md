@@ -45,3 +45,9 @@ Independent scheduling review completed; targeted host-state review remains part
 **Rationale**: The 20-job hosted candidate still queued bundles behind concurrent validation. Modeling two workers with the same completed-run estimates gives a longest job of 838 seconds at 16 jobs versus 827 seconds at 20. Leaving capacity for other checks should reduce queue delays; the model is not hosted timing proof.
 
 The completed worker trial (run 34003602400) supplied all 86 execution durations, including checkout and collection. All test executions passed; one Windows permission-fixture cleanup failed and is repaired separately. Refreshing the scheduling estimates with these measurements moves one job from Ubuntu to Windows and models a longest job of 928 seconds at 16 jobs. Hosted validation remains the acceptance gate.
+
+## Timing-sensitive work
+
+**Decision**: Performance shards have a dedicated serial Windows job. Ordinary shards retain two workers. The full budget is 17 jobs so the dedicated job does not lengthen the other Windows groups.
+
+**Rationale**: Run 34005288918 completed in 19m46s but failed one security-tools performance assertion while sharing a runner with eager loader work. The quiet batch runner retained only counts, so the exact assertion was unavailable. Keep performance thresholds unchanged, remove competing shard execution, and retain per-file XML and captured output for diagnosis. The completed-run estimates model a longest job of about 16 minutes with 17 jobs; only successful hosted execution establishes acceptance.
