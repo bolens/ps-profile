@@ -99,17 +99,21 @@ Describe 'FragmentErrorHandling Module Functions' {
             $accessErrorPath = Join-Path $script:TestFragmentDir 'access-error.ps1'
             Set-Content -Path $accessErrorPath -Value '# Test'
 
+            $originalAcl = Get-Acl -LiteralPath $accessErrorPath -ErrorAction Stop
             try {
-                $acl = Get-Acl $accessErrorPath
+                $acl = Get-Acl -LiteralPath $accessErrorPath -ErrorAction Stop
                 $acl.SetAccessRuleProtection($true, $false)
                 $acl.Access | ForEach-Object { $acl.RemoveAccessRule($_) }
-                Set-Acl $accessErrorPath $acl -ErrorAction SilentlyContinue
+                Set-Acl -LiteralPath $accessErrorPath -AclObject $acl -ErrorAction Stop
 
                 $result = Invoke-FragmentSafely -FragmentName 'access-error' -FragmentPath $accessErrorPath
                 $result | Should -Be $false
             }
-            catch {
-                Get-Command Invoke-FragmentSafely | Should -Not -BeNullOrEmpty
+            finally {
+                # Restore access even when the assertion fails so isolated runner
+                # cleanup can remove the checkout without bypassing permissions.
+                Set-Acl -LiteralPath $accessErrorPath -AclObject $originalAcl -ErrorAction Stop
+                Remove-Item -LiteralPath $accessErrorPath -Force -ErrorAction Stop
             }
         }
 
