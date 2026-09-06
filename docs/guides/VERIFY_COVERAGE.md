@@ -25,11 +25,15 @@ For each path:
 
 The script matches source files to test files by naming convention, runs Pester with coverage, and writes JSON reports. See [Testing Guide — Coverage Analysis](TESTING.md#coverage-analysis) for flags and report locations.
 
+Check the reported test counts and coverage data even when the helper exits
+successfully. Missing coverage data and a percentage below the target produce
+warnings; neither establishes that the coverage target passed.
+
 ## Troubleshooting
 
 If commands hang or prompt for input:
 
-1. Close other PowerShell sessions and retry
+1. Identify the task-owned process before stopping a stuck run; preserve unrelated PowerShell sessions
 2. Run directly in a terminal (not through an IDE task runner)
 3. Check for stuck processes: `Get-Process pwsh`
 4. Use an explicit binary path if needed: `& 'C:\Program Files\PowerShell\7\pwsh.exe' -NoProfile -File ...`

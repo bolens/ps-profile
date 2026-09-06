@@ -93,7 +93,7 @@ function Invoke-PesterWithTimeout {
                 $powershell.RunspacePool = $runspacePool
                 
                 $scriptBlock = {
-                    param($TestPaths, $ConfigPath)
+                    param($TestPaths, $PesterConfig, $TestSupportPath)
                     try {
                         # Suppress all confirmations in runspace context
                         $ErrorActionPreference = 'Stop'
@@ -127,32 +127,16 @@ function Invoke-PesterWithTimeout {
                         Write-Host "Test execution started, running Pester tests on $($TestPaths.Count) paths..."
                         Write-Host "Paths: $($TestPaths -join ', ')"
 
-                        # Create Pester 5 configuration
-                        $config = New-PesterConfiguration
+                        # Preserve the caller's filters, coverage, and result settings.
+                        $config = $PesterConfig
                         $config.Run.PassThru = $true
                         $config.Run.Exit = $false
-                        $config.Output.Verbosity = 'Minimal'
-                        
-                        # Set path in configuration
                         if ($TestPaths) {
                             $config.Run.Path = $TestPaths
                         }
-
-                        # Load configuration if provided
-                        if ($ConfigPath -and -not [string]::IsNullOrWhiteSpace($ConfigPath) -and (Test-Path -LiteralPath $ConfigPath)) {
-                            Write-Host "Loading configuration from: $ConfigPath"
-                            if (Get-Command Read-JsonFile -ErrorAction SilentlyContinue) {
-                                $loadedConfig = Read-JsonFile -Path $ConfigPath -ErrorAction SilentlyContinue
-                            }
-                            else {
-                                $loadedConfig = Get-Content $ConfigPath -Raw | ConvertFrom-Json
-                            }
-                            if ($loadedConfig -is [PesterConfiguration]) {
-                                $config = $loadedConfig
-                                if ($TestPaths) {
-                                    $config.Run.Path = $TestPaths
-                                }
-                            }
+                        # A new runspace needs the same test helpers as the main runner.
+                        if (Test-Path -LiteralPath $TestSupportPath) {
+                            . $TestSupportPath
                         }
 
                         # Run Pester with Pester 5 syntax.
@@ -187,7 +171,8 @@ function Invoke-PesterWithTimeout {
                 
                 $null = $powershell.AddScript($scriptBlock)
                 $null = $powershell.AddArgument($TestPaths)
-                $null = $powershell.AddArgument($null)
+                $null = $powershell.AddArgument($Config)
+                $null = $powershell.AddArgument((Join-Path $PSScriptRoot '../../../../tests/TestSupport.ps1'))
                 $handle = $powershell.BeginInvoke()
             }
             catch {
@@ -241,6 +226,9 @@ function Invoke-PesterWithTimeout {
                 # Execution completed within timeout
                 try {
                     $jobResult = $powershell.EndInvoke($handle)
+                    foreach ($record in $powershell.Streams.Information) {
+                        Write-Information -MessageData $record.MessageData -InformationAction Continue
+                    }
                 }
                 catch {
                     throw "Failed to receive execution result: $($_.Exception.Message)"

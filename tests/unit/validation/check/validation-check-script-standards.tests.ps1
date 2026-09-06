@@ -72,6 +72,17 @@ exit 2
         } | Should -Throw '*1 issue(s) that need attention*'
     }
 
+    It 'accepts explicitly scoped Exit-WithCode implementations' {
+        foreach ($scope in @('script', 'global', 'local', 'private')) {
+            $content = 'function {0}:Exit-WithCode {{ param([int]$Code) exit $Code }}' -f $scope
+            Set-Content -LiteralPath (Join-Path $script:FixtureRoot "$scope.ps1") -Value $content -Encoding UTF8
+        }
+
+        $output = & $script:ScriptStandardsScript -Path $script:FixtureRoot 2>&1 | Out-String
+
+        $output | Should -Match 'informational issue|All scripts comply with codebase standards'
+    }
+
     It 'does not exempt functions whose names merely contain Exit-WithCode' {
         $content = @'
 function Invoke-Exit-WithCodeWrapper {

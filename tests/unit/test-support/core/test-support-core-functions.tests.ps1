@@ -169,3 +169,77 @@ Describe 'Package availability helpers' {
         }
     }
 }
+
+Describe 'Structured logging fixture isolation' {
+    BeforeAll {
+        $script:LoggingProbe = Join-Path $TestDrive 'logging-probe.ps1'
+        $script:LoggingHelper = Join-Path $script:TestRepoRoot 'tests/TestSupport/TestSupportCoreFunctions.ps1'
+        @'
+param([string]$HelperPath, [string]$Scenario)
+$ErrorActionPreference = 'Stop'
+. $HelperPath
+if ($Scenario -ne 'no-original') {
+    function global:Write-StructuredError { 'original-logger' }
+}
+switch ($Scenario) {
+    'never-enabled' { Disable-TestStructuredLogging }
+    'repeated-enable' {
+        Enable-TestStructuredLogging
+        Enable-TestStructuredLogging
+        Disable-TestStructuredLogging
+    }
+    'reload' {
+        Enable-TestStructuredLogging
+        . $HelperPath
+        Disable-TestStructuredLogging
+    }
+    'no-original' {
+        Enable-TestStructuredLogging
+        Enable-TestStructuredLogging
+        Disable-TestStructuredLogging
+    }
+}
+$logger = Get-Command Write-StructuredError -ErrorAction SilentlyContinue
+if ($Scenario -eq 'no-original') {
+    if ($logger) { throw 'A logging stub leaked after cleanup' }
+}
+elseif (-not $logger -or (& $logger) -ne 'original-logger') {
+    throw 'Cleanup removed or replaced the original logger'
+}
+'logging-isolation-ok'
+'@ | Set-Content -LiteralPath $script:LoggingProbe -Encoding utf8
+    }
+
+    It 'preserves logger ownership for <Scenario>' -ForEach @(
+        @{ Scenario = 'never-enabled' }
+        @{ Scenario = 'repeated-enable' }
+        @{ Scenario = 'reload' }
+        @{ Scenario = 'no-original' }
+    ) {
+        $pwsh = Join-Path $PSHOME $(if ($IsWindows) { 'pwsh.exe' } else { 'pwsh' })
+        $output = & $pwsh -NoProfile -NonInteractive -File $script:LoggingProbe -HelperPath $script:LoggingHelper -Scenario $Scenario 2>&1 | Out-String
+        $LASTEXITCODE | Should -Be 0 -Because $output
+        $output | Should -Match 'logging-isolation-ok'
+    }
+}
+
+Describe 'Conversion fixture helper scope' {
+    It 'Resolves conversion setup after the loading scope has exited' {
+        $probe = Join-Path $TestDrive 'conversion-scope.ps1'
+        @'
+param([string]$RepoRoot)
+$ErrorActionPreference = 'Stop'
+& {
+    . (Join-Path $RepoRoot 'tests/TestSupport/TestSupportCoreFunctions.ps1')
+    . (Join-Path $RepoRoot 'tests/TestSupport/TestModuleLoading.ps1')
+    Export-TestSupportGlobalFunctions
+}
+$resolved = Resolve-ConversionIntegrationForTest -TestScriptPath (
+    Join-Path $RepoRoot 'tests/integration/conversion/data/error-handling/errors.tests.ps1'
+)
+if ($resolved.ModuleType -ne 'Data') { throw 'Conversion routing was lost after scope exit' }
+'@ | Set-Content -LiteralPath $probe
+        $output = & (Get-Process -Id $PID).Path -NoProfile -File $probe $script:TestRepoRoot 2>&1
+        $LASTEXITCODE | Should -Be 0 -Because ($output -join [Environment]::NewLine)
+    }
+}

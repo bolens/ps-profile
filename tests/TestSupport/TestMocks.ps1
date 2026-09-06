@@ -816,7 +816,6 @@ function Clear-TestRepoRootSpillover {
         'test.hurl'
         'test-Brewfile'
         'test-packages.config'
-        'cliff.toml'
         'nonexistent.csv'
         'nonexistent.yaml'
         'nonexistent.txt'
