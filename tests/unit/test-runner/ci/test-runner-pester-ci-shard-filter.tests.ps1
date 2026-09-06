@@ -25,7 +25,7 @@ Describe 'PesterCiShardFilter' {
 
     It 'Maps library test changes to unit-library and coverage-smoke' {
         $shards = Resolve-PesterCiShards -ChangedFiles @('tests/unit/library/common/library-common.tests.ps1')
-        $shards | Should -Be @('coverage-smoke', 'unit-library')
+        $shards | Should -Be @('coverage-smoke', 'unit-library', 'unit-test-runner')
     }
 
     It 'Maps unit-profile-core paths to split core shards' {
@@ -53,6 +53,14 @@ Describe 'PesterCiShardFilter' {
     It 'Enables full suite for CI contract changes' {
         $shards = Resolve-PesterCiShards -ChangedFiles @('.github/workflows/test-pester.yml')
         $shards.Count | Should -Be (Get-PesterCiAllShards).Count
+    }
+
+    It 'Runs every shard for shared support and unclassified runtime changes' {
+        foreach ($path in @('tests/TestSupport.ps1', 'tests/TestSupport/Mocks.ps1',
+                'tests/fixtures/input.json', 'scripts/new-helper.ps1',
+                'tests/unit/new-area/example.tests.ps1', 'scripts/lib/Common.psm1')) {
+            @(Resolve-PesterCiShards -ChangedFiles @($path)).Count | Should -Be (Get-PesterCiAllShards).Count
+        }
     }
 
     It 'Builds Ubuntu-first matrix with Windows/Arch includes and Windows-only performance' {
@@ -116,5 +124,34 @@ Describe 'PesterCiShardFilter' {
         $all | Should -Contain 'integration-tools-eh'
         $all | Should -Contain 'conversion-document-markdown-core'
         $all | Should -Contain 'conversion-data-structured-n'
+    }
+
+    It 'Assigns every maintained test to exactly one shard plus optional coverage' {
+        $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '../../../..')).Path
+        $ast = [System.Management.Automation.Language.Parser]::ParseFile("$RepoRoot/scripts/utils/code-quality/run-pester-ci-shard.ps1", [ref]$null, [ref]$null)
+        $fn = $ast.Find({param($n) $n -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $n.Name -eq 'Get-PesterCiShardDefinitions'}, $true)
+        . ([scriptblock]::Create($fn.Extent.Text))
+        $defs = Get-PesterCiShardDefinitions
+        @(Compare-Object @($defs.Keys | Sort-Object) @(Get-PesterCiAllShards | Sort-Object)) | Should -HaveCount 0
+        $files = Get-ChildItem "$RepoRoot/tests/unit", "$RepoRoot/tests/integration", "$RepoRoot/tests/performance" -File -Recurse -Filter '*.tests.ps1'
+        $missing = @(); $duplicate = @()
+        foreach ($file in $files) {
+         $rel = [IO.Path]::GetRelativePath($RepoRoot,$file.FullName) -replace '\\', '/'; $owners = @()
+         foreach ($key in $defs.Keys) {
+          if ($key -eq 'coverage-smoke') { continue }
+          $d=$defs[$key]; $match=$false
+          switch ($d.Kind) {
+           'Pester' { foreach ($path in $d.Paths) { if ($rel -eq $path -or $rel.StartsWith("$path/")) { $match=$true } } }
+           'ToolsBatch' {$match=$rel.StartsWith('tests/integration/tools/') -and $file.Name -match $d.NamePattern}
+           'PerformanceBatch' {$match=$rel.StartsWith('tests/performance/') -and $rel.Substring(18) -match $d.PathPattern}
+           default {foreach ($path in $d.Paths) {if ($rel.StartsWith("tests/integration/conversion/$path/")) { $match= -not $d.ContainsKey('NamePattern') -or $file.Name -match $d.NamePattern }}}
+          }
+          if ($match) {$owners += $key}
+         }
+         if ($owners.Count -eq 0) {$missing += $rel}
+         if ($owners.Count -gt 1) {$duplicate += $rel}
+        }
+        $missing | Should -BeNullOrEmpty -Because 'every test must have a CI shard'
+        $duplicate | Should -BeNullOrEmpty -Because 'shards must partition the suite'
     }
 }

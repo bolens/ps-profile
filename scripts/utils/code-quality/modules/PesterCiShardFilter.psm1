@@ -57,6 +57,10 @@ function Get-PesterCiFilterRules {
                 '.github/actions/setup-arch-linux/**'
                 '.devcontainer/install-pwsh-linux.sh'
                 'PSScriptAnalyzerSettings.psd1'
+                'tests/TestSupport.ps1'
+                'tests/TestSupport/**'
+                'tests/fixtures/**'
+                'tests/helpers/**'
                 'scripts/utils/code-quality/run-pester.ps1'
                 'scripts/utils/code-quality/run-pester-ci-shard.ps1'
                 'scripts/utils/code-quality/run-pester-changed-shards.ps1'
@@ -74,18 +78,8 @@ function Get-PesterCiFilterRules {
                 'scripts/checks/**'
                 'profile.d/**'
             )
-            # conversion-modules handled separately; exclude below in matcher
             ExcludePrefixes = @('profile.d/conversion-modules/')
-            Shards = @(
-                'unit-library', 'unit-utility', 'unit-support'
-                'unit-profile-conversion'
-            ) + $unitProfileCoreShards + @(
-                'unit-profile-infra'
-                'unit-profile-misc-a', 'unit-profile-misc-b'
-                'integration-core'
-            ) + $integrationToolsShards + @(
-                'coverage-smoke'
-            ) + $performanceShards
+            Shards = @('__ALL__')
         }
         conversion = @{
             Patterns = @(
@@ -119,8 +113,6 @@ function Get-PesterCiFilterRules {
             Patterns = @(
                 'tests/unit/test-support/**'
                 'tests/unit/validation/**'
-                'tests/TestSupport.ps1'
-                'tests/TestSupport/**'
             )
             Shards = @('unit-support', 'coverage-smoke')
         }
@@ -385,6 +377,21 @@ function Resolve-PesterCiShards {
         return
     }
 
+    # New runtime/support paths must not silently opt out of testing. Known
+    # test paths retain focused selection; the inventory test guards coverage.
+    foreach ($file in $files) {
+        $matched = $false
+        foreach ($rule in $rules.Values) {
+            if (Test-PesterCiFileMatchesRule -Path $file -Rule $rule) {
+                $matched = $true
+                break
+            }
+        }
+        if (-not $matched -and ($file -match '^(tests|scripts|Modules|profile[.]d)/' -or $file -match '[.]ps(m|d)?1$')) {
+            return @(Get-PesterCiAllShards)
+        }
+    }
+
     foreach ($ruleName in $rules.Keys) {
         $rule = $rules[$ruleName]
         $hit = $false
@@ -405,6 +412,10 @@ function Resolve-PesterCiShards {
         }
     }
 
+    if ($shards.Count -gt 0) {
+        # Every selected run checks that the maintained test inventory is covered.
+        [void]$shards.Add('unit-test-runner')
+    }
     $ordered = [string[]]@($shards | Sort-Object)
     if ($ordered.Count -eq 0) {
         return

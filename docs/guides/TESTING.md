@@ -1587,3 +1587,10 @@ Describe 'MyModule' {
     }
 }
 ```
+
+The path filter obtains PR filenames through the GitHub API, including removed
+and renamed paths. Missing output or detection errors fail the required `Pester
+result` gate. Manual runs select all shards. Shared profile code, test support,
+and previously unclassified runtime paths select the full suite. The final gate
+requires selected shards to succeed and only permits skips for an explicit empty
+selection. Keep the shard inventory test passing when adding test directories.
