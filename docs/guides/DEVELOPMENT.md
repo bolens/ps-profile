@@ -496,7 +496,7 @@ If `Get-RepoRoot` fails:
 | [Development Guide](DEVELOPMENT.md) | This doc — setup, workflow, advanced runner features |
 | [Testing Patterns](../examples/TESTING_PATTERNS.md) | Code examples for writing tests |
 | [Test Stub Guide](TEST_VERIFICATION_MOCKING_GUIDE.md) | TestSupport stubs and isolation |
-| [Coverage Verification](VERIFY_COVERAGE.md) | `analyze-coverage.ps1` workflows |
+| [Coverage Verification](VERIFY_COVERAGE.md) | `analyze-coverage.ps1` results, failure counts, and coverage warnings |
 | [Tool Requirements](TOOL_REQUIREMENTS.md) | Required and optional test tools |
 
 ### General

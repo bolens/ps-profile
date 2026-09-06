@@ -3857,7 +3857,7 @@ docs/api/functions/venv.md -> profile.d/dev.ps1 sig:3077918b09bfd18c
 docs/api/functions/~.md -> profile.d/files-modules/navigation/files-navigation.ps1 sig:eeedced76d2c23f5
 docs/guides/DEVELOPMENT.md -> requirements/linux.txt sig:50a0ea54af26d113
 docs/guides/DEVELOPMENT.md -> requirements/scoop.txt sig:d7f36587afdb9b8b
-docs/guides/DEVELOPMENT.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:682de92c5a08d2b3
+docs/guides/DEVELOPMENT.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:d1c260ef378cc816
 docs/guides/DEVELOPMENT.md -> scripts/utils/code-quality/run-pester.ps1 sig:3363180016608ff6
 docs/guides/DEVELOPMENT.md -> scripts/utils/docs/generate-docs.ps1 sig:80a68557d104e76d
 docs/guides/DEVELOPMENT.md -> tests/unit/library/common/library-common.tests.ps1 sig:883c040538d61094
@@ -3933,7 +3933,7 @@ docs/guides/TESTING.md -> profile.d/files.ps1 sig:2a63ce5e7ebcad5b
 docs/guides/TESTING.md -> profile.d/git.ps1 sig:a7f9055956a7be64
 docs/guides/TESTING.md -> scripts/git/hooks/pre-push.ps1 sig:981ba4c4be6664fa
 docs/guides/TESTING.md -> scripts/lib/path/PathResolution.psm1 sig:77cd28d0062bfc09
-docs/guides/TESTING.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:682de92c5a08d2b3
+docs/guides/TESTING.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:d1c260ef378cc816
 docs/guides/TESTING.md -> scripts/utils/code-quality/modules/PesterCiJobs.psm1 sig:677c3aa0c5acde84
 docs/guides/TESTING.md -> scripts/utils/code-quality/modules/PesterCiShardFilter.psm1 sig:96f8c0ec1bad98e4
 docs/guides/TESTING.md -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
@@ -3947,7 +3947,7 @@ docs/guides/TESTING.md -> tests/TestSupport.ps1 sig:60c2d3807b910a2b
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport.ps1 sig:60c2d3807b910a2b
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestCommandAvailability.ps1 sig:2efaccf608c2c699
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestEnvironmentStubs.ps1 sig:d0e87d7840b90211
-docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestMocks.ps1 sig:d7f7368f9fc4d822
+docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestMocks.ps1 sig:f8b98d533f3c5473
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/TestReflectionHelpers.ps1 sig:7fd79c03dc23c2c4
 docs/guides/TEST_VERIFICATION_MOCKING_GUIDE.md -> tests/TestSupport/ToolDetection.ps1 sig:45bdee0ff94fc557
 docs/guides/TOOL_REQUIREMENTS.md -> requirements.txt sig:a9257ea294261766
@@ -3964,7 +3964,7 @@ docs/guides/TYPE_SAFETY.md -> scripts/lib/fragment/FragmentCommandRegistry.psm1 
 docs/guides/TYPE_SAFETY.md -> scripts/lib/fragment/FragmentLoading.psm1 sig:6d871cd4b17ae9ac
 docs/guides/TYPE_SAFETY.md -> tests/TestSupport.ps1 sig:60c2d3807b910a2b
 docs/guides/VERIFY_COVERAGE.md -> scripts/lib/utilities/Command.psm1 sig:4d68807fd241b457
-docs/guides/VERIFY_COVERAGE.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:682de92c5a08d2b3
+docs/guides/VERIFY_COVERAGE.md -> scripts/utils/code-quality/analyze-coverage.ps1 sig:d1c260ef378cc816
 tests/integration/bootstrap/fragment-command-access.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/integration/bootstrap/fragment-command-access.tests.ps1 -> scripts/lib/fragment/CommandDispatcher.psm1 sig:e319d1dded89ac0d
 tests/integration/bootstrap/fragment-command-access.tests.ps1 -> scripts/lib/fragment/FragmentCommandRegistry.psm1 sig:02f839f07291471d
@@ -4524,7 +4524,7 @@ tests/integration/terminal/oh-my-posh.tests.ps1 -> profile.d/oh-my-posh.ps1 sig:
 tests/integration/terminal/scoop-completion.tests.ps1 -> profile.d/scoop-completion.ps1 sig:e324286c762abdb0
 tests/integration/terminal/smartprompt.tests.ps1 -> profile.d/starship/SmartPrompt.ps1 sig:ae8388f7fb4496cb
 tests/integration/terminal/starship.tests.ps1 -> profile.d/starship.ps1 sig:683005c16f6ac66d
-tests/integration/test-runner/analyze-coverage.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:682de92c5a08d2b3
+tests/integration/test-runner/analyze-coverage.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:d1c260ef378cc816
 tests/integration/test-runner/baseline-comparison.tests.ps1 -> scripts/utils/code-quality/modules/BaselineComparison.psm1 sig:8a067e83b715ca42
 tests/integration/test-runner/baseline-comparison.tests.ps1 -> scripts/utils/code-quality/modules/BaselineGeneration.psm1 sig:adc4d349bee3aae2
 tests/integration/test-runner/baseline-comparison.tests.ps1 -> scripts/utils/code-quality/run-pester.ps1 sig:3363180016608ff6
@@ -4724,7 +4724,7 @@ tests/integration/tools/text-processing-tools.tests.ps1 -> profile.d/bootstrap.p
 tests/integration/tools/text-processing-tools.tests.ps1 -> profile.d/jq-yq.ps1 sig:eb9fbd7f3f7f1365
 tests/integration/tools/text-processing-tools.tests.ps1 -> profile.d/rg.ps1 sig:471bef974cd5a868
 tests/integration/tools/tooling.tests.ps1 -> Microsoft.PowerShell_profile.ps1 sig:e1a5656c1f0efc86
-tests/integration/tools/tooling.tests.ps1 -> cspell.json sig:9d18bf117432a970
+tests/integration/tools/tooling.tests.ps1 -> cspell.json sig:b3789ab802978fd6
 tests/integration/tools/uv.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/integration/tools/uv.tests.ps1 -> profile.d/uv.ps1 sig:2a3f18a2af2ae544
 tests/integration/tools/vcpkg.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
@@ -4908,7 +4908,7 @@ tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/lib/path/
 tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/lib/runtime/PowerShellDetection.psm1 sig:4e7b96eb1e750fb4
 tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/lib/utilities/Command.psm1 sig:4d68807fd241b457
 tests/unit/library/common/library-common-extended.tests.ps1 -> scripts/utils/code-quality/run-pester.ps1 sig:3363180016608ff6
-tests/unit/library/common/library-common.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:3dbb0d6fbe924e34
+tests/unit/library/common/library-common.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:d5d4ab7b64cc340f
 tests/unit/library/common/library-common.tests.ps1 -> scripts/lib/core/ExitCodes.psm1 sig:2eefcd5aea43478e
 tests/unit/library/common/library-common.tests.ps1 -> scripts/lib/core/PlatformPaths.psm1 sig:f0f4bad472b381e2
 tests/unit/library/common/library-common.tests.ps1 -> scripts/lib/file/FileSystem.psm1 sig:5d00a04e2377ef90
@@ -6457,7 +6457,7 @@ tests/unit/test-runner/analysis/test-runner-analysis-edge-cases-extended.tests.p
 tests/unit/test-runner/analysis/test-runner-analysis-edge-cases.tests.ps1 -> scripts/utils/code-quality/modules/TestCategorization.psm1 sig:8b01502115892f7f
 tests/unit/test-runner/analysis/test-runner-analysis-edge-cases.tests.ps1 -> scripts/utils/code-quality/modules/TestFailureAnalysis.psm1 sig:e0259daca1c5c77e
 tests/unit/test-runner/analysis/test-runner-analysis-edge-cases.tests.ps1 -> scripts/utils/code-quality/modules/TestPerformanceAnalysis.psm1 sig:228d724a3de28791
-tests/unit/test-runner/analyze/test-runner-analyze-coverage-extended.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:682de92c5a08d2b3
+tests/unit/test-runner/analyze/test-runner-analyze-coverage-extended.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:d1c260ef378cc816
 tests/unit/test-runner/analyze/test-runner-analyze-test-performance-extended.tests.ps1 -> scripts/utils/code-quality/analyze-test-performance.ps1 sig:0f57fc070d1919fe
 tests/unit/test-runner/analyze/test-runner-analyze-test-performance.tests.ps1 -> scripts/utils/code-quality/analyze-test-performance.ps1 sig:0f57fc070d1919fe
 tests/unit/test-runner/baseline/test-runner-baseline-comparison-extended.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
@@ -6582,7 +6582,7 @@ tests/unit/test-runner/modules/discovery/test-runner-test-discovery.tests.ps1 ->
 tests/unit/test-runner/modules/discovery/test-runner-test-discovery.tests.ps1 -> scripts/utils/code-quality/modules/TestReporting.psm1 sig:f60b329bb8733bdd
 tests/unit/test-runner/modules/discovery/test-runner-test-discovery.tests.ps1 -> scripts/utils/code-quality/modules/TestRetry.psm1 sig:b11aacb0710fdad1
 tests/unit/test-runner/modules/discovery/test-runner-test-discovery.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryGeneration.psm1 sig:8db896b4a3f921ae
-tests/unit/test-runner/modules/discovery/test-runner-test-discovery.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6f1ad859fa7d0770
+tests/unit/test-runner/modules/discovery/test-runner-test-discovery.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6c54c67a47fcc43c
 tests/unit/test-runner/modules/discovery/test-runner-test-discovery.tests.ps1 -> scripts/utils/code-quality/run-pester.ps1 sig:3363180016608ff6
 tests/unit/test-runner/modules/enhanced/test-runner-test-enhanced-performance-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestEnhancedPerformance.psm1 sig:fa68f9ac4fdf741c
 tests/unit/test-runner/modules/environment/test-runner-test-environment-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestEnvironment.psm1 sig:2c8f0a4398438cd5
@@ -6609,7 +6609,7 @@ tests/unit/test-runner/modules/execution/test-runner-test-execution.tests.ps1 ->
 tests/unit/test-runner/modules/execution/test-runner-test-execution.tests.ps1 -> scripts/utils/code-quality/modules/TestReporting.psm1 sig:f60b329bb8733bdd
 tests/unit/test-runner/modules/execution/test-runner-test-execution.tests.ps1 -> scripts/utils/code-quality/modules/TestRetry.psm1 sig:b11aacb0710fdad1
 tests/unit/test-runner/modules/execution/test-runner-test-execution.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryGeneration.psm1 sig:8db896b4a3f921ae
-tests/unit/test-runner/modules/execution/test-runner-test-execution.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6f1ad859fa7d0770
+tests/unit/test-runner/modules/execution/test-runner-test-execution.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6c54c67a47fcc43c
 tests/unit/test-runner/modules/failure/test-runner-test-failure-analysis-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestCategorization.psm1 sig:8b01502115892f7f
 tests/unit/test-runner/modules/failure/test-runner-test-failure-analysis-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestFailureAnalysis.psm1 sig:e0259daca1c5c77e
 tests/unit/test-runner/modules/failure/test-runner-test-failure-analysis-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestFailureAnalysis.psm1 sig:e0259daca1c5c77e
@@ -6660,7 +6660,7 @@ tests/unit/test-runner/modules/reporting/test-runner-test-reporting.tests.ps1 ->
 tests/unit/test-runner/modules/reporting/test-runner-test-reporting.tests.ps1 -> scripts/utils/code-quality/modules/TestReporting.psm1 sig:f60b329bb8733bdd
 tests/unit/test-runner/modules/reporting/test-runner-test-reporting.tests.ps1 -> scripts/utils/code-quality/modules/TestRetry.psm1 sig:b11aacb0710fdad1
 tests/unit/test-runner/modules/reporting/test-runner-test-reporting.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryGeneration.psm1 sig:8db896b4a3f921ae
-tests/unit/test-runner/modules/reporting/test-runner-test-reporting.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6f1ad859fa7d0770
+tests/unit/test-runner/modules/reporting/test-runner-test-reporting.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6c54c67a47fcc43c
 tests/unit/test-runner/modules/result/test-runner-test-result-reader-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestResultReader.psm1 sig:74d2a3ca4f996cdd
 tests/unit/test-runner/modules/result/test-runner-test-result-validation-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestResultValidation.psm1 sig:a889bdf13d942bb1
 tests/unit/test-runner/modules/retry/test-runner-test-retry-extended.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
@@ -6669,7 +6669,7 @@ tests/unit/test-runner/modules/retry/test-runner-test-retry.tests.ps1 -> scripts
 tests/unit/test-runner/modules/retry/test-runner-test-retry.tests.ps1 -> scripts/utils/code-quality/modules/TestRetry.psm1 sig:b11aacb0710fdad1
 tests/unit/test-runner/modules/summary/test-runner-test-summary-generation-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryGeneration.psm1 sig:8db896b4a3f921ae
 tests/unit/test-runner/modules/summary/test-runner-test-summary-stats-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryStats.psm1 sig:ee6524df1cdada9d
-tests/unit/test-runner/modules/timeout/test-runner-test-timeout-handling-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6f1ad859fa7d0770
+tests/unit/test-runner/modules/timeout/test-runner-test-timeout-handling-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6c54c67a47fcc43c
 tests/unit/test-runner/modules/trend/test-runner-test-trend-analysis-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestTrendAnalysis.psm1 sig:dbb615a16be18ad3
 tests/unit/test-runner/modules/trend/test-runner-test-trend-analysis-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestTrendAnalysis.psm1 sig:dbb615a16be18ad3
 tests/unit/test-runner/modules/trend/test-runner-test-trend-analysis.tests.ps1 -> scripts/utils/code-quality/modules/TestTrendAnalysis.psm1 sig:dbb615a16be18ad3
@@ -6719,7 +6719,7 @@ tests/unit/test-runner/pester/test-runner-pester-config.tests.ps1 -> scripts/uti
 tests/unit/test-runner/pester/test-runner-pester-config.tests.ps1 -> scripts/utils/code-quality/modules/TestReporting.psm1 sig:f60b329bb8733bdd
 tests/unit/test-runner/pester/test-runner-pester-config.tests.ps1 -> scripts/utils/code-quality/modules/TestRetry.psm1 sig:b11aacb0710fdad1
 tests/unit/test-runner/pester/test-runner-pester-config.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryGeneration.psm1 sig:8db896b4a3f921ae
-tests/unit/test-runner/pester/test-runner-pester-config.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6f1ad859fa7d0770
+tests/unit/test-runner/pester/test-runner-pester-config.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6c54c67a47fcc43c
 tests/unit/test-runner/pester/test-runner-pester-coverage-config-extended.tests.ps1 -> scripts/utils/code-quality/modules/PesterCoverageConfig.psm1 sig:d52bb4b17d5db839
 tests/unit/test-runner/pester/test-runner-pester-coverage-config-structure-extended.tests.ps1 -> scripts/utils/code-quality/modules/PesterCoverageConfig.psm1 sig:d52bb4b17d5db839
 tests/unit/test-runner/pester/test-runner-pester-coverage-config.tests.ps1 -> profile.d/bootstrap/CommandCache.ps1 sig:b22cf04b6983c16a
@@ -6762,9 +6762,9 @@ tests/unit/test-runner/summary/test-runner-summary-generation.tests.ps1 -> scrip
 tests/unit/test-runner/summary/test-runner-summary-stats-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryStats.psm1 sig:ee6524df1cdada9d
 tests/unit/test-runner/summary/test-runner-summary-stats.tests.ps1 -> scripts/utils/code-quality/modules/TestSummaryStats.psm1 sig:ee6524df1cdada9d
 tests/unit/test-runner/timeout/test-runner-timeout-handling-extended.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
-tests/unit/test-runner/timeout/test-runner-timeout-handling-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6f1ad859fa7d0770
+tests/unit/test-runner/timeout/test-runner-timeout-handling-extended.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6c54c67a47fcc43c
 tests/unit/test-runner/timeout/test-runner-timeout-handling.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
-tests/unit/test-runner/timeout/test-runner-timeout-handling.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6f1ad859fa7d0770
+tests/unit/test-runner/timeout/test-runner-timeout-handling.tests.ps1 -> scripts/utils/code-quality/modules/TestTimeoutHandling.psm1 sig:6c54c67a47fcc43c
 tests/unit/test-runner/tools/test-runner-tools-integration-batch-extended.tests.ps1 -> scripts/utils/code-quality/run-tools-integration-batch.ps1 sig:02a6b3157f500079
 tests/unit/test-runner/unit/test-runner-unit-batch-extended.tests.ps1 -> scripts/utils/code-quality/run-unit-batch.ps1 sig:cbed57563e9a8dad
 tests/unit/test-runner/validate/test-runner-validate-function-naming-extended.tests.ps1 -> scripts/utils/code-quality/validate-function-naming.ps1 sig:ed98ec71a6eb3e89
@@ -6774,9 +6774,10 @@ tests/unit/test-runner/validation/test-runner-validation-reporter-structure-exte
 tests/unit/test-runner/validation/test-runner-validation-reporter.tests.ps1 -> scripts/utils/code-quality/modules/FunctionDiscovery.psm1 sig:2c5f929a16ee59a5
 tests/unit/test-runner/validation/test-runner-validation-reporter.tests.ps1 -> scripts/utils/code-quality/modules/ValidationReporter.psm1 sig:842016364d1a35c6
 tests/unit/test-support/core/test-support-core-functions-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
-tests/unit/test-support/core/test-support-core-functions-extended.tests.ps1 -> tests/TestSupport/TestSupportCoreFunctions.ps1 sig:e72b5d63202f4860
+tests/unit/test-support/core/test-support-core-functions-extended.tests.ps1 -> tests/TestSupport/TestSupportCoreFunctions.ps1 sig:a1cc866031e17546
 tests/unit/test-support/core/test-support-core-functions.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/unit/test-support/core/test-support-core-functions.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
+tests/unit/test-support/core/test-support-core-functions.tests.ps1 -> tests/TestSupport/TestSupportCoreFunctions.ps1 sig:a1cc866031e17546
 tests/unit/test-support/loader/test-support-loader-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
 tests/unit/test-support/paths/test-support-paths.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
 tests/unit/test-support/python/test-support-python-helpers.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
@@ -6799,7 +6800,7 @@ tests/unit/test-support/test/test-support-test-execution-extended.tests.ps1 -> t
 tests/unit/test-support/test/test-support-test-execution-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
 tests/unit/test-support/test/test-support-test-linux-package-helpers-extended.tests.ps1 -> tests/TestSupport/TestLinuxPackageHelpers.ps1 sig:7c49a3a3042ff7ec
 tests/unit/test-support/test/test-support-test-linux-package-helpers-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
-tests/unit/test-support/test/test-support-test-mocks-extended.tests.ps1 -> tests/TestSupport/TestMocks.ps1 sig:d7f7368f9fc4d822
+tests/unit/test-support/test/test-support-test-mocks-extended.tests.ps1 -> tests/TestSupport/TestMocks.ps1 sig:f8b98d533f3c5473
 tests/unit/test-support/test/test-support-test-mocks-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
 tests/unit/test-support/test/test-support-test-module-loading-extended.tests.ps1 -> tests/TestSupport/TestModuleLoading.ps1 sig:953d9fd3da9de9ea
 tests/unit/test-support/test/test-support-test-module-loading-extended.tests.ps1 -> tests/TestSupport/TestPaths.ps1 sig:5257615631ad15a4
@@ -6817,7 +6818,7 @@ tests/unit/test-support/tool/test-support-tool-detection-extended.tests.ps1 -> t
 tests/unit/utility/add/utility-add-comment-help.tests.ps1 -> scripts/utils/code-quality/add-comment-help.ps1 sig:a0507e6b0c76e92c
 tests/unit/utility/add/utility-add-fragment-metadata-extended.tests.ps1 -> scripts/utils/fragment/add-fragment-metadata.ps1 sig:7fb66c043b4e4fed
 tests/unit/utility/add/utility-add-fragment-metadata.tests.ps1 -> scripts/utils/fragment/add-fragment-metadata.ps1 sig:7fb66c043b4e4fed
-tests/unit/utility/analyze/utility-analyze-coverage.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:682de92c5a08d2b3
+tests/unit/utility/analyze/utility-analyze-coverage.tests.ps1 -> scripts/utils/code-quality/analyze-coverage.ps1 sig:d1c260ef378cc816
 tests/unit/utility/backup/utility-backup-workflow.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
 tests/unit/utility/benchmark/utility-benchmark-startup-extended.tests.ps1 -> scripts/utils/metrics/benchmark-startup.ps1 sig:dee41149421251de
 tests/unit/utility/benchmark/utility-benchmark-startup.tests.ps1 -> scripts/utils/metrics/benchmark-startup.ps1 sig:dee41149421251de
@@ -6878,10 +6879,10 @@ tests/unit/utility/init/utility-init-wrangler-config-extended.tests.ps1 -> scrip
 tests/unit/utility/init/utility-init-wrangler-config.tests.ps1 -> scripts/utils/setup/init-wrangler-config.ps1 sig:ef19531082cab152
 tests/unit/utility/initialize/utility-initialize-databases-extended.tests.ps1 -> scripts/utils/database/initialize-databases.ps1 sig:99ee189ace8f874b
 tests/unit/utility/initialize/utility-initialize-databases.tests.ps1 -> scripts/utils/database/initialize-databases.ps1 sig:99ee189ace8f874b
-tests/unit/utility/install/utility-install-githooks.tests.ps1 -> scripts/git/install-githooks.ps1 sig:dd1eac9fdc5eefb4
-tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:d163ae4b6191fc9a
+tests/unit/utility/install/utility-install-githooks.tests.ps1 -> scripts/git/install-githooks.ps1 sig:00f98b6d714f2651
+tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:f4688eb6779a605d
 tests/unit/utility/install/utility-install-pre-commit-hook-extended.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
-tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:d163ae4b6191fc9a
+tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/git/install-pre-commit-hook.ps1 sig:f4688eb6779a605d
 tests/unit/utility/install/utility-install-pre-commit-hook.tests.ps1 -> scripts/lib/file/FileBackup.psm1 sig:15ca5cb45b0f205d
 tests/unit/utility/logging/utility-logging.tests.ps1 -> scripts/lib/core/Logging.psm1 sig:17c0e8f8b22fa73f
 tests/unit/utility/migrate/utility-migrate-metrics-to-sqlite-extended.tests.ps1 -> scripts/utils/database/migrate-metrics-to-sqlite.ps1 sig:5ace14879dee3357
@@ -6908,7 +6909,7 @@ tests/unit/utility/performance/utility-performance.tests.ps1 -> scripts/lib/perf
 tests/unit/utility/populate/utility-populate-performance-metrics-extended.tests.ps1 -> scripts/utils/database/populate-performance-metrics.ps1 sig:53ddccd7ee916267
 tests/unit/utility/populate/utility-populate-performance-metrics.tests.ps1 -> scripts/utils/database/populate-performance-metrics.ps1 sig:53ddccd7ee916267
 tests/unit/utility/pre/utility-pre-commit.tests.ps1 -> scripts/git/pre-commit.ps1 sig:826f2d241c1e3d5a
-tests/unit/utility/pre/utility-pre-push.tests.ps1 -> scripts/git/hooks/pre-push.ps1 sig:af39e36715ce3325
+tests/unit/utility/pre/utility-pre-push.tests.ps1 -> scripts/git/hooks/pre-push.ps1 sig:981ba4c4be6664fa
 tests/unit/utility/run/utility-run-conversion-all-batch.tests.ps1 -> scripts/utils/code-quality/run-conversion-all-batch.ps1 sig:7d0c06776966e51f
 tests/unit/utility/run/utility-run-conversion-integration-batch.tests.ps1 -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
 tests/unit/utility/run/utility-run-format.tests.ps1 -> scripts/utils/code-quality/run-format.ps1 sig:31997fbb63847fe9
@@ -6942,7 +6943,7 @@ tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> .vsc
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> Makefile sig:218db1f93c76d9b4
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> Taskfile.yml sig:c269031ad63901dd
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> justfile sig:30bc4c1a0c7f0858
-tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> package.json sig:7de8c3335b5c625a
+tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> package.json sig:2afee832a3dc5d9d
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskParser.psm1 sig:70df6e65f25b8e16
 tests/unit/utility/track/utility-track-coverage-trends-extended.tests.ps1 -> scripts/utils/metrics/track-coverage-trends.ps1 sig:2340a411fb7efb2f
 tests/unit/utility/track/utility-track-coverage-trends.tests.ps1 -> scripts/utils/metrics/track-coverage-trends.ps1 sig:2340a411fb7efb2f
@@ -6956,7 +6957,7 @@ tests/unit/utility/verify/utility-verify-cache-cleared.tests.ps1 -> scripts/util
 tests/unit/validation/check/validation-check-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/check/validation-check-commit-messages.tests.ps1 -> scripts/checks/check-commit-messages.ps1 sig:234e7c99d1ed6d5a
 tests/unit/validation/check/validation-check-idempotency.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
-tests/unit/validation/check/validation-check-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:d6c2a8a02d76c802
+tests/unit/validation/check/validation-check-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:d5d4ab7b64cc340f
 tests/unit/validation/comment/validation-comment-help-extended.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/comment/validation-comment-help-fixtures.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
 tests/unit/validation/comment/validation-comment-help.tests.ps1 -> scripts/checks/check-comment-help.ps1 sig:7d3f039f4d6ca155
@@ -6968,13 +6969,13 @@ tests/unit/validation/doc/validation-doc-coverage-extended.tests.ps1 -> scripts/
 tests/unit/validation/idempotency/validation-idempotency-extended.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
 tests/unit/validation/idempotency/validation-idempotency-fixtures.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
 tests/unit/validation/idempotency/validation-idempotency.tests.ps1 -> scripts/checks/check-idempotency.ps1 sig:68a9afe0c26f3536
-tests/unit/validation/script/validation-script-standards-extended.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:3dbb0d6fbe924e34
-tests/unit/validation/script/validation-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:3dbb0d6fbe924e34
+tests/unit/validation/script/validation-script-standards-extended.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:d5d4ab7b64cc340f
+tests/unit/validation/script/validation-script-standards.tests.ps1 -> scripts/checks/check-script-standards.ps1 sig:d5d4ab7b64cc340f
 tests/unit/validation/validate/validation-validate-function-naming.tests.ps1 -> scripts/utils/code-quality/validate-function-naming.ps1 sig:ed98ec71a6eb3e89
 tests/unit/validation/validate/validation-validate-profile-extended.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:16c28ee8c0b00a12
 tests/unit/validation/validate/validation-validate-profile.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:16c28ee8c0b00a12
-tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/commit-message-check.yml sig:b1b5720dd8edd78d
-tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-validation.yml sig:2633811a6e27faef
-tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-vulnerability-scan.yml sig:9c88e297f43e12ed
-tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/metrics-collection.yml sig:08f8f356311c21b3
-tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/validate-profile.yml sig:e44472787b4bebb4
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/commit-message-check.yml sig:990eb653a51e2e92
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-validation.yml sig:1ee3c144056aea46
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-vulnerability-scan.yml sig:a898277730a9a520
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/metrics-collection.yml sig:ef49993694895722
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/validate-profile.yml sig:a999849ca82f8751

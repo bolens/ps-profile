@@ -3,7 +3,12 @@
 # Canonical TestSupport helpers restored between test files
 # ===============================================
 
-$script:SavedStructuredLoggingFunctions = @{}
+if (-not (Get-Variable -Name SavedStructuredLoggingFunctions -Scope Script -ErrorAction SilentlyContinue)) {
+    $script:SavedStructuredLoggingFunctions = @{}
+}
+if (-not (Get-Variable -Name TestStructuredLoggingEnabled -Scope Script -ErrorAction SilentlyContinue)) {
+    $script:TestStructuredLoggingEnabled = $false
+}
 
 function Enable-TestStructuredLogging {
     <#
@@ -17,6 +22,9 @@ function Enable-TestStructuredLogging {
     #>
     [CmdletBinding()]
     param()
+
+    if ($script:TestStructuredLoggingEnabled) { return }
+    $script:TestStructuredLoggingEnabled = $true
 
     foreach ($name in @('Write-StructuredWarning', 'Write-StructuredError', 'Write-WideEvent')) {
         if (-not $script:SavedStructuredLoggingFunctions.ContainsKey($name)) {
@@ -65,6 +73,8 @@ function Disable-TestStructuredLogging {
     [CmdletBinding()]
     param()
 
+    if (-not $script:TestStructuredLoggingEnabled) { return }
+
     Remove-TestFunction -Name 'Write-StructuredWarning', 'Write-StructuredError', 'Write-WideEvent'
 
     foreach ($entry in $script:SavedStructuredLoggingFunctions.GetEnumerator()) {
@@ -72,6 +82,7 @@ function Disable-TestStructuredLogging {
     }
 
     $script:SavedStructuredLoggingFunctions = @{}
+    $script:TestStructuredLoggingEnabled = $false
 }
 
 function Remove-TestFunction {
@@ -284,6 +295,8 @@ function Export-TestSupportGlobalFunctions {
         'Invoke-TypeConstructorWrapper'
         'Invoke-TestPwshScript'
         'Invoke-TestScriptFile'
+        'Get-DocumentConversionSelectiveModules'
+        'Resolve-ConversionIntegrationForTest'
         'Initialize-ConversionIntegrationForTestFile'
         'Initialize-ConversionIntegration'
         'Enable-TestStructuredLogging'

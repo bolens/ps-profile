@@ -548,7 +548,7 @@ if ($result.CodeCoverage) {
     }
 }
 # Fallback: Check for Coverage property (older Pester versions or different structure)
-elseif ($result.Coverage) {
+elseif ($result.PSObject.Properties['Coverage'] -and $result.Coverage) {
     $coverageObj = $result.Coverage
     $hasCoverage = (
         ($coverageObj.NumberOfCommandsAnalyzed -and $coverageObj.NumberOfCommandsAnalyzed -gt 0) -or

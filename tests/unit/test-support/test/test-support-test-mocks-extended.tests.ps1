@@ -34,3 +34,24 @@ Describe 'tests/TestSupport/TestMocks.ps1 extended scenarios' {
     }
 }
 
+
+Describe 'Repository spillover cleanup' {
+    It 'Preserves changelog configuration while removing known test output' {
+        $fixture = Join-Path $TestDrive 'cleanup-root'
+        New-Item -ItemType Directory -Path $fixture | Out-Null
+        Set-Content -LiteralPath (Join-Path $fixture 'cliff.toml') -Value 'maintained configuration'
+        Set-Content -LiteralPath (Join-Path $fixture 'backup.dump') -Value 'temporary output'
+        $probe = Join-Path $TestDrive 'cleanup-probe.ps1'
+        @'
+param([string]$Helper, [string]$FixtureRoot)
+$ErrorActionPreference = 'Stop'
+. $Helper
+function Get-TestRepoRoot { param([string]$StartPath) return $FixtureRoot }
+Clear-TestRepoRootSpillover -StartPath $FixtureRoot
+'@ | Set-Content -LiteralPath $probe
+        $output = & (Get-Process -Id $PID).Path -NoProfile -File $probe $script:Fragment $fixture 2>&1
+        $LASTEXITCODE | Should -Be 0 -Because ($output -join [Environment]::NewLine)
+        Get-Content -LiteralPath (Join-Path $fixture 'cliff.toml') | Should -Be 'maintained configuration'
+        Test-Path -LiteralPath (Join-Path $fixture 'backup.dump') | Should -BeFalse
+    }
+}

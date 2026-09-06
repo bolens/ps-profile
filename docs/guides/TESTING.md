@@ -919,6 +919,10 @@ pwsh -NoProfile -File scripts/utils/code-quality/run-pester.ps1 -Repeat 3
 
 ### Timeouts
 
+`-Timeout` preserves the selected tests, tag filters, coverage settings, and result
+output paths. The timeout worker loads the same repository test helpers and
+returns Pester diagnostics when execution completes.
+
 Set timeouts for test execution:
 
 ```powershell

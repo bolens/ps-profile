@@ -40,6 +40,33 @@ Describe 'TestTimeoutHandling Module' {
                 Should -Throw '*Invalid test paths detected*'
         }
 
+        It 'Preserves filters, helper initialization, and reports with a timeout' {
+            $fixture = Join-Path $TestDrive 'timeout-config.tests.ps1'
+            @'
+Describe 'Timeout configuration' {
+    It 'runs selected tests with repository helpers' -Tag selected {
+        Get-Command Get-TestRepoRoot | Should -Not -BeNullOrEmpty
+    }
+    It 'does not run excluded tests' -Tag excluded {
+        throw 'The timeout runner dropped the tag filter'
+    }
+}
+'@ | Set-Content -LiteralPath $fixture
+            $config = New-PesterConfiguration
+            $config.Run.PassThru = $true
+            $config.Run.Exit = $false
+            $config.Output.Verbosity = 'None'
+            $config.Filter.Tag = @('selected')
+            $config.TestResult.Enabled = $true
+            $config.TestResult.OutputPath = Join-Path $TestDrive 'timeout-results.xml'
+
+            $output = @(Invoke-PesterWithTimeout -Config $config -TestPaths @($fixture) -Timeout 30)
+            $result = @($output | Where-Object { $null -ne $_ -and $_.PSObject.Properties['PassedCount'] }) | Select-Object -Last 1
+            $result.PassedCount | Should -Be 1
+            $result.FailedCount | Should -Be 0
+            Test-Path -LiteralPath $config.TestResult.OutputPath.Value | Should -BeTrue
+        }
+
         It 'Runs tests without timeout when Timeout is zero' {
             $config = New-PesterConfiguration
             $config.Run.PassThru = $true

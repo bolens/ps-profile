@@ -119,36 +119,31 @@ Describe 'containers-enhanced.ps1 - Graceful Degradation' {
     }
     
     It 'Clean-Containers handles missing tool gracefully' {
-        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
-        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
+        Initialize-ContainerEngineUnavailableMocks
         $output = & { Clean-Containers -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }
     
     It 'Export-ContainerLogs handles missing tool gracefully' {
-        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
-        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
+        Initialize-ContainerEngineUnavailableMocks
         $output = & { Export-ContainerLogs -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }
     
     It 'Get-ContainerStats handles missing tool gracefully' {
-        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
-        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
+        Initialize-ContainerEngineUnavailableMocks
         $output = & { Get-ContainerStats -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }
     
     It 'Backup-ContainerVolumes handles missing tool gracefully' {
-        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
-        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
+        Initialize-ContainerEngineUnavailableMocks
         $output = & { Backup-ContainerVolumes -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }
     
     It 'Restore-ContainerVolumes handles missing tool gracefully' {
-        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
-        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
+        Initialize-ContainerEngineUnavailableMocks
         $output = & {
             Restore-ContainerVolumes -BackupPath (Get-TestArtifactPath -FileName 'backup.tar.gz') -ErrorAction SilentlyContinue
         } 2>&1 3>&1 | Out-String
@@ -156,8 +151,7 @@ Describe 'containers-enhanced.ps1 - Graceful Degradation' {
     }
     
     It 'Health-CheckContainers handles missing tool gracefully' {
-        Set-TestCommandAvailabilityState -CommandName 'docker' -Available $false
-        Set-TestCommandAvailabilityState -CommandName 'podman' -Available $false
+        Initialize-ContainerEngineUnavailableMocks
         $output = & { Health-CheckContainers -ErrorAction SilentlyContinue } 2>&1 3>&1 | Out-String
         Assert-TestMissingToolWarning -Output $output -Pattern 'docker/podman not found'
     }
