@@ -6473,12 +6473,12 @@ tests/unit/test-runner/baseline/test-runner-baseline-regression.tests.ps1 -> scr
 tests/unit/test-runner/baseline/test-runner-baseline-regression.tests.ps1 -> scripts/utils/code-quality/modules/BaselineComparison.psm1 sig:8a067e83b715ca42
 tests/unit/test-runner/batch/test-runner-batch-scripts-extended.tests.ps1 -> scripts/utils/code-quality/run-conversion-all-batch.ps1 sig:7d0c06776966e51f
 tests/unit/test-runner/batch/test-runner-batch-scripts-extended.tests.ps1 -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
-tests/unit/test-runner/batch/test-runner-batch-scripts-extended.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:2b6a591a650f98c7
+tests/unit/test-runner/batch/test-runner-batch-scripts-extended.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:371519e060c3d811
 tests/unit/test-runner/batch/test-runner-batch-scripts-extended.tests.ps1 -> scripts/utils/code-quality/run-tools-integration-batch.ps1 sig:02a6b3157f500079
 tests/unit/test-runner/batch/test-runner-batch-scripts-extended.tests.ps1 -> scripts/utils/code-quality/run-unit-batch.ps1 sig:cbed57563e9a8dad
 tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-conversion-all-batch.ps1 sig:7d0c06776966e51f
 tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
-tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:2b6a591a650f98c7
+tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:371519e060c3d811
 tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-tools-integration-batch.ps1 sig:02a6b3157f500079
 tests/unit/test-runner/batch/test-runner-batch-scripts.tests.ps1 -> scripts/utils/code-quality/run-unit-batch.ps1 sig:cbed57563e9a8dad
 tests/unit/test-runner/check/test-runner-check-missing-tests-extended.tests.ps1 -> scripts/utils/code-quality/check-missing-tests.ps1 sig:4754eeede4f5f829
