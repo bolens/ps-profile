@@ -667,3 +667,8 @@ Use one of these help patterns so `task generate-docs` can extract documentation
 ## Questions
 
 Open an issue or draft PR if you need guidance. Tag maintainers for review.
+
+## Devcontainer
+
+See [the devcontainer guide](.devcontainer/README.md) for the repository toolchain,
+setup, checks and platform limits.

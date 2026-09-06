@@ -4,7 +4,7 @@ FROM ghcr.io/astral-sh/ruff:latest@sha256:77e0110c04fdfdd7c97657a680aad0faa7c7d2
 FROM docker.io/rhysd/actionlint:latest@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 AS actionlint
 FROM docker.io/hadolint/hadolint:latest@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d AS hadolint
 
-FROM docker.io/library/ubuntu:24.04@sha256:33ceb71981b602c1a7443a53469e4dba065f7503eab3078a2d7a57a2ab987517
+FROM mcr.microsoft.com/devcontainers/base:trixie@sha256:b8c3669fb4cc652621b3386517c40ab3e151e827de958d6fe75528798ffb5727
 
 # Distribution packages provide native tools used by this repository.
 # hadolint ignore=DL3008
@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     jq \
     less \
-    libicu74 \
+    libicu76 \
     libsnappy-dev \
     libssl3t64 \
     locales \
@@ -56,8 +56,4 @@ ARG PWSH_VERSION=7.4.7
 COPY install-pwsh-linux.sh /tmp/install-pwsh-linux.sh
 RUN bash /tmp/install-pwsh-linux.sh "${PWSH_VERSION}" && rm /tmp/install-pwsh-linux.sh
 ENV POWERSHELL_TELEMETRY_OPTOUT=1
-RUN if id ubuntu >/dev/null 2>&1; then userdel --remove ubuntu; fi \
-    && useradd --uid 1000 --create-home --shell /bin/bash vscode \
-    && echo "vscode ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vscode \
-    && chmod 0440 /etc/sudoers.d/vscode
 WORKDIR /workspace
