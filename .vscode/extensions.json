@@ -1,9 +1,17 @@
 {
   "recommendations": [
     "ms-vscode.powershell",
-    "ms-vscode.powershell-preview",
     "eamodio.gitlens",
-    "EditorConfig.EditorConfig"
+    "EditorConfig.EditorConfig",
+    "redhat.vscode-yaml",
+    "GitHub.vscode-github-actions",
+    "timonwong.shellcheck",
+    "mads-hartmann.bash-ide-vscode",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-azuretools.vscode-containers",
+    "ms-vscode-remote.remote-containers",
+    "streetsidesoftware.code-spell-checker"
   ],
   "unwantedRecommendations": []
 }
