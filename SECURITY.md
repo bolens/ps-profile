@@ -1,5 +1,7 @@
 # Security Policy
 
+[Documentation](docs/README.md)
+
 ## Reporting a vulnerability
 
 Please report suspected vulnerabilities through GitHub's private vulnerability

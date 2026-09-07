@@ -1,5 +1,7 @@
 # powershell.config.json
 
+[Documentation](docs/README.md)
+
 This file contains PowerShell preferences for the distribution. JSON does not
 support comments; to document settings we keep this README alongside it.
 

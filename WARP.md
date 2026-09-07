@@ -1,5 +1,7 @@
 # WARP.md
 
+[Documentation](docs/README.md)
+
 This file provides guidance to WARP (warp.dev) terminal when working with code in this repository.
 
 > **Note**: For general AI coding assistant guidance (Claude, Cursor, Copilot, etc.), see [AGENTS.md](AGENTS.md).

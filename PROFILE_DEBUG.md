@@ -1,5 +1,7 @@
 # PS_PROFILE_DEBUG — profile debug guide
 
+[Documentation](docs/README.md)
+
 ## Purpose
 
 This repository exposes a small runtime debug toggle for development and CI.

@@ -1,93 +1,77 @@
-# PowerShell Profile Documentation
+# Documentation
 
-Welcome to the PowerShell Profile documentation! This documentation is organized into several sections to help you find what you need.
+PowerShell startup, shared libraries, generated API docs, and local storage.
 
-> **Note:** This profile is under active development and may be unstable. See [README.md](../README.md) for the full warning.
+## Start here
 
-## Documentation Structure
+| Need | Owning document |
+| --- | --- |
+| Use the project | [README.md](../README.md) |
+| Change the repository | [AGENTS.md](../AGENTS.md) |
+| Deliver or recover | [RELEASING.md](../RELEASING.md) |
+| Plan substantial changes | [.specify/memory/project-guide.md](../.specify/memory/project-guide.md) |
+| Non-negotiable constraints | [.specify/memory/constitution.md](../.specify/memory/constitution.md) |
 
-### 📚 [API Reference](api/)
+## Architecture
 
-Complete reference documentation for all functions and aliases available in the profile.
+[ARCHITECTURE.md](../ARCHITECTURE.md) owns lazy fragment loading and shared library boundaries. Keep
+the root profile small and preserve canonical module loading, strict behavior, and idempotent
+fragments. Generated [API documentation](api/README.md) comes from source help, while hand-authored
+guides explain decisions and failure modes.
 
-- **Functions**: [Browse all functions](api/functions/) organized by fragment
-- **Aliases**: [Browse all aliases](api/aliases/) organized by fragment
-- **Index**: [Full API index](api/README.md) with functions and aliases grouped by source fragment
+## Deployment and recovery
 
-The API documentation is automatically generated from comment-based help in the profile functions and aliases.
+[Profile setup](../PROFILE_README.md) owns installation and configuration.
+[RELEASING.md](../RELEASING.md) owns semantic-release delivery and recovery. Test with isolated
+roots and `-NoProfile`. A checked-out update does not establish that the active user profile loaded
+it.
 
-### 🧩 [Fragment Documentation](fragments/)
+## Database and state
 
-Documentation for each profile fragment, explaining what each fragment does and what functions it provides.
+[SQLite databases](guides/SQLITE_DATABASES.md) distinguishes available helpers from
+absent optional backends and owns persistence guidance. [Fragment cache
+usage](guides/FRAGMENT_CACHE_USAGE.md) owns disposable cache behavior. Command history and retained
+metrics are user data, so they cannot be treated like replaceable parsed-fragment caches.
 
-- **Fragment Index**: [Browse all fragments](fragments/README.md) organized by load order
-- **Individual Fragments**: See detailed documentation for each fragment
+## Documentation maintenance
 
-Fragments are modular components of the profile, loaded in dependency-aware order (tier-based: core, essential, standard, optional). Many fragments use organized subdirectories for related modules:
+Keep decisions, invariants, failure modes, and recovery requirements in the owning document. Link to
+commands, defaults, schemas, and generated catalogs instead of copying them. Change the owner and
+affected references together. Update this index when adding or moving a guide, and verify relative
+links and heading anchors. Historical specs and audits describe their recorded revision, not current
+runtime proof. A topic without an implementation stays explicitly unimplemented.
 
-- **Main Fragments**: 130+ top-level scripts in `profile.d/` (e.g. `bootstrap.ps1`, `git.ps1`, `files.ps1`) that load and orchestrate modules
-- **Module Subdirectories**: Organized modules loaded by parent fragments
-  - `cli-modules/` - Modern CLI tool integrations
-  - `container-modules/` - Container helper modules
-  - `conversion-modules/` - Data/document/media format conversions
-  - `dev-tools-modules/` - Development tool integrations
-  - `diagnostics-modules/` - Diagnostic and monitoring modules
-  - `files-modules/` - File operation modules
-  - `git-modules/` - Git integration modules
-  - `utilities-modules/` - Utility function modules
+## Topic guides
 
-### 📖 [Developer Guides](guides/)
-
-Comprehensive guides for developers working on or contributing to the profile.
-
-- **Guide Index**: [Browse all guides](guides/README.md) - Full categorized guide index
-- **Testing Guide**: [TESTING.md](guides/TESTING.md) - **Primary** testing reference (structure, runner flags, batch scripts, coverage)
-- **Development Guide**: [DEVELOPMENT.md](guides/DEVELOPMENT.md) - Setup, workflow, and advanced runner features
-- **Testing Patterns**: [TESTING_PATTERNS.md](examples/TESTING_PATTERNS.md) - Code examples for writing tests
-- **Test Stub Guide**: [TEST_VERIFICATION_MOCKING_GUIDE.md](guides/TEST_VERIFICATION_MOCKING_GUIDE.md) - TestSupport stubs and isolation
-- **Coverage Verification**: [VERIFY_COVERAGE.md](guides/VERIFY_COVERAGE.md) - Per-module `analyze-coverage.ps1` workflows
-- **Quick Start**: [DEVELOPMENT_QUICK_START.md](guides/DEVELOPMENT_QUICK_START.md) - Fast profile loading and common dev commands
-- **Error Handling Standard**: [ERROR_HANDLING_STANDARD.md](guides/ERROR_HANDLING_STANDARD.md) - Error handling, logging, and color coding standards
-- **Fragment Command Access**: [FRAGMENT_COMMAND_ACCESS.md](guides/FRAGMENT_COMMAND_ACCESS.md) - How to access fragment-defined commands
-- **Type Safety Guide**: [TYPE_SAFETY.md](guides/TYPE_SAFETY.md) - Enums, classes, validation, and strict mode
-- **Function Naming Exceptions**: [FUNCTION_NAMING_EXCEPTIONS.md](guides/FUNCTION_NAMING_EXCEPTIONS.md) - Exceptions to standard naming conventions
-- **Security Allowlist**: [SECURITY_ALLOWLIST.md](guides/SECURITY_ALLOWLIST.md) - Security scanning allowlist
-- **Tool Requirements**: [TOOL_REQUIREMENTS.md](guides/TOOL_REQUIREMENTS.md) - Test/conversion dependencies ([requirements.txt](../requirements.txt), [scoop.txt](../requirements/scoop.txt), [linux.txt](../requirements/linux.txt))
-- **Fragment Cache**: [FRAGMENT_CACHE_USAGE.md](guides/FRAGMENT_CACHE_USAGE.md) - SQLite fragment cache and utility scripts
-- **Fragment Loading**: [FRAGMENT_LOADING_OPTIMIZATION.md](guides/FRAGMENT_LOADING_OPTIMIZATION.md) - Lazy loading and command pre-registration
-- **Module Loading**: [MODULE_LOADING_STANDARD.md](guides/MODULE_LOADING_STANDARD.md) - `Import-FragmentModule` patterns
-- **Preference-Aware Hints**: [PREFERENCE_AWARE_INSTALL_HINTS.md](guides/PREFERENCE_AWARE_INSTALL_HINTS.md) - Install hint preferences
-
-See the [full guide index](guides/README.md) for performance, SQLite, and advanced topics.
-
-## Quick Links
-
-- **Main Profile README**: [PROFILE_README.md](../PROFILE_README.md) - Comprehensive profile documentation
-- **Architecture**: [ARCHITECTURE.md](../ARCHITECTURE.md) - Technical architecture details
-- **Contributing**: [CONTRIBUTING.md](../CONTRIBUTING.md) - How to contribute
-- **Agent Guidelines**: [AGENTS.md](../AGENTS.md) - Guidelines for AI coding assistants
+- [API reference](api/README.md): generated functions and aliases.
+- [Fragment index](fragments/README.md): fragment behavior and load order.
+- [Developer guides](guides/README.md): authoring, performance, and failure handling.
+- [Examples](examples/README.md): repository conventions in working code.
+- [Testing](guides/TESTING.md): runner selection, isolation, and coverage.
+- [Contributing](../CONTRIBUTING.md): local workflow and required validation.
+- [Security](../SECURITY.md): trust boundaries and reporting.
 
 ## Documentation Generation
 
-All documentation is automatically generated from source code:
+API and fragment reference pages are generated from source. This index and maintainer guides are
+hand-authored:
 
 - **API Documentation**: Run `task generate-docs` or `pwsh -NoProfile -File scripts/utils/docs/generate-docs.ps1`
 - **Fragment Documentation**: Run `task generate-fragment-readmes` or `pwsh -NoProfile -File scripts/utils/docs/generate-fragment-readmes.ps1`
 - **All Documentation**: Run `task all-docs` to generate both
 
-API documentation generation returns a validation failure if any function, alias, index, or cleanup step fails; partial output is never reported as a successful run.
+API documentation generation returns a validation failure if any function, alias, index, or cleanup
+step fails; partial output is never reported as a successful run.
 
-After editing guides, tests, or the source files they describe—or after `generate-docs`—refresh drift bindings:
+After editing guides, tests, or the source files they describe—or after `generate-docs`—refresh
+drift bindings:
 
 ```powershell
 task drift-link    # updates drift.lock for tests, guides, and docs/api
 task drift-check   # included in quality-check
 ```
 
-After a full API doc regeneration, run `task drift-link` again so `docs/api/**` source anchors stay current.
+After a full API doc regeneration, run `task drift-link` again so `docs/api/**` source anchors stay
+current.
 
-## Statistics
-
-- **Total Functions**: See [API index](api/README.md) for current count
-- **Total Aliases**: See [API index](api/README.md) for current count
-- **Total Fragments**: See [Fragment index](fragments/README.md) for current count
+- [Editor setup](../.vscode/README.md)
