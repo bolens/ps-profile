@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Install PowerShell from the official Linux x64 tarball (CI + Dev Containers).
-# Usage: install-pwsh-linux.sh [version]
+# Install the CI-pinned PowerShell runtime after verifying its official checksum.
 set -euo pipefail
-
-pwsh_version="${1:-7.4.7}"
-install_root="/opt/microsoft/powershell/$(echo "${pwsh_version}" | cut -d. -f1,2)"
-tarball="powershell-${pwsh_version}-linux-x64.tar.gz"
-download_url="https://github.com/PowerShell/PowerShell/releases/download/v${pwsh_version}/${tarball}"
-
+version="${1:-7.4.7}"
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Expected a stable PowerShell version.' >&2; exit 2; }
+case "$(uname -m)" in
+  x86_64) arch=x64; checksum=cfd57927b7a0d9f2da400471ea8dadc3ceb52f5e4a4a9a51c20495b4071f055a ;;
+  aarch64|arm64) arch=arm64; checksum=e5d34d4777c4d8841eade59dfdb6a8ceb0bb64b690863e4bf976eb698021f446 ;;
+  *) echo 'PowerShell container supports x86-64 and ARM64.' >&2; exit 2 ;;
+esac
 install_deps_arch() {
   pacman -Syu --noconfirm
   pacman -S --noconfirm \
@@ -63,18 +63,23 @@ else
   exit 1
 fi
 
-mkdir -p "${install_root}"
-curl -fsSL -o "/tmp/${tarball}" "${download_url}"
-tar -xzf "/tmp/${tarball}" -C "${install_root}"
-rm -f "/tmp/${tarball}"
 
-# Tar extract can leave the entrypoint non-executable in some images (exit 126).
-chmod a+x "${install_root}/pwsh"
-find "${install_root}" -type f -name '*.so*' -exec chmod a+x {} +
-
-# Prefer /usr/local/bin so PATH does not resolve through Arch usr-merge /usr/sbin.
-ln -sfn "${install_root}/pwsh" /usr/local/bin/pwsh
-ln -sfn "${install_root}/pwsh" /usr/bin/pwsh
-
-command -v pwsh
-pwsh -NoProfile -Command '$PSVersionTable.PSVersion.ToString()'
+if [[ "$version" != 7.4.7 ]]; then
+  # Explicit CI overrides use the matching release's checksum manifest.
+  checksum=$(curl --fail --show-error --location --retry 3 \
+    "https://github.com/PowerShell/PowerShell/releases/download/v${version}/hashes.sha256" |
+    awk -v file="powershell-${version}-linux-${arch}.tar.gz" '$2 == "*" file || $2 == file { print $1 }')
+  [[ "$checksum" =~ ^[a-fA-F0-9]{64}$ ]] || { echo 'Missing release checksum.' >&2; exit 2; }
+fi
+archive="$(mktemp)"
+trap 'rm -f "$archive"' EXIT
+curl --fail --show-error --location --retry 3 --output "$archive" \
+  "https://github.com/PowerShell/PowerShell/releases/download/v${version}/powershell-${version}-linux-${arch}.tar.gz"
+printf '%s  %s\n' "$checksum" "$archive" | sha256sum --check -
+install -d /opt/microsoft/powershell/7
+tar -xzf "$archive" -C /opt/microsoft/powershell/7
+chmod a+x /opt/microsoft/powershell/7/pwsh
+ln -sfn /opt/microsoft/powershell/7/pwsh /usr/local/bin/pwsh
+# PowerShell expands these variables, not Bash.
+# shellcheck disable=SC2016
+pwsh -NoLogo -NoProfile -Command '$PSVersionTable.PSVersion.ToString()'

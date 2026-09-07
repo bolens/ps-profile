@@ -1,36 +1,46 @@
 {
-  "name": "ps-profile (Ubuntu)",
+  "name": "ps-profile (ubuntu)",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": "..",
-    "args": {
-      "PWSH_VERSION": "7.4.7",
-      "UBUNTU_VERSION": "24.04"
-    }
+    "context": ".."
   },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
   "workspaceFolder": "/workspace",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
-  "remoteUser": "root",
-  "postCreateCommand": "pwsh -NoProfile -File .devcontainer/post-create.ps1",
+  "remoteUser": "vscode",
+  "updateRemoteUserUID": true,
+  "init": true,
+  "postCreateCommand": [
+    "bash",
+    ".devcontainer/post-create.sh"
+  ],
+  "waitFor": "postCreateCommand",
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-vscode.powershell",
-        "ms-azuretools.vscode-docker",
-        "editorconfig.editorconfig"
+        "editorconfig.editorconfig",
+        "timonwong.shellcheck",
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "redhat.vscode-yaml",
+        "github.vscode-github-actions",
+        "ms-vscode.powershell"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "pwsh",
         "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "/bin/bash"
+          },
           "pwsh": {
             "path": "/usr/local/bin/pwsh",
-            "args": ["-NoLogo"]
+            "args": [
+              "-NoLogo",
+              "-NoProfile"
+            ]
           }
         },
-        "powershell.powerShellAdditionalExePaths": {
-          "Dev Container pwsh": "/usr/local/bin/pwsh"
-        },
-        "powershell.powerShellDefaultVersion": "Dev Container pwsh"
+        "python.defaultInterpreterPath": "/usr/bin/python3",
+        "files.eol": "\n"
       }
     }
   }

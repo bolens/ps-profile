@@ -33,3 +33,16 @@ updates:
       - "npm"
     cooldown:
       default-days: 7
+
+  - package-ecosystem: docker
+    cooldown:
+      default-days: 7
+    directories:
+      - /.devcontainer
+      - /.devcontainer/ubuntu
+      - /.devcontainer/arch
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: chore(deps)
