@@ -35,6 +35,8 @@ updates:
       default-days: 7
 
   - package-ecosystem: docker
+    cooldown:
+      default-days: 7
     directories:
       - /.devcontainer
       - /.devcontainer/ubuntu
