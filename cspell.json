@@ -1129,7 +1129,11 @@
   ],
   "overrides": [
     {
-      "filename": "THIRD_PARTY_LICENSES.txt",
+      "filename": [
+        "THIRD_PARTY_LICENSES.txt",
+        "THIRD_PARTY_NOTICES.md",
+        "cspell.json"
+      ],
       "words": [
         "Aboukhadijeh",
         "Arnout",
@@ -1179,13 +1183,8 @@
         "schroffl",
         "sindresorhus",
         "socketpair",
+        "speckit",
         "stdint"
-      ]
-    },
-    {
-      "filename": "THIRD_PARTY_NOTICES.md",
-      "words": [
-        "speckit"
       ]
     }
   ]
