@@ -1126,5 +1126,67 @@
     "**/tests/**",
     "**/test-verification-reports/**",
     "**/dist/**"
+  ],
+  "overrides": [
+    {
+      "filename": "THIRD_PARTY_LICENSES.txt",
+      "words": [
+        "Aboukhadijeh",
+        "Arnout",
+        "Aseem",
+        "Ashkenas",
+        "Bynens",
+        "Chemeris",
+        "Collina",
+        "Collison",
+        "Dijkstar",
+        "Dineshkumar",
+        "Efimov",
+        "Einar",
+        "Feross",
+        "Gnomovision",
+        "Griess",
+        "Halliday",
+        "Kazemier",
+        "Kishore",
+        "Korolenko",
+        "Kowal",
+        "Kuba",
+        "Luca",
+        "Marchán",
+        "Mesqueeb",
+        "Monsch",
+        "Niegowski",
+        "Noordhuis",
+        "Onur",
+        "Pandiyan",
+        "Pinca",
+        "Porschberg",
+        "Rajlich",
+        "Sannis",
+        "Schlueter",
+        "Sindre",
+        "Sorhus",
+        "Stangvik",
+        "Unnebäck",
+        "Wirtz",
+        "Yıldırım",
+        "Zejin",
+        "Zhipeng",
+        "aclocal",
+        "bradconte",
+        "minilzo",
+        "schroffl",
+        "sindresorhus",
+        "socketpair",
+        "stdint"
+      ]
+    },
+    {
+      "filename": "THIRD_PARTY_NOTICES.md",
+      "words": [
+        "speckit"
+      ]
+    }
   ]
 }
