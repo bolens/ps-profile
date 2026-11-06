@@ -9,7 +9,12 @@ FROM docker.io/library/archlinux:latest@sha256:82b1b08faae9d61e3e7e13d562f4d0911
 RUN pacman -Syu --noconfirm --needed base-devel bash-completion ca-certificates curl git jq less openssh python python-pip ripgrep shellcheck sudo unzip wget zip icu openssl unixodbc snappy \
     && pacman -Scc --noconfirm
 
-COPY --from=node /usr/local/ /usr/local/
+# Keep Arch's real /usr/local/man directory; Debian uses a symlink there.
+COPY --from=node /usr/local/bin/ /usr/local/bin/
+COPY --from=node /usr/local/lib/ /usr/local/lib/
+COPY --from=node /usr/local/include/ /usr/local/include/
+COPY --from=node /usr/local/share/ /usr/local/share/
+COPY --from=node /usr/local/LICENSE /usr/local/README.md /usr/local/CHANGELOG.md /usr/local/
 COPY --from=uv /uv /uvx /usr/local/bin/
 COPY --from=ruff /ruff /usr/local/bin/ruff
 COPY --from=actionlint /usr/local/bin/actionlint /usr/local/bin/actionlint
