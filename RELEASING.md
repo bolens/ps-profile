@@ -70,3 +70,11 @@ with the same tooling revision pinned in
 [the workflow](.github/workflows/source-lint.yml). Review exclusions when adding
 source files; generated and imported files retain their native validation.
 Require the new check to pass on the current PR head before merging.
+
+## Woodpecker validation
+
+[The transition contract](docs/woodpecker-transition.md) adds portable Linux
+checks alongside existing host validation. Require actual native PR and main
+success before retiring duplicates. Existing platform, security, packaging and
+publishing authorities remain in place. No new tag or product release is part
+of this CI change.
