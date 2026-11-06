@@ -8,3 +8,5 @@ Installation validation alone does not establish feature completion.
   [plan](002-profile-baseline/plan.md), [coverage](002-profile-baseline/coverage.md),
   [tasks](002-profile-baseline/tasks.md).
 - [003-cleanup-config-preservation](003-cleanup-config-preservation/spec.md): existing feature specification.
+
+- [Portable Woodpecker validation](004-woodpecker-validation/spec.md) - planned native CI transition.

@@ -1,0 +1,28 @@
+labels:
+  platform: linux/amd64
+  backend: docker
+clone:
+  git:
+    image: docker.io/woodpeckerci/plugin-git@sha256:9802cb7852dcf31f9c5c1d1ddeadfb9002d4fae85751f7b6a792eedb267bcc59
+    settings:
+      depth: 0
+      partial: false
+when:
+  - event: push
+    branch: main
+  - event: [pull_request, manual]
+steps:
+  - name: documents
+    image: docker.io/library/node:24-trixie-slim@sha256:0820eaa85e07d0490446dd01d14707e17e6108a36988cf374899cd057eb3812d
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+      npm_config_cache: /tmp/npm-cache
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    commands:
+      - apt-get update
+      - apt-get install -y --no-install-recommends ca-certificates git
+      - npm install --global pnpm@11.5.3 --ignore-scripts --no-audit --no-fund
+      - pnpm install --frozen-lockfile
+      - pnpm exec markdownlint README.md WARP.md AGENTS.md ARCHITECTURE.md CONTRIBUTING.md PROFILE_README.md PROFILE_DEBUG.md profile.d/README.md requirements/README.md scripts/utils/README.md scripts/examples/README.md docs/README.md
+      - pnpm exec cspell "**/*" --no-progress --no-summary
+      - pnpm dlx markdown-link-check@3.15.0 README.md

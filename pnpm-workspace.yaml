@@ -4,4 +4,9 @@ allowBuilds:
 
 overrides:
   parquetjs>thrift: 0.23.0
-  js-yaml: '>=4.2.0'
+  js-yaml: 5.5.0
+  # Security fixes pending upstream markdownlint-cli dependency-range updates.
+  markdownlint-cli>minimatch: 11.0.4
+  minimatch>@isaacs/nonrecursive-glob-match: 1.0.3
+  markdownlint-cli>smol-toml: 1.9.1
+  cspell-config-lib>smol-toml: 1.9.1

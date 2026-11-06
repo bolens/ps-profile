@@ -75,3 +75,5 @@ After a full API doc regeneration, run `task drift-link` again so `docs/api/**` 
 current.
 
 - [Editor setup](../.vscode/README.md)
+
+- [Woodpecker validation](woodpecker-transition.md)
