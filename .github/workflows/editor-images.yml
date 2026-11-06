@@ -1,0 +1,47 @@
+name: Editor images
+on:
+  pull_request:
+    paths: ['.devcontainer/**', '.github/workflows/editor-images.yml', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml']
+  push:
+    branches: [main]
+    paths: ['.devcontainer/**', '.github/workflows/editor-images.yml', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: editor-images-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  editor:
+    name: Editor (${{ matrix.variant }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {variant: debian, dockerfile: .devcontainer/Dockerfile}
+          - {variant: ubuntu, dockerfile: .devcontainer/ubuntu/Dockerfile}
+          - {variant: arch, dockerfile: .devcontainer/arch/Dockerfile}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Build editor image
+        env:
+          DOCKERFILE: ${{ matrix.dockerfile }}
+        run: docker build --tag profile-editor:ci --file "$DOCKERFILE" .devcontainer
+      - name: Exercise setup and checks as the editor user
+        run: |
+          docker run --rm --init --user vscode \
+            --mount "type=bind,source=$GITHUB_WORKSPACE,target=/source,readonly" \
+            --workdir /tmp profile-editor:ci bash -euc '
+              test "$(id -u)" -ne 0
+              id -un >/dev/null
+              workspace=$(mktemp -d /tmp/profile-editor.XXXXXX)
+              cp -R /source/. "$workspace/"
+              cd "$workspace"
+              bash .devcontainer/post-create.sh
+              pnpm exec markdownlint-cli2 ".devcontainer/**/*.md"
+              pwsh -NoProfile -File scripts/utils/code-quality/run-pester-ci-shard.ps1 -Shard unit-library -Quiet
+            '
