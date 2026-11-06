@@ -9,7 +9,7 @@ packages. Setup installs dependencies from this checkout's lockfiles and runs
 
 PowerShell remains on the existing CI version 7.4.7. Pester and
 PSScriptAnalyzer install inside the container only. Node/Corepack, Python/uv
-and Make support the repository scripts. Optional data-conversion dependencies
+and Make support the repository scripts. All three editor images use Node 26. Optional data-conversion dependencies
 can be installed with `uv venv && uv pip install -r requirements.txt`.
 Windows-only fragments require Windows coverage.
 
@@ -31,7 +31,14 @@ where supported. Distribution packages resolve from the configured Debian
 repositories at build time. Update image pins and rerun setup and native checks
 together. Existing native and Nix workflows remain available independently.
 
-The default container uses Debian 13. Choose the Ubuntu or Arch configuration
+The default container uses Debian 13. Choose the Ubuntu 26.04 or Arch configuration
 from the Reopen in Container picker for distribution-specific tests. These
 variants share the same setup scripts and pinned PowerShell runtime. Arch is
 x86-64 only because its official base image does not publish ARM64.
+
+The Editor images workflow builds all three configurations for editor and
+lockfile changes. It copies the read-only checkout into a container-owned
+workspace, runs the actual post-create setup as `vscode`, checks Markdown and
+runs the existing `unit-library` Pester shard. PowerShell remains pinned to
+7.4.7. The Ubuntu installer resolves the distribution's ICU package rather
+than requiring Ubuntu 24.04's `libicu74` name.

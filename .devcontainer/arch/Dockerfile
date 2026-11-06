@@ -1,4 +1,4 @@
-FROM docker.io/library/node:24-trixie-slim@sha256:50c3b2f6988dfc307b86e5301d69611af31f4789bdf232863b07d3b02fe55ae0 AS node
+FROM docker.io/library/node:26-trixie-slim@sha256:5adad64f9a1fca2d51972caa65983634c8a774eb300d72b20f7f2a0f60368072 AS node
 FROM ghcr.io/astral-sh/uv:latest@sha256:2bb3ebca0a796a155094a27773d290c4b074572e6107f171d88d086682fd2500 AS uv
 FROM ghcr.io/astral-sh/ruff:latest@sha256:77e0110c04fdfdd7c97657a680aad0faa7c7d2161556d698695e87d608071ac2 AS ruff
 FROM docker.io/rhysd/actionlint:latest@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 AS actionlint
@@ -9,7 +9,13 @@ FROM docker.io/library/archlinux:latest@sha256:82b1b08faae9d61e3e7e13d562f4d0911
 RUN pacman -Syu --noconfirm --needed base-devel bash-completion ca-certificates curl git jq less openssh python python-pip ripgrep shellcheck sudo unzip wget zip icu openssl unixodbc snappy \
     && pacman -Scc --noconfirm
 
-COPY --from=node /usr/local/ /usr/local/
+# Preserve Arch's man directory and share/man symlink when copying Debian's Node tree.
+COPY --from=node /usr/local/bin/ /usr/local/bin/
+COPY --from=node /usr/local/lib/ /usr/local/lib/
+COPY --from=node /usr/local/include/ /usr/local/include/
+COPY --from=node /usr/local/share/man/ /usr/local/man/
+COPY --from=node /usr/local/share/doc/ /usr/local/share/doc/
+COPY --from=node /usr/local/LICENSE /usr/local/README.md /usr/local/CHANGELOG.md /usr/local/
 COPY --from=uv /uv /uvx /usr/local/bin/
 COPY --from=ruff /ruff /usr/local/bin/ruff
 COPY --from=actionlint /usr/local/bin/actionlint /usr/local/bin/actionlint
