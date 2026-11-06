@@ -17,3 +17,10 @@ corrective PR without changing live profiles or installations.
 Review image digests monthly and after security releases. Existing Dockerfile
 updaters do not monitor these Woodpecker YAML references. Direct tool pins and
 image updates require a reviewed PR and successful native execution.
+
+The pnpm overrides pin security fixes for YAML/TOML parsing and the Markdown
+linter’s glob matcher while upstream dependency ranges catch up. The matcher
+override is limited to markdownlint-cli; its glob and ignore behavior must pass
+with the repository checks. Keep release-age protections enabled, rerun a frozen
+install and the moderate-or-higher audit gate, and remove overrides when upstream
+ranges include the fixes. Existing runtime dependency overrides remain separate.

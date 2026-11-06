@@ -698,6 +698,7 @@
     "nonexistentcommand",
     "nonexistentpattern",
     "noninteractive",
+    "nonrecursive",
     "nonly",
     "nopass",
     "noprofile",
