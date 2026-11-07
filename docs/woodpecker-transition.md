@@ -30,7 +30,7 @@ images. It has no host mounts, Docker socket, privileged mode or publishing
 secrets. Package installation is confined to the disposable job container.
 The duplicate hosted Source lint is retired after accepted native PR and main
 verification. The native `ci/woodpecker/pr/woodpecker` status is required alongside
-GitHub’s unchanged `Pester result` and `commit-message-check`. Platform, real
+GitHub's unchanged `Pester result` and `commit-message-check`. Platform, real
 Docker, security and release checks retain their own coverage and authority.
 A container or lint result does not prove installation, runtime or publication.
 

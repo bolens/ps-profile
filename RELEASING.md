@@ -63,16 +63,16 @@ cancellations. Update the protection settings when renaming required jobs.
 
 ## Source lint
 
-The native `woodpecker` workflow’s `source-policy` step checks the complete
+The native `woodpecker` workflow's `source-policy` step checks the complete
 Python and shell file sets selected by
 [`.github/source-lint.json`](.github/source-lint.json) on pull requests and pushes
 to `main`. Run `bash scripts/ci/check-policy.sh` locally with the exact shared
-revision `7603518f305fb76f7bb1b9979f2692521f633b82`; the
+revision `7603518f305fb76f7bb1b9979f2692521f633b82`. The
 [shared reproduction instructions](https://github.com/bolens/.github/blob/7603518f305fb76f7bb1b9979f2692521f633b82/docs/source-lint.md)
 explain the selector and tooling. The duplicate hosted Source lint workflow is
 retired after accepted native PR and genuine-main runs. Require the current native
 result before merging, review exclusions when adding files, and retain generated
-or imported files’ own validation.
+or imported files' own validation.
 
 ## Woodpecker validation
 
