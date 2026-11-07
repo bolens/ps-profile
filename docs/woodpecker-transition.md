@@ -1,6 +1,27 @@
 # Woodpecker validation
 
-Run the existing locked Markdown and spelling checks on Node 24, then the README link checker at a recorded package version.
+Run the existing changelog policy checker on Python 3.14, followed by the locked
+Markdown and spelling checks on Node 24 and the README link checker at a recorded
+package version. The changelog checker uses the standard library and validates
+the tracked changelog without generating or rewriting it.
+
+## CI groups and local commands
+
+The workflow keeps its existing `woodpecker` identity so required status names
+remain stable. Use these repository commands to reproduce each group:
+
+| Group | Woodpecker step | Local command |
+| --- | --- | --- |
+| Validate | `validate-changelog` | `python3 scripts/check-changelog.py` |
+| Validate | `documents` | `pnpm exec markdownlint` with the tracked pipeline's file list; `pnpm exec cspell "**/*" --no-progress --no-summary`; `pnpm dlx markdown-link-check@3.15.0 README.md` |
+| Test | Existing hosted PowerShell checks | `make validate`; `make test` in an isolated `pwsh -NoProfile` environment |
+| Publish | Existing Release workflow | Protected-main semantic-release; no local publication command |
+
+Use the frozen pnpm lockfile before local document checks. Portable changelog
+and document validation does not replace Pester, platform checks, security
+checks or the release authority.
+
+## Acceptance and recovery
 
 The pipeline runs on pull requests and main pushes with immutable clone/runtime
 images. It has no host mounts, Docker socket, privileged mode or publishing

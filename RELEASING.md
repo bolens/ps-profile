@@ -78,3 +78,8 @@ checks alongside existing host validation. Require actual native PR and main
 success before retiring duplicates. Existing platform, security, packaging and
 publishing authorities remain in place. No new tag or product release is part
 of this CI change.
+
+The native `validate-changelog` step runs the same read-only
+`python3 scripts/check-changelog.py` command used before release. It does not
+generate release notes or change the tracked changelog. The transition contract
+groups native and local commands without changing the required workflow name.
