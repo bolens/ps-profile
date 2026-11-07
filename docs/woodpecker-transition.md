@@ -8,14 +8,16 @@ the tracked changelog without generating or rewriting it.
 ## CI groups and local commands
 
 The workflow keeps its existing `woodpecker` identity so required status names
-remain stable. Use these repository commands to reproduce each group:
+remain stable. Use the [shared purpose phases](https://github.com/bolens/.github/blob/main/docs/woodpecker-transition.md#ci-organization)
+and these repository commands to reproduce each group:
 
-| Group | Woodpecker step | Local command |
+| Phase | Woodpecker step | Local command |
 | --- | --- | --- |
-| Validate | `validate-changelog` | `python3 scripts/check-changelog.py` |
-| Validate | `documents` | `pnpm exec markdownlint` with the tracked pipeline's file list; `pnpm exec cspell "**/*" --no-progress --no-summary`; `pnpm dlx markdown-link-check@3.15.0 README.md` |
-| Test | Existing hosted PowerShell checks | `make validate`; `make test` in an isolated `pwsh -NoProfile` environment |
-| Publish | Existing Release workflow | Protected-main semantic-release; no local publication command |
+| `validate` | `source-policy` | `bash scripts/ci/check-policy.sh` |
+| `validate` | `validate-changelog` | `python3 scripts/check-changelog.py` |
+| `validate` | `documents` | `pnpm exec markdownlint` with the tracked pipeline's file list; `pnpm exec cspell "**/*" --no-progress --no-summary`; `pnpm dlx markdown-link-check@3.15.0 README.md` |
+| `test` | Existing hosted PowerShell checks | `make validate`; `make test` in an isolated `pwsh -NoProfile` environment |
+| `publish` | Existing Release workflow | Protected-main semantic-release; no local publication command |
 
 Use the frozen pnpm lockfile before local document checks. Portable changelog
 and document validation does not replace Pester, platform checks, security
@@ -45,3 +47,12 @@ override is limited to markdownlint-cli; its glob and ignore behavior must pass
 with the repository checks. Keep release-age protections enabled, rerun a frozen
 install and the moderate-or-higher audit gate, and remove overrides when upstream
 ranges include the fixes. Existing runtime dependency overrides remain separate.
+
+The `source-policy` group runs the existing shared SourceLint selector at
+`7603518f305fb76f7bb1b9979f2692521f633b82` over the complete Python and shell
+sets in `.github/source-lint.json`. It uses Ruff 0.15.20 and the shared locked
+tooling. Local reproduction requires Git, Node 24, Python 3 with venv support
+and ShellCheck; all downloaded tooling is installed in a disposable temporary
+directory. No PowerShell module or live profile is loaded or installed by this
+check. Keep hosted Source lint and all required checks until exact-head native
+PR and genuine-main results support a separately reviewed status migration.

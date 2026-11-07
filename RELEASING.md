@@ -83,3 +83,9 @@ The native `validate-changelog` step runs the same read-only
 `python3 scripts/check-changelog.py` command used before release. It does not
 generate release notes or change the tracked changelog. The transition contract
 groups native and local commands without changing the required workflow name.
+
+The native `source-policy` group calls `bash scripts/ci/check-policy.sh` to run
+the exact shared SourceLint revision above over its complete configured file
+sets. It is separate from Pester and platform runtime qualification. Keep hosted
+Source lint and current required status bindings during PR and genuine-main
+verification; a later settings change must preserve the other required checks.
