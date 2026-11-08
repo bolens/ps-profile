@@ -115,7 +115,7 @@
   },
   "devDependencies": {
     "@cspell/dict-aws": "^4.0.17",
-    "@cspell/dict-companies": "^3.2.12",
+    "@cspell/dict-companies": "^3.2.13",
     "@cspell/dict-docker": "^1.1.17",
     "@cspell/dict-dotnet": "^5.0.13",
     "@cspell/dict-en-au": "^1.1.24",
