@@ -104,20 +104,20 @@ Describe 'run-markdownlint.ps1 execution' {
             ''
             '# Duplicate Top Level'
         ) | Set-Content -LiteralPath (Join-Path $repo 'bad-markdown.md') -Encoding UTF8
-                Push-Location $repo
+        Push-Location $repo
         try {
             git init -q | Out-Null
             git config user.email 'fixture@example.com'
             git config user.name 'Fixture'
             git add bad-markdown.md
             git commit -m 'init bad markdown' -q
-                    $output = & pwsh -NoProfile -File (Join-Path $runnerDir 'run-markdownlint.ps1') 2>&1 | Out-String
+            $output = & pwsh -NoProfile -File (Join-Path $runnerDir 'run-markdownlint.ps1') 2>&1 | Out-String
             $exitCode = $LASTEXITCODE
         }
         finally {
             Pop-Location
         }
-                $exitCode | Should -Be 1
+        $exitCode | Should -Be 1
         $output | Should -Match 'markdownlint found errors|markdownlint'
     }
 
@@ -138,20 +138,20 @@ Describe 'run-markdownlint.ps1 execution' {
             ''
             'This file should pass markdownlint.'
         ) | Set-Content -LiteralPath (Join-Path $repo 'clean-markdown.md') -Encoding UTF8
-                Push-Location $repo
+        Push-Location $repo
         try {
             git init -q | Out-Null
             git config user.email 'fixture@example.com'
             git config user.name 'Fixture'
             git add clean-markdown.md
             git commit -m 'init clean markdown' -q
-                    $output = & pwsh -NoProfile -File (Join-Path $runnerDir 'run-markdownlint.ps1') 2>&1 | Out-String
+            $output = & pwsh -NoProfile -File (Join-Path $runnerDir 'run-markdownlint.ps1') 2>&1 | Out-String
             $exitCode = $LASTEXITCODE
         }
         finally {
             Pop-Location
         }
-                $exitCode | Should -Be 0
+        $exitCode | Should -Be 0
         $output | Should -Match 'markdownlint passed'
     }
 }
@@ -159,6 +159,39 @@ Describe 'run-markdownlint.ps1 execution' {
 Describe 'run-markdownlint.ps1 canonical version selection' -Tag 'CanonicalVersion' {
     BeforeAll {
         $script:MarkdownlintVersionFixturePaths = @()
+        $script:MarkdownlintFixturePathComparison = if ($IsWindows) {
+            [StringComparison]::OrdinalIgnoreCase
+        }
+        else {
+            [StringComparison]::Ordinal
+        }
+        function Restore-MarkdownlintFixtureModules {
+            $originalLib = Join-Path $script:TestRepoRoot 'scripts/lib'
+            $restorePaths = @()
+            foreach ($module in @(Get-Module -All)) {
+                foreach ($fixtureRoot in $script:MarkdownlintVersionFixturePaths) {
+                    $fixtureLib = (Join-Path $fixtureRoot 'scripts/lib') + [IO.Path]::DirectorySeparatorChar
+                    if ($module.Path -and $module.Path.StartsWith($fixtureLib, $script:MarkdownlintFixturePathComparison)) {
+                        $relativePath = $module.Path.Substring($fixtureLib.Length)
+                        $originalPath = Join-Path $originalLib $relativePath
+                        if (-not (Test-Path -LiteralPath $originalPath)) {
+                            throw "Cannot restore canonical library module: $relativePath"
+                        }
+                        $restorePaths += $originalPath
+                        Remove-Module -ModuleInfo $module -Force -ErrorAction Stop
+                        break
+                    }
+                }
+            }
+            foreach ($originalPath in @($restorePaths | Sort-Object -Unique)) {
+                Import-Module $originalPath -Global -Force -DisableNameChecking -ErrorAction Stop
+            }
+            # Fixture copies export commands and variables globally. Re-establish the
+            # canonical loader and exit constants after unloading their owned copies.
+            Import-Module (Join-Path $originalLib 'ModuleImport.psm1') -Global -Force -DisableNameChecking -ErrorAction Stop
+            Import-Module (Join-Path $originalLib 'core/ExitCodes.psm1') -Global -Force -DisableNameChecking -ErrorAction Stop
+        }
+
         function New-MarkdownlintVersionFixture {
             param(
                 [string]$ManifestText = '{"devDependencies":{"markdownlint-cli":"9.8.7"}}',
@@ -182,6 +215,7 @@ Describe 'run-markdownlint.ps1 canonical version selection' -Tag 'CanonicalVersi
     }
 
     AfterAll {
+        Restore-MarkdownlintFixtureModules
         foreach ($path in $script:MarkdownlintVersionFixturePaths) {
             Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
         }
@@ -207,6 +241,7 @@ Describe 'run-markdownlint.ps1 canonical version selection' -Tag 'CanonicalVersi
     }
 
     AfterEach {
+        Restore-MarkdownlintFixtureModules
         foreach ($name in @('markdownlint', 'npx', 'npm')) {
             Remove-Item "Function:\$name" -ErrorAction SilentlyContinue
         }
@@ -248,6 +283,51 @@ Describe 'run-markdownlint.ps1 canonical version selection' -Tag 'CanonicalVersi
         $output | Should -Match 'version: 0.47.0'
         $global:MarkdownlintNpxArguments | Should -Contain 'markdownlint-cli@0.47.0'
         $global:MarkdownlintNpmCalls | Should -Be 0
+    }
+
+    It 'restores canonical exit bindings after running a copied library fixture' {
+        Mock Get-Command { $null } -ParameterFilter { $Name -eq 'markdownlint' }
+        $fixture = New-MarkdownlintVersionFixture
+        $null = & $fixture.Runner 2>&1
+        Restore-MarkdownlintFixtureModules
+
+        $global:EXIT_SETUP_ERROR | Should -Be 2
+        $global:EXIT_VALIDATION_FAILURE | Should -Be 1
+        (Get-Command Exit-WithCode).Module.Path | Should -Be (Join-Path $script:TestRepoRoot 'scripts/lib/core/ExitCodes.psm1')
+        $fixtureLib = (Join-Path $fixture.Root 'scripts/lib') + [IO.Path]::DirectorySeparatorChar
+        @(Get-Module -All | Where-Object { $_.Path -and $_.Path.StartsWith($fixtureLib, $script:MarkdownlintFixturePathComparison) }).Count | Should -Be 0
+    }
+
+    It 'preserves an unrelated module in a case-variant sibling directory' {
+        $fixture = New-MarkdownlintVersionFixture
+        $sibling = Join-Path (Split-Path -Parent $fixture.Root) ([IO.Path]::GetFileName($fixture.Root).ToLowerInvariant())
+        if (Test-Path -LiteralPath $sibling) {
+            Set-ItResult -Skipped -Because 'This ownership control requires a case-sensitive filesystem'
+            return
+        }
+
+        $sentinel = $null
+        try {
+            $siblingLib = Join-Path $sibling 'scripts/lib'
+            $null = New-Item -ItemType Directory -Path $siblingLib -Force
+            $sentinelPath = Join-Path $siblingLib 'MarkdownlintCaseVariantSentinel.psm1'
+            Set-Content -LiteralPath $sentinelPath -Value @'
+function Get-MarkdownlintCaseVariantSentinel { 'case-variant-sentinel' }
+Export-ModuleMember -Function Get-MarkdownlintCaseVariantSentinel
+'@ -Encoding UTF8
+            $sentinel = Import-Module $sentinelPath -Global -PassThru -ErrorAction Stop
+
+            Restore-MarkdownlintFixtureModules
+
+            @(Get-Module -All | Where-Object { $_.Path -ceq $sentinel.Path }).Count | Should -Be 1
+            Get-MarkdownlintCaseVariantSentinel | Should -Be 'case-variant-sentinel'
+        }
+        finally {
+            if ($sentinel) {
+                Remove-Module -ModuleInfo $sentinel -Force -ErrorAction SilentlyContinue
+            }
+            Remove-Item -LiteralPath $sibling -Recurse -Force -ErrorAction SilentlyContinue
+        }
     }
 
     It 'rejects <Case> before invoking a package runner' -ForEach @(

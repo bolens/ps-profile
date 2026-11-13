@@ -10,6 +10,7 @@ overrides:
   markdownlint-cli>minimatch: 11.0.4
   minimatch>@isaacs/nonrecursive-glob-match: 1.0.3
   markdownlint-cli>smol-toml: 1.9.1
+  markdownlint>re2js: 2.8.7
   cspell-config-lib>smol-toml: 1.9.1
 
 importers:
@@ -961,9 +962,9 @@ packages:
     engines: {node: '>=10.13.0'}
     hasBin: true
 
-  re2js@2.8.6:
-    resolution: {integrity: sha512-xLgQil4kIUCrAzVk9fRSkxkFNwmygLFjVxXrLc65aE1F0+Zsb8rxumFBy4XKyvgMCTL6kilDq3EZ0piE2dP/Dg==}
-    engines: {node: '>=18.0.0'}
+  re2js@2.8.7:
+    resolution: {integrity: sha512-bRSL/vn3KAmlGfGNoVpcsBXLaVvl6AbuvMMWbz0m3vBj60nj+p2/biozfBUOSBP+5XTduF6mr6IO/ZVjmqqkVQ==}
+    engines: {node: '>=20.0.0'}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -1794,7 +1795,7 @@ snapshots:
       micromark-extension-gfm-table: 2.1.2
       micromark-extension-math: 3.1.0
       micromark-util-types: 2.0.3
-      re2js: 2.8.6
+      re2js: 2.8.7
       string-width: 8.3.0
     transitivePeerDependencies:
       - supports-color
@@ -2058,7 +2059,7 @@ snapshots:
       pngjs: 5.0.0
       yargs: 15.4.1
 
-  re2js@2.8.6: {}
+  re2js@2.8.7: {}
 
   require-directory@2.1.1: {}
 

@@ -9,4 +9,6 @@ overrides:
   markdownlint-cli>minimatch: 11.0.4
   minimatch>@isaacs/nonrecursive-glob-match: 1.0.3
   markdownlint-cli>smol-toml: 1.9.1
+  # GHSA-gg6h-894w-4m9c: markdownlint 0.42.0 pins vulnerable re2js 2.8.6.
+  markdownlint>re2js: 2.8.7
   cspell-config-lib>smol-toml: 1.9.1

@@ -4728,7 +4728,7 @@ tests/integration/tools/text-processing-tools.tests.ps1 -> profile.d/bootstrap.p
 tests/integration/tools/text-processing-tools.tests.ps1 -> profile.d/jq-yq.ps1 sig:eb9fbd7f3f7f1365
 tests/integration/tools/text-processing-tools.tests.ps1 -> profile.d/rg.ps1 sig:471bef974cd5a868
 tests/integration/tools/tooling.tests.ps1 -> Microsoft.PowerShell_profile.ps1 sig:e1a5656c1f0efc86
-tests/integration/tools/tooling.tests.ps1 -> cspell.json sig:b3789ab802978fd6
+tests/integration/tools/tooling.tests.ps1 -> cspell.json sig:34a0c55b30a1e84f
 tests/integration/tools/uv.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/integration/tools/uv.tests.ps1 -> profile.d/uv.ps1 sig:2a3f18a2af2ae544
 tests/integration/tools/vcpkg.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
@@ -6754,7 +6754,7 @@ tests/unit/test-runner/result/test-runner-result-validation-extended.tests.ps1 -
 tests/unit/test-runner/result/test-runner-result-validation.tests.ps1 -> scripts/utils/code-quality/modules/TestResultValidation.psm1 sig:a889bdf13d942bb1
 tests/unit/test-runner/run/test-runner-run-format-extended.tests.ps1 -> scripts/utils/code-quality/run-format.ps1 sig:31997fbb63847fe9
 tests/unit/test-runner/run/test-runner-run-lint-extended.tests.ps1 -> scripts/utils/code-quality/run-lint.ps1 sig:defbba736969a474
-tests/unit/test-runner/run/test-runner-run-markdownlint-extended.tests.ps1 -> scripts/utils/code-quality/run-markdownlint.ps1 sig:7ac3156ffcf78cbf
+tests/unit/test-runner/run/test-runner-run-markdownlint-extended.tests.ps1 -> scripts/utils/code-quality/run-markdownlint.ps1 sig:c6b045c7222de8d8
 tests/unit/test-runner/run/test-runner-run-pester-extended.tests.ps1 -> scripts/utils/code-quality/modules/PesterConfig.psm1 sig:43a7e54f37cf1fb3
 tests/unit/test-runner/run/test-runner-run-pester-extended.tests.ps1 -> scripts/utils/code-quality/run-pester.ps1 sig:3363180016608ff6
 tests/unit/test-runner/run/test-runner-run-pester.tests.ps1 -> scripts/utils/code-quality/modules/PesterConfig.psm1 sig:43a7e54f37cf1fb3
@@ -6918,7 +6918,8 @@ tests/unit/utility/run/utility-run-conversion-all-batch.tests.ps1 -> scripts/uti
 tests/unit/utility/run/utility-run-conversion-integration-batch.tests.ps1 -> scripts/utils/code-quality/run-conversion-integration-batch.ps1 sig:5abf72b9b1cd206f
 tests/unit/utility/run/utility-run-format.tests.ps1 -> scripts/utils/code-quality/run-format.ps1 sig:31997fbb63847fe9
 tests/unit/utility/run/utility-run-lint.tests.ps1 -> scripts/utils/code-quality/run-lint.ps1 sig:defbba736969a474
-tests/unit/utility/run/utility-run-markdownlint.tests.ps1 -> scripts/utils/code-quality/run-markdownlint.ps1 sig:7ac3156ffcf78cbf
+tests/unit/utility/run/utility-run-markdownlint.tests.ps1 -> scripts/lib/core/ExitCodes.psm1 sig:2eefcd5aea43478e
+tests/unit/utility/run/utility-run-markdownlint.tests.ps1 -> scripts/utils/code-quality/run-markdownlint.ps1 sig:c6b045c7222de8d8
 tests/unit/utility/run/utility-run-performance-batch.tests.ps1 -> scripts/utils/code-quality/run-performance-batch.ps1 sig:371519e060c3d811
 tests/unit/utility/run/utility-run-security-scan-extended.tests.ps1 -> scripts/utils/security/run-security-scan.ps1 sig:9183bb6b55a22b91
 tests/unit/utility/run/utility-run-security-scan.tests.ps1 -> scripts/utils/security/modules/SecurityReporter.psm1 sig:def268e80f2badc2
@@ -6943,11 +6944,11 @@ tests/unit/utility/sync/utility-sync-profile-fragments.tests.ps1 -> scripts/util
 tests/unit/utility/task/utility-task-comparator-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskComparator.psm1 sig:fae902a57b00e69f
 tests/unit/utility/task/utility-task-generator-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskGenerator.psm1 sig:4653ffdadb3de355
 tests/unit/utility/task/utility-task-parity-utilities-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskParityUtilities.psm1 sig:b6e4767930248714
-tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> .vscode/tasks.json sig:c1cd7f7195e3d108
+tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> .vscode/tasks.json sig:6924c210661f9d28
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> Makefile sig:218db1f93c76d9b4
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> Taskfile.yml sig:c269031ad63901dd
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> justfile sig:30bc4c1a0c7f0858
-tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> package.json sig:2afee832a3dc5d9d
+tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> package.json sig:3ce27fee7c9a91a4
 tests/unit/utility/task/utility-task-parser-structure-extended.tests.ps1 -> scripts/utils/task-parity/modules/TaskParser.psm1 sig:70df6e65f25b8e16
 tests/unit/utility/track/utility-track-coverage-trends-extended.tests.ps1 -> scripts/utils/metrics/track-coverage-trends.ps1 sig:2340a411fb7efb2f
 tests/unit/utility/track/utility-track-coverage-trends.tests.ps1 -> scripts/utils/metrics/track-coverage-trends.ps1 sig:2340a411fb7efb2f
@@ -6980,6 +6981,6 @@ tests/unit/validation/validate/validation-validate-profile-extended.tests.ps1 ->
 tests/unit/validation/validate/validation-validate-profile.tests.ps1 -> scripts/checks/validate-profile.ps1 sig:16c28ee8c0b00a12
 tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/commit-message-check.yml sig:990eb653a51e2e92
 tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-validation.yml sig:1ee3c144056aea46
-tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-vulnerability-scan.yml sig:a898277730a9a520
-tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/metrics-collection.yml sig:ef49993694895722
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/dependency-vulnerability-scan.yml sig:c109940b2872f9e3
+tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/metrics-collection.yml sig:5b34dfb29bba1630
 tests/unit/validation/workflow/validation-workflow-gates.tests.ps1 -> .github/workflows/validate-profile.yml sig:a999849ca82f8751
