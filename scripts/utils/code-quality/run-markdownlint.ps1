@@ -13,7 +13,7 @@
     any linting errors are found.
 
     The markdownlint-cli version can be controlled via the MARKDOWNLINT_VERSION
-    environment variable. Defaults to 0.48.0 if not specified.
+    environment variable. Otherwise, the exact version in package.json is used.
 
 
 .NOTES
@@ -24,7 +24,7 @@
 
     Version Control:
     - Set MARKDOWNLINT_VERSION environment variable to use a specific version
-    - Default version: 0.48.0
+    - Default version: package.json devDependencies.markdownlint-cli
 
 .EXAMPLE
     pwsh -NoProfile -File scripts\utils\run-markdownlint.ps1
@@ -48,15 +48,30 @@ Import-Module $moduleImportPath -DisableNameChecking -ErrorAction Stop
 Import-LibModule -ModuleName 'ExitCodes' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'Logging' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 Import-LibModule -ModuleName 'NodeJs' -ScriptPath $PSScriptRoot -DisableNameChecking -ErrorAction SilentlyContinue
+Import-LibModule -ModuleName 'JsonUtilities' -ScriptPath $PSScriptRoot -DisableNameChecking -Global
 
 $ErrorActionPreference = 'Stop'
 
-# Get markdownlint-cli version from environment variable or use default
+# Keep the local fallback and its log aligned with the canonical dependency pin.
 $markdownlintVersion = if ($env:MARKDOWNLINT_VERSION) {
     $env:MARKDOWNLINT_VERSION
 }
 else {
-    '0.48.0'  # Default version
+    try {
+        $repoRoot = Get-RepoRoot -ScriptPath $PSCommandPath
+        $package = Read-JsonFile -Path (Join-Path $repoRoot 'package.json') -ErrorAction Stop
+        $version = $package.devDependencies.'markdownlint-cli'
+        [System.Management.Automation.SemanticVersion]$parsedVersion = $null
+        if ($version -isnot [string] -or
+            -not [System.Management.Automation.SemanticVersion]::TryParse($version, [ref]$parsedVersion) -or
+            $version -ne $parsedVersion.ToString()) {
+            throw 'package.json must pin markdownlint-cli to an exact semantic version'
+        }
+        $version
+    }
+    catch {
+        Exit-WithCode -ExitCode $EXIT_SETUP_ERROR -Message "Cannot resolve the canonical markdownlint-cli version: $($_.Exception.Message)"
+    }
 }
 
 # Check if markdownlint-cli is installed

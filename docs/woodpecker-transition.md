@@ -28,8 +28,10 @@ checks or the release authority.
 The pipeline runs on pull requests and main pushes with immutable clone/runtime
 images. It has no host mounts, Docker socket, privileged mode or publishing
 secrets. Package installation is confined to the disposable job container.
-Existing GitHub checks remain during native verification. Platform, real Docker,
-security and release checks remain separate until equivalent coverage exists.
+The duplicate hosted Source lint is retired after accepted native PR and main
+verification. The native `ci/woodpecker/pr/woodpecker` status is required alongside
+GitHub's unchanged `Pester result` and `commit-message-check`. Platform, real
+Docker, security and release checks retain their own coverage and authority.
 A container or lint result does not prove installation, runtime or publication.
 
 Require exact-head PR checks, a reviewed squash merge, and genuine native main
@@ -54,5 +56,6 @@ sets in `.github/source-lint.json`. It uses Ruff 0.15.20 and the shared locked
 tooling. Local reproduction requires Git, Node 24, Python 3 with venv support
 and ShellCheck; all downloaded tooling is installed in a disposable temporary
 directory. No PowerShell module or live profile is loaded or installed by this
-check. Keep hosted Source lint and all required checks until exact-head native
-PR and genuine-main results support a separately reviewed status migration.
+check. Its duplicate hosted Source lint is retired. Future status migrations
+still require exact-head native PR and genuine-main results and a separately
+reviewed settings change that preserves every other required check.

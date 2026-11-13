@@ -98,6 +98,7 @@ Describe 'run-markdownlint.ps1 execution' {
         $null = New-Item -ItemType Directory -Path $runnerDir -Force
         Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
         Copy-Item -LiteralPath $script:RunMarkdownlintScript -Destination (Join-Path $runnerDir 'run-markdownlint.ps1') -Force
+        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'package.json') -Destination (Join-Path $repo 'package.json')
         @(
             '# Bad Heading'
             ''
@@ -131,6 +132,7 @@ Describe 'run-markdownlint.ps1 execution' {
         $null = New-Item -ItemType Directory -Path $runnerDir -Force
         Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
         Copy-Item -LiteralPath $script:RunMarkdownlintScript -Destination (Join-Path $runnerDir 'run-markdownlint.ps1') -Force
+        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'package.json') -Destination (Join-Path $repo 'package.json')
         @(
             '# Clean Markdown Fixture'
             ''
@@ -151,5 +153,114 @@ Describe 'run-markdownlint.ps1 execution' {
         }
                 $exitCode | Should -Be 0
         $output | Should -Match 'markdownlint passed'
+    }
+}
+
+Describe 'run-markdownlint.ps1 canonical version selection' -Tag 'CanonicalVersion' {
+    BeforeAll {
+        $script:MarkdownlintVersionFixturePaths = @()
+        function New-MarkdownlintVersionFixture {
+            param(
+                [string]$ManifestText = '{"devDependencies":{"markdownlint-cli":"9.8.7"}}',
+                [switch]$MissingManifest
+            )
+
+            $repo = New-TestTempDirectory -Prefix 'MarkdownlintVersion'
+            $script:MarkdownlintVersionFixturePaths += $repo
+            $runnerDir = Join-Path $repo 'scripts/utils/code-quality'
+            $null = New-Item -ItemType Directory -Path $runnerDir -Force
+            $null = New-Item -ItemType Directory -Path (Join-Path $repo 'profile.d') -Force
+            Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts/lib') -Destination (Join-Path $repo 'scripts/lib') -Recurse
+            $runner = Join-Path $runnerDir 'run-markdownlint.ps1'
+            Copy-Item -LiteralPath $script:RunMarkdownlintScript -Destination $runner
+            $manifest = Join-Path $repo 'package.json'
+            if (-not $MissingManifest) {
+                Set-Content -LiteralPath $manifest -Value $ManifestText -Encoding UTF8
+            }
+            [PSCustomObject]@{ Root = $repo; Runner = $runner; Manifest = $manifest }
+        }
+    }
+
+    AfterAll {
+        foreach ($path in $script:MarkdownlintVersionFixturePaths) {
+            Remove-Item -LiteralPath $path -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    BeforeEach {
+        $script:PreviousMarkdownlintVersion = $env:MARKDOWNLINT_VERSION
+        $script:PreviousProfileTestMode = $env:PS_PROFILE_TEST_MODE
+        Remove-Item Env:MARKDOWNLINT_VERSION -ErrorAction SilentlyContinue
+        $env:PS_PROFILE_TEST_MODE = '1'
+        $global:MarkdownlintNpxArguments = @()
+        $global:MarkdownlintNpmCalls = 0
+        function global:npx {
+            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+            $global:MarkdownlintNpxArguments = $Arguments
+            $global:LASTEXITCODE = 0
+        }
+        function global:npm {
+            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+            $global:MarkdownlintNpmCalls++
+            throw 'Unexpected npm invocation in an offline fixture'
+        }
+    }
+
+    AfterEach {
+        foreach ($name in @('markdownlint', 'npx', 'npm')) {
+            Remove-Item "Function:\$name" -ErrorAction SilentlyContinue
+        }
+        if ($null -eq $script:PreviousMarkdownlintVersion) {
+            Remove-Item Env:MARKDOWNLINT_VERSION -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:MARKDOWNLINT_VERSION = $script:PreviousMarkdownlintVersion
+        }
+        if ($null -eq $script:PreviousProfileTestMode) {
+            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:PS_PROFILE_TEST_MODE = $script:PreviousProfileTestMode
+        }
+        Remove-Variable MarkdownlintNpxArguments, MarkdownlintNpmCalls -Scope Global -ErrorAction SilentlyContinue
+    }
+
+    It 'reads a changed manifest pin for the log and offline npx fallback' {
+        Mock Get-Command { $null } -ParameterFilter { $Name -eq 'markdownlint' }
+        $fixture = New-MarkdownlintVersionFixture
+        $output = & $fixture.Runner 2>&1 | Out-String
+        $output | Should -Match 'version: 9.8.7'
+        $global:MarkdownlintNpxArguments | Should -Contain 'markdownlint-cli@9.8.7'
+
+        Set-Content -LiteralPath $fixture.Manifest -Value '{"devDependencies":{"markdownlint-cli":"9.8.8"}}' -Encoding UTF8
+        $output = & $fixture.Runner 2>&1 | Out-String
+        $output | Should -Match 'version: 9.8.8'
+        $global:MarkdownlintNpxArguments | Should -Contain 'markdownlint-cli@9.8.8'
+        $global:MarkdownlintNpxArguments | Should -Contain '**/*.md'
+        $global:MarkdownlintNpmCalls | Should -Be 0
+    }
+
+    It 'preserves an explicit override when the canonical manifest is absent' {
+        Mock Get-Command { $null } -ParameterFilter { $Name -eq 'markdownlint' }
+        $fixture = New-MarkdownlintVersionFixture -MissingManifest
+        $env:MARKDOWNLINT_VERSION = '0.47.0'
+        $output = & $fixture.Runner 2>&1 | Out-String
+        $output | Should -Match 'version: 0.47.0'
+        $global:MarkdownlintNpxArguments | Should -Contain 'markdownlint-cli@0.47.0'
+        $global:MarkdownlintNpmCalls | Should -Be 0
+    }
+
+    It 'rejects <Case> before invoking a package runner' -ForEach @(
+        @{ Case = 'a missing manifest'; MissingManifest = $true; ManifestText = '{}' }
+        @{ Case = 'invalid JSON'; MissingManifest = $false; ManifestText = '{' }
+        @{ Case = 'a missing dependency pin'; MissingManifest = $false; ManifestText = '{"devDependencies":{}}' }
+        @{ Case = 'a dependency range'; MissingManifest = $false; ManifestText = '{"devDependencies":{"markdownlint-cli":"^0.50.0"}}' }
+        @{ Case = 'a registry tag'; MissingManifest = $false; ManifestText = '{"devDependencies":{"markdownlint-cli":"latest"}}' }
+        @{ Case = 'a non-string pin'; MissingManifest = $false; ManifestText = '{"devDependencies":{"markdownlint-cli":50}}' }
+    ) {
+        $fixture = New-MarkdownlintVersionFixture -ManifestText $ManifestText -MissingManifest:$MissingManifest
+        { & $fixture.Runner 2>&1 } | Should -Throw -ExpectedMessage '*Cannot resolve the canonical markdownlint-cli version*'
+        $global:MarkdownlintNpxArguments.Count | Should -Be 0
+        $global:MarkdownlintNpmCalls | Should -Be 0
     }
 }
