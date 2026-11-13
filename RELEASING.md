@@ -51,7 +51,8 @@ Fleet policy: <https://github.com/bolens/.github/blob/main/RELEASING.md>.
 
 The default branch requires pull requests, resolved conversations, linear
 history, and an up-to-date branch with passing required checks, including
-`Pester result` and `commit-message-check`. These rules also apply to
+`ci/woodpecker/pr/woodpecker`, `Pester result` and `commit-message-check`. These
+rules also apply to
 administrators; force pushes and branch deletion are disabled. Zero approving
 reviews are required because this is a solo-maintainer repository; review the
 complete diff before merging.
@@ -62,14 +63,16 @@ cancellations. Update the protection settings when renaming required jobs.
 
 ## Source lint
 
-The Source lint workflow checks maintained python, shell files selected by
-[`.github/source-lint.json`](.github/source-lint.json) on every pull request
-and push to `main`. Existing native checks remain part of the merge gate.
-Use the [shared local reproduction instructions](https://github.com/bolens/.github/blob/7603518f305fb76f7bb1b9979f2692521f633b82/docs/source-lint.md)
-with the same tooling revision pinned in
-[the workflow](.github/workflows/source-lint.yml). Review exclusions when adding
-source files; generated and imported files retain their native validation.
-Require the new check to pass on the current PR head before merging.
+The native `woodpecker` workflow's `source-policy` step checks the complete
+Python and shell file sets selected by
+[`.github/source-lint.json`](.github/source-lint.json) on pull requests and pushes
+to `main`. Run `bash scripts/ci/check-policy.sh` locally with the exact shared
+revision `7603518f305fb76f7bb1b9979f2692521f633b82`. The
+[shared reproduction instructions](https://github.com/bolens/.github/blob/7603518f305fb76f7bb1b9979f2692521f633b82/docs/source-lint.md)
+explain the selector and tooling. The duplicate hosted Source lint workflow is
+retired after accepted native PR and genuine-main runs. Require the current native
+result before merging, review exclusions when adding files, and retain generated
+or imported files' own validation.
 
 ## Woodpecker validation
 
@@ -86,6 +89,8 @@ groups native and local commands without changing the required workflow name.
 
 The native `source-policy` group calls `bash scripts/ci/check-policy.sh` to run
 the exact shared SourceLint revision above over its complete configured file
-sets. It is separate from Pester and platform runtime qualification. Keep hosted
-Source lint and current required status bindings during PR and genuine-main
-verification; a later settings change must preserve the other required checks.
+sets. It is separate from Pester and platform runtime qualification. The duplicate
+hosted Source lint is retired, and the native `woodpecker` PR status is required
+alongside the unchanged `Pester result` and `commit-message-check` bindings. Future
+status replacements still require actual PR/main proof and preservation of the
+other required checks.
