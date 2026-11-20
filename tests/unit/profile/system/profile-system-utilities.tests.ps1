@@ -435,10 +435,8 @@ Describe 'Profile system utility functions' {
             { Invoke-SystemUtility Get-NetworkPorts ports } | Should -Not -Throw
         }
 
-        It 'ptest tests network connectivity' {
-            $original = Get-Command Test-NetworkConnection -ErrorAction SilentlyContinue
-
-            function global:Test-NetworkConnection {
+        It 'ptest forwards the target to Test-Connection' {
+            Mock -CommandName Test-Connection -MockWith {
                 [PSCustomObject]@{
                     ComputerName = 'localhost'
                     ResponseTime = 1
@@ -446,16 +444,11 @@ Describe 'Profile system utility functions' {
                 }
             }
 
-            try {
-                $result = Invoke-SystemUtility Test-NetworkConnection ptest localhost
-                $result | Should -Not -BeNullOrEmpty
-            }
-            finally {
-                Remove-Item Function:\Test-NetworkConnection -Force -ErrorAction SilentlyContinue
-                Remove-Item Function:\global:Test-NetworkConnection -Force -ErrorAction SilentlyContinue
-                if ($original) {
-                    Set-Item -Path Function:\global:Test-NetworkConnection -Value $original.ScriptBlock -Force
-                }
+            $result = Invoke-SystemUtility Test-NetworkConnection ptest localhost
+
+            $result.Status | Should -Be 'Success'
+            Should -Invoke -CommandName Test-Connection -Exactly -Times 1 -Scope It -ParameterFilter {
+                $TargetName -contains 'localhost'
             }
         }
 
