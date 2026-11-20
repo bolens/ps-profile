@@ -45,7 +45,9 @@ Describe 'profile.d/utilities-modules/filesystem/utilities-filesystem.ps1 extend
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        { Open-Explorer -ErrorAction SilentlyContinue | Out-Null } | Should -Not -Throw
+        $warning = Open-Explorer 3>&1
+        $warning | Should -BeOfType [System.Management.Automation.WarningRecord]
+        $warning.Message | Should -Be 'No file manager found. Install xdg-open or a file manager.'
     }
 
     It 'Allows repeated Ensure-Utilities calls without losing Open-Explorer' {

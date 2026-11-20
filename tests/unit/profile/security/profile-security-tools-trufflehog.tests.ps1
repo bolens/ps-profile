@@ -155,7 +155,7 @@ Describe 'security-tools.ps1 - Invoke-TruffleHogScan' {
 
         It 'Tests trufflehog stderr output handling' {
             Setup-CapturingCommandMock -CommandName 'trufflehog' -OnInvoke {
-                [Console]::Error.WriteLine('Warning message')
+                Write-Error -Message 'Fixture stderr' -ErrorAction Continue
                 return 'Scan results'
             }
 

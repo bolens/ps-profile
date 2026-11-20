@@ -308,7 +308,7 @@ Describe 'security-tools.ps1 - Invoke-GitLeaksScan' {
 
         It 'Tests gitleaks stderr output handling' {
             Setup-CapturingCommandMock -CommandName 'gitleaks' -OnInvoke {
-                [Console]::Error.WriteLine('Warning message')
+                Write-Error -Message 'Fixture stderr' -ErrorAction Continue
                 return 'Scan results'
             }
 

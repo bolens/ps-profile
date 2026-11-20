@@ -17,14 +17,6 @@ Describe 'Fragment Error Recovery' {
             # Enable test mode to allow test fragments to be loaded
             $script:OriginalTestMode = $env:PS_PROFILE_TEST_MODE
             $env:PS_PROFILE_TEST_MODE = '1'
-
-            # Silence expected fragment warnings so test output focuses on pass/fail status.
-            $script:OriginalFragmentWarningSetting = $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS
-            $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS = '1'
-
-            if (Get-Command -Name 'Initialize-FragmentWarningSuppression' -ErrorAction SilentlyContinue) {
-                Initialize-FragmentWarningSuppression
-            }
         }
         catch {
             $errorDetails = @{
@@ -36,16 +28,9 @@ Describe 'Fragment Error Recovery' {
             throw
         }
 
-        $script:InvokeProfileSilently = {
-            # Temporarily silence warnings so intentionally failing fragments don't pollute test output.
-            $originalWarningPreference = $WarningPreference
-            try {
-                $WarningPreference = 'SilentlyContinue'
-                . $script:ProfilePath
-            }
-            finally {
-                $WarningPreference = $originalWarningPreference
-            }
+        $script:InvokeProfile = {
+            $WarningPreference = 'Continue'
+            . $script:ProfilePath
         }
 
         # Helper to create a temporary fragment with specific content
@@ -81,18 +66,7 @@ Describe 'Fragment Error Recovery' {
             $env:PS_PROFILE_TEST_MODE = $null
         }
 
-        if ($null -ne $script:OriginalFragmentWarningSetting) {
-            $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS = $script:OriginalFragmentWarningSetting
-        }
-        else {
-            $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS = $null
-        }
-
-        if (Get-Command -Name 'Initialize-FragmentWarningSuppression' -ErrorAction SilentlyContinue) {
-            Initialize-FragmentWarningSuppression
-        }
-
-        Remove-Variable -Name 'InvokeProfileSilently' -Scope Script -ErrorAction SilentlyContinue
+        Remove-Variable -Name 'InvokeProfile' -Scope Script -ErrorAction SilentlyContinue
     }
 
     Context 'Error Recovery' {
@@ -108,11 +82,15 @@ throw "Recovery test error"
                 New-TestFragment -Name $fragmentName -Content $badContent
                 $cleanupNeeded = $true
 
-                # First load with error
-                { . $script:InvokeProfileSilently } | Should -Not -Throw -Because "profile should handle fragment errors gracefully"
-
-                # Second load should also work (recovery)
-                { . $script:InvokeProfileSilently } | Should -Not -Throw -Because "profile should recover and allow subsequent loads"
+                foreach ($attempt in 1..2) {
+                    $records = & $script:InvokeProfile 3>&1
+                    foreach ($record in $records) {
+                        if ($record -is [System.Management.Automation.WarningRecord] -and
+                            $record.Message -ne "Failed to load profile fragment '$fragmentName': Recovery test error") {
+                            Write-Warning $record.Message
+                        }
+                    }
+                }
             }
             catch {
                 $errorDetails = @{
@@ -157,8 +135,13 @@ throw "Recovery test error"
                 # Create invalid JSON
                 Set-Content -Path $configPath -Value '{ invalid json }' -Encoding UTF8
 
-                # Profile should handle corrupted config gracefully
-                { . $script:InvokeProfileSilently } | Should -Not -Throw
+                $records = & $script:InvokeProfile 2>&1
+                foreach ($record in $records) {
+                    if ($record -is [System.Management.Automation.ErrorRecord] -and
+                        $record.Exception.Message -notlike 'Invalid JSON in config file:*') {
+                        Write-Error -ErrorRecord $record -ErrorAction Continue
+                    }
+                }
             }
             finally {
                 # Restore original config

@@ -32,7 +32,16 @@ Describe 'profile.d/system-info.ps1 extended scenarios' {
         { Get-SystemUptime } | Should -Not -Throw
     }
 
-    It 'Get-BatteryInfo executes without throwing on this platform' {
-        { Get-BatteryInfo } | Should -Not -Throw
+    It 'Get-BatteryInfo handles hosts without a battery' {
+        if ($IsWindows -or $PSVersionTable.Platform -eq 'Win32NT') {
+            Mock Get-CimInstance {} -ParameterFilter { $ClassName -eq 'Win32_Battery' }
+            Get-BatteryInfo | Should -BeNullOrEmpty
+            return
+        }
+
+        Mock Get-ChildItem {} -ParameterFilter { $Path -eq '/sys/class/power_supply' }
+        $warning = Get-BatteryInfo 3>&1
+        $warning | Should -BeOfType [System.Management.Automation.WarningRecord]
+        $warning.Message | Should -Be 'No battery information available on this system.'
     }
 }

@@ -489,9 +489,10 @@ function Test-RetryFunction {
 
                 $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
                     -ModulePath @('test-modules', 'syntax-check-module.ps1') `
-                    -Context 'Test: syntax-check'
+                    -Context 'Test: syntax-check' -WarningVariable warnings -WarningAction SilentlyContinue
 
                 $result | Should -Be $false
+                $warnings.Message | Should -Match 'PowerShell syntax errors'
             }
             finally {
                 Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
@@ -765,18 +766,20 @@ function global:Test-FlakyFunction {
             $env:PS_PROFILE_DEBUG = '1'
             $result = Import-FragmentModule -FragmentRoot $null `
                 -ModulePath @('test-modules', 'valid-module.ps1') `
-                -Context 'Test: debug-warning'
+                -Context 'Test: debug-warning' -WarningVariable warnings -WarningAction SilentlyContinue
             
             $result | Should -Be $false
+            $warnings.Message | Should -Match 'FragmentRoot cannot be null or empty'
         }
         
         It 'Shows warnings in debug mode for missing directory' {
             $env:PS_PROFILE_DEBUG = '1'
             $result = Import-FragmentModule -FragmentRoot $script:TestFragmentRoot `
                 -ModulePath @('nonexistent-dir', 'module.ps1') `
-                -Context 'Test: debug-dir-warning'
+                -Context 'Test: debug-dir-warning' -WarningVariable warnings -WarningAction SilentlyContinue
             
             $result | Should -Be $false
+            $warnings.Message | Should -Match 'Directory not found'
         }
     }
     

@@ -54,7 +54,7 @@ Describe 'profile.d/git-modules/core/git-advanced.ps1 extended scenarios' {
         . (Join-Path $script:ProfileDir 'git.ps1')
         Ensure-Git
 
-        Invoke-GitClone -ErrorAction SilentlyContinue | Out-Null
+        Ensure-GitHelper
 
         Get-Command Undo-GitCommit -ErrorAction Stop | Should -Not -BeNullOrEmpty
         Get-Command Get-GitDefaultBranch -ErrorAction Stop | Should -Not -BeNullOrEmpty
@@ -64,10 +64,10 @@ Describe 'profile.d/git-modules/core/git-advanced.ps1 extended scenarios' {
         . (Join-Path $script:ProfileDir 'git.ps1')
         Ensure-Git
 
-        Invoke-GitClone -ErrorAction SilentlyContinue | Out-Null
+        Ensure-GitHelper
         $firstUndo = Get-Command Undo-GitCommit -ErrorAction Stop
 
-        Invoke-GitClone -ErrorAction SilentlyContinue | Out-Null
+        Ensure-GitHelper
 
         (Get-Command Undo-GitCommit -ErrorAction Stop).ScriptBlock.ToString() |
             Should -Be $firstUndo.ScriptBlock.ToString()

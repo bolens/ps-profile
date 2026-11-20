@@ -95,8 +95,10 @@ Describe 'CloudProviderBase extended scenarios' {
         It 'Returns false when the cloud command is unavailable' {
             Mark-TestCommandsUnavailable -CommandNames 'aws'
 
-            Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') |
-                Should -Be $false
+            $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -WarningVariable warnings -WarningAction SilentlyContinue
+
+            $result | Should -Be $false
+            $warnings.Message | Should -Be "aws connection test failed: No response"
         }
     }
 

@@ -56,7 +56,9 @@ Describe 'profile.d/utilities-modules/history/utilities-history-enhanced.ps1 ext
             }
         )
 
-        Find-HistoryFuzzy -Pattern '' -WarningAction SilentlyContinue | Out-Null
+        $warning = Find-HistoryFuzzy -Pattern '' 3>&1
+        $warning | Should -BeOfType [System.Management.Automation.WarningRecord]
+        $warning.Message | Should -Be 'Please provide a search pattern.'
 
         Assert-TestGetHistoryInvoked -Times 0
     }

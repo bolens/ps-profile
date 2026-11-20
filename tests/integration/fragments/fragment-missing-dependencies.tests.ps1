@@ -13,14 +13,6 @@ Describe 'Fragment Missing Dependencies' {
             if (-not (Test-Path -LiteralPath $script:ProfilePath)) {
                 throw "Profile file not found at: $script:ProfilePath"
             }
-
-            # Silence expected fragment warnings so test output focuses on pass/fail status.
-            $script:OriginalFragmentWarningSetting = $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS
-            $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS = '1'
-
-            if (Get-Command -Name 'Initialize-FragmentWarningSuppression' -ErrorAction SilentlyContinue) {
-                Initialize-FragmentWarningSuppression
-            }
         }
         catch {
             $errorDetails = @{
@@ -32,16 +24,9 @@ Describe 'Fragment Missing Dependencies' {
             throw
         }
 
-        $script:InvokeProfileSilently = {
-            # Temporarily silence warnings so intentionally failing fragments don't pollute test output.
-            $originalWarningPreference = $WarningPreference
-            try {
-                $WarningPreference = 'SilentlyContinue'
-                . $script:ProfilePath
-            }
-            finally {
-                $WarningPreference = $originalWarningPreference
-            }
+        $script:InvokeProfile = {
+            $WarningPreference = 'Continue'
+            . $script:ProfilePath
         }
 
         # Helper to create a temporary fragment with specific content
@@ -70,18 +55,7 @@ Describe 'Fragment Missing Dependencies' {
     }
 
     AfterAll {
-        if ($null -ne $script:OriginalFragmentWarningSetting) {
-            $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS = $script:OriginalFragmentWarningSetting
-        }
-        else {
-            $env:PS_PROFILE_SUPPRESS_FRAGMENT_WARNINGS = $null
-        }
-
-        if (Get-Command -Name 'Initialize-FragmentWarningSuppression' -ErrorAction SilentlyContinue) {
-            Initialize-FragmentWarningSuppression
-        }
-
-        Remove-Variable -Name 'InvokeProfileSilently' -Scope Script -ErrorAction SilentlyContinue
+        Remove-Variable -Name 'InvokeProfile' -Scope Script -ErrorAction SilentlyContinue
     }
 
     Context 'Missing Dependencies' {
@@ -98,8 +72,13 @@ $result = Get-NonExistentCommand -ErrorAction SilentlyContinue
                 New-TestFragment -Name $fragmentName -Content $content
                 $cleanupNeeded = $true
 
-                # Profile should handle missing command gracefully
-                { . $script:InvokeProfileSilently } | Should -Not -Throw -Because "profile should handle missing commands gracefully"
+                $records = & $script:InvokeProfile 3>&1
+                foreach ($record in $records) {
+                    if ($record -is [System.Management.Automation.WarningRecord] -and
+                        $record.Message -notlike "Failed to load profile fragment '$fragmentName': *Get-NonExistentCommand*") {
+                        Write-Warning $record.Message
+                    }
+                }
             }
             catch {
                 $errorDetails = @{
@@ -130,7 +109,7 @@ Import-Module NonExistentModule -ErrorAction SilentlyContinue
                 $cleanupNeeded = $true
 
                 # Profile should handle missing module gracefully
-                { . $script:InvokeProfileSilently } | Should -Not -Throw -Because "profile should handle missing modules gracefully"
+                { & $script:InvokeProfile } | Should -Not -Throw -Because "profile should handle missing modules gracefully"
             }
             catch {
                 $errorDetails = @{

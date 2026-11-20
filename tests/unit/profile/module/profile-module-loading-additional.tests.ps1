@@ -165,9 +165,10 @@ Describe "ModuleLoading Functions - Additional Coverage" {
             $result = Import-FragmentModule `
                 -FragmentRoot '' `
                 -ModulePath @('test-modules', 'valid-module.ps1') `
-                -Context 'Test: debug-empty-root'
+                -Context 'Test: debug-empty-root' -WarningVariable warnings -WarningAction SilentlyContinue
             
             $result | Should -Be $false
+            $warnings.Message | Should -Match 'FragmentRoot cannot be null or empty'
         }
         
         It "Writes warning in debug mode when ModulePath segment is empty" {
@@ -182,18 +183,20 @@ Describe "ModuleLoading Functions - Additional Coverage" {
             $result = Import-FragmentModule `
                 -FragmentRoot $script:TestFragmentRoot `
                 -ModulePath @('nonexistent-dir', 'valid-module.ps1') `
-                -Context 'Test: debug-missing-dir'
+                -Context 'Test: debug-missing-dir' -WarningVariable warnings -WarningAction SilentlyContinue
             
             $result | Should -Be $false
+            $warnings.Message | Should -Match 'Directory not found'
         }
         
         It "Writes warning in debug mode when file is missing" {
             $result = Import-FragmentModule `
                 -FragmentRoot $script:TestFragmentRoot `
                 -ModulePath @('test-modules', 'nonexistent.ps1') `
-                -Context 'Test: debug-missing-file'
+                -Context 'Test: debug-missing-file' -WarningVariable warnings -WarningAction SilentlyContinue
             
             $result | Should -Be $false
+            $warnings.Message | Should -Match 'Module file not found'
         }
         
         It "Writes warning in debug mode when dependencies are missing" {
@@ -201,9 +204,10 @@ Describe "ModuleLoading Functions - Additional Coverage" {
                 -FragmentRoot $script:TestFragmentRoot `
                 -ModulePath @('test-modules', 'valid-module.ps1') `
                 -Context 'Test: debug-missing-deps' `
-                -Dependencies @('nonexistent-module')
+                -Dependencies @('nonexistent-module') -WarningVariable warnings -WarningAction SilentlyContinue
             
             $result | Should -Be $false
+            $warnings.Message | Should -Match 'Missing dependencies: nonexistent-module'
         }
         
         It "Writes warning in debug mode when file extension is invalid" {
@@ -214,9 +218,10 @@ Describe "ModuleLoading Functions - Additional Coverage" {
                         $result = Import-FragmentModule `
                 -FragmentRoot $script:TestFragmentRoot `
                 -ModulePath @('test-modules', 'invalid.txt') `
-                -Context 'Test: debug-invalid-ext'
+                -Context 'Test: debug-invalid-ext' -WarningVariable warnings -WarningAction SilentlyContinue
             
             $result | Should -Be $false
+            $warnings.Message | Should -Match 'Invalid file type'
             }
             finally {
                 Remove-Item -Path $invalidExtFile -Force -ErrorAction SilentlyContinue
@@ -232,9 +237,10 @@ Describe "ModuleLoading Functions - Additional Coverage" {
                 $result = Import-FragmentModule `
                     -FragmentRoot $script:TestFragmentRoot `
                     -ModulePath @('test-modules', 'syntax-error.ps1') `
-                    -Context 'Test: debug-syntax-error'
+                    -Context 'Test: debug-syntax-error' -WarningVariable warnings -WarningAction SilentlyContinue
 
                 $result | Should -Be $false
+                $warnings.Message | Should -Match 'PowerShell syntax errors'
             }
             finally {
                 Remove-Item -Path $syntaxErrorModule -Force -ErrorAction SilentlyContinue
@@ -250,9 +256,10 @@ Describe "ModuleLoading Functions - Additional Coverage" {
                         $result = Import-FragmentModule `
                 -FragmentRoot $script:TestFragmentRoot `
                 -ModulePath @('test-modules', 'error-module.ps1') `
-                -Context 'Test: debug-load-error'
+                -Context 'Test: debug-load-error' -WarningVariable warnings -WarningAction SilentlyContinue
             
             $result | Should -Be $false
+            $warnings.Message | Should -Match 'Failed to load module'
             }
             finally {
                 Remove-Item -Path $errorModule -Force -ErrorAction SilentlyContinue

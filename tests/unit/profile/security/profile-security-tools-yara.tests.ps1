@@ -126,7 +126,7 @@ Describe 'security-tools.ps1 - Invoke-YaraScan' {
 
         It 'Tests yara stderr output handling' {
             Setup-CapturingCommandMock -CommandName 'yara' -OnInvoke {
-                [Console]::Error.WriteLine('Warning message')
+                Write-Error -Message 'Fixture stderr' -ErrorAction Continue
                 return 'Scan results'
             }
 

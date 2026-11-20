@@ -141,7 +141,7 @@ Describe 'security-tools.ps1 - Invoke-ClamAVScan' {
 
         It 'Tests clamscan stderr output handling' {
             Setup-CapturingCommandMock -CommandName 'clamscan' -OnInvoke {
-                [Console]::Error.WriteLine('Warning message')
+                Write-Error -Message 'Fixture stderr' -ErrorAction Continue
                 return 'Scan results'
             }
 
