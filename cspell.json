@@ -522,6 +522,7 @@
     "ldflags",
     "leafpad",
     "lemonchiffon",
+    "libatomic",
     "libcairo",
     "libgif",
     "libicu",

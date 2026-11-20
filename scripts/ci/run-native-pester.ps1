@@ -39,7 +39,12 @@ try {
     if ($job.Count -ne 1 -or $job[0].maxParallelShards -ne 2) { throw 'Invalid canonical Linux bundle.' }
     $revision = & git -C $root rev-parse HEAD
     if ($LASTEXITCODE -ne 0 -or $revision -notmatch '^[0-9a-f]{40}$') { throw 'Cannot resolve actual source HEAD.' }
+    if ($env:CI_COMMIT_SHA -and $revision -ne $env:CI_COMMIT_SHA) {
+        throw 'Checked-out HEAD does not match the Woodpecker revision.'
+    }
     Write-Host ('NATIVE_PESTER_PLAN ' + (@{ revision = $revision; bundle = $Bundle; shards = @($job[0].shards); runtime = $PSVersionTable.PSVersion.ToString() } | ConvertTo-Json -Compress))
+    # Match the hosted runner's CI checks in the shared test suite.
+    $env:CI = 'true'
     & (Join-Path $PSHOME 'pwsh') -NoLogo -NoProfile -NonInteractive -File (Join-Path $quality 'run-pester-ci-job.ps1') -ShardsJson (ConvertTo-Json -InputObject @($job[0].shards) -Compress) -RepoRoot $root -OutputPath $OutputPath -MaxParallelShards 2
     $status = $LASTEXITCODE
     if ($status -ne 0) { Exit-WithCode -ExitCode $status }
