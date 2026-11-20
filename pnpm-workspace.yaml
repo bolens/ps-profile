@@ -10,3 +10,6 @@ overrides:
   minimatch>@isaacs/nonrecursive-glob-match: 1.0.3
   markdownlint-cli>smol-toml: 1.9.1
   cspell-config-lib>smol-toml: 1.9.1
+  # Apply the advisory fix while the math extension pins the 0.16 series.
+  # https://github.com/KaTeX/KaTeX/security/advisories/GHSA-238p-pmpm-9mq7
+  micromark-extension-math@3.1.0>katex: 0.18.2
