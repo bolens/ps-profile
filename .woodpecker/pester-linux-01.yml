@@ -1,0 +1,25 @@
+# Shadow only: retain all hosted Pester jobs and existing protections.
+when:
+  - event: push
+    branch: main
+  - event: [pull_request, manual]
+labels:
+  platform: linux/amd64
+  backend: docker
+clone:
+  git:
+    image: docker.io/woodpeckerci/plugin-git@sha256:9802cb7852dcf31f9c5c1d1ddeadfb9002d4fae85751f7b6a792eedb267bcc59
+    settings:
+      depth: 0
+      partial: false
+steps:
+  - name: pester-linux-01
+    image: docker.io/library/ubuntu:24.04@sha256:2198e4c65076e9cb0b3d695219df667c0e3b0072da64ca3c2648aca17dcecaf5
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+      POWERSHELL_TELEMETRY_OPTOUT: '1'
+      DOTNET_PROCESSOR_COUNT: '2'
+    commands:
+      - bash scripts/ci/setup-native-pester.sh
+      - export HOME=/tmp/native-pester-home PATH=/tmp/native-pester-tools/pwsh:/tmp/native-pester-tools/node/bin:$PATH PSModulePath=/tmp/native-pester-tools/modules:/tmp/native-pester-tools/pwsh/Modules
+      - pwsh -NoLogo -NoProfile -NonInteractive -File scripts/ci/run-native-pester.ps1 -Bundle 1 -OutputPath "$CI_WORKSPACE/tests/test-artifacts/native-pester-01"

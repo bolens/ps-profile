@@ -60,6 +60,10 @@ function Get-PesterCiFilterRules {
         ci_contract = @{
             Patterns = @(
                 '.github/workflows/test-pester.yml'
+                '.woodpecker/**'
+                '.woodpecker.yml'
+                'scripts/ci/run-native-pester.ps1'
+                'scripts/ci/setup-native-pester.sh'
                 '.github/actions/setup-arch-linux/**'
                 '.devcontainer/install-pwsh-linux.sh'
                 'PSScriptAnalyzerSettings.psd1'

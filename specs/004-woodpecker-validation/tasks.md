@@ -6,4 +6,11 @@
 - [ ] Observe exact-head native and existing hosted checks.
 - [ ] Verify genuine merged-main execution and required-check cutover.
 
-The PR and private operation record retain exact revisions and observed results.
+## Linux Pester shadow
+
+- [x] Preserve the existing workflow name and add eight Linux shadow bundles.
+- [x] Validate the Woodpecker configuration and the 48-shard plan locally.
+- [ ] Confirm the existing native check and eight shadow statuses on the PR.
+- [ ] Confirm the same workflows on merged main.
+
+The PR and operation record retain exact revisions and observed results.
