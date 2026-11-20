@@ -50,7 +50,9 @@ Describe 'profile.d/git-modules/integrations/git-github.ps1 extended scenarios' 
             Clear-TestCachedCommandCache | Out-Null
         }
 
-        { New-GitHubPullRequest -ErrorAction SilentlyContinue | Out-Null } | Should -Not -Throw
+        $warning = New-GitHubPullRequest 3>&1
+        $warning | Should -BeOfType [System.Management.Automation.WarningRecord]
+        $warning.Message | Should -Be 'GitHub CLI (gh) not found'
         $global:TestCommandInvocationCaptures.Count | Should -Be 0
     }
 

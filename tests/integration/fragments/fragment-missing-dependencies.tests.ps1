@@ -98,8 +98,13 @@ $result = Get-NonExistentCommand -ErrorAction SilentlyContinue
                 New-TestFragment -Name $fragmentName -Content $content
                 $cleanupNeeded = $true
 
-                # Profile should handle missing command gracefully
-                { . $script:InvokeProfileSilently } | Should -Not -Throw -Because "profile should handle missing commands gracefully"
+                $records = . $script:InvokeProfileSilently 3>&1
+                foreach ($record in $records) {
+                    if ($record -is [System.Management.Automation.WarningRecord] -and
+                        $record.Message -notlike "Failed to load profile fragment '$fragmentName': *Get-NonExistentCommand*") {
+                        Write-Warning $record.Message
+                    }
+                }
             }
             catch {
                 $errorDetails = @{

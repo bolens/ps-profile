@@ -108,11 +108,15 @@ throw "Recovery test error"
                 New-TestFragment -Name $fragmentName -Content $badContent
                 $cleanupNeeded = $true
 
-                # First load with error
-                { . $script:InvokeProfileSilently } | Should -Not -Throw -Because "profile should handle fragment errors gracefully"
-
-                # Second load should also work (recovery)
-                { . $script:InvokeProfileSilently } | Should -Not -Throw -Because "profile should recover and allow subsequent loads"
+                foreach ($attempt in 1..2) {
+                    $records = . $script:InvokeProfileSilently 3>&1
+                    foreach ($record in $records) {
+                        if ($record -is [System.Management.Automation.WarningRecord] -and
+                            $record.Message -ne "Failed to load profile fragment '$fragmentName': Recovery test error") {
+                            Write-Warning $record.Message
+                        }
+                    }
+                }
             }
             catch {
                 $errorDetails = @{
@@ -157,8 +161,13 @@ throw "Recovery test error"
                 # Create invalid JSON
                 Set-Content -Path $configPath -Value '{ invalid json }' -Encoding UTF8
 
-                # Profile should handle corrupted config gracefully
-                { . $script:InvokeProfileSilently } | Should -Not -Throw
+                $records = . $script:InvokeProfileSilently 2>&1
+                foreach ($record in $records) {
+                    if ($record -is [System.Management.Automation.ErrorRecord] -and
+                        $record.Exception.Message -notlike 'Invalid JSON in config file:*') {
+                        Write-Error -ErrorRecord $record -ErrorAction Continue
+                    }
+                }
             }
             finally {
                 # Restore original config

@@ -30,14 +30,12 @@ Describe 'profile.d/utilities-modules/network/utilities-network.ps1 extended sce
     }
 
     It 'Start-SpeedTest completes without throwing when speedtest binaries are unavailable' {
-        foreach ($cmd in @('speedtest', 'speedtest.exe')) {
-            Set-TestCommandAvailabilityState -CommandName $cmd -Available $false
+        Mock Get-Command {} -ParameterFilter {
+            $Name -in @('speedtest', 'speedtest.exe') -and $CommandType -eq 'Application'
         }
-        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-            Clear-TestCachedCommandCache | Out-Null
-        }
-
-        { Start-SpeedTest -ErrorAction SilentlyContinue | Out-Null } | Should -Not -Throw
+        $warning = Start-SpeedTest 3>&1
+        $warning | Should -BeOfType [System.Management.Automation.WarningRecord]
+        $warning.Message | Should -Be 'speedtest not found in PATH. Install speedtest-cli.'
     }
 
     It 'Allows repeated Ensure-Utilities calls without losing network helpers' {
