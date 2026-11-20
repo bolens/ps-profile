@@ -10,6 +10,9 @@ export GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null
 export GIT_TERMINAL_PROMPT=0 GIT_ASKPASS=/bin/false
 cd -- "$root"
 test "$(git rev-parse --show-toplevel)" = "$root"
+if [[ -d .woodpecker ]]; then
+  cmp .woodpecker.yml .woodpecker/woodpecker.yml
+fi
 scratch=$(mktemp -d "${TMPDIR:-/tmp}/repository-ci-policy.XXXXXX")
 trap 'rm -rf -- "$scratch"' EXIT
 export PIP_NO_CACHE_DIR=1 npm_config_cache="$scratch/npm-cache"
