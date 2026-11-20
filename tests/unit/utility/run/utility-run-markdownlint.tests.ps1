@@ -1,8 +1,6 @@
 <#
-tests/unit/utility-run-markdownlint.tests.ps1
-
 .SYNOPSIS
-    Behavioral smoke test for run-markdownlint.ps1.
+    Tests markdownlint version selection and exit codes in an isolated PowerShell process.
 #>
 
 BeforeAll {
@@ -13,143 +11,103 @@ BeforeAll {
             . $testSupportPath
             break
         }
-        if ($current.Name -eq 'tests' -or $current.Parent -eq $null) { break }
+        if ($current.Name -eq 'tests' -or $null -eq $current.Parent) { break }
         $current = $current.Parent
     }
-    $script:TestRepoRoot = Get-TestRepoRoot -StartPath $PSScriptRoot
-    $script:RunMarkdownlintScript = Join-Path $script:TestRepoRoot 'scripts' 'utils' 'code-quality' 'run-markdownlint.ps1'
-    $script:MarkdownlintAvailable = [bool](Get-Command markdownlint -ErrorAction SilentlyContinue)
-    $script:NpxAvailable = [bool](Get-Command npx -ErrorAction SilentlyContinue)
-    $ConfirmPreference = 'None'
+
+    $root = Get-TestRepoRoot -StartPath $PSScriptRoot
+    $script:Fixture = New-TestTempDirectory -Prefix 'Markdownlint'
+    $runnerDir = Join-Path $script:Fixture 'scripts/utils/code-quality'
+    $null = New-Item -ItemType Directory -Path $runnerDir, (Join-Path $script:Fixture 'profile.d') -Force
+    Copy-Item -LiteralPath (Join-Path $root 'scripts/lib') -Destination (Join-Path $script:Fixture 'scripts/lib') -Recurse
+    $script:Runner = Join-Path $runnerDir 'run-markdownlint.ps1'
+    Copy-Item -LiteralPath (Join-Path $root 'scripts/utils/code-quality/run-markdownlint.ps1') -Destination $script:Runner
+    $script:Manifest = Join-Path $script:Fixture 'package.json'
+    $script:Harness = Join-Path $script:Fixture 'invoke-lint.ps1'
+    @'
+param([string]$Runner, [string]$Version, [int]$LintExitCode)
+$env:PS_PROFILE_TEST_MODE = '0'
+$env:MARKDOWNLINT_VERSION = $Version
+
+function global:markdownlint { throw 'The ambient markdownlint command must not be used' }
+function global:npx {
+    param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
+    Write-Output "npx: $($Arguments -join ' ')"
+    $global:LASTEXITCODE = $LintExitCode
+}
+
+& $Runner
+exit $LASTEXITCODE
+'@ | Set-Content -LiteralPath $script:Harness
+    $script:PowerShell = Join-Path $PSHOME $(if ($IsWindows) { 'pwsh.exe' } else { 'pwsh' })
 }
 
 Describe 'run-markdownlint.ps1 execution' {
-    It 'prefers an available markdownlint command in-process' {
-        function global:markdownlint {
-            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
-            $global:LASTEXITCODE = 0
-        }
+    BeforeEach {
+        '{"devDependencies":{"markdownlint-cli":"0.50.0"}}' | Set-Content -LiteralPath $script:Manifest
+    }
 
-        $previousVersion = $env:MARKDOWNLINT_VERSION
-        $env:MARKDOWNLINT_VERSION = '0.47.0'
-        $env:PS_PROFILE_TEST_MODE = '1'
+    It 'requires the locked checkout installation for the default version' {
+        $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner 2>&1 | Out-String
+        $LASTEXITCODE | Should -Be 2
+        $output | Should -Match 'pnpm install --frozen-lockfile --ignore-scripts'
+        $output | Should -Not -Match 'npx:'
+    }
+
+    It 'uses the checkout launcher only when its version matches the manifest' {
+        $modules = Join-Path $script:Fixture 'node_modules'
+        $bin = Join-Path $modules '.bin'
+        $installed = Join-Path $modules 'markdownlint-cli'
+        $null = New-Item -ItemType Directory -Path $bin, $installed -Force
         try {
-            $output = & $script:RunMarkdownlintScript 2>&1 | Out-String
-
-            $output | Should -Match 'version: 0.47.0'
-            $output | Should -Match 'markdownlint passed'
-        }
-        finally {
-            Remove-Item Function:\markdownlint -ErrorAction SilentlyContinue
-            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
-            if ($null -eq $previousVersion) {
-                Remove-Item Env:MARKDOWNLINT_VERSION -ErrorAction SilentlyContinue
+            if ($IsWindows) {
+                @('@echo checkout launcher', '@exit /b 0') | Set-Content -LiteralPath (Join-Path $bin 'markdownlint.cmd') -Encoding ascii
             }
             else {
-                $env:MARKDOWNLINT_VERSION = $previousVersion
+                $launcher = Join-Path $bin 'markdownlint'
+                @('#!/bin/sh', 'echo checkout launcher') | Set-Content -LiteralPath $launcher -Encoding ascii
+                chmod +x $launcher
             }
+            $installedManifest = Join-Path $installed 'package.json'
+            '{"version":"0.50.0"}' | Set-Content -LiteralPath $installedManifest
+            $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner 2>&1 | Out-String
+            $LASTEXITCODE | Should -Be 0
+            $output | Should -Match 'checkout launcher'
+            $output | Should -Not -Match 'npx:'
+
+            '{"version":"0.49.1"}' | Set-Content -LiteralPath $installedManifest
+            $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner 2>&1 | Out-String
+            $LASTEXITCODE | Should -Be 2
+            $output | Should -Match 'pnpm install --frozen-lockfile --ignore-scripts'
+            $output | Should -Not -Match 'npx:'
+        }
+        finally {
+            Remove-Item -LiteralPath $modules -Recurse -Force
         }
     }
 
-    It 'uses the npx fallback in-process when markdownlint is unavailable' {
-        function global:npx {
-            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
-            $global:LASTEXITCODE = 0
-        }
-
-        Mock Get-Command { $null } -ParameterFilter { $Name -eq 'markdownlint' }
-        $env:PS_PROFILE_TEST_MODE = '1'
-        try {
-            $output = & $script:RunMarkdownlintScript 2>&1 | Out-String
-
-            $output | Should -Match 'markdownlint passed'
-        }
-        finally {
-            Remove-Item Function:\npx -ErrorAction SilentlyContinue
-            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
-        }
+    It 'honors an explicit version without the repository manifest' {
+        Remove-Item -LiteralPath $script:Manifest
+        $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner -Version '0.47.0' 2>&1 | Out-String
+        $LASTEXITCODE | Should -Be 0
+        $output | Should -Match 'npx: --yes --ignore-scripts markdownlint-cli@0\.47\.0'
     }
 
-    It 'reports markdownlint violations in-process' {
-        function global:markdownlint {
-            param([Parameter(ValueFromRemainingArguments)][object[]]$Arguments)
-            $global:LASTEXITCODE = 1
-        }
-
-        $env:PS_PROFILE_TEST_MODE = '1'
-        try {
-            { & $script:RunMarkdownlintScript 2>&1 } |
-                Should -Throw -ExpectedMessage '*markdownlint found errors*'
-        }
-        finally {
-            Remove-Item Function:\markdownlint -ErrorAction SilentlyContinue
-            Remove-Item Env:PS_PROFILE_TEST_MODE -ErrorAction SilentlyContinue
-        }
+    It 'rejects <Pin> before invoking the package runner' -ForEach @(
+        @{ Pin = 'a range'; ManifestText = '{"devDependencies":{"markdownlint-cli":"^0.50.0"}}' }
+        @{ Pin = 'a registry tag'; ManifestText = '{"devDependencies":{"markdownlint-cli":"latest"}}' }
+        @{ Pin = 'a missing pin'; ManifestText = '{"devDependencies":{}}' }
+    ) {
+        Set-Content -LiteralPath $script:Manifest -Value $ManifestText
+        $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner 2>&1 | Out-String
+        $LASTEXITCODE | Should -Be 2
+        $output | Should -Match 'Cannot prepare markdownlint-cli'
+        $output | Should -Not -Match 'npx:'
     }
 
-    It 'Fails when markdownlint finds violations in an isolated repository' {
-        if (-not $script:MarkdownlintAvailable -and -not $script:NpxAvailable) {
-            Set-ItResult -Skipped -Because 'markdownlint and npx are not available'
-            return
-        }
-
-        $repo = New-TestTempDirectory -Prefix 'MarkdownlintViolationRepo'
-        $runnerDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
-        $null = New-Item -ItemType Directory -Path $runnerDir -Force
-        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-        Copy-Item -LiteralPath $script:RunMarkdownlintScript -Destination (Join-Path $runnerDir 'run-markdownlint.ps1') -Force
-        @(
-            '# Bad Heading'
-            ''
-            '# Duplicate Top Level'
-        ) | Set-Content -LiteralPath (Join-Path $repo 'bad-markdown.md') -Encoding UTF8
-                Push-Location $repo
-        try {
-            git init -q | Out-Null
-            git config user.email 'fixture@example.com'
-            git config user.name 'Fixture'
-            git add bad-markdown.md
-            git commit -m 'init bad markdown' -q
-                    $output = & pwsh -NoProfile -File (Join-Path $runnerDir 'run-markdownlint.ps1') 2>&1 | Out-String
-            $exitCode = $LASTEXITCODE
-        }
-        finally {
-            Pop-Location
-        }
-                $exitCode | Should -Be 1
-        $output | Should -Match 'markdownlint found errors|markdownlint'
-    }
-
-    It 'Passes when markdownlint finds no violations in an isolated repository' {
-        if (-not $script:MarkdownlintAvailable -and -not $script:NpxAvailable) {
-            Set-ItResult -Skipped -Because 'markdownlint and npx are not available'
-            return
-        }
-
-        $repo = New-TestTempDirectory -Prefix 'MarkdownlintCleanRepo'
-        $runnerDir = Join-Path $repo 'scripts' 'utils' 'code-quality'
-        $null = New-Item -ItemType Directory -Path $runnerDir -Force
-        Copy-Item -LiteralPath (Join-Path $script:TestRepoRoot 'scripts' 'lib') -Destination (Join-Path $repo 'scripts' 'lib') -Recurse -Force
-        Copy-Item -LiteralPath $script:RunMarkdownlintScript -Destination (Join-Path $runnerDir 'run-markdownlint.ps1') -Force
-        @(
-            '# Clean Markdown Fixture'
-            ''
-            'This file should pass markdownlint.'
-        ) | Set-Content -LiteralPath (Join-Path $repo 'clean-markdown.md') -Encoding UTF8
-                Push-Location $repo
-        try {
-            git init -q | Out-Null
-            git config user.email 'fixture@example.com'
-            git config user.name 'Fixture'
-            git add clean-markdown.md
-            git commit -m 'init clean markdown' -q
-                    $output = & pwsh -NoProfile -File (Join-Path $runnerDir 'run-markdownlint.ps1') 2>&1 | Out-String
-            $exitCode = $LASTEXITCODE
-        }
-        finally {
-            Pop-Location
-        }
-                $exitCode | Should -Be 0
-        $output | Should -Match 'markdownlint passed'
+    It 'reports markdownlint violations with the validation exit code' {
+        $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner -Version '0.47.0' -LintExitCode 1 2>&1 | Out-String
+        $LASTEXITCODE | Should -Be 1
+        $output | Should -Match 'markdownlint found errors'
     }
 }

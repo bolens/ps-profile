@@ -25,7 +25,7 @@ Describe 'run-markdownlint.ps1 extended scenarios' {
         It 'Documents MARKDOWNLINT_VERSION environment variable' {
             $content = Get-Content -LiteralPath $script:MarkdownlintScript -Raw
             $content | Should -Match 'MARKDOWNLINT_VERSION'
-            $content | Should -Match '0\.48\.0'
+            $content | Should -Match 'package\.json'
         }
 
         It 'Documents exit codes for success validation and setup errors' {
@@ -37,9 +37,9 @@ Describe 'run-markdownlint.ps1 extended scenarios' {
     }
 
     Context 'Execution strategy' {
-        It 'Prefers markdownlint command and falls back to npx' {
+        It 'Uses the checkout launcher and supports explicit npx overrides' {
             $content = Get-Content -LiteralPath $script:MarkdownlintScript -Raw
-            $content | Should -Match 'Get-Command markdownlint'
+            $content | Should -Match 'node_modules/\.bin'
             $content | Should -Match 'Get-Command npx'
             $content | Should -Match 'markdownlint-cli@'
         }
@@ -50,10 +50,9 @@ Describe 'run-markdownlint.ps1 extended scenarios' {
             $content | Should -Match 'Modules'
         }
 
-        It 'Attempts global npm install when markdownlint is missing' {
+        It 'Disables lifecycle scripts when using npx' {
             $content = Get-Content -LiteralPath $script:MarkdownlintScript -Raw
-            $content | Should -Match 'npm install -g'
-            $content | Should -Match 'Failed to install markdownlint-cli'
+            $content | Should -Match '--ignore-scripts'
         }
     }
 }
