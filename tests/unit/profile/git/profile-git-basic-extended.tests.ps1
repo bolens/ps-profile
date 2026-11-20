@@ -52,17 +52,25 @@ Describe 'profile.d/git-modules/core/git-basic.ps1 extended scenarios' {
         . (Join-Path $script:ProfileDir 'git.ps1')
         Ensure-Git
 
-        Set-TestCommandAvailabilityState -CommandName 'git' -Available $true
-        if (Get-Command Clear-TestCachedCommandCache -ErrorAction SilentlyContinue) {
-            Clear-TestCachedCommandCache | Out-Null
-        }
-
-        Push-Location (New-TestTempDirectory -Prefix 'GitBasicOutsideRepo')
+        $originalExitCode = Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
+        $previousExitCode = if ($originalExitCode) { $originalExitCode.Value }
         try {
-            { Invoke-GitStatus | Out-Null } | Should -Not -Throw
+            Setup-CapturingCommandMock -CommandName 'git' -OnInvoke {
+                if ($args[0] -eq 'rev-parse') {
+                    return 'true'
+                }
+                return $args -join ' '
+            }
+
+            Invoke-GitStatus | Should -Be 'status'
         }
         finally {
-            Pop-Location
+            if ($originalExitCode) {
+                $global:LASTEXITCODE = $previousExitCode
+            }
+            else {
+                Remove-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
+            }
         }
     }
 
