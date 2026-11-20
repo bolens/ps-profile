@@ -26,7 +26,7 @@ steps:
       - apt-get update
       - apt-get install -y --no-install-recommends ca-certificates git
       - npm install --global pnpm@11.5.3 --ignore-scripts --no-audit --no-fund
-      - pnpm install --frozen-lockfile
+      - pnpm install --frozen-lockfile --ignore-scripts
       - pnpm exec markdownlint README.md WARP.md AGENTS.md ARCHITECTURE.md CONTRIBUTING.md PROFILE_README.md PROFILE_DEBUG.md profile.d/README.md requirements/README.md scripts/utils/README.md scripts/examples/README.md docs/README.md
       - pnpm exec cspell "**/*" --no-progress --no-summary
       - pnpm dlx markdown-link-check@3.15.0 README.md

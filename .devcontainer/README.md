@@ -35,6 +35,10 @@ The default container uses Debian 13. Choose the Ubuntu 26.04 or Arch configurat
 from the Reopen in Container picker for distribution-specific tests. These
 variants share the same setup scripts and pinned PowerShell runtime. Arch is
 x86-64 only because its official base image does not publish ARM64.
+Its package layer initializes the signing keyring and updates the signed
+`archlinux-keyring` package first, then
+completes the full system upgrade in the same `RUN` instruction. Signature checks
+remain enabled for both transactions.
 
 The Editor images workflow builds all three configurations for editor and
 lockfile changes. It copies the read-only checkout into a container-owned
