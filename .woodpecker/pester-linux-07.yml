@@ -20,7 +20,6 @@ steps:
       POWERSHELL_TELEMETRY_OPTOUT: '1'
       DOTNET_PROCESSOR_COUNT: '2'
     commands:
-      - apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git python3 unzip xz-utils libatomic1 libicu74 libssl3t64
       - bash scripts/ci/setup-native-pester.sh
       - export HOME=/tmp/native-pester-home PATH=/tmp/native-pester-tools/pwsh:/tmp/native-pester-tools/node/bin:$PATH PSModulePath=/tmp/native-pester-tools/modules:/tmp/native-pester-tools/pwsh/Modules
       - pwsh -NoLogo -NoProfile -NonInteractive -File scripts/ci/run-native-pester.ps1 -Bundle 7 -OutputPath "$CI_WORKSPACE/tests/test-artifacts/native-pester-07"
