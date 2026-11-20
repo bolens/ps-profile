@@ -7,9 +7,10 @@
 
 
 .DESCRIPTION
-    Runs the exact markdownlint-cli version declared in package.json. Uses the
-    matching checkout-installed CLI when available, or npx as a fallback.
-    Set MARKDOWNLINT_VERSION to run a different exact version via npx.
+    Runs the checkout-installed markdownlint-cli version declared in package.json.
+    Install it with pnpm install --frozen-lockfile --ignore-scripts.
+    Set MARKDOWNLINT_VERSION to opt into a separate exact version via npx.
+    The explicit npx override resolves dependencies outside the checkout lockfile.
 
 
 .NOTES
@@ -72,8 +73,11 @@ try {
                 $markdownlint = $localCommand
             }
         }
+        if (-not $markdownlint) {
+            throw 'Install the locked checkout dependencies with pnpm install --frozen-lockfile --ignore-scripts.'
+        }
     }
-    if (-not $markdownlint) {
+    else {
         $npx = Get-Command npx -ErrorAction Stop
     }
 }

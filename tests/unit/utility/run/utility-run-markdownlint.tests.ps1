@@ -47,12 +47,11 @@ Describe 'run-markdownlint.ps1 execution' {
         '{"devDependencies":{"markdownlint-cli":"0.50.0"}}' | Set-Content -LiteralPath $script:Manifest
     }
 
-    It 'uses the exact repository pin for the npx fallback' {
+    It 'requires the locked checkout installation for the default version' {
         $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner 2>&1 | Out-String
-        $LASTEXITCODE | Should -Be 0
-        $output | Should -Match 'version: 0\.50\.0'
-        $output | Should -Match 'npx: --yes --ignore-scripts markdownlint-cli@0\.50\.0'
-        $output | Should -Match 'markdownlint passed'
+        $LASTEXITCODE | Should -Be 2
+        $output | Should -Match 'pnpm install --frozen-lockfile --ignore-scripts'
+        $output | Should -Not -Match 'npx:'
     }
 
     It 'uses the checkout launcher only when its version matches the manifest' {
@@ -78,8 +77,9 @@ Describe 'run-markdownlint.ps1 execution' {
 
             '{"version":"0.49.1"}' | Set-Content -LiteralPath $installedManifest
             $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner 2>&1 | Out-String
-            $LASTEXITCODE | Should -Be 0
-            $output | Should -Match 'npx: --yes --ignore-scripts markdownlint-cli@0\.50\.0'
+            $LASTEXITCODE | Should -Be 2
+            $output | Should -Match 'pnpm install --frozen-lockfile --ignore-scripts'
+            $output | Should -Not -Match 'npx:'
         }
         finally {
             Remove-Item -LiteralPath $modules -Recurse -Force
@@ -106,7 +106,7 @@ Describe 'run-markdownlint.ps1 execution' {
     }
 
     It 'reports markdownlint violations with the validation exit code' {
-        $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner -LintExitCode 1 2>&1 | Out-String
+        $output = & $script:PowerShell -NoProfile -NonInteractive -File $script:Harness -Runner $script:Runner -Version '0.47.0' -LintExitCode 1 2>&1 | Out-String
         $LASTEXITCODE | Should -Be 1
         $output | Should -Match 'markdownlint found errors'
     }

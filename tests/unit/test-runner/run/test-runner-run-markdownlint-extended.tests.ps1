@@ -37,7 +37,7 @@ Describe 'run-markdownlint.ps1 extended scenarios' {
     }
 
     Context 'Execution strategy' {
-        It 'Uses the checkout launcher and falls back to npx' {
+        It 'Uses the checkout launcher and supports explicit npx overrides' {
             $content = Get-Content -LiteralPath $script:MarkdownlintScript -Raw
             $content | Should -Match 'node_modules/\.bin'
             $content | Should -Match 'Get-Command npx'
