@@ -4817,6 +4817,8 @@ tests/performance/profile/re-tools-performance.tests.ps1 -> profile.d/bootstrap.
 tests/performance/profile/re-tools-performance.tests.ps1 -> profile.d/re-tools.ps1 sig:6b3941513fbc3168
 tests/performance/profile/security-tools-performance.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/performance/profile/security-tools-performance.tests.ps1 -> profile.d/security-tools.ps1 sig:c8bc3cd027a93b69
+tests/performance/profile/security-tools-performance.tests.ps1 -> scripts/lib/ModuleImport.psm1 sig:e334f0766c976bc1
+tests/performance/profile/security-tools-performance.tests.ps1 -> scripts/lib/fragment/FragmentIdempotency.psm1 sig:60824258dcf6ff10
 tests/performance/profile/terminal-enhanced-performance.tests.ps1 -> profile.d/bootstrap.ps1 sig:aba2d6efc3213d93
 tests/performance/profile/terminal-enhanced-performance.tests.ps1 -> profile.d/terminal-enhanced.ps1 sig:5b03d1d8f0eed929
 tests/performance/test-runner/test-runner-performance.tests.ps1 -> scripts/utils/code-quality/modules/TestEnhancedPerformance.psm1 sig:fa68f9ac4fdf741c

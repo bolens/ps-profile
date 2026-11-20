@@ -6,7 +6,9 @@ FROM docker.io/hadolint/hadolint:latest@sha256:32dac94127fd60b7b7e3fbfc65e1383b9
 
 FROM docker.io/library/archlinux:latest@sha256:82b1b08faae9d61e3e7e13d562f4d09114d939105b0d59ff34140f3bd418593a
 
-RUN pacman -Syu --noconfirm --needed base-devel bash-completion ca-certificates curl git jq less openssh python python-pip ripgrep shellcheck sudo unzip wget zip icu openssl unixodbc snappy \
+# Refresh signing keys before validating the full coherent package transaction.
+RUN pacman -Sy --noconfirm --needed archlinux-keyring \
+    && pacman -Syu --noconfirm --needed base-devel bash-completion ca-certificates curl git jq less openssh python python-pip ripgrep shellcheck sudo unzip wget zip icu openssl unixodbc snappy \
     && pacman -Scc --noconfirm
 
 # Preserve Arch's man directory and share/man symlink when copying Debian's Node tree.
