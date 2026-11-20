@@ -134,7 +134,8 @@ Describe 'Register-ToolWrapper Function' {
             Get-Command $script:TestFunctionName -ErrorAction SilentlyContinue | Should -Not -BeNullOrEmpty
 
             # Call the wrapper — should emit a warning about the missing command, not throw
-            { & $script:TestFunctionName 2>&1 | Out-Null } | Should -Not -Throw
+            $output = & $script:TestFunctionName 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern ([regex]::Escape($nonExistentCmd))
         }
         
         It 'Uses custom warning message when provided' {
@@ -208,7 +209,8 @@ Describe 'Register-ToolWrapper Function' {
                 -InstallHint $installHint | Out-Null
 
             # Calling the wrapper should not throw — it should warn
-            { & $script:TestFunctionName 2>&1 | Out-Null } | Should -Not -Throw
+            $output = & $script:TestFunctionName 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern ([regex]::Escape($nonExistentCmd))
         }
 
         It 'Wrapper for missing command emits a warning (not throws) when invoked with WarningMessage' {
@@ -218,7 +220,8 @@ Describe 'Register-ToolWrapper Function' {
                 -CommandName $nonExistentCmd `
                 -WarningMessage "Tool $nonExistentCmd not found" | Out-Null
 
-            { & $script:TestFunctionName 2>&1 | Out-Null } | Should -Not -Throw
+            $output = & $script:TestFunctionName 3>&1 | Out-String
+            Assert-TestMissingToolWarning -Output $output -Pattern ([regex]::Escape("Tool $nonExistentCmd not found"))
         }
     }
     

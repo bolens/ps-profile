@@ -361,8 +361,9 @@ Describe 'CloudProviderBase.ps1 - Get-CloudResources' {
     }
 
     Context 'Error Handling' {
-        It 'Returns null when neither Service/Action nor Arguments provided' {
-            { Get-CloudResources -CommandName 'aws' } | Should -Throw '*Service/Action*'
+        It 'Throws when neither Service/Action nor Arguments are provided' {
+            { Get-CloudResources -CommandName 'aws' -ErrorAction SilentlyContinue } |
+                Should -Throw '*Service/Action*'
         }
     }
 }
@@ -400,9 +401,10 @@ Describe 'CloudProviderBase.ps1 - Test-CloudConnection' {
                 return ''
             }.GetNewClosure() -Force
 
-            $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity')
+            $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -WarningVariable warnings -WarningAction SilentlyContinue
 
             $result | Should -Be $false
+            $warnings.Message | Should -Be "aws connection test failed: No response"
         }
 
         It 'Validates success indicator' {
@@ -426,9 +428,10 @@ Describe 'CloudProviderBase.ps1 - Test-CloudConnection' {
                 return '{"UserId":"test"}'
             }.GetNewClosure() -Force
 
-            $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -SuccessIndicator 'Account'
+            $result = Test-CloudConnection -CommandName 'aws' -TestCommand @('sts', 'get-caller-identity') -SuccessIndicator 'Account' -WarningVariable warnings -WarningAction SilentlyContinue
 
             $result | Should -Be $false
+            $warnings.Message | Should -Be "aws connection test failed: Success indicator 'Account' not found"
         }
 
         It 'Handles nested success indicators' {

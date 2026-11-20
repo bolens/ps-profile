@@ -310,7 +310,7 @@ Describe 'security-tools.ps1 - Invoke-DangerzoneConvert' {
 
         It 'Tests dangerzone stderr output handling' {
             Setup-CapturingCommandMock -CommandName 'dangerzone' -OnInvoke {
-                [Console]::Error.WriteLine('Warning message')
+                Write-Error -Message 'Fixture stderr' -ErrorAction Continue
                 return 'Conversion results'
             }
 
