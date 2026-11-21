@@ -103,10 +103,10 @@
     "jsonc": "^2.0.0",
     "jsonwebtoken": "^9.0.3",
     "parquetjs": "^0.11.2",
-    "protobufjs": "^8.8.0",
+    "protobufjs": "^8.8.1",
     "qrcode": "^1.5.4",
     "superjson": "^2.2.6",
-    "thrift": "^0.24.0",
+    "thrift": "^0.25.0",
     "ubjson": "^0.0.8",
     "uuid": "^14.0.2"
   },
