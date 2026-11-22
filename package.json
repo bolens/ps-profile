@@ -118,7 +118,7 @@
     "@cspell/dict-companies": "^3.2.13",
     "@cspell/dict-docker": "^1.1.17",
     "@cspell/dict-dotnet": "^5.0.13",
-    "@cspell/dict-en-au": "^1.1.24",
+    "@cspell/dict-en-au": "^1.1.31",
     "@cspell/dict-en-ca": "^1.0.62",
     "@cspell/dict-en-gb-ise": "^1.0.31",
     "@cspell/dict-filetypes": "^3.0.18",
