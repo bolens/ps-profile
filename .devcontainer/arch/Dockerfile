@@ -4,7 +4,7 @@ FROM ghcr.io/astral-sh/ruff:latest@sha256:3abcaeec575bf06baac8e28f2462e75d7093a7
 FROM docker.io/rhysd/actionlint:latest@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 AS actionlint
 FROM docker.io/hadolint/hadolint:latest@sha256:32dac94127fd60b7b7e3fbfc65e1383b9b5e25c9bfd7b8536de7a539fe68a12d AS hadolint
 
-FROM docker.io/library/archlinux:latest@sha256:82b1b08faae9d61e3e7e13d562f4d09114d939105b0d59ff34140f3bd418593a
+FROM docker.io/library/archlinux:latest@sha256:d4594bb2300cba11f41c2f27923eb56f63d9988909c402f9c95517d1e362c899
 
 # Refresh signing keys before validating the full coherent package transaction.
 RUN pacman-key --init \
