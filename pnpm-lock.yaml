@@ -85,8 +85,8 @@ importers:
         specifier: ^5.0.13
         version: 5.0.13
       '@cspell/dict-en-au':
-        specifier: ^1.1.24
-        version: 1.1.24
+        specifier: ^1.1.31
+        version: 1.1.31
       '@cspell/dict-en-ca':
         specifier: ^1.0.62
         version: 1.0.62
@@ -203,8 +203,8 @@ packages:
   '@cspell/dict-elixir@4.0.8':
     resolution: {integrity: sha512-CyfphrbMyl4Ms55Vzuj+mNmd693HjBFr9hvU+B2YbFEZprE5AG+EXLYTMRWrXbpds4AuZcvN3deM2XVB80BN/Q==}
 
-  '@cspell/dict-en-au@1.1.24':
-    resolution: {integrity: sha512-BetfyZPS4gb7WJvBlMWuzT+XOvnhZw5dtLIAI5hDC35Xc1lqNnGJw5bMLcaG5VgaaZ++nfeF8w50tor3sSHP4A==}
+  '@cspell/dict-en-au@1.1.31':
+    resolution: {integrity: sha512-Xz1ASvRQwRWfL3+4se1xfjHkABh3h+RB3ml8Tf9/ToEJSG85+l3VVYy+AkwmAukE912nnVVQgo/UsRl8WZK85g==}
 
   '@cspell/dict-en-ca@1.0.62':
     resolution: {integrity: sha512-M9NXgt6gddIbZm3Ii+FX9uIeJX+B058xCaKd9m4LeZmWE5zxCefju2zTJreeCTvih0TkJ+LEv0nJ9v8ds5OQdQ==}
@@ -1262,7 +1262,7 @@ snapshots:
 
   '@cspell/dict-elixir@4.0.8': {}
 
-  '@cspell/dict-en-au@1.1.24': {}
+  '@cspell/dict-en-au@1.1.31': {}
 
   '@cspell/dict-en-ca@1.0.62': {}
 
